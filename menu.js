@@ -89,13 +89,13 @@ var 								j_db_menu=[
 												[
 													"2018-07-18",
 													[
+														["teac_html5_login_demo","分享","HTML5登入頁"],
 														["info_joyful_melody_devotion_group","資訊","專情團"],
 														["shar_m3u8_download","教學","副檔名M3U8影"],
 														["shar_pics_20210914","分享","網友分享作品"],
 														["shar_python","分享","Python常用"],
 														["shar_store_65","分享","工研院的老闆許友"],
 														["teac_fat32_in_win10","教學","Windows "],
-														["teac_html5_login_demo","分享","HTML5登入頁"],
 														["teac_program_auto_install","技術","自動安裝常用應用"]														
 													]
 												],												
@@ -116,8 +116,8 @@ var 								j_db_menu=[
 												[
 													"2016-06-11",
 													[
-														["cryp_left_tree_2021","教學","長生草"],
 														["shar_constellation_traits","分享","12星座永不會變"],
+														["cryp_left_tree_2021","教學","長生草"],
 														["shar_php","分享","PHP常用函式大"],
 														["teac_game_pubg","教學","PUBG 閃退("],
 														["teac_office201x_jump_365","教學","OFFICE 2"],
@@ -130,8 +130,8 @@ var 								j_db_menu=[
 													[
 														["teac_ex_md2","教學","EXpansio"],
 														["info_gpu_2021_top","資訊","顯示卡天梯202"],
-														["cryp_japan_20220708","分享","安倍晉三槍擊真相"],
 														["shar_rec_cam_or_screen_for_potplayer","分享","錄製網路攝影機畫"],
+														["cryp_japan_20220708","分享","安倍晉三槍擊真相"],
 														["teac_easy_net_disable","教學","簡易禁止電腦上網"],
 														["teac_w11_right_menu_to_w10","技術","將 Win11 "],
 														["cryp_dream_20220808","機密","機密檔案88(紅"]														
@@ -234,12 +234,12 @@ var 								j_db_menu=[
 												[
 													"2006-06-05",
 													[
-														["util_port_scaner","教學","線上Port掃描"],
 														["cryp_virus_file","教學","電腦病毒收集(1"],
-														["util_mats_utility","教學","MATS顯示卡測"],
+														["util_port_scaner","教學","線上Port掃描"],
 														["shar_codeing_one_and_mut","教學","專案開發模式(單"],
 														["teac_check_urls","教學","台灣疑似已被駭客"],
-														["teac_win10_home_to_pro","教學","Windows "]														
+														["teac_win10_home_to_pro","教學","Windows "],
+														["util_mats_utility","教學","MATS顯示卡測"]														
 													]
 												],												
 												[
@@ -334,13 +334,13 @@ var 								j_db_menu=[
 												[
 													"1997-01-11",
 													[
-														["util_pi_db","教學","Pi(圓周率)1"],
 														["shar_ntp","教學","常用NTP伺服器"],
 														["shar_user_agent_lists","教學","常用USER-A"],
 														["teac_disable_origin_policy_in_chrome","教學","Chrome解決"],
 														["teac_short_url_services","教學","縮網址服務"],
 														["teac_veracrypt_command","教學","VeraCryp"],
-														["teac_win_samba_445port","教學","TCP 445 "]														
+														["teac_win_samba_445port","教學","TCP 445 "],
+														["util_pi_db","教學","Pi(圓周率)1"]														
 													]
 												],												
 												[
