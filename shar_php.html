@@ -1,0 +1,781 @@
+<HTML><!-- InstanceBegin template="/Templates/default.dwt" codeOutsideHTMLIsLocked="false" -->
+<HEAD>
+<!-- InstanceBeginEditable name="doctitle" -->
+<TITLE>歸檔星球 Archive Star - PHP常用函式大全</TITLE>
+<!-- InstanceEndEditable -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+<!-- InstanceBeginEditable name="head" -->
+
+	<meta name="keywords" content="PHP常用函式大全">
+	<meta name="pagetype" content="分享">
+	<meta name="description" content="PHP常用函式大全">
+	
+	<script type="application/ld+json">
+		{
+		  "@context": "https://schema.org",
+		  "@type": "WebPage",
+		  "url": "https://jplop.netlify.app/teac_post_about.html",
+		  "name": "PHP",
+		  "description": "PHP常用函式相關教學、相關下載、相關技術文獻。"
+		}
+	</script>
+<!-- InstanceEndEditable -->
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="mm_menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/message.js"></script>		
+		<style>
+			a:link {color: #0000FF;text-decoration: none;} 
+			a:visited {color: #3366FF;text-decoration: none;}
+			a:hover {}
+			a:active {color: #FF0000;text-decoration: none;}
+			font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;}
+			input ,button , select{font-size:12px;}
+			.spoiler, .spoiler2{color: black; background-color:black;}
+			.spoiler:hover{color: white;}
+			.spoiler2:hover { background-color:white; }
+		</style>
+		
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVGMPW8LR4"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		
+		  gtag('config', 'G-SVGMPW8LR4');
+		</script>
+		
+</HEAD>
+
+<BODY leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table width="100%" height="100%" border="0" style="padding:20px;" cellspacing="0" background="images/archive_star_ban_bg_1997.jpg" id="table_top1">
+  <tr>
+    <td height="715" valign="top"><table width="100%" height="100%" border="0" cellspacing="0" bgcolor="#FFFFFF" style="padding:20px;border:1px #ccc solid;border-radius:10px;box-shadow:1px 1px 20px #ffffff;margin-right:8px;" id="table_top2">
+      <tr>
+        <td valign="top">
+		
+		<span id="j_space_top_data"></span>
+		<script>
+			var ajax_load_top = new sack();
+			ajax_load_top.requestFile = "init/top.html";
+			ajax_load_top.method  = 'GET'; 
+			ajax_load_top.element = 'j_space_top_data'; 
+	   </script>
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+
+            <td width="200" valign="top" id="mmenu"></td>
+			  <!-- InstanceBeginEditable name="EditRegion4" --> <!-- InstanceEndEditable -->
+            <td valign="top">
+			
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				  <tr>
+				    <td id="top_left_menu_td_m" align="center" bgcolor="#40588C" width="40" onClick="window.location='#d_menu_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">M</font></td>
+					<td id="top_left_menu_td_f" align="center" bgcolor="#336600" width="40" onClick="window.location='#d_file_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">F</font></td>
+					<td id="top_left_menu_td" style="text-align:right;background-color:#FFFFFF">
+							<span id="LoginBox_PC">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">About</a> | 
+								<a href="https://jplop.netlify.app/">NetLify</a> | 
+								<a href="https://jplop.neocities.org/">NeoCities</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">Project</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_M" style="display:none">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">AB</a> | 
+								<a href="https://jplop.netlify.app/">NL</a> | 
+								<a href="https://jplop.neocities.org/">NC</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">PJ</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_status"> | 
+								<a href="javascript:main_login_in_start();void(0);">管理</a> 
+							</span>
+					  </td>
+				  </tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="10" cellspacing="0">
+				  <tr>
+					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
+              <h2><img id="one_page_number_1" src="images/archive_star_ban_2014.jpg" alt="PHP常用函式大全"  style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
+              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;PHP常用函式大全&gt;&gt;</font></h2>
+              <p><br>
+                <font face="Arial, Helvetica, sans-serif">PHP常用函式大全</font>說明：</p>
+              <blockquote>
+                <p>PHP內建的函數超過&lt;&lt;4千多個&gt;&gt;，當然一個專案下不太可能全都用得到，況且某些函數的功能相近，只看我們程式功能的需求來取用。</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p><font face="Arial, Helvetica, sans-serif">PHP常用函式大全</font>適用：</p>
+              <blockquote>
+                <p>PHP 4.X</p>
+                <p>PHP 5.X</p>
+                <p>PHP 7.X</p>
+                <p>&nbsp; </p>
+              </blockquote>
+              <p><font face="Arial, Helvetica, sans-serif">PHP常用函式大全</font>函式：</p>
+              <blockquote>
+                <p>usleep() 函數延遲代碼執行若幹微秒。<br>
+                      unpack() 函數從二進制字符串對數據進行解包。<br>
+                      uniqid() 函數基於以微秒計的當前時間，生成一個唯一的 ID。<br>
+                      time_sleep_until() 函數延遲代碼執行直到指定的時間。<br>
+                      time_nanosleep() 函數延遲代碼執行若幹秒和納秒。<br>
+                      sleep() 函數延遲代碼執行若幹秒。<br>
+                      show_source() 函數對文件進行語法高亮顯示。<br>
+                      strip_whitespace() 函數返回已刪除 PHP 註釋以及空白字符的源代碼文件。<br>
+                      pack() 函數把數據裝入一個二進制字符串。<br>
+                      ignore_user_abort() 函數設置與客戶機斷開是否會終止腳本的執行。<br>
+                      highlight_string() 函數對字符串進行語法高亮顯示。<br>
+                      highlight_file() 函數對文件進行語法高亮顯示。<br>
+                      get_browser() 函數返回用戶瀏覽器的性能。<br>
+                      exit() 函數輸出一條消息，並退出當前腳本。<br>
+                      eval() 函數把字符串按照 PHP 代碼來計算。<br>
+                      die() 函數輸出一條消息，並退出當前腳本。<br>
+                      defined() 函數檢查某常量是否存在。<br>
+                      define() 函數定義一個常量。<br>
+                      constant() 函數返回常量的值。<br>
+                      connection_status() 函數返回當前的連接狀態。<br>
+                      connection_aborted() 函數檢查是否斷開客戶機。<br>
+                      zip_read() 函數讀取打開的 zip 檔案中的下一個文件。<br>
+                      zip_open() 函數打開 ZIP 文件以供讀取。<br>
+                      zip_entry_read() 函數從打開的 zip 檔案項目中獲取內容。<br>
+                      zip_entry_open() 函數打開一個 ZIP 檔案項目以供讀取。<br>
+                      zip_entry_name() 函數返回 zip 檔案項目的名稱。<br>
+                      zip_entry_filesize() 函數返回 zip 檔案項目的原始大小（在壓縮之前）。<br>
+                      zip_entry_compressionmethod() 函數返回 zip 檔案項目的壓縮方法。<br>
+                      zip_entry_compressedsize() 函數返回 zip 檔案項目的壓縮文件尺寸。<br>
+                      zip_entry_close() 函數關閉由 zip_entry_open() 函數打開的 zip 檔案文件。<br>
+                      zip_close() 函數關閉由 zip_open() 函數打開的 zip 檔案文件。<br>
+                      xml_set_unparsed_entity_decl_handler() 函數規定在遇到無法解析的實體名稱（NDATA）聲明時被調用的函數。<br>
+                      xml_set_processing_instruction_handler() 函數規定當解析器在 xml 文檔中找到處理指令時所調用的函數。<br>
+                      xml_set_object() 函數允許在對象中使用 xml 解析器。<br>
+                      xml_set_notation_decl_handler() 函數規定當解析器在 xml 文檔中找到符號聲明時被調用的函數。<br>
+                      xml_set_external_entity_ref_handler() 函數規定當解析器在 xml 文檔中找到外部實體時被調用的函數。<br>
+                      xml_set_element_handler() 函數建立起始和終止元素處理器。<br>
+                      xml_set_default_handler() 函數為 xml 解析器建立默認的數據處理器。<br>
+                      xml_set_character_data_handler() 函數建立字符數據處理器。<br>
+                      xml_parser_set_option() 函數為 xml 解析器進行選項設置。<br>
+                      xml_parser_get_option() 函數從 xml 解析器獲取選項設置信息。<br>
+                      xml_parser_free() 函數釋放 xml 解析器。<br>
+                      xml_parser_create() 函數創建 xml 解析器。<br>
+                      xml_parser_create_ns() 函數創建帶有命名空間支持的 xml 解析器。<br>
+                      xml_parse_into_struct() 函數把 xml 數據解析到數組中。<br>
+                      xml_parse() 函數解析 xml 文檔。<br>
+                      xml_get_error_code() 函數獲取 xml 解析器錯誤代碼。<br>
+                      xml_get_current_line_number() 函數獲取 xml 解析器的當前行號。<br>
+                      xml_get_current_column_number() 函數獲取 xml 解析器的當前列號。<br>
+                      xml_get_current_byte_index() 函數獲取 xml 解析器的當前字節索引。<br>
+                      xml_error_string() 函數獲取 xml 解析器的錯誤描述。<br>
+                      utf8_encode() 函數把 ISO-8859-1 字符串編碼為 UTF-8。<br>
+                      utf8_decode() 函數把 UTF-8 字符串解碼為 ISO-8859-1。<br>
+                      wordwrap() 函數按照指定長度對字符串進行折行處理。<br>
+                      vsprintf() 函數把格式化字符串寫入變量中。<br>
+                      vprintf() 函數輸出格式化的字符串。<br>
+                      vfprintf() 函數把格式化的字符串寫到指定的輸出流。<br>
+                      ucwords() 函數把字符串中每個單詞的首字符轉換為大寫。<br>
+                      ucfirst() 函數把字符串中的首字符轉換為大寫。<br>
+                      trim() 函數從字符串的兩端刪除空白字符和其他預定義字符。<br>
+                      substr_replace() 函數把字符串的一部分替換為另一個字符串。<br>
+                      substr_count() 函數計算子串在字符串中出現的次數。<br>
+                      substr_compare() 函數從指定的開始長度比較兩個字符串。<br>
+                      substr() 函數返回字符串的一部分。<br>
+                      strtr() 函數轉換字符串中特定的字符。<br>
+                      strtoupper() 函數把字符串轉換為大寫。<br>
+                      strtolower() 函數把字符串轉換為小寫。<br>
+                      strtok() 函數把字符串分割為更小的字符串。<br>
+                      strstr() 函數搜索一個字符串在另一個字符串中的第一次出現。<br>
+                      strspn() 函數返回在字符串中包含的特定字符的數目。<br>
+                      strrpos() 函數查找字符串在另一個字符串中最後一次出現的位置。<br>
+                      strripos() 函數查找字符串在另一個字符串中最後一次出現的位置。<br>
+                      strrev() 函數反轉字符串。<br>
+                      strrchr() 函數查找字符串在另一個字符串中最後一次出現的位置，並返回從該位置到字符串結尾的所有字符。<br>
+                      strpos() 函數返回字符串在另一個字符串中第一次出現的位置。<br>
+                      strpbrk() 函數在字符串中搜索指定字符中的任意一個。<br>
+                      strncmp() 函數比較兩個字符串。<br>
+                      strncasecmp() 函數比較兩個字符串。<br>
+                      strnatcmp() 函數使用一種“自然”算法來比較兩個字符串。<br>
+                      strnatcasecmp() 函數使用一種“自然”算法來比較兩個字符串。<br>
+                      strlen() 函數返回字符串的長度。<br>
+                      stristr() 函數查找字符串在另一個字符串中第一次出現的位置。<br>
+                      stripos() 函數返回字符串在另一個字符串中第一次出現的位置。<br>
+                      stripslashes() 函數刪除由 addslashes() 函數添加的反斜杠。<br>
+                      stripcslashes() 函數刪除由 addcslashes() 函數添加的反斜杠。<br>
+                      strip_tags() 函數剝去 HTML、xml 以及 PHP 的標簽。<br>
+                      strcspn() 函數返回在找到任何指定的字符之前，在字符串查找的字符數。<br>
+                      strcoll() 函數比較兩個字符串。<br>
+                      strcmp() 函數比較兩個字符串。<br>
+                      strchr() 函數搜索一個字符串在另一個字符串中的第一次出現。<br>
+                      strcasecmp() 函數比較兩個字符串。<br>
+                      str_word_count() 函數計算字符串中的單詞數。<br>
+                      str_split() 函數把字符串分割到數組中。<br>
+                      str_shuffle() 函數隨機地打亂字符串中的所有字符。<br>
+                      str_rot13() 函數對字符串執行 ROT13 編碼。<br>
+                      str_replace() 函數使用一個字符串替換字符串中的另一些字符。<br>
+                      str_repeat() 函數把字符串重復指定的次數。<br>
+                      str_pad() 函數把字符串填充為指定的長度。<br>
+                      str_ireplace() 函數使用一個字符串替換字符串中的另一些字符。<br>
+                      sscanf() 函數根據指定的格式解析來自一個字符串的輸入。<br>
+                      sprintf() 函數把格式化的字符串寫寫入一個變量中。<br>
+                      soundex() 函數計算字符串的 soundex 鍵。<br>
+                      similar_text() 函數計算兩個字符串的匹配字符的數目。<br>
+                      sha1_file() 函數計算文件的 SHA-1 散列。<br>
+                      sha1() 函數計算字符串的 SHA-1 散列。<br>
+                      setlocale() 函數設置地區信息（地域信息）。<br>
+                      rtrim() P rtrim() 函數<br>
+                      PHP String 函數<br>
+                      quotemeta() 函數在字符串中某些預定義的字符前添加反斜杠。<br>
+                      quoted_printable_decode() 函數對經過 quoted-printable 編碼後的字符串進行解碼，返回 8 位的字符串。<br>
+                      printf() 函數輸出格式化的字符串。<br>
+                      print() 函數輸出一個或多個字符串。<br>
+                      parse_str() 函數把查詢字符串解析到變量中。<br>
+                      ord() 函數返回字符串第一個字符的 ASCII 值。<br>
+                      number_format() 函數通過千位分組來格式化數字。<br>
+                      nl2br() 函數在字符串中的每個新行 (\n) 之前插入 HTML 換行符 (&lt;br&gt; )。<br>
+                      nl_langinfo() 函數返回指定的本地信息。<br>
+                      money_format() 函數把字符串格式化為貨幣字符串。<br>
+                      metaphone() 函數計算字符串的 metaphone 鍵。<br>
+                      md5_file() 函數計算文件的 MD5 散列。<br>
+                      md5() 函數計算字符串的 MD5 散列。<br>
+                      ltrim() 函數從字符串左側刪除空格或其他預定義字符。<br>
+                      localeconv() 函數返回包含本地數字及貨幣信息格式的數組。<br>
+                      levenshtein() 函數返回兩個字符串之間的 Levenshtein 距離。<br>
+                      join() 函數把數組元素組合為一個字符串。<br>
+                      implode() 函數把數組元素組合為一個字符串。<br>
+                      htmlspecialchars() 函數把一些預定義的字符轉換為 HTML 實體。<br>
+                      html_entity_decode() chars_decode() 函數</p>
+                <p><b>PHP String 函數</b><br>
+                    htmlentities() 函數把字符轉換為 HTML 實體。<br>
+                    html_entity_decode() 函數把 HTML 實體轉換為字符。<br>
+                    hebrevc() 函數把希伯來文本從右至左的流轉換為左至右的流。它也會把新行 (\n) 轉換為
+                    。<br>
+                    hebrev() 函數把希伯來文本從右至左的流轉換為左至右的流。<br>
+                    get_html_translation_table() 函數返回被 htmlentities() 和 htmlspecialchars() 函數使用的翻譯表。<br>
+                    fprintf() 函數把格式化的字符串寫到指定的輸出流（例如：文件或數據庫）。<br>
+                    explode() 函數把字符串分割為數組。<br>
+                    echo() 函數輸出一個或多個字符串。<br>
+                    crypt() 函數返回使用 DES、Blowfish 或 MD5 加密的字符串。<br>
+                    crc32() 函數計算一個字符串的 crc32 多項式。<br>
+                    count_chars() 函數返回字符串所用字符的信息。<br>
+                    convert_uuencode() 函數使用 uuencode 算法對字符串進行編碼。<br>
+                    convert_uudecode() 函數對 uuencode 編碼的字符串進行解碼。<br>
+                    convert_cyr_string() 函數把字符由一種 Cyrillic 字符轉換成另一種。<br>
+                    chunk_split() 函數把字符串分割為一連串更小的部分。<br>
+                    chr() 函數從指定的 ASCII 值返回字符。<br>
+                    chop() 函數從字符串的末端開始刪除空白字符或其他預定義字符。<br>
+                    bin2hex() 函數把 ASCII 字符的字符串轉換為十六進制值。<br>
+                    addslashes() 函數在指定的預定義字符前添加反斜杠。<br>
+                    addcslashes() 函數在指定的字符前添加反斜杠。<br>
+                    xpath() 函數運行對 xml 文檔的 XPath 查詢。<br>
+                    simplexml_load_string() 函數把 xml 字符串載入對象中。<br>
+                    simplexml_load_file() 函數把 xml 文檔載入對象中。<br>
+                    simplexml_import_dom() 函數把 DOM 節點轉換為 SimplexmlElement 對象。<br>
+                    registerXPathNamespace() 函數為下一次 XPath 查詢創建命名空間語境。<br>
+                    getNamespace() 函數獲取在 xml 文檔中使用的命名空間。<br>
+                    getName() 函數從 SimplexmlElement 對象獲取 xml 元素的名稱。<br>
+                    getDocNamespaces() 函數從 SimplexmlElement 對象返回在 xml 文檔中聲明的命名空間。<br>
+                    children() 函數獲取指定節點的子節點。<br>
+                    attributes() 函數獲取 Simplexml 元素的屬性。<br>
+                    asxml() 函數以字符串的形式從 SimplexmlElement 對象返回 xml 文檔。<br>
+                    addChild() 函數向指定的 xml 節點添加一個子節點。<br>
+                    addAttribute() 函數給 Simplexml 元素添加一個屬性。<br>
+                    __construct() 函數創建一個新的 SimplexmlElement 對象。<br>
+                    mysql_unbuffered_query() 函數向 MySQL 發送一條 SQL 查詢（不獲取 / 緩存結果）。<br>
+                    mysql_thread_id() 函數返回當前線程的 ID。<br>
+                    mysql_stat() 函數返回 MySQL 服務器的當前系統狀態。<br>
+                    mysql_select_db() 函數設置活動的 MySQL 數據庫。<br>
+                    mysql_result() 函數返回結果集中一個字段的值。<br>
+                    mysql_real_escape_string() 函數轉義 SQL 語句中使用的字符串中的特殊字符。<br>
+                    mysql_query() 函數執行一條 MySQL 查詢。<br>
+                    mysql_ping() 函數 Ping 一個服務器連接，如果沒有連接則重新連接。<br>
+                    mysql_pconnect() 函數打開一個到 MySQL 服務器的持久連接。<br>
+                    mysql_num_rows() 函數返回結果集中行的數目。<br>
+                    mysql_num_fields() 函數返回結果集中字段的數。<br>
+                    mysql_list_processes() 函數列出 MySQL 進程。<br>
+                    mysql_list_dbs() 函數列出 MySQL 服務器中所有的數據庫。<br>
+                    mysql_insert_id() 函數返回上一步 INSERT 操作產生的 ID。<br>
+                    mysql_info() 函數返回最近一條查詢的信息。<br>
+                    mysql_get_server_info() 函數返回 MySQL 服務器的信息。<br>
+                    mysql_get_proto_info() 函數返回 MySQL 協議的信息。<br>
+                    mysql_get_host_info() 函數返回 MySQL 主機的信息。<br>
+                    mysql_get_client_info() 函數返回 MySQL 客戶端信息。<br>
+                    mysql_free_result() 函數釋放結果內存。<br>
+                    mysql_field_type() 函數返回結果集中指定字段的類型。<br>
+                    mysql_field_table() 函數返回指定字段所在的表名。<br>
+                    mysql_field_seek() 函數將結果集中的指針設定為指定的字段偏移量。<br>
+                    mysql_field_name() 函數取得結果中指定字段的字段名。<br>
+                    mysql_field_len() 函數返回指定字段的長度。<br>
+                    mysql_field_flags() 函數從結果中取得和指定字段關聯的標誌。<br>
+                    mysql_fetch_row() 函數從結果集中取得一行作為數字數組。<br>
+                    mysql_fetch_object() 函數從結果集（記錄集）中取得一行作為對象。<br>
+                    mysql_fetch_lengths() 函數取得一行中每個字段的內容的長度。<br>
+                    mysql_fetch_field() 函數從結果集中取得列信息並作為對象返回。<br>
+                    mysql_fetch_assoc() 函數從結果集中取得一行作為關聯數組。<br>
+                    mysql_fetch_array() 函數從結果集中取得一行作為關聯數組，或數字數組，或二者兼有<br>
+                    mysql_error() 函數返回上一個 MySQL 操作產生的文本錯誤信息。<br>
+                    mysql_errno() 函數返回上一個 MySQL 操作中的錯誤信息的數字編碼。<br>
+                    mysql_db_name() 函數取得 mysql_list_dbs() 調用所返回的數據庫名。<br>
+                    mysql_data_seek() 函數移動內部結果的指針。<br>
+                    mysql_connect() 函數打開非持久的 MySQL 連接。<br>
+                    mysql_close() 函數關閉非持久的 MySQL 連接。<br>
+                    mysql_client_encoding() 函數返回當前連接的字符集的名稱。<br>
+                    mysql_affected_rows() 函數返回前一次 MySQL 操作所影響的記錄行數。<br>
+                    tanh() 函數返回雙曲正切。<br>
+                    tan() 函數返回正切。<br>
+                    srand() 函數播下隨機數發生器種子。<br>
+                    sqrt() 函數返回一個數的平方根。<br>
+                    sinh() 函數返回一個數的雙曲正弦。<br>
+                    sin() 函數返回一個數的正弦。<br>
+                    round() 函數對浮點數進行四舍五入。<br>
+                    rand() 函數返回隨機整數。<br>
+                    rad2deg() 函數把弧度數轉換為角度數。<br>
+                    pow() 函數返回 x 的 y 次方。<br>
+                    pi() 函數返回圓周率的值。<br>
+                    octdec() 函數把八進制轉換為十進制。<br>
+                    mt_srand() 播種 Mersenne Twister 隨機數生成器。<br>
+                    mt_rand() 使用 Mersenne Twister 算法返回隨機整數。<br>
+                    mt_getrandmax() 顯示隨機數的最大可能值。<br>
+                    min() 返回最小值。<br>
+                    max() 返回最大值。<br>
+                    log1p() 以返回 log(1 + x)，甚至當 x 的值接近零也能計算出準確結果。<br>
+                    log10() 以 10 為底的對數。<br>
+                    log() 返回自然對數。<br>
+                    lcg_value() 組合線性同余發生器。<br>
+                    is_nan() 判斷是否為合法數值。<br>
+                    is_infinite() 判斷是否為無限值。<br>
+                    is_finite() 函數判斷是否為有限值。<br>
+                    hypot() 函數計算一直角三角形的斜邊長度。<br>
+                    hexdec() 函數把十六進制轉換為十進制。<br>
+                    fmod() 函數顯示隨機數最大的可能值。<br>
+                    fmod() 函數返回除法的浮點數余數。<br>
+                    floor() 函數向下舍入為最接近的整數。<br>
+                    expm1() 函數返回 exp(x) - 1，甚至當 number 的值接近零也能計算出準確結果。<br>
+                    exp() 函數計算 e 的指數。<br>
+                    deg2rad() 函數將角度轉換為弧度。<br>
+                    decoct() 函數把十進制轉換為八進制。<br>
+                    dechex() 函數把十進制轉換為十六進制。<br>
+                    decbin() 函數把十進制轉換為二進制。<br>
+                    cosh() 函數返回一個數的雙曲余弦。<br>
+                    cos() 函數返回一個數的余弦。<br>
+                    ceil() 函數向上舍入為最接近的整數。<br>
+                    bindec() 函數把二進制轉換為十進制。<br>
+                    base_convert() 函數在任意進制之間轉換數字。<br>
+                    atanh() 函數返回一個角度的反雙曲正切。<br>
+                    atan() 和 atan2() 和 atan2() 函數</p>
+                <p><b>PHP Math 函數</b><br>
+                    atan() 和 atan2() 和 atan2() 函數</p>
+                <p><b>PHP Math 函數</b><br>
+                    asinh() 函數返回一個數的反雙曲正弦。<br>
+                    asin() 函數返回不同數值的反正弦，返回的結果是介於 -PI/2 與 PI/2 之間的弧度值。<br>
+                    acosh() 函數返回一個數的反雙曲余弦。<br>
+                    acos() 函數返回一個數的反余弦。<br>
+                    abs() 函數返回一個數的絕對值。<br>
+                    mail() 函數允許您從腳本中直接發送電子郵件。<br>
+                    libxml_use_internal_errors() 函數禁用標準的 libxml 錯誤，並啟用用戶錯誤處理。<br>
+                    libxml_get_last_error() 函數從 libxml 錯誤緩沖中獲取最後一個錯誤。<br>
+                    libxml_get_errors() 函數從 libxml 錯誤緩沖中獲取錯誤。<br>
+                    libxml_clear_errors() 函數清空 libxml 錯誤緩沖。<br>
+                    setrawcookie() 函數不對 cookie 值進行 URL 編碼，發送一個 HTTP cookie。<br>
+                    setcookie() 函數向客戶端發送一個 HTTP cookie。<br>
+                    headers_sent() 函數檢查 HTTP 報頭是否發送/已發送到何處。<br>
+                    headers_list() 函數返回已發送的（或待發送的）響應頭部的一個列表。<br>
+                    header() 函數向客戶端發送原始的 HTTP 報頭。<br>
+                    ftp_systype() 函數返回遠程 FTP 服務器的系統類型標識符。<br>
+                    ftp_ssl_connect() 函數打開一個安全的 SSL-FTP 連接。<br>
+                    ftp_size() 函數返回指定文件的大小。<br>
+                    ftp_site() 函數向服務器發送 SITE 命令。<br>
+                    ftp_set_option() 函數設置各種 FTP 運行時選項。<br>
+                    ftp_rmdir() 函數刪除一個目錄。<br>
+                    ftp_rename() 函數更改 FTP 服務器上的文件或目錄名。<br>
+                    ftp_rawlist() 函數返回指定目錄中文件的詳細列表。<br>
+                    ftp_raw() 函數向 FTP 服務器發送一個 raw 命令。<br>
+                    ftp_quit() 函數關閉 FTP 連接。<br>
+                    ftp_pwd() 函數返回當前目錄名。<br>
+                    ftp_put() 函數把文件上傳到服務器。<br>
+                    ftp_pasv() 函數把被動模式設置為打開或關閉。<br>
+                    ftp_nlist() 函數返回指定目錄的文件列表。<br>
+                    ftp_nb_put() 函數把文件上傳到服務器 (non-blocking)。<br>
+                    ftp_nb_get() 函數從 FTP 服務器上獲取文件並寫入本地文件 (non-blocking)。<br>
+                    ftp_nb_fput() 函數上傳一個已打開的文件，並在 FTP 服務器上把它保存為文件 (non-blocking)。<br>
+                    ftp_nb_fget() 函數從 FTP 服務器上下載一個文件並保存到本地已經打開的一個文件中 (non-blocking)。<br>
+                    ftp_nb_continue() 函數連續獲取 / 發送文件。<br>
+                    ftp_mkdir() 函數在 FTP 服務器上建立新目錄。<br>
+                    ftp_mdtm() 函數返回指定文件的最後修改時間。<br>
+                    ftp_login() 函數登錄 FTP 服務器。<br>
+                    ftp_get() 函數從 FTP 服務器上下載一個文件。<br>
+                    ftp_get_option() 函數返回當前 FTP 連接的各種不同的選項設置。<br>
+                    ftp_fput() 函數上傳一個已經打開的文件到 FTP 服務器。<br>
+                    ftp_fget() 函數從 FTP 服務器上下載一個文件並保存到本地一個已經打開的文件中。<br>
+                    ftp_exec() 函數請求在 FTP 服務器上執行一個程序或命令。<br>
+                    ftp_delete() 函數刪除 FTP 服務器上的一個文件。<br>
+                    ftp_connect() 函數建立一個新的 FTP 連接。<br>
+                    ftp_close() 函數關閉 FTP 連接。<br>
+                    ftp_chmod() 函數設置 FTP 服務器上指定文件的權限。<br>
+                    ftp_chdir() 函數改變 FTP 服務器上的當前目錄。<br>
+                    ftp_cdup() 函數把當前目錄改變為 FTP 服務器上的父目錄。<br>
+                    ftp_alloc() 函數為要上傳到 FTP 服務器的文件分配空間。<br>
+                    filter_var() 函數通過指定的過濾器過濾變量。<br>
+                    filter_var_array() 函數獲取多項變量，並進行過濾。<br>
+                    filter_list() 函數返回包含所有得到支持的過濾器的一個數組。<br>
+                    filter_input_array() 函數從腳本外部獲取多項輸入，並進行過濾。<br>
+                    filter_input() 函數從腳本外部獲取輸入，並進行過濾。<br>
+                    filter_id() 函數返回指定過濾器的 ID 號。<br>
+                    filter_has_var() 函數檢查是否存在指定輸入類型的變量。<br>
+                    unlink() 函數刪除文件。<br>
+                    umask() 函數改變當前的 umask。<br>
+                    touch() 函數設置指定文件的訪問和修改時間。<br>
+                    tmpfile() 函數以讀寫（w+）模式建立一個具有唯一文件名的臨時文件。<br>
+                    tempnam() 函數創建一個具有唯一文件名的臨時文件。<br>
+                    symlink() 函數創建符號連接。<br>
+                    stat() 函數返回關於文件的信息。<br>
+                    set_file_buffer() 函數設置打開文件的緩沖大小。<br>
+                    rmdir() 函數刪除空的目錄。<br>
+                    rewind() 函數將文件指針的位置倒回文件的開頭。<br>
+                    rename() 函數重命名文件或目錄。<br>
+                    realpath() 函數返回絕對路徑。<br>
+                    readlink() 函數返回符號連接指向的目標。<br>
+                    readfile() 函數輸出一個文件。<br>
+                    popen() 函數打開進程文件指針。<br>
+                    pclose() 函數關閉由 popen() 打開的管道。<br>
+                    pathinfo() 函數以數組的形式返回文件路徑的信息。<br>
+                    parse_ini_file() 函數解析一個配置文件，並以數組的形式返回其中的設置。<br>
+                    move_uploaded_file() 函數將上傳的文件移動到新位置。<br>
+                    mkdir() 函數創建目錄。<br>
+                    lstat() 函數返回關於文件或符號連接的信息。<br>
+                    linkinfo() 函數返回連接的信息。<br>
+                    link() 函數建立一個硬連接。<br>
+                    is_writeable() 函數判斷指定的文件是否可寫。<br>
+                    is_writable() 函數判斷指定的文件是否可寫。<br>
+                    is_uploaded_file() 函數判斷指定的文件是否是通過 HTTP POST 上傳的。<br>
+                    is_readable() 函數判斷指定文件名是否可讀。<br>
+                    is_link() 函數判斷指定文件名是否為一個符號連接。<br>
+                    is_file() 函數檢查指定的文件名是否是正常的文件。<br>
+                    is_executable() 函數檢查指定的文件是否可執行。<br>
+                    is_dir() 函數檢查指定的文件是否是目錄。<br>
+                    glob() 函數返回匹配指定模式的文件名或目錄。<br>
+                    fwrite() 函數寫入文件（可安全用於二進制文件）。<br>
+                    ftruncate() 函數把文件截斷到指定的長度。<br>
+                    ftell() 函數在打開文件中的當前位置。<br>
+                    fstat() 函數返回關於打開文件的信息。<br>
+                    fseek() 函數在打開的文件中定位。<br>
+                    fscanf() 函數根據指定的格式對來自打開的文件的輸入進行解析。<br>
+                    fread() 函數讀取文件（可安全用於二進制文件）。<br>
+                    fputs() 函數寫入文件（可安全用於二進制文件）。<br>
+                    fputcsv() 函數將行格式化為 CSV 並寫入一個打開的文件。<br>
+                    fpassthru() 函數輸出文件指針處的所有剩余數據。<br>
+                    fopen() 函數打開文件或者 URL。<br>
+                    fnmatch() 函數根據指定的模式來匹配文件名或字符串。<br>
+                    flock() 函數鎖定或釋放文件。<br>
+                    filetype() 函數返回指定文件或目錄的類型。<br>
+                    filesize() 函數返回指定文件的大小。<br>
+                    fileperms() 函數返回文件或目錄的權限。<br>
+                    fileowner() 函數返回文件的所有者。<br>
+                    filemtime() 函數返回文件內容上次的修改時間。<br>
+                    fileinode() 函數返回文件的 inode 編號。<br>
+                    filegroup() 函數返回指定文件的組 ID。<br>
+                    filectime() 函數返回指定文件的上次 inode 修改時間。<br>
+                    fileatime() 函數返回指定文件的上次訪問時間。<br>
+                    file_put_contents() 函數把一個字符串寫入文件中。<br>
+                    file_get_contents() 函數把整個文件讀入一個字符串中。<br>
+                    file_exists() 函數檢查文件或目錄是否存在。<br>
+                    file() 函數把整個文件讀入一個數組中。<br>
+                    fgetss() 函數從打開的文件中讀取一行並過濾掉 HTML 和 PHP 標記。<br>
+                    fgets() 函數從文件指針中讀取一行。<br>
+                    fgetcsv() 函數從文件指針中讀入一行並解析 CSV 字段。<br>
+                    fgetc() 函數從文件指針中讀取一個字符。<br>
+                    fflush() 函數將緩沖內容輸出到文件。<br>
+                    feof() 函數檢測是否已到達文件末尾 (eof)。<br>
+                    fclose() 函數關閉一個打開文件。<br>
+                    diskfreespace() 函數返回目錄中的可用空間。該函數是 disk_free_space() 函數的別名。<br>
+                    disk_total_space() 函數返回指定目錄的磁盤總大小。<br>
+                    disk_free_space() 函數返回目錄中的可用空間<br>
+                    dirname() 函數返回路徑中的目錄部分。<br>
+                    clearstatcache() 函數拷貝文件。<br>
+                    clearstatcache() 函數清除文件狀態緩存。<br>
+                    chown() 函數改變指定文件的所有者。<br>
+                    chmod() 函數改變文件模式。<br>
+                    chgrp() 函數改變文件所屬的組。<br>
+                    basename() 函數返回路徑中的文件名部分。<br>
+                    set_exception_handler() handler() 函數</p>
+                <p><b>PHP Error 和 Logging 函數</b><br>
+                    set_exception_handler() 函數設置用戶自定義的異常處理函數。<br>
+                    set_error_handler() 函數設置用戶自定義的錯誤處理函數。<br>
+                    restore_exception_handler() 函數恢復之前的異常處理程序，該程序是由 set_exception_handler() 函數改變的。<br>
+                    restore_error_handler() 函數恢復之前的錯誤處理程序，該程序是由 set_error_handler() 函數改變的。<br>
+                    error_reporting() 設置 PHP 的報錯級別並返回當前級別。<br>
+                    error_log() 函數向服務器錯誤記錄、文件或遠程目標發送一個錯誤。<br>
+                    error_get_last() 函數獲取最後發生的錯誤。<br>
+                    debug_print_backtrace() 函數輸出 backtrace。<br>
+                    debug_backtrace() cktrace() 函數</p>
+                <p><b>PHP Error 和 Logging 函數</b><br>
+                    scandir() 函數返回一個數組，其中包含指定路徑中的文件和目錄。<br>
+                    rewinddir() 函數重置由 opendir() 打開的目錄句柄。<br>
+                    readdir() 函數返回由 opendir() 打開的目錄句柄中的條目。<br>
+                    opendir() 函數打開一個目錄句柄，可由 closedir()，readdir() 和 rewinddir() 使用。<br>
+                    getcwd() 函數返回當前目錄。<br>
+                    closedir() 函數關閉由 opendir() 函數打開的目錄句柄。<br>
+                    dir() 函數打開一個目錄句柄，並返回一個對象。這個對象包含三個方法：read() , rewind() 以及 close()。<br>
+                    chroot() 函數把當前進程的根目錄改變為指定的目錄。<br>
+                    chdir() 函數把當前的目錄改變為指定的目錄。<br>
+                    time() 函數返回當前時間的 Unix 時間戳。<br>
+                    strtotime() 函數將任何英文文本的日期時間描述解析為 Unix 時間戳。<br>
+                    strptime() 函數解析由 strftime() 生成的日期／時間。<br>
+                    strftime() 函數根據區域設置格式化本地時間／日期。<br>
+                    mktime() 函數返回一個日期的 Unix 時間戳。<br>
+                    microtime() 函數返回當前 Unix 時間戳和微秒數。<br>
+                    localtime() 函數返回本地時間（一個數組）。<br>
+                    idate() 函數將本地時間/日期格式化為整數。<br>
+                    gmstrftime() 函數根據本地區域設置格式化 GMT/UTC 時間／日期。<br>
+                    gmmktime() 函數取得 GMT 日期的 UNIX 時間戳。<br>
+                    gmdate() 函數格式化 GMT/UTC 日期/時間。<br>
+                    gettimeofday() 函數返回一個包含當前時間信息的數組。<br>
+                    getdate() 函數取得日期／時間信息。<br>
+                    date() 函數格式化一個本地時間／日期。<br>
+                    date_sunset() 函數返回指定的日期與地點的日落時間。<br>
+                    date_sunrise() 函數返回指定的日期與地點的日出時間。<br>
+                    date_default_timezone_set() 函數設置用在腳本中所有日期/時間函數的默認時區。<br>
+                    date_default_timezone_get() 函數返回腳本中所有日期時間函數所使用的默認時區。<br>
+                    checkdate() 函數驗證一個格裏高裏日期。<br>
+                    UnixToJD() 函數把 Unix 時間戳轉換為儒略日計數。<br>
+                    JulianToJD() 函數把儒略歷轉換為儒略日計數。<br>
+                    JewishToJD() 函數把猶太歷法轉換為儒略日計數。<br>
+                    JDToUnix() 函數把儒略日計數轉換為 Unix 時間戳。<br>
+                    JDToGregorian() lian() 函數</p>
+                <p><b>PHP Array 函數</b><br>
+                    JDToGregorian() wish() 函數</p>
+                <p><b>PHP Array 函數</b><br>
+                    JDToGregorian() 函數把儒略日計數轉換為格利高裏歷法。<br>
+                    JDToFrench() 函數把儒略日計數轉換為法國共和國歷法。<br>
+                    JDMonthName() 函數返回指定歷法的月份字符串。<br>
+                    JDDayOfWeek() 函數返回日期在周幾。<br>
+                    GregorianToJD() 函數將格利高裏歷法轉換成為儒略日計數。<br>
+                    FrenchToJD() 函數將法國共和歷法轉換成為儒略日計數。<br>
+                    easter_days() 函數返回指定年份的復活節與 3 月 21 日之間的天數。<br>
+                    easter_date() 函數返回指定年份的復活節午夜的 Unix 時間戳。<br>
+                    cal_to_jd() 函數把指定的日期轉換為儒略日計數。<br>
+                    cal_info() 函數返回一個數組，其中包含了關於給定歷法的信息。<br>
+                    cal_from_jd() 函數把儒略日計數轉換為指定歷法的日期。<br>
+                    cal_days_in_month() 函數針對指定的年份和日歷，返回一個月中的天數。<br>
+                    usort() 函數使用用戶自定義的函數對數組排序。<br>
+                    uksort() 函數使用用戶自定義的比較函數按照鍵名對數組排序，並保持索引關系。<br>
+                    uasort() 函數使用用戶自定義的比較函數對數組排序，並保持索引關聯（不為元素分配新的鍵）。<br>
+                    sort() 函數按升序對給定數組的值排序。<br>
+                    sizeof() 函數計算數組中的單元數目或對象中的屬性個數。<br>
+                    shuffle() 函數把數組中的元素按隨機順序重新排列。<br>
+                    rsort() 函數對數組的元素按照鍵值進行逆向排序。與 arsort() 的功能基本相同。<br>
+                    reset() 函數把數組的內部指針指向第一個元素，並返回這個元素的值。<br>
+                    range() 函數創建並返回一個包含指定範圍的元素的數組。<br>
+                    prev() HP prev() 函數</p>
+                <p><b>PHP Array 函數</b><br>
+                    pos() 函數是 current() 函數 的別名。它可返回數組中當前元素的值。<br>
+                    next() 函數把指向當前元素的指針移動到下一個元素的位置，並返回當前元素的值。<br>
+                    natsort() 函數用自然順序算法對給定數組中的元素排序。<br>
+                    natcasesort() 函數用不區分大小寫的自然順序算法對給定數組中的元素排序。<br>
+                    list() 函數用數組中的元素為一組變量賦值。<br>
+                    ksort() 函數按照鍵名對數組排序，為數組值保留原來的鍵。<br>
+                    krsort() 函數將數組按照鍵逆向排序，為數組值保留原來的鍵。<br>
+                    key() 函數返回數組內部指針當前指向元素的鍵名。<br>
+                    in_array() 函數在數組中搜索給定的值。<br>
+                    extract() extract() 函數</p>
+                <p><b>PHP Array 函數</b><br>
+                    end() 函數將數組內部指針指向最後一個元素，並返回該元素的值（如果成功）。<br>
+                    each() 函數生成一個由數組當前內部指針所指向的元素的鍵名和鍵值組成的數組，並把內部指針向前移動。<br>
+                    current() 函數返回數組中的當前元素（單元）。<br>
+                    count() 函數計算數組中的單元數目或對象中的屬性個數。<br>
+                    compact() 函數創建一個由參數所帶變量組成的數組。如果參數中存在數組，該數組中變量的值也會被獲取。<br>
+                    asort() 函數對數組進行排序並保持索引關系。主要用於對那些單元順序很重要的結合數組進行排序。<br>
+                    arsort() 函數對數組進行逆向排序並保持索引關系。主要用於對那些單元順序很重要的結合數組進行排序。<br>
+                    array_walk_recursive() cursive() 函數</p>
+                <p><b>PHP Array 函數</b><br>
+                    array_walk() 函數對數組中的每個元素應用回調函數。如果成功則返回 TRUE，否則返回 FALSE。<br>
+                    array_values() 函數返回一個包含給定數組中所有鍵值的數組，但不保留鍵名。<br>
+                    array_unshift() 函數在數組開頭插入一個或多個元素。<br>
+                    array_unique() 函數移除數組中的重復的值，並返回結果數組。<br>
+                    array_uintersect_assoc() 函數帶索引檢查計算數組的交集，用回調函數比較數據。<br>
+                    array_uintersect() 函數計算數組的交集，用回調函數比較數據。<br>
+                    array_udiff_uassoc() 函數返回 array1 數組中存在但其它數組中都不存在的部分。返回的數組中鍵名保持不變。<br>
+                    array_udiff_assoc() 函數返回 array1 中存在但其它數組中都不存在的部分。<br>
+                    array_udiff() 函數返回一個數組，該數組包括了所有在被比較數組中，但是不在任何其它參數數組中的值，鍵名保留不變。<br>
+                    array_sum() 函數返回數組中所有值的總和。<br>
+                    array_splice() 函數與 array_slice() 函數類似，選擇數組中的一系列元素，但不返回，而是刪除它們並用其它值代替。<br>
+                    array_slice() 函數在數組中根據條件取出一段值，並返回。<br>
+                    array_shift() 函數刪除數組中的第一個元素，並返回被刪除元素的值。<br>
+                    array_search() 函數與 in_array() 一樣，在數組中查找一個鍵值。如果找到了該值，匹配元素的鍵名會被返回。如果沒找到，則返回 false。<br>
+                    array_reverse() 函數將原數組中的元素順序翻轉，創建新的數組並返回。如果第二個參數指定為 true，則元素的鍵名保持不變，否則鍵名將丟失。<br>
+                    array_reduce() 函數用回調函數叠代地將數組簡化為單一的值。如果指定第三個參數，則該參數將被當成是數組中的第一個值來處理，或者如果數組為空的話就作為最終返回值。<br>
+                    array_rand() 函數從數組中隨機選出一個或多個元素，並返回。<br>
+                    array_push() 函數向第一個參數的數組尾部添加一個或多個元素（入棧），然後返回新數組的長度。<br>
+                    array_product() 函數計算並返回數組中所有值的乘積。<br>
+                    array_pop() 函數刪除數組中的最後一個元素。<br>
+                    array_pad() 函數向一個數組插入帶有指定值的指定數量的元素。<br>
+                    array_multisort() 函數對多個數組或多維數組進行排序。<br>
+                    array_merge_recursive() 函數與 array_merge() 函數 一樣，將一個或多個數組的元素的合並起來，一個數組中的值附加在前一個數組的後面。並返回作為結果的數組。<br>
+                    array_merge() 函數把兩個或多個數組合並為一個數組。<br>
+                    array_map() 函數返回用戶自定義函數作用後的數組。回調函數接受的參數數目應該和傳遞給 array_map() 函數的數組數目一致。<br>
+                    array_keys() 函數返回包含數組中所有鍵名的一個新數組。<br>
+                    array_key_exists() 函數判斷某個數組中是否存在指定的 key，如果該 key 存在，則返回 true，否則返回 false。<br>
+                    array_intersect_ukey() 函數用回調函數比較鍵名來計算數組的交集。<br>
+                    array_intersect_uassoc() 函數使用用戶自定義的回調函數計算數組的交集，用回調函數比較索引。<br>
+                    array_intersect_key() 函數使用鍵名比較計算數組的交集。<br>
+                    array_intersect_assoc() 函數返回兩個或多個數組的交集數組。<br>
+                    array_intersect() 函數返回兩個或多個數組的交集數組。<br>
+                    array_flip() 函數返回一個反轉後的數組，如果同一值出現了多次，則最後一個鍵名將作為它的值，所有其他的鍵名都將丟失。<br>
+                    array_filter() 函數用回調函數過濾數組中的元素，如果自定義過濾函數返回 true，則被操作的數組的當前值就會被包含在返回的結果數組中， 並將結果組成一個新的數組。如果原數組是一個關聯數組，鍵名保持不變。<br>
+                    array_fill() 函數用給定的值填充數組，返回的數組有 number 個元素，值為 value。返回的數組使用數字索引，從 start 位置開始並遞增。如果 number 為 0 或小於 0，就會出錯。<br>
+                    array_diff_ukey() 返回一個數組，該數組包括了所有出現在 array1 中但是未出現在任何其它參數數組中的鍵名的值。註意關聯關系保留不變。與 array_diff() 不同的是，比較是根據鍵名而不是值來進行的。<br>
+                    array_diff_uassoc() 函數使用用戶自定義的回調函數 (callback) 做索引檢查來計算兩個或多個數組的差集。返回一個數組，該數組包括了在 array1 中但是不在任何其他參數數組中的值。<br>
+                    array_diff_key() 函數返回一個數組，該數組包括了所有在被比較的數組中，但是不在任何其他參數數組中的鍵。<br>
+                    array_diff_assoc() 函數返回兩個數組的差集數組。該數組包括了所有在被比較的數組中，但是不在任何其他參數數組中的鍵和值。<br>
+                    array_diff() 函數返回兩個數組的差集數組。該數組包括了所有在被比較的數組中，但是不在任何其他參數數組中的鍵值。<br>
+                    array_count_values() 函數用於統計數組中所有值出現的次數。<br>
+                    array_combine() 函數通過合並兩個數組來創建一個新數組，其中的一個數組是鍵名，另一個數組的值為鍵值。<br>
+                    array_chunk() 函數把一個數組分割為新的數組塊。<br>
+                    array_change_key_case() 函數將數組的所有的 KEY 都轉換為大寫或小寫。<br>
+                    array() 創建數組，帶有鍵和值。如果在規定數組時省略了鍵，則生成一個整數鍵，這個 key 從 0 開始，然後以 1 進行遞增。</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p><font face="Arial, Helvetica, sans-serif">PHP常用函式大全</font>參考 - ob_start()範例：</p>
+              <blockquote>
+                <p>用PHP的ob_start();控制您的瀏覽器cache!Output Control 函數可以讓你自由控制腳本中數據的輸出。它非常地有用，特別是對于：當你想在數據已經輸出后，再輸出文件頭的情況。輸出控制函數不對使用 header() 或 setcookie(), 發送的文件頭信息產生影響,只對那些類似于 echo() 和 PHP 代碼的數據塊有作用。</p>
+                <p>&lt;?php </p>
+                <blockquote>
+                  <p> <b>ob_start(); </b></p>
+                  <blockquote>
+                    <p> ?&gt;</p>
+                    <blockquote>
+                      <p> <b>&lt;p&gt;&lt;?php echo &quot;2&quot;; ?&gt;&lt;/p&gt;</b></p>
+                    </blockquote>
+                    <p> &lt;?php </p>
+                  </blockquote>
+                  <p> <b>$content = ob_get_clean(); </b><br>
+                        echo $content;</p>
+                </blockquote>
+                <p> ?&gt;</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p><font face="Arial, Helvetica, sans-serif">PHP常用函式大全</font>參考 - 使用外部 php.exe 呼叫 php 程式，並帶get/ post資料範例：</p>
+              <blockquote>
+                <p>範例1：<font color="#003300"><b>C:\php\php.exe -r</b></font> &quot;<i>$_GET['<b>s</b>']='<b>1</b>';require_once('<b><font color="#FF0000">C:\App\a.php</font></b>');</i>&quot;</p>
+                <p>範例2：<font color="#003300"><b>C:\php\php.exe -r</b></font> &quot;<i>$_GET['<b>s</b>']='<b>1</b>';$_GET['<b>s2</b>']='<b>2</b>';require_once('<b><font color="#FF0000">C:\App\a.php</font></b>');</i>&quot;</p>
+                <p>範例3：<font color="#003300"><b>C:\php\php.exe -r</b></font> &quot;<i>$_POST['<b>s</b>']='<b>1</b>';require_once('<b><font color="#FF0000">C:\App\a.php</font></b>');</i>&quot;</p>
+              <p>這段程式碼是用 PHP 命令列工具執行的，以下是它的功能解釋：</p>
+              <blockquote>
+                <p><b>C:\php\php.exe</b>: 指定 PHP 解釋器的執行路徑。</p>
+                <p><b>-r</b>: 表示在命令列中直接執行一行 PHP 代碼。</p>
+                <p><b>$_GET['s']='1';$_GET['s2']='2';</b>: 在 PHP 中，$_GET 是一個用於獲取 URL 中的 GET 參數的超全局變數。這一行的目的是將 $_GET['s'] 設置為 '1'，將 $_GET['s2'] 設置為 '2'。</p>
+                <p><b>require_once('C:\App\a.php');</b>: 這個語句使用 require_once 引入了一個外部的 PHP 檔案 a.php，該檔案的路徑是 C:\App\a.php。</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p><font face="Arial, Helvetica, sans-serif">PHP常用函式大全</font>參考文獻：</p>
+              <blockquote>
+                <p><a href="https://www.maya.com.tw/blog_detail.php?idn=38%20title=">https://www.maya.com.tw/blog_detail.php?idn=38%20title=</a></p>
+                <p><a href="https://hackmd.io/@wFs2rNd0TkWPw15Qyb5RIw/Bk971sGIF">https://hackmd.io/@wFs2rNd0TkWPw15Qyb5RIw/Bk971sGIF</a></p>
+                <p><a href="https://ithelp.ithome.com.tw/articles/10270971">https://ithelp.ithome.com.tw/articles/10270971</a></p>
+                <p><a href="https://www.phpernote.com/php-function/168.html">https://www.phpernote.com/php-function/168.html</a></p>
+                <p><a href="https://incode.pixnet.net/blog/post/39437602">https://incode.pixnet.net/blog/post/39437602</a></p>
+                <p><a href="https://blog.csdn.net/xin_ge_cheng_xu/article/details/79757581">https://blog.csdn.net/xin_ge_cheng_xu/article/details/79757581</a></p>
+                <p><a href="https://blog.csdn.net/ZDX_Y/article/details/52819255">https://blog.csdn.net/ZDX_Y/article/details/52819255</a></p>
+                <p><a href="https://sanji0802.wordpress.com/2008/02/25/php%E5%BC%95%E7%94%A8%E6%AA%94%E6%A1%88%E7%9A%84%E5%87%BD%E6%95%B8%E5%8D%80%E5%88%A5requirerequire_onceincludeinclude_once/">https://sanji0802.wordpress.com/2008/02/25/php%E5...</a></p>
+                <p><a href="https://blog.csdn.net/LJFPHP/article/details/78839654">https://blog.csdn.net/LJFPHP/article/details/78839654</a></p>
+                <p><a href="https://www.cnblogs.com/52php/p/5665472.html">https://www.cnblogs.com/52php/p/5665472.html</a></p>
+                <p><a href="https://incode.pixnet.net/blog/post/39437602">https://incode.pixnet.net/blog/post/39437602</a></p>
+                <p><a href="https://math.ccsh.tp.edu.tw/%7Erick/homepage/phpfunction.php3">https://math.ccsh.tp.edu.tw/~rick/homepage/phpfunction.php3</a></p>
+                <p><a href="https://summer10920.github.io/2020/05-12/php-baseclass-6/">https://summer10920.github.io/2020/05-12/php-baseclass-6/</a></p>
+                <p>&nbsp;</p>
+              </blockquote>
+
+            <!-- InstanceEndEditable --></td>
+				  </tr>
+				</table>
+			
+			
+			</td>
+          </tr>
+        </table></td>
+      </tr>
+     
+      <tr>
+        <td align="left" valign="top" style="display:none" id="mmenu_down">
+		
+			<table width="100%" border="0" cellpadding="10" cellspacing="0">
+			  <tr>
+				<td align="left" valign="top" bgcolor="#DEECF1"><b>其他資料</b><a name="d_menu_a" id="d_menu_a"></a></td>
+			  </tr>
+			  <tr>
+				<td align="left" valign="top" id="mmenu_down_data"></td>
+			  </tr>
+			</table>
+
+		</td>
+      </tr>
+      <tr>
+       <td height="80" valign="middle" bgcolor="#DEECF1" id="m_files" style="padding:20px;"></td>
+		
+		<script>
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/files.htm"; 
+			ajax_load_files.method  = 'GET'; 
+			ajax_load_files.element = 'm_files'; 
+			function start_ajax_load_files(){
+				ajax_load_files.runAJAX('');
+			}
+			setTimeout("start_ajax_load_files();",1000);
+	   </script>
+		
+      </tr>
+      <tr>
+        <td height="60" align="center" valign="middle">
+		
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="https://www.jplopsoft.idv.tw/">Jplopsoft</a> | 
+				<a href="https://twhkinc.jplopsoft.idv.tw/">THI</a> | 
+				<a href="https://app.netlify.com/sites/jplop/deploys">Netlify</a> | 
+				<a href="https://neocities.org/dashboard">NeoCities</a> | 
+				<a href="https://lionfree.net/">LionFree</a>
+			</font></p>
+			
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="util_aes_utility.html">加密工具</a> | 
+				<a href="teac_post_about.html">提交歸檔</a> | 
+				<a href="util_qrcode_online_gen_tool.html">QRCODE產生器</a> | 
+				<a href="util_gen_pass.html">密碼產生器</a>
+			</font></p>
+			
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+			
+		</td>
+      </tr>
+    </table>
+	</td>
+  </tr>
+</table>
+</BODY>
+<script>
+	
+</script>
+<!-- InstanceEnd --></HTML>

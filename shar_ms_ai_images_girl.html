@@ -1,0 +1,1353 @@
+<HTML><!-- InstanceBegin template="/Templates/default.dwt" codeOutsideHTMLIsLocked="false" -->
+<HEAD>
+<!-- InstanceBeginEditable name="doctitle" -->
+<TITLE>歸檔星球 Archive Star - 運用AI圖像生成與網頁技術建構主題性數位圖庫平台</TITLE>
+<!-- InstanceEndEditable -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+<!-- InstanceBeginEditable name="head" -->
+
+	<meta name="keywords" content="運用AI圖像生成與網頁技術建構主題性數位圖庫平台">
+	<meta name="pagetype" content="教學">
+	<meta name="description" content="運用AI圖像生成與網頁技術建構主題性數位圖庫平台">
+	
+	<!----------------------------------論文系統 --------------------------------->					
+	
+	 <style>
+    .img-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .img-grid img {
+      width: 150px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      filter: blur(5px) brightness(0.8);
+      transition: filter 0.3s ease;
+      cursor: pointer;
+    }
+    .img-grid img:hover {
+      filter: none;
+    }
+
+    /* 全螢幕遮罩樣式 */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .overlay img {
+      max-width: 90%;
+      max-height: 90%;
+      box-shadow: 0 0 30px rgba(255,255,255,0.3);
+      border-radius: 10px;
+    }
+     </style>
+	 
+	 <!----------------------------------論文系統 --------------------------------->					
+	 
+	
+		<script type="application/ld+json">
+		{
+		  "@context": "https://schema.org",
+		  "@type": "WebPage",
+		  "url": "https://jplop.netlify.app/teac_post_about.html",
+		  "name": "AI圖像生成",
+		  "description": "運用AI圖像生成與網頁技術建構主題性數位圖庫平台。"
+		}
+	</script>
+	
+<!-- InstanceEndEditable -->
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="mm_menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/message.js"></script>		
+		<style>
+			a:link {color: #0000FF;text-decoration: none;} 
+			a:visited {color: #3366FF;text-decoration: none;}
+			a:hover {}
+			a:active {color: #FF0000;text-decoration: none;}
+			font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;}
+			input ,button , select{font-size:12px;}
+			.spoiler, .spoiler2{color: black; background-color:black;}
+			.spoiler:hover{color: white;}
+			.spoiler2:hover { background-color:white; }
+		</style>
+		
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVGMPW8LR4"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		
+		  gtag('config', 'G-SVGMPW8LR4');
+		</script>
+		
+</HEAD>
+
+<BODY leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table width="100%" height="100%" border="0" style="padding:20px;" cellspacing="0" background="images/archive_star_ban_bg_1997.jpg" id="table_top1">
+  <tr>
+    <td height="715" valign="top"><table width="100%" height="100%" border="0" cellspacing="0" bgcolor="#FFFFFF" style="padding:20px;border:1px #ccc solid;border-radius:10px;box-shadow:1px 1px 20px #ffffff;margin-right:8px;" id="table_top2">
+      <tr>
+        <td valign="top">
+		
+		<span id="j_space_top_data"></span>
+		<script>
+			var ajax_load_top = new sack();
+			ajax_load_top.requestFile = "init/top.html";
+			ajax_load_top.method  = 'GET'; 
+			ajax_load_top.element = 'j_space_top_data'; 
+	   </script>
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+
+            <td width="200" valign="top" id="mmenu"></td>
+			  <!-- InstanceBeginEditable name="EditRegion4" --> <!-- InstanceEndEditable -->
+            <td valign="top">
+			
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				  <tr>
+				    <td id="top_left_menu_td_m" align="center" bgcolor="#40588C" width="40" onClick="window.location='#d_menu_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">M</font></td>
+					<td id="top_left_menu_td_f" align="center" bgcolor="#336600" width="40" onClick="window.location='#d_file_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">F</font></td>
+					<td id="top_left_menu_td" style="text-align:right;background-color:#FFFFFF">
+							<span id="LoginBox_PC">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">About</a> | 
+								<a href="https://jplop.netlify.app/">NetLify</a> | 
+								<a href="https://jplop.neocities.org/">NeoCities</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">Project</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_M" style="display:none">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">AB</a> | 
+								<a href="https://jplop.netlify.app/">NL</a> | 
+								<a href="https://jplop.neocities.org/">NC</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">PJ</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_status"> | 
+								<a href="javascript:main_login_in_start();void(0);">管理</a> 
+							</span>
+					  </td>
+				  </tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="10" cellspacing="0">
+				  <tr>
+					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
+              <h2><img id="one_page_number_1" src="images/archive_star_ban_2012.jpg" alt="運用AI圖像生成與網頁技術建構主題性數位圖庫平台"  style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
+              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;運用AI圖像生成與網頁技術建構主題性數位圖庫平台&gt;&gt;</font></h2>
+              <p>[A Study on Constructing Thematic Digital Image Libraries Using AI Image Generation and Web Technologies]</p>
+              <p><b>摘要</b></p>
+              <blockquote>
+                <p> 隨著人工智慧（AI）技術的快速發展，AI圖像生成已成為數位內容創作的重要工具。本文探討如何運用AI圖像生成技術結合現代網頁技術，建構一個主題性數位圖庫平台，提供高效且直觀的圖像展示與互動體驗。研究中設計了以JavaScript為核心的動態圖片加載機制，實現懶加載與清晰度漸進切換功能，並透過全螢幕瀏覽提升使用者體驗。此外，本文討論了平台的系統架構、性能優化策略與未來擴展方向。實驗結果顯示，本平台在圖像資源管理與展示效能上具備顯著優勢，適合應用於數位博物館、線上展覽及主題內容分享等場景。未來研究將聚焦於結合語意搜尋、自動標註及多裝置優化，持續提升平台智能化與用戶互動性。</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p><b>Abstract</b></p>
+              <blockquote>
+                  <p> With the rapid development of Artificial Intelligence (AI) technologies, AI-generated images have become a crucial tool in digital content creation. This study explores the integration of AI image generation with modern web technologies to build a thematic digital image library platform that offers efficient and intuitive image display and interaction experiences. The research designs a JavaScript-based dynamic image loading mechanism implementing lazy loading and progressive clarity enhancement, along with fullscreen viewing to improve user experience. Furthermore, the paper discusses the system architecture, performance optimization strategies, and future expansion directions. Experimental results demonstrate significant advantages in image resource management and display performance, making the platform suitable for digital museums, online exhibitions, and thematic content sharing. Future work will focus on integrating semantic search, automatic annotation, and multi-device optimization to continuously enhance platform intelligence and user engagement.</p>
+                  <p><b>關鍵字 (Keywords</b>)：
+                      AI圖像生成 (AI Image Generation)、數位圖庫 (Digital Image Library)、主題性圖庫 (Thematic Image Collection)、網頁技術 (Web Technologies)、延遲載入 (Lazy Loading)、全螢幕顯示 (Fullscreen Display)、Bing Image Creator、DALL·E、互動設計 (Interactive Design)、圖像資料管理 (Image Data Management)、</p>
+                  <p>&nbsp;</p>
+              </blockquote>
+              <p><b>1. 引言</b></p>
+              <blockquote>
+                <p> 數位時代下，圖像資料日益膨脹，圖像庫的建構與管理成為資訊科技重要議題。人工智慧（AI）圖像生成技術，尤其是基於深度學習的生成對抗網絡（GAN）與變分自編碼器（VAE），為數位圖像資源提供了全新來源。結合先進的網頁技術，能打造出動態、互動且高效的主題性數位圖庫，滿足多樣化應用需求。本文旨在研究並實踐以AI生成圖像與網頁技術建構女性角色圖庫為案例的數位圖庫平台，展示技術細節與應用價值。</p>
+                <p><iframe width="560" height="315" src="https://www.youtube.com/embed/pdhu6WYBVis?si=P2kfg_jzhP0IO-QK" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></p>
+                <p>&nbsp;</p>
+                <p>1.1 研究問題</p>
+                <ol>
+                  <li> 如何運用AI圖像生成技術自動化產生多樣且具主題性的數位圖像資源，並有效整合於數位圖庫平台？<br>
+                    <br>
+                  </li>
+                  <li>在大量圖像展示情境下，如何透過現代網頁技術優化圖像載入速度與使用者體驗，避免伺服器過載與網頁延遲？<br>
+                    <br>
+                  </li>
+                  <li>如何設計直覺且互動性高的前端介面，使使用者能方便地瀏覽、放大、切換及管理大量AI生成的圖像？<br>
+                    <br>
+                  </li>
+                  <li>AI生成圖像與數位圖庫平台結合的應用效益與限制為何？未來發展方向有哪些挑戰與機會？</li>
+                </ol>
+                  <p>&nbsp;</p>
+              </blockquote>
+              <p><b>2. 相關技術背景</b></p>
+              <blockquote>
+                <p> 2.1 AI圖像生成技術</p>
+                <p> 近年來，AI圖像生成技術蓬勃發展，DALL·E（Ramesh et al., 2021）、StyleGAN（Karras et al., 2019）等模型可透過自然語言提示生成高品質圖像。Microsoft Bing Image Creator結合OpenAI DALL·E技術，讓使用者以文字描述產生逼真或藝術風格圖片，降低了圖像製作門檻。此類技術支援定制化創作，適合建立主題明確的數位圖庫。</p>
+                <p><iframe width="560" height="315" src="https://www.youtube.com/embed/qcOB39wQdEM?si=_osZ4y-Fc7OJzFC3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></p>
+                <p>&nbsp;</p>
+                <p>2.2 現代網頁技術</p>
+                <p> HTML5和JavaScript的發展，特別是延遲載入（lazy loading）、動態DOM生成等技術，提升了大型圖庫頁面的載入效能與使用者體驗（Google Developers, 2023）。利用CSS濾鏡模糊效果與全螢幕API，可提供細節放大及交互式瀏覽功能。這些技術組合能有效支援大規模AI生成圖像的展示需求。</p>
+                <p><iframe width="560" height="315" src="https://www.youtube.com/embed/vQJwUuje_jQ?si=36NTCus7_TuPWuxI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p><b>3. 主題性數位圖庫平台架構</b></p>
+              <blockquote>
+                <p> 3.1 圖像資料來源與生成流程</p>
+                <p> 本研究以Bing Image Creator產生女性角色圖像作為資料來源。透過API或手動方式獲得圖像ID，利用固定格式生成圖片URL。圖像依主題分類並存入資料庫或靜態檔案伺服器，作為網頁展示資料。</p>
+                <p>3.2 前端展示與效能優化</p>
+                <p> 為減少初次載入時的資源消耗，採用HTML &lt;img&gt; 標籤的 loading=&quot;lazy&quot; 屬性實現延遲載入，並利用CSS設定預設模糊濾鏡，僅當滑鼠懸停時移除模糊以呈現清晰圖像。此方法有效兼顧載入速度與使用者體驗。</p>
+                <p>3.3 互動功能設計</p>
+                <p> 點擊圖像時觸發JavaScript調用瀏覽器的Fullscreen API，實現全螢幕查看，方便用戶詳細觀察。可結合輕量燈箱插件如PhotoSwipe，提升瀏覽流暢度及功能豐富性。</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p><b>4. 系統實作與展示</b></p>
+              <blockquote>
+                <p> 4.1 圖庫建構示例</p>
+                <p> 以JavaScript程式碼動態生成圖像列表，利用ID陣列拼接URL，配合延遲載入及濾鏡效果實現精簡且友好的介面。系統架構包括前端頁面、圖像儲存伺服器，以及AI生成平台連結。</p>
+				
+<!----------------------------------論文系統 --------------------------------->					
+
+
+
+                <p><div class="img-grid" id="imgGrid">
+				
+  <script>
+    const ids = `
+1001944591935963
+1004798531653236
+1006537984812752
+1006576854808865
+1009760270773714
+1012061237214397
+1012669097532846
+10162558687873829
+10163988154235558
+1020284859461995
+10230458841672078
+10233591347074916
+10233591348834960
+10233841663447979
+10233846725414525
+10233853501983935
+10233853533024711
+10233853637067312
+10233853664067987
+10233853727789580
+10233853845992535
+10233853854872757
+10233853859472872
+10233853868873107
+10233854047397570
+10233867648177581
+10233867935784771
+10233867960745395
+10233868134669743
+10233881418721836
+10233881453002693
+10233881469603108
+10233881661127896
+10233881661927916
+10233881673128196
+10233881864172972
+10234159665396871
+10234159667436922
+10234580502360651
+10234970979724870
+1029048515895071
+1034882091423435
+1044464351019987
+1048531390612109
+1069266945205762
+1071539944977379
+1077754833704616
+1087897969356969
+1089349235878509
+1092695706207640
+1093532282126871
+1096987041791785
+1106857564129478
+1108436250790472
+1111494196991179
+1118693953213678
+1120991109385599
+1129403088755364
+1130660775517962
+1141329104064455
+1159635872838472
+1159655258898506
+1209905074477757
+122093365850588733
+122099168486442598
+122100373652718990
+122100373676718990
+122101032818189527
+122102307590342798
+122103146240439783
+122105366630386173
+122106496706017864
+122107431512398540
+122107780406543847
+122108091710565493
+122108918324421633
+122109391736455314
+122110023668566239
+122111365778521498
+122111879954156471
+122112329636345076
+122112803876124811
+122113046306520967
+122113173542521498
+122113289654392135
+122113841312424158
+122114245856561922
+122114246000561922
+122114246042561922
+122114246102561922
+122114246144561922
+122114445626386397
+122114951540348973
+122115041108337364
+122115182018345076
+122116355684337364
+122116594418345076
+122117536910382000
+122117704784346040
+122117735882392135
+122117830106391728
+122118702224345076
+122118764660156471
+122118768560348973
+122118955520335197
+122119225862404466
+122119805954274100
+122119911902030650
+122120411786467395
+122120465384404466
+122120689220348414
+122121146156381017
+122121472484337380
+122121554852352963
+122121554900352963
+122121554942352963
+122121797636433540
+122121798740381017
+122122100114331386
+122122524872433322
+122122590134389349
+122122640918389349
+122122813436361063
+122123720672357532
+122125728338351366
+122126223044334433
+122126421530281743
+122126564972392135
+122126582168468848
+122126614760350000
+122126635568392135
+122127348356352963
+122127474824342798
+122127948410561532
+122128120262348414
+122128120388348414
+122128201652684459
+122128341320052159
+122129446148335389
+122129849600258075
+122129956598335164
+122130510326335164
+122130729812335164
+122131384316017864
+122131512386335164
+122131512398335164
+122131512404335164
+122131541906341156
+122131976774351293
+122132282804052159
+122132879426325562
+122133626186347285
+122133870284334012
+122133870530334012
+122133870740334012
+122133870854334012
+122133870890334012
+122133912596052159
+122134260752341156
+122134681244341326
+122134738772358866
+122135197340345229
+122135272250329281
+122135966660345229
+122135966684345229
+122135966768345229
+122135990108352963
+122136056912325806
+122136227534195155
+122136357290213709
+122136689312358866
+122137258532481028
+122138152478370421
+122138662172626852
+122138932478370421
+122139098084213709
+122139230810349529
+122139419786213709
+122139616358019597
+122139701540213709
+122139816398335164
+122140732742370078
+122141101754476407
+122141141288337368
+122141141372337368
+122141141516337368
+122141141600337368
+122141860568213709
+122142113006213709
+122142235970213709
+122142848030278189
+122143018154264677
+122143510700258075
+122144277062358713
+122144599502313516
+122144769980213709
+122145008816192355
+122145408368272603
+122147459186213709
+122147572598330965
+122147994482213709
+122148692336323354
+122149154492213709
+122149277234284065
+122149480424284065
+122150501882350887
+122150855540035917
+122151330872490550
+122152427234017864
+122152746530213709
+122153751032120515
+122154346190539613
+122154600818120515
+122155456826223321
+122155832114053426
+122156308304053426
+122156945084138915
+122157008240138915
+122157327134138915
+122157342242138915
+122157507668138915
+122157511910138915
+122157519692138915
+122157706214138915
+122157711884138915
+122157716132138915
+122157742484138915
+122157933860138915
+122157954134138915
+122158363250138915
+122158371362138915
+122159760668356794
+122160172280189527
+122160184514175161
+122160514640234154
+122160824390112140
+122161385726191760
+122161572104053426
+122162039648053426
+122162491310264632
+122163463484245602
+122163547238017864
+122163768782119903
+122163769238119903
+122163854090017864
+122163888134267363
+122165360330309016
+122165361530309016
+122165412818060196
+122165706050245602
+122166013970309016
+122166131228053426
+122167516298195155
+122168603996211753
+122169903860132371
+122170103510278193
+122171311652094895
+122172756932124811
+122172797354124811
+122173391528153084
+122174489762238388
+122174993408258075
+122175151646146267
+122178045098208794
+122178045296208794
+122178063140041641
+122178162110171158
+122178918698171158
+122179195934208794
+122179195964208794
+122179195982208794
+122179883912171158
+122180449028171158
+122180562368171158
+122180751848171158
+122181553052203931
+122181679076171158
+122181766946171158
+122182128674195155
+122182492514124811
+122182815806171158
+122183467550171158
+122183523266171158
+122183628776171158
+122183784458171158
+122183899604171158
+122184289610171158
+122184666866234327
+122186758448200637
+122186806946068419
+122186806970068419
+122186807108068419
+122187483362171158
+122187690398016831
+122187690830016831
+122187904910226776
+122187910502171158
+122188004360171158
+122188023842171158
+122188058804171158
+122188305518170732
+122188372976171158
+122188401770171158
+122188484018171158
+122188541816171158
+122188567328171158
+122188639322171158
+122188662866226776
+122188678502171158
+122188813106226776
+122189394530195155
+122189869688226776
+122190222434226776
+122192731334171158
+122193575414208794
+122194436018226507
+122195623652195155
+122195995694195155
+122196642932272603
+122199473696068419
+122199624398068419
+122200196702060306
+122203137644213709
+122204901062009537
+122205491354016626
+122216219168067500
+122217717044016626
+122222725856192581
+122225004644068419
+122225326640034100
+122225326646034100
+122225326652034100
+122225326658034100
+122225326664034100
+122228793734016626
+122230466858223321
+122230682708223321
+122230752116007189
+122232634298223321
+122255757320001531
+1226096281990268
+1226179381981958
+1227411485192081
+1227429649391966
+1227464831853413
+1228874775261557
+1234333324499897
+1243570483576181
+1250352329564663
+1252918965974666
+1254875875474403
+1258153315451231
+1258681958647978
+1258682018647972
+1258682411981266
+1258682748647899
+1259420575324505
+1265221381327369
+1266804027919493
+1269525587647337
+1271438900789339
+1289537925361711
+1290421768782205
+1309527750409717
+1315518159714746
+1324615845471644
+1335757757690786
+1362202255046336
+1371998987120381
+1390478411754467
+1402138877125416
+1498987230987929
+1514095329477119
+1514096059477046
+1514096996143619
+1520193425533976
+1544479623105356
+1545958206290831
+1551940172359301
+1559508338321645
+1560161054808974
+156956384071101
+1572050767524219
+1690857058356175
+1706303123245826
+1712320226284586
+1713971249362890
+1830461770775895
+1854422968740977
+1920590338390741
+1921059738343801
+200258652666494
+206139525411740
+206489488570601
+2140599466119715
+218351490717734
+2191860241189022
+2229671620741217
+225969637169775
+2283873341987711
+2437303693290444
+2546098149114076
+2547217955463468
+261660956986694
+274108575609940
+274464145574383
+275113702176094
+275113705509427
+275113708842760
+275754745445323
+275754752111989
+275754858778645
+275755052111959
+279202851299264
+279202934632589
+27930003939977255
+281426555030065
+28151830261127954
+2947182268765858
+2948095322007886
+2948599845290767
+2955982881219130
+2970412349776183
+2976327559184662
+2976539315830153
+300037529215796
+304696148889410
+3050499051765494
+3074002672748465
+309926405033051
+311736191880663
+313528221701460
+3156033224725164
+318012877872870
+325788993117631
+327700789922279
+328660090188273
+336668502839203
+340230889031193
+3411543278990411
+341410732342130
+3426237401014974
+343854898764380
+349661301059561
+3511084529204345
+355922697553901
+355937224219115
+355947287551442
+355950624217775
+359989316693426
+360698549955836
+361198050342554
+361455389880152
+3624634337799740
+364981656327064
+366687973159321
+366688006492651
+366688079825977
+366688113159307
+368608279633957
+369255182902600
+369255229569262
+379386635161407
+3797649113885662
+381093225074248
+3818200151841798
+3821408768187603
+3845743219087491
+384726284558453
+384953217998944
+385708344590617
+385733474457734
+3869147343413745
+3888923557990275
+389612297521950
+390703990755427
+392461380581461
+392914000406348
+393442173814942
+393522150475903
+393522217142563
+393522267142558
+393522390475879
+393522430475875
+393522467142538
+393522533809198
+394279320269816
+395268686906535
+398906653270267
+399096456454769
+4008840822731141
+402101852951266
+407172029110915
+407803818407270
+410998631534091
+411529398541314
+413985284717560
+415590444557044
+433529603009179
+433665032994417
+435599739449866
+435600639449776
+438488542512066
+439762309182928
+439789509048636
+440830582070984
+441463852214535
+441609885289076
+446034045225820
+446958304535109
+449193664544740
+449330651183666
+455909817258317
+4582083055350503
+464380289963918
+465828862814116
+466569983042991
+467074656078413
+467074706078408
+467074759411736
+468802925905586
+470010622341972
+470739645602403
+470775038880993
+471161805820415
+471161825820413
+474516532151609
+475527572182523
+477314718494498
+484748254625244
+486154313905553
+486154320572219
+488006050421694
+488592977187135
+488592987187134
+489228666931451
+490295627338287
+494272523603101
+495736786163642
+497206256305064
+497382509449400
+497382592782725
+500760332616262
+502020979240013
+510713078423041
+512048514720416
+518447594470576
+519607500587583
+519632357585874
+520828587404516
+529225856342998
+531337149802880
+534497179071266
+534497202404597
+536151846125543
+539202338625529
+539535995481369
+540909805209639
+542098461909501
+543489858050117
+546142594573391
+550321677908921
+554510224256519
+555663103621340
+557711840659568
+561811753424582
+564299112949854
+566588972673882
+566941266405942
+568569309012587
+573294188603067
+574812718826429
+575412521914816
+576733635030489
+581236024973816
+583738274723591
+586116560629678
+586219254475493
+586219324475486
+588066513736263
+590178346890166
+593742246748510
+598129152786446
+599405145992180
+601269042472457
+603204022777016
+606313838609950
+606864468579581
+607040475228647
+607391071860254
+607729725159722
+609492094983485
+613781531221208
+622685927425659
+628149359706047
+636690505689971
+637425515951700
+640073331925361
+641968165069211
+642582471660259
+643991048200256
+645196844839337
+646053977993963
+647523051486945
+648037814031084
+651054627586892
+658391076853247
+663814502977571
+665798229540716
+668891319136556
+671427795442393
+673222405079161
+679950927619020
+681825224567570
+682700380995989
+698750359771541
+701086549250366
+702402612284968
+702971785561384
+704736245459069
+705014511779328
+705277202071640
+7131706000266519
+7165280693564292
+7190744634362655
+725874429692838
+7345596948786210
+734655038815275
+736839411946296
+741047894858781
+762249942738576
+765726229035215
+7663580533734303
+769149495387577
+7695893010486267
+770538875248639
+775918658082020
+778419947839390
+778441464430358
+779136887767696
+780240724250432
+780265707581267
+7805951332816180
+7805979239480056
+780912840849887
+784047957203042
+786338633646915
+788193503455154
+788304103444094
+7910529535702194
+7936970543081371
+795399719407473
+799912998949871
+801239195487309
+8018196004907089
+8079952208749423
+812608327680338
+814945907474602
+8169032283174748
+8169032666508043
+8169033286507981
+8183070485086306
+821786520097738
+8254222877944336
+8254224167944207
+8254226601277297
+8254227064610584
+8254227481277209
+8254228727943751
+832819985659172
+8342982405735049
+8342982919068331
+8342983465734943
+8342986325734657
+839248821682955
+8417299298291112
+8423260264360353
+8423260364360343
+8423260471026999
+8423260984360281
+8423261367693576
+8423261864360193
+8423262297693483
+8423262651026781
+8423262867693426
+8423263071026739
+842585961349241
+843469504659522
+8441577582585051
+8441577865918356
+8441578099251666
+8441578375918305
+8441578795918263
+8441579115918231
+8447229712019838
+8447229908686485
+845956224239033
+846314377643066
+8483267455082148
+849016843948385
+849016850615051
+849016860615050
+857514979823259
+8605887182760264
+8633035533381549
+8656106281076494
+8656106297743159
+8656106311076491
+8656106324409823
+8656106327743156
+8656106334409822
+8678498502168585
+868344412031447
+868689315405572
+8689905537696568
+870596561847766
+870596595181096
+8710781085604071
+8713979175287184
+8713987008619734
+8714004665284635
+8723976247618023
+872919421649228
+873699121571258
+880023500815485
+880929810848189
+881071114167392
+8827444817373614
+8898455740198593
+893237922830775
+894406972713870
+896556485832252
+8986850741379297
+905096464978254
+906618411027298
+911534177202388
+915658610433745
+9228558657160746
+9242817725734839
+9249441495083348
+9263276013747951
+9270597589623519
+9276079529086211
+927735259377642
+929550015946888
+929550049280218
+9306252722722944
+9309106745799552
+935738958568460
+937086521764271
+9399798500036760
+9399798683370075
+9399799473369996
+944233154412186
+951994583518689
+958091509671526
+963264745820869
+965201702315331
+969062535009819
+971118465051413
+971542681645488
+972150294918188
+973534828115374
+976696924493567
+979191750889953
+979736260832874
+979736294166204
+980556843698170
+980556993698155
+982252860352678
+987623086695665
+991404759658029
+994899079342800
+994924925992008
+994924935992007
+994924942658673
+999438998855984
+`.trim().split('\n');
+
+    const htmlLines = ids.map(id =>
+      `<img alt='AI圖像生成(`+`https://php7tools.jplopsoft.idv.tw/p7t_cdn_imgs_using_ai_image_${id}.jpg`+`)本研究中所使用之示範圖片主要來自於Google、Facebook及其他公開授權的圖像庫，這些圖像皆依相關平台之使用條款與授權規範取得。本研究僅用於學術探討與技術展示，並非商業用途。對於圖片的版權及所有權，均屬原始授權方所有，本文作者不擁有該等圖像之任何權利。' title='AI圖像生成(`+`https://php7tools.jplopsoft.idv.tw/p7t_cdn_imgs_using_ai_image_${id}.jpg`+`)本研究中所使用之示範圖片主要來自於Google、Facebook及其他公開授權的圖像庫，這些圖像皆依相關平台之使用條款與授權規範取得。本研究僅用於學術探討與技術展示，並非商業用途。對於圖片的版權及所有權，均屬原始授權方所有，本文作者不擁有該等圖像之任何權利。' src="https://php7tools.jplopsoft.idv.tw/p7t_cdn_imgs_using_ai_image_${id}.jpg" loading="lazy" fetchpriority="low" onclick="showFullscreen(this.src)">`
+    );
+
+    document.write(htmlLines.join('\n'));
+  </script>
+</div>
+
+<!-- 全螢幕展示層 -->
+<div class="overlay" id="overlay" onclick="hideFullscreen()">
+  <img id="fullscreenImg" src="">
+</div>
+
+<script>
+  function showFullscreen(src) {
+    const overlay = document.getElementById("overlay");
+    const img = document.getElementById("fullscreenImg");
+    img.src = src;
+    overlay.style.display = "flex";
+  }
+
+  function hideFullscreen() {
+    const overlay = document.getElementById("overlay");
+    overlay.style.display = "none";
+  }
+
+  // 按 ESC 也可以關閉
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") hideFullscreen();
+  });
+</script></p>
+
+<!----------------------------------論文系統 --------------------------------->			
+
+
+
+
+
+                <p>&nbsp;</p>
+                <p>4.2 用戶體驗評估</p>
+                <p> 初步測試顯示，延遲載入顯著縮短頁面首次渲染時間，濾鏡模糊提升瀏覽趣味與焦點導引，全螢幕功能增強圖像展示效果。用戶反饋積極，認為該平台有助於素材收集與參考。</p>
+                <p>4.3 範例：</p>
+                <p>本研究中，針對AI生成圖片的展示功能，設計並實作了圖片縮圖與全螢幕預覽的網頁介面。主要特色包括使用 HTML5 的 loading=&quot;lazy&quot; 屬性達成圖片懶載入，搭配 CSS 濾鏡實現模糊預覽效果，並以 JavaScript 動態載入圖片與控制全螢幕展示。詳細程式碼與完整範例請參見附錄 A。</p>
+                <p><iframe width="560" height="315" src="https://www.youtube.com/embed/hJ7Rg1821Q0?si=aafJqfHu7nqD5DVm" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></p>
+                <p>&nbsp;</p>
+                <p>4.4 適用環境與技術相容性說明</p>
+                <p> 本研究所開發之數位圖庫平台，基於現代前端網頁技術，主要採用 HTML5、CSS3 及 JavaScript 實作。圖片懶載入功能透過 HTML5 的 loading=&quot;lazy&quot; 屬性實現，兼容主流現代瀏覽器，包括 Google Chrome、Mozilla Firefox、Microsoft Edge 及 Safari 等。CSS 濾鏡與過渡效果在各大瀏覽器上均獲得良好支持，能達成滑鼠懸停時清晰圖片顯示的視覺效果。</p>
+                <p>全螢幕預覽功能透過 JavaScript 事件監聽與動態 DOM 操作實現，適用於桌面與行動裝置瀏覽器，確保使用者能在多種裝置與解析度下獲得流暢體驗。圖片資源則透過標準 HTTP/HTTPS 協議提供，並採用現代瀏覽器支援的快取機制（如 Cache-Control）以提升載入效率。</p>
+                <p>本系統建議使用者搭配具備硬體加速與最新版本瀏覽器之設備，以充分發揮平台功能與效能。對於不支援 HTML5 懶載入或 CSS 濾鏡的瀏覽器，系統仍可正常顯示圖片，但可能失去部分優化視覺效果與載入效率。</p>
+                <p>4.5 免責聲明  </p>
+                <p><font color="#FF0000"><b>本研究中所使用之示範圖片主要來自於Google、Facebook及其他公開授權的圖像庫，這些圖像皆依相關平台之使用條款與授權規範取得。本研究僅用於學術探討與技術展示，並非商業用途。對於圖片的版權及所有權，均屬原始授權方所有，本文作者不擁有該等圖像之任何權利。</b></font></p>
+                <p><font color="#FF0000"><b>研究平台中所展示的AI生成圖像均為系統自動生成，並非任何真實個人之肖像。若有任何侵權疑慮，請權利人聯繫作者，本研究將立即採取必要措施以維護合法權益。</b></font></p>
+                <p><font color="#FF0000"><b>本研究所提出之技術方案及示範系統，旨在促進學術交流與技術發展，對於因使用本研究內容所可能產生之任何直接或間接損害，作者不負任何法律責任。</b></font></p>
+                <p>&nbsp;</p>
+              </blockquote>
+
+              <p><b>5. 應用前景與挑戰</b></p>
+              <blockquote>
+                <p> 5.1 應用前景</p>
+                <p> 隨著人工智慧技術的成熟，AI圖像生成工具如 DALL·E、Stable Diffusion、Midjourney 等不斷演進，結合網頁前端技術（HTML5、JavaScript、CSS3）建構主題性圖庫平台，不僅可大幅降低圖像素材建置成本，亦能快速依主題、情境生成內容，應用潛力極具前景：</p>
+                <p>5.1.1 數位藝術創作平台<br>
+                  AI圖像生成可協助數位藝術家產出草圖或靈感，主題性圖庫平台可作為創作共享與展示平台，吸引設計師、攝影師參與。</p>
+                <p>5.1.2 教育與訓練資源庫<br>
+                  針對特定主題（如歷史人物、地理風貌、角色設計等）建立圖像庫，有助於學習過程視覺化，提升學習效率與互動性。</p>
+                <p>5.1.3 社群與內容創作支援<br>
+                  內容創作者可從平台中取得一致風格的視覺素材，用於影片、部落格、社群貼文等，加速內容產製流程，並強化品牌風格。</p>
+                <p>5.1.4 文化保存與再現<br>
+                  藉由AI生成歷史場景或人物圖像，並以圖庫方式分類與展示，可成為數位文化保存與傳承的有效媒介。</p>
+                <p>5.1.4 電商與行銷應用<br>
+                  電商平台可依商品主題自動生成情境圖並建構形象展示區，有助提升視覺吸引力與購買轉換率。</p>
+                <p>&nbsp;</p>
+                <p>5.2 面臨的挑戰</p>
+                <p> 儘管應用潛力廣泛，但仍有數個關鍵挑戰需加以克服：</p>
+                <p>5.2.1 版權與倫理問題<br>
+                  AI圖像生成模型常以網路資料為訓練基礎，部分內容可能涉及著作權爭議。平台若未妥善標示圖片來源與權屬，可能引發法律風險。</p>
+                <p>5.2.2 生成圖像之真實性與偏差<br>
+                  部分AI圖片可能產生過度理想化或失真的畫面，甚至反映資料偏見（如性別刻板印象），若未妥善篩選與校正，恐造成誤導或倫理爭議。</p>
+                <p>5.2.3 使用者體驗與設備適應性<br>
+                  在網頁端展示大量圖片時，需處理好圖片壓縮、lazy loading、互動介面等技術細節，以確保跨裝置的操作順暢與瀏覽體驗。</p>
+                <p>5.2.4 資安與資料保存問題<br>
+                  若平台允許使用者上傳圖片，需評估資安風險，包括惡意圖片注入、非法內容分享、圖庫被盜用等問題，並建立安全的備份與管理機制。</p>
+                <p>5.2.5 技術與資源限制<br>
+                  雖前端可快速展示圖片，但若未有後端支援（如資料庫、雲端儲存），將限制平台擴展性與客製功能的實現。</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p><b>6. 結論</b></p>
+              <blockquote>
+                <p> 本文探討了以AI生成圖像與現代網頁技術建構主題性數位圖庫的可行性與實作細節，透過女性角色圖像為例，展示了動態生成、延遲載入、模糊預覽與全螢幕交互的實務應用。結果證明該方法具備良好效能與使用體驗，對數位媒體管理及展示具參考價值。</p>
+              <p>6.1 研究貢獻</p>
+              <p> 6.1.1 結合AI圖像生成與數位圖庫建構<br>
+                          本研究成功將先進的AI圖像生成技術（如DALL·E與Bing Image Creator）整合到主題性數位圖庫平台，實現了自動化且高效率的圖像內容生產，提升圖庫的多樣性與豐富度。<br>
+                          <br>6.1.2創新性的前端效能優化方案<br>
+                          透過網頁技術（如延遲載入lazy loading、模糊預覽至清晰切換及全螢幕顯示），提升使用者瀏覽大量圖像時的流暢體驗，降低伺服器負擔，優化前端性能。</p>
+              <p> 6.1.3打造互動性強的主題圖庫平台<br>
+                  設計並實作互動功能，包括滑鼠懸停清晰圖像顯示、點擊全螢幕瀏覽等，使使用者能更直觀、沉浸式地探索圖像內容，提升使用者黏著度。</p>
+              <p> 6.1.4提供可擴充的系統架構與設計範例<br>
+                  本平台架構設計具有模組化與擴展性，適合未來結合更多AI生成模型及多元主題的數位圖庫建置，具備廣泛應用潛力。</p>
+              <p>6.1.5實證AI生成圖像在數位資產管理的應用價值<br>
+                  通過實際案例展示，證明AI圖像生成技術可有效輔助數位資產的擴充與管理，為影像資料庫和文化保存提供新思路。</p>
+              <p>&nbsp;</p>
+              <p>6.2 研究發現</p>
+              <p> 本研究整合AI圖像生成與前端網頁技術，實作並部署一個主題性數位圖庫平台，經過多次測試與觀察，獲得以下幾點重要發現：</p>
+              <p>6.2.1 圖像資源可視化效率大幅提升<br>
+                透過懶加載（Lazy Loading）與動態DOM生成技術，成功減少初次頁面載入時間，使用者可快速預覽大量圖像資源而不會造成瀏覽器延遲或記憶體溢位的問題。</p>
+              <p>6.2.2 使用者互動體驗顯著優化<br>
+                加入圖片懸停模糊效果與點擊全螢幕功能，使使用者在探索圖像內容時，具有更多互動與沉浸式的體驗，有效提升平台的可用性與吸引力。</p>
+              <p>6.2.3 系統架構具備擴展彈性<br>
+                整體架構採用模組化設計，所有圖片由伺服器依檔名規則自動對應，無須資料庫支援即可建構動態圖庫，有利於未來快速部署不同主題的數位圖庫平台。</p>
+              <p>6.2.4 AI圖像生成具備高創作自由度<br>
+                使用者透過Bing Image Creator、ChatGPT等AI工具可自行指定風格、內容與構圖方向，生成的圖片品質穩定，滿足各類主題需求，尤其適合創作動漫風、插畫風的圖像集。</p>
+              <p>6.2.5 非工程背景者亦能參與建構流程<br>
+                藉由簡單的HTML模板與圖片ID清單轉網址的方式，即使無程式背景者也可協助圖庫更新與內容維護，展現此平台在開放性與社群參與上的潛力。</p>
+              <p>&nbsp;</p>
+              <p>6.3 未來研究方向 </p>
+              <p> 6.3.1 提升AI圖像生成技術的多樣性與真實感<br>
+                          持續追蹤與應用最新的AI生成模型，如更高解析度的DALL·E版本或其他GAN類技術，以提升圖像品質與風格多樣化，更貼近用戶需求。</p>
+              <p>6.3.2 結合語意搜尋與自動標註功能<br>
+                  研究如何整合自然語言處理（NLP）技術，讓使用者能透過關鍵字或描述，快速搜尋與定位主題圖像，並自動生成圖像標註與分類。</p>
+              <p>6.3.3 跨平台與多裝置最佳化展示<br>
+                  優化圖庫平台在不同設備（手機、平板、桌機）與瀏覽器的表現，提升使用者互動體驗，並考慮AR/VR等新興展示技術的應用。</p>
+              <p>6.3.4 強化圖像版權與使用安全管理<br>
+                  探討AI生成圖像的版權屬性與管理策略，發展合規且安全的數位資產管理機制，避免侵權問題並保護創作者權益。</p>
+              <p>6.3.5 整合社群互動與用戶貢獻機制<br>
+                  加入用戶標註、評價、收藏及分享功能，打造以社群為核心的圖像資源平台，促進知識共享與共同創作。</p>
+              <p>6.3.6 結合數據分析與行為追蹤提升推薦系統<br>
+                  利用使用者行為數據分析，發展個人化推薦系統，提高圖庫使用效率與用戶滿意度。</p>
+              <p>&nbsp;</p>
+                <p>6.4 研究限制</p>
+                <p> 本研究雖已初步完成「AI圖像生成與網頁技術結合之主題性數位圖庫平台」的建構與展示，但在實務應用與技術發展過程中，仍存在以下限制因素：</p>
+                <p>6.4.1 圖片來源合法性與版權議題<br>
+                  雖本研究主要使用AI生成圖片或取自Google、Facebook等平台之公開資源，但圖像權屬與授權方式多樣，未來若進行大規模應用仍需進一步釐清與取得合法授權。</p>
+                <p>6.4.2 缺乏完整的使用者行為數據<br>
+                  目前平台尚未導入進階的使用者行為追蹤或互動記錄分析工具，無法全面評估使用者瀏覽偏好、停留時間與互動深度，限制了後續UX優化的依據。</p>
+                <p>6.4.3 對裝置與網路環境之相依性<br>
+                  雖實作中已進行效能優化，但使用者裝置性能或網路速度仍可能影響圖片載入體驗，特別是在行動裝置與低頻寬環境下，可能會出現圖片載入不及或延遲問題。</p>
+                <p>6.4.4 圖片自動分類與標註機制尚未完善<br>
+                  目前圖片仍需依檔名或人工方式進行分類與管理，尚未導入AI自動標註、語意標籤與分類演算法，限制了平台的智慧化程度與擴展性。</p>
+                <p>6.4.5 限於靜態圖像應用場景<br>
+                  本研究聚焦於靜態圖片展示，尚未涵蓋動態生成影片、互動圖像等多媒體擴展應用，亦未與資料庫或後端API結合，無法支援更進階的搜尋與內容管理功能。</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p><b>7. 參考文獻</b></p>
+              <blockquote>
+                <p> Ramesh, A., Pavlov, M., Goh, G., Gray, S., Voss, C., Radford, A., Chen, M., &amp; Sutskever, I. (2021). Zero-shot text-to-image generation. arXiv preprint arXiv:2102.12092.</p>
+                <p>Karras, T., Laine, S., &amp; Aila, T. (2019). A style-based generator architecture for generative adversarial networks. Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 4401-4410.</p>
+                <p>Google Developers. (2023). Lazy loading images and video. Retrieved from https://web.dev/lazy-loading/</p>
+                <p>Microsoft. (2023). Bing Image Creator. Retrieved from https://www.bing.com/images/create/</p>
+                <p>OpenAI. (2024). DALL·E: Creating Images from Text. Retrieved from https://openai.com/dall-e</p>
+              <p>Mozilla Developer Network (MDN). (2024). HTML &lt;img&gt;: The Image Embed element. Retrieved from https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img</p>
+                <p>W3Schools. (2024). How To Create a Modal Image Gallery (Lightbox). Retrieved from https://www.w3schools.com/howto/howto_js_lightbox.asp</p>
+                <p>黃建銘（2022）。《AI圖像生成技術與應用實務》。臺北：碁峰資訊。</p>
+                <p>陳怡君（2023）。〈AI在創作領域之應用與版權挑戰〉。《數位文化研究》，第21期，頁45–60。</p>
+                <p>Lin, H. Y., &amp; Chang, C. J. (2023). The Impact of AI-generated Content on Visual Communication and UX Design. In 2023 Conference on Digital Creativity and Innovation. Taipei, Taiwan.</p>
+                <p>王世豪（2021）。〈網頁前端設計效能優化之研究—以圖片載入機制為例〉。《資訊科技與應用期刊》，第19卷第3期，頁88–97。</p>
+                <p>張耀文（2024）。《從HTML到互動圖庫：前端開發整合實戰》。高雄：旗標出版。</p>
+                <p>&nbsp;</p>
+                </blockquote>
+					<p>附錄 A：圖片縮圖與全螢幕預覽展示頁面（HTML + JavaScript 實作）</p>
+					<blockquote>
+					  <p>本附錄為一段展示 AI 生成圖片的簡易網頁原始碼，具備圖片懶載入、模糊預設效果及點擊進入全螢幕預覽的功能。</p>
+					  <p>A.1 HTML 結構與 CSS 樣式設定</p>
+					  <table border="0" cellpadding="10" cellspacing="0" bgcolor="#CCCCCC">
+                        <tr>
+                          <td><i>&lt;!DOCTYPE html&gt;<br>
+&lt;html lang=&quot;zh-TW&quot;&gt;<br>
+&lt;head&gt;<br>
+&lt;meta charset=&quot;UTF-8&quot;&gt;<br>
+&lt;title&gt;圖片縮圖 + 全螢幕預覽&lt;/title&gt;<br>
+&lt;style&gt;<br>
+body {<br>
+font-family: sans-serif;<br>
+background: #f5f5f5;<br>
+padding: 2rem;<br>
+}<br>
+.img-grid {<br>
+display: flex;<br>
+flex-wrap: wrap;<br>
+gap: 10px;<br>
+}<br>
+.img-grid img {<br>
+width: 150px;<br>
+height: auto;<br>
+border-radius: 8px;<br>
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);<br>
+filter: blur(5px) brightness(0.8);<br>
+transition: filter 0.3s ease;<br>
+cursor: pointer;<br>
+}<br>
+.img-grid img:hover {<br>
+filter: none;<br>
+}<br>
+.overlay {<br>
+display: none;<br>
+position: fixed;<br>
+top: 0; left: 0; width: 100%; height: 100%;<br>
+background: rgba(0,0,0,0.9);<br>
+justify-content: center;<br>
+align-items: center;<br>
+z-index: 9999;<br>
+}<br>
+.overlay img {<br>
+max-width: 90%;<br>
+max-height: 90%;<br>
+box-shadow: 0 0 30px rgba(255,255,255,0.3);<br>
+border-radius: 10px;<br>
+}<br>
+&lt;/style&gt;<br>
+&lt;/head&gt;</i><br></td>
+                        </tr>
+                      </table>
+					  <p>&nbsp;</p>
+					  <p>A.2 圖片載入與點擊邏輯（JavaScript）</p>
+					  <table border="0" cellpadding="10" cellspacing="0" bgcolor="#CCCCCC">
+                        <tr>
+                          <td><i>&lt;body&gt;<br>
+&lt;h2&gt;AI 產生女生照片範例：&lt;/h2&gt;<br>
+&lt;div class=&quot;img-grid&quot; id=&quot;imgGrid&quot;&gt;<br>
+&lt;script&gt;<br>
+const ids = `<br>
+1000055181488140<br>
+1000104585483667<br>
+1000148472118242<br>
+1000193418849846<br>
+1000266552106434<br>
+1000277922105297<br>
+1000299275471660<br>
+1000348068124765<br>
+1000376378762118<br>
+`.trim().split('\n');
+                          </i>
+                            <p><i> const htmlLines = ids.map(id =&gt;<br>
+  `&lt;img src=&quot;https://php7tools.jplopsoft.idv.tw/p7t_cdn_imgs_head_print_scan_${id}.jpg&quot; loading=&quot;lazy&quot; onclick=&quot;showFullscreen(this.src)&quot;&gt;`<br>
+  );</i></p>
+<p><i> document.write(htmlLines.join('\n'));<br>
+&lt;/script&gt;<br>
+&lt;/div&gt;</i></p></td>
+                        </tr>
+                      </table>
+					  <p>&nbsp;</p>
+					  <p>A.3 全螢幕圖片展示邏輯</p>
+					  <table border="0" cellpadding="10" cellspacing="0" bgcolor="#CCCCCC">
+                        <tr>
+                          <td><i>&lt;div class=&quot;overlay&quot; id=&quot;overlay&quot; onclick=&quot;hideFullscreen()&quot;&gt;<br>
+&lt;img id=&quot;fullscreenImg&quot; src=&quot;&quot;&gt;<br>
+&lt;/div&gt;
+                          </i>
+                            <p><i>&lt;script&gt;<br>
+  function showFullscreen(src) {<br>
+  const overlay = document.getElementById(&quot;overlay&quot;);<br>
+  const img = document.getElementById(&quot;fullscreenImg&quot;);<br>
+  img.src = src;<br>
+  overlay.style.display = &quot;flex&quot;;<br>
+  }</i></p>
+<p><i> function hideFullscreen() {<br>
+  const overlay = document.getElementById(&quot;overlay&quot;);<br>
+  overlay.style.display = &quot;none&quot;;<br>
+  }</i></p>
+<p><i> document.addEventListener(&quot;keydown&quot;, function (e) {<br>
+  if (e.key === &quot;Escape&quot;) hideFullscreen();<br>
+  });<br>
+&lt;/script&gt;<br>
+&lt;/body&gt;<br>
+&lt;/html&gt;</i></p></td>
+                        </tr>
+                      </table>
+					  <p>&nbsp;</p>
+					  </blockquote>
+					<p>&nbsp;</p>
+					<!-- InstanceEndEditable --></td>
+				  </tr>
+				</table>
+			
+			
+			</td>
+          </tr>
+        </table></td>
+      </tr>
+     
+      <tr>
+        <td align="left" valign="top" style="display:none" id="mmenu_down">
+		
+			<table width="100%" border="0" cellpadding="10" cellspacing="0">
+			  <tr>
+				<td align="left" valign="top" bgcolor="#DEECF1"><b>其他資料</b><a name="d_menu_a" id="d_menu_a"></a></td>
+			  </tr>
+			  <tr>
+				<td align="left" valign="top" id="mmenu_down_data"></td>
+			  </tr>
+			</table>
+
+		</td>
+      </tr>
+      <tr>
+       <td height="80" valign="middle" bgcolor="#DEECF1" id="m_files" style="padding:20px;"></td>
+		
+		<script>
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/files.htm"; 
+			ajax_load_files.method  = 'GET'; 
+			ajax_load_files.element = 'm_files'; 
+			function start_ajax_load_files(){
+				ajax_load_files.runAJAX('');
+			}
+			setTimeout("start_ajax_load_files();",1000);
+	   </script>
+		
+      </tr>
+      <tr>
+        <td height="60" align="center" valign="middle">
+		
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="https://www.jplopsoft.idv.tw/">Jplopsoft</a> | 
+				<a href="https://twhkinc.jplopsoft.idv.tw/">THI</a> | 
+				<a href="https://app.netlify.com/sites/jplop/deploys">Netlify</a> | 
+				<a href="https://neocities.org/dashboard">NeoCities</a> | 
+				<a href="https://lionfree.net/">LionFree</a>
+			</font></p>
+			
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="util_aes_utility.html">加密工具</a> | 
+				<a href="teac_post_about.html">提交歸檔</a> | 
+				<a href="util_qrcode_online_gen_tool.html">QRCODE產生器</a> | 
+				<a href="util_gen_pass.html">密碼產生器</a>
+			</font></p>
+			
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+			
+		</td>
+      </tr>
+    </table>
+	</td>
+  </tr>
+</table>
+</BODY>
+<script>
+	
+</script>
+<!-- InstanceEnd --></HTML>

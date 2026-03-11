@@ -1,0 +1,937 @@
+<HTML><!-- InstanceBegin template="/Templates/default.dwt" codeOutsideHTMLIsLocked="false" -->
+<HEAD>
+<!-- InstanceBeginEditable name="doctitle" -->
+<TITLE>歸檔星球 Archive Star - DOS指令集介紹</TITLE>
+<!-- InstanceEndEditable -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+<!-- InstanceBeginEditable name="head" -->
+
+	<meta name="keywords" content="DOS指令集介紹">
+	<meta name="pagetype" content="分享">
+	<meta name="description" content="DOS指令集介紹">
+	
+	<script type="application/ld+json">
+		{
+		  "@context": "https://schema.org",
+		  "@type": "WebPage",
+		  "url": "https://jplop.netlify.app/teac_post_about.html",
+		  "name": "DOS",
+		  "description": "DOS指令集介紹、相關說明、相關技術文獻。"
+		}
+	</script>
+<!-- InstanceEndEditable -->
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="mm_menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/message.js"></script>		
+		<style>
+			a:link {color: #0000FF;text-decoration: none;} 
+			a:visited {color: #3366FF;text-decoration: none;}
+			a:hover {}
+			a:active {color: #FF0000;text-decoration: none;}
+			font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;}
+			input ,button , select{font-size:12px;}
+			.spoiler, .spoiler2{color: black; background-color:black;}
+			.spoiler:hover{color: white;}
+			.spoiler2:hover { background-color:white; }
+		</style>
+		
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVGMPW8LR4"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		
+		  gtag('config', 'G-SVGMPW8LR4');
+		</script>
+		
+</HEAD>
+
+<BODY leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table width="100%" height="100%" border="0" style="padding:20px;" cellspacing="0" background="images/archive_star_ban_bg_1997.jpg" id="table_top1">
+  <tr>
+    <td height="715" valign="top"><table width="100%" height="100%" border="0" cellspacing="0" bgcolor="#FFFFFF" style="padding:20px;border:1px #ccc solid;border-radius:10px;box-shadow:1px 1px 20px #ffffff;margin-right:8px;" id="table_top2">
+      <tr>
+        <td valign="top">
+		
+		<span id="j_space_top_data"></span>
+		<script>
+			var ajax_load_top = new sack();
+			ajax_load_top.requestFile = "init/top.html";
+			ajax_load_top.method  = 'GET'; 
+			ajax_load_top.element = 'j_space_top_data'; 
+	   </script>
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+
+            <td width="200" valign="top" id="mmenu"></td>
+			  <!-- InstanceBeginEditable name="EditRegion4" --> <!-- InstanceEndEditable -->
+            <td valign="top">
+			
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				  <tr>
+				    <td id="top_left_menu_td_m" align="center" bgcolor="#40588C" width="40" onClick="window.location='#d_menu_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">M</font></td>
+					<td id="top_left_menu_td_f" align="center" bgcolor="#336600" width="40" onClick="window.location='#d_file_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">F</font></td>
+					<td id="top_left_menu_td" style="text-align:right;background-color:#FFFFFF">
+							<span id="LoginBox_PC">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">About</a> | 
+								<a href="https://jplop.netlify.app/">NetLify</a> | 
+								<a href="https://jplop.neocities.org/">NeoCities</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">Project</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_M" style="display:none">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">AB</a> | 
+								<a href="https://jplop.netlify.app/">NL</a> | 
+								<a href="https://jplop.neocities.org/">NC</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">PJ</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_status"> | 
+								<a href="javascript:main_login_in_start();void(0);">管理</a> 
+							</span>
+					  </td>
+				  </tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="10" cellspacing="0">
+				  <tr>
+					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
+              <h2><img id="one_page_number_1" src="images/archive_star_ban_2014.jpg" alt="DOS指令集介紹"  style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
+              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;DOS指令集介紹&gt;&gt;</font></h2>
+              <p><a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]指令集說明[<a href="https://birdfly.666forum.com/t77-topic">1</a>]：</p>
+              <blockquote>
+                <p><b>&lt;&lt;內建命令&gt;&gt;</b></p>
+                <p> 內建命令即是<a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]開機後就能使用的DOS指令，例如： copy, del, md, cd, ren, dir, echo, type, cls, path ... 等命令，
+                    這些是本身就內建在開機程式 ( command.com ) 內。</p>
+                <p>使用者能用外在命令(doskey) 來終止這些指令，
+                          這樣使用者將無法用 del, copy, cd, dir ... 等指令</p>
+                <p>&nbsp;</p>
+                <p><b>&lt;&lt;外在命令&gt;&gt;</b></p>
+                <p> 
+                    <a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]在開機後本身並不存在的命令，這些指令是由一個一個的可執行檔所組成的：
+                      format, deltree, diskcopy, smartdrv, debug, diskcomp, scandisk, fdisk ... 等指令，這些指令只要把他的檔名刪掉(del)
+                        或改名(ren)，
+                        那您的電腦將無法用 format deltree ... 等外在命令。</p>
+                <p> Windwos 的外在命令執行檔是放在 system32 中。</p>
+                <p>&nbsp;</p>
+                </blockquote>
+              <p><font face="Arial, Helvetica, sans-serif"><a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]指令集[<a href="https://birdfly.666forum.com/t77-topic">1</a>]：</font></p>
+              <blockquote>
+                <p><b>help</b></p>
+                <p>若需某特定指定的資訊，請鍵入 HELP 指令名稱。</p>
+                <p> ASSOC 顯示或修改關聯的副檔名。<br>
+                    AT 將命令或程式的執行加以排程。<br>
+                    ATTRIB 顯示或變更檔案屬性。<br>
+                    BREAK 設定或清除延伸的 CTRL+C 檢查。<br>
+                    CALL 呼叫其他的批次程式。<br>
+                    CACLS 顯示或修改檔案的存取控制清單 (ACL)。<br>
+                    CD 顯示目前的目錄名稱或目錄變更。<br>
+                    CHCP 顯示或設定字碼頁號碼。<br>
+                    CHDIR 顯示目前的目錄名稱或目錄變更。<br>
+                    CHKDSK 檢查磁碟並顯示磁碟狀態。<br>
+                    CLS 清除螢幕。<br>
+                    CMD 啟動新的 Windows 2000 指令直譯器例項。<br>
+                    COLOR 設定預設主控台背景及前景顏色。<br>
+                    COMP 比較兩個或兩組檔案的差異。<br>
+                    COMPACT 顯示或變更在 NTFS 磁碟分割上的檔案壓縮。<br>
+                    CONVERT 將 FAT 磁區轉換為 NTFS。您不能轉換使用中的磁區。<br>
+                    COPY 將檔案複製到其它位置。<br>
+                    DATE 顯示或設定日期。<br>
+                    DEL 刪除檔案。<br>
+                    DIR 顯示檔案清單或子目錄清單。<br>
+                    DISKCOMP 比較兩個磁片的差異<br>
+                    DISKCOPY 將磁片內容全部複製到另一張磁片。<br>
+                    DOSKEY 編輯命令列，重新呼叫 Windows 2000 命令，建立巨集。<br>
+                    ECHO 顯示訊息，啟動或關閉 echo 功能。<br>
+                    ENDLOCAL 中止在批次檔案中的地區設定變更。<br>
+                    ERASE 刪除檔案。<br>
+                    EXIT 結束 CMD.EXE 程式 (指令直譯器)。<br>
+                    FC 比較兩個或兩組檔案的差異，並顯示結果。<br>
+                    FIND 搜尋檔案中的文字或字串。<br>
+                    FINDSTR 搜尋檔案中的字串。<br>
+                    FOR 為一組檔案指定個別檔案的執行命令。<br>
+                    formAT 格式化磁片以供 Windows 2000 使用。<br>
+                    FTYPE 顯示或修改副檔名關聯的檔案類型。<br>
+                    GOTO 指示 Windows 2000 指令直譯器，跳到有標示的指令行執行。<br>
+                    GRAFTABL 讓 Windows 2000 在圖形介面能夠顯示擴充字元集。<br>
+                    HELP 提供 Windows 2000 指令的說明資訊。<br>
+                    IF 執行邏輯判斷式。<br>
+                    LABEL 建立，變更，或刪除磁碟標籤。<br>
+                    MD 建立目錄。<br>
+                    MKDIR 建立目錄。<br>
+                    MODE 設定系統裝置。<br>
+                    MORE 設定螢幕顯示一頁後暫停。<br>
+                    MOVE 將檔案從目前的位置移動到同一磁碟中的其他目錄。<br>
+                    PATH 顯示或設定執行檔的搜尋目錄。<br>
+                    PAUSE 暫停批次檔案處理並顯示訊息。<br>
+                    POPD 還原先前經由 PUSHD 儲存的的現用目錄設定值。<br>
+                    PRINT 列印文字檔案。<br>
+                    PROMPT 變更 Windows 2000 命令提示字元。<br>
+                    PUSHD 儲存現用目錄，然後修改它。<br>
+                    RD 移除目錄。<br>
+                    RECOVER 恢復損壞磁碟的唯讀資訊。<br>
+                    REM 批次檔或 CONFIG.SYS 中的備註標記。<br>
+                    REN 重新命名檔案。<br>
+                    RENAME 重新命名檔案。<br>
+                    REPLACE 取代檔案。<br>
+                    RMDIR 移除目錄。<br>
+                    SET 顯示，設定，或移除 Windows 2000 環境變數。<br>
+                    SETLOCAL 啟始批次檔中地區設定的變更。<br>
+                    SHIFT 移動批次檔中可取代參數的位置。<br>
+                    SORT 排序輸入項目。<br>
+                    START 啟動一個獨立的視窗以執行指定程式或命令。<br>
+                    SUBST 將路徑對應到磁碟代號。<br>
+                    TIME 顯示或設定系統時間。<br>
+                    TITLE 設定 CMD.EXE 工作階段的視窗標題。<br>
+                    TREE 以圖形顯示磁碟目錄結構。<br>
+                    TYPE 顯示文字檔的內容。<br>
+                    VER 顯示 Windows 2000 版本編號。<br>
+                    VERIFY 告訴 Windows 2000 是否要檢查檔案寫入磁碟的正確性。<br>
+                    VOL 顯示磁碟標籤及序號。<br>
+                    XCOPY 複製檔案及目錄結構。<br>
+                  </p>
+                <hr noshade style="border-style:groove">
+                  <p><b>attrib</b></p>
+                  <p>                      顯示或變更檔案屬性。</p>
+                  <p><i>ATTRIB [+R | -R] [+A | -A ] [+S | -S] [+H | -H] [drive:] [path] filename]<br>
+                    [/S [/D]</i></p>
+                  <p>+ 設定屬性。<br>
+                    - 清除屬性。<br>
+                    R 唯讀檔案屬性。<br>
+                    A 保存檔案屬性。<br>
+                    S 系統檔案屬性。<br>
+                    H 隱藏檔案屬性。<br>
+                    /S 處理目前的資料夾及所有子資料夾中相符的檔案。<br>
+                    /D 一併處理資料夾。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                      <b>cd</b></p>
+                  <p>                      顯示目前工作目錄的名稱或是變更目錄。</p>
+                  <p><i>CHDIR [/D] [drive:][path]<br>
+                    CHDIR [..]<br>
+                    CD [/D] [drive:][path]<br>
+                    CD [..]</i></p>
+                  <p>.. 指定變更到父系目錄。</p>
+                  <p>鍵入 CD drive: 即可顯示指定磁碟機的目前工作目錄。<br>
+                    僅鍵入 CD 而不加參數，即可顯示目前的磁碟機和目錄。</p>
+                  <p>使用 /D 指令參數可以同時變更工作磁碟機及其工作目錄。<br>
+                  </p>
+                  <p>如果您啟用擴充指令，CHDIR 的變更如下:</p>
+                  <p>目前的目錄字串會被轉換成與磁碟上名稱相同大小寫的字串。所以如果磁碟<br>
+                    上的目錄是 C:Temp 的話，CD C:TEMP 命令實際上會轉換為 CD C:Temp。</p>
+                  <p>CHDIR 命令不會將空格當成分隔字元，所以如果您要切換到含有空格字元<br>
+                    的目錄時，就算您不使用引號來括住目錄名稱，也一樣可以用 CD 指令切<br>
+                    換到該目錄。例如:</p>
+                  <p>cd winntprofilesusernameprogramsstart menu</p>
+                  <p>就相等於:</p>
+                  <p>cd &quot;winntprofilesusernameprogramsstart menu&quot;</p>
+                  <p><font color="#FF0000">如果您停用擴充指令，就必須輸入前一種指令。</font><br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>chkdsk </b></p>
+                  <p>                    檢查磁碟並顯示狀態報告。<br>
+                  </p>
+                  <p><i>CHKDSK [磁碟機[路徑]檔名] [/F] [/V] [/R] [/X] [/C] [/L[:大小]</i><br>
+                  </p>
+                  <p>volume 指定磁碟機代號 (後接冒號)，連接點或磁碟區名稱。<br>
+                    filename 只能用在 FAT: 指定要進行分散程度檢查的檔案。<br>
+                    /F 修復磁片上的錯誤。<br>
+                    /V FAT/FAT32 模式: 顯示磁碟上每個檔案的完整路徑及名稱。<br>
+                    NTFS 模式: 如果有清除的訊息，也一併顯示。<br>
+                    /R 找出損壞的磁扇區並復原可讀取的資訊。(包含 /F)。<br>
+                    /L:size 只適用於 NTFS 模式: 將記錄檔大小變更為指定的 KB<br>
+                    數值。如果沒有指定記錄檔大小，就顯示目前的大小。<br>
+                    /X 如果必須的話，強制先解下磁碟區。所有在<br>
+                    磁碟區上開啟的控制代碼都會失效 (包含 /F)。<br>
+                    /I 只適用於 NTFS 模式: 不檢查索引項目。<br>
+                    /C 只適用於 NTFS 模式: 跳過資料夾結構的循環檢查。<br>
+                  </p>
+                  <p><font color="#FF0000">使用 /I 或 /C 參數跳過某些磁碟區檢查，可以在執行Chkdsk 時減少檢查時間。</font><br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                      <b>cls</b></p>
+                  <p>                      清除螢幕。</p>
+                  <p>CLS<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p>&nbsp;                    </p>
+                  <p><b>cmd </b></p>
+                  <p>                      啟動 Windows 2000 指令直譯器新例項</p>
+                  <p><i>CMD [/A | /U] [/Q] [/D] [/E:ON | /E:OFF] [/F:ON | /F:OFF] [/V:ON | /V:OFF]<br>
+                    [/S] [/C | /K] string]</i></p>
+                  <p>/C 執行字串中所描述的指令然後結束指令視窗<br>
+                    /K 執行 字串中所描述的指令然後保留指令視窗<br>
+                    /S 修改字串在 /C 或 /K (參看下方)<br>
+                    /Q 關閉 echo<br>
+                    /D 從登錄中停用 AutoRun 指令(參看下方)<br>
+                    /A 將內部指令輸出結果以 ANSI 格式導向 pipe 或檔案<br>
+                    /U 將內部指令輸出結果以 Unicode 格式導向 pipe或檔案<br>
+                    /T:fg 設定幕前/幕後色彩 (參看 COLOR /?)<br>
+                    /E:ON 啟用指令延伸 (參看下方)<br>
+                    /E:OFF 停用指令延伸 (參看下方)<br>
+                    /F:ON 啟用檔案及目錄名稱完整字元(參看下方)<br>
+                    /F:OFF 停用檔案及目錄名稱完整字元(參看下方)<br>
+                    /V:ON 啟用延遲環境變數延伸，用 c 作為分隔字元。例如, /V:ON<br>
+                    可以讓 !var! 在執行時展開變數 var。文法 var 則會在輸入時<br>
+                    展開變數，這在 FOR 迴圈之中是完全不同的事。<br>
+                    /V:OFF 停用延遲環境變數展開</p>
+                  <p>請注意用命令分隔字元 '&amp;&amp;&amp;&amp;' 隔開的多個命令<br>
+                    如果被引號包含時則會被當成字串來接受。此外，為了相容性的原因，/X<br>
+                    的作用與 /E:ON 相同; /Y 與 /E:OFF 相同且 /R 與/C 相同。其餘的參數<br>
+                    則會被忽略。</p>
+                  <p>如果指定了/C 或 /K，則在參數後的其餘命令列會被當成命令列來處理，其<br>
+                    中使用下面的邏輯來處理引號字元 (&quot;) :</p>
+                  <p>1. 如果所有下列條件都符合，那麼指令列上的引號會被保留:</p>
+                  <p>- 沒有 /S 參數<br>
+                    - 正好有兩個引號<br>
+                    - 在兩個引號之間沒有下列<br>
+                    特殊字元: &lt;&gt;()@^|<br>
+                    - 兩個引號之間有一些空格<br>
+                    - 在兩個引號之間的字串是執行檔的檔案名稱。</p>
+                  <p>2. 否則，如果第一個字元是引號，舊的指令行為會把前置字元去掉，並<br>
+                    將指令列中第一個引號及最後一個引號之間的所有文字便成保留文字。</p>
+                  <p>(&amp;&lt;如果您在指令行中未指定 /D，當 CMD.EXE 起動後，它會尋找下列 REG_SZ/REG_EXPAND_SZ的 登錄變數。如果有一個存在或兩個都存在，<br>
+                    指令會執行第一個變數。</p>
+                  <p>HKEY_LOCAL_MACHINESoftwareMicrosoftCommandProcessorAutoRun</p>
+                  <p>及/或</p>
+                  <p>HKEY_CURRENT_USERSoftwareMicrosoftCommandProcessorAutoRun</p>
+                  <p>將指令擴充功能預設成啟用狀態。您可以在特定的<br>
+                    呼叫中，用 /E:OFF 參數來停用擴充功能。<br>
+                    您可以啟用或停用一台電腦上或使用者登入工作階段中所有<br>
+                    CMD.EXE 呼叫的擴充功能，如果您要這樣作，<br>
+                    請使用 REGEDT32.EXE 來設定以下的 REG_DWORD 值:</p>
+                  <p>HKEY_LOCAL_MACHINESoftwareMicrosoftCommand ProcessorEnableExtensions</p>
+                  <p>及/或</p>
+                  <p>HKEY_CURRENT_USERSoftwareMicrosoftCommand ProcessorEnableExtensions</p>
+                  <p>到 0x1 或 0x0。 使用者指定設定的執行優先權高於電腦上的設定。指令行<br>
+                    參數的執行優先權高於登錄中的設定值。<br>
+                  </p>
+                  <p>擴充指令包括下列指令的變更及(或)新增:</p>
+                  <p>DEL or ERASE<br>
+                    COLOR<br>
+                    CD or CHDIR<br>
+                    MD or MKDIR<br>
+                    PROMPT<br>
+                    PUSHD<br>
+                    POPD<br>
+                    SET<br>
+                    SETLOCAL<br>
+                    ENDLOCAL<br>
+                    IF<br>
+                    FOR<br>
+                    CALL<br>
+                    SHIFT<br>
+                    GOTO<br>
+                    START (也包括援用外部指令之變更)<br>
+                    ASSOC<br>
+                    FTYPE</p>
+                  <p>請鍵入 HELP 指令名稱，以查閱說明。</p>
+                  <p>預設狀態下，不會啟用延遲環境變數擴充。您可以使用 /V:ON 或 /V:OFF<br>
+                    參數在執行 CMD.EXE 時啟用或停用完整檔案名稱。您也可以用<br>
+                    REGEDT32.EXE 來修改以下 REG_DWORD 值，來啟用或停用整個電腦上<br>
+                    或使用者登入工作階段中所有 CMD.EXE 的檔案名稱完整功能:</p>
+                  <p>HKEY_LOCAL_MACHINESoftwareMicrosoftCommand ProcessorDelayedExpansion</p>
+                  <p>及/或</p>
+                  <p>HKEY_CURRENT_USERSoftwareMicrosoftCommand ProcessorDelayedExpansion</p>
+                  <p>其值可為 0x1 或 0x0。使用者登錄指定會比電腦設定<br>
+                    優先使用。而指令行參數又會比登錄設定值更優先使用。</p>
+                  <p>如果已啟用延遲環境變數擴充，驚嘆號字元會在執行時<br>
+                    被用來取代環境變數值。</p>
+                  <p>預設無法啟用檔案和目錄名稱完成。 您可以為特定的 CMD.EXE 呼叫，以<br>
+                    /F:ON 或 /F:OFF 開關啟用或停用檔案名稱完成。 您可以啟用或停用在同<br>
+                    一部電腦上所有 CMD.EXE 的呼叫完成及/或使用者登入工作階段。方法是使<br>
+                    用 REGEDT32.EXE 設定其一或兩者登錄中的 REG_DWORD 值:</p>
+                  <p>HKEY_LOCAL_MACHINESoftwareMicrosoftCommand ProcessorCompletionChar<br>
+                    HKEY_LOCAL_MACHINESoftwareMicrosoftCommand ProcessorPathCompletionChar</p>
+                  <p>及/或</p>
+                  <p>HKEY_CURRENT_USERSoftwareMicrosoftCommand ProcessorCompletionChar<br>
+                    HKEY_CURRENT_USERSoftwareMicrosoftCommand ProcessorPathCompletionChar</p>
+                  <p>用於特定功能的控制字元十六進位值 (例如 0x4 是 Ctrl-D ; 0x6 是<br>
+                    Ctrl-F)。使用者特定設定優先於電腦設定，指令行開關也優先於登錄設定。</p>
+                  <p>如果以 /F:ON 開關啟用完成，則用於目錄名稱完成的控制字元是 Ctrl-D<br>
+                    而用於檔案名稱完成的控制字元是 Ctrl-F。如果您要停用在登錄中的特定<br>
+                    完成字元，請使用空間值 (0x20)，因為它不是正確的控制字元。</p>
+                  <p>當您鍵入其中一個控制字元後，完成功能會被啟動。如果路徑字串已存在，<br>
+                    而且所建立的路徑清單也符合的話，完成函數會讀取到指標所在左方為止<br>
+                    的路徑字串。然後它會顯示第一個符合的路徑。如果找不到符合的路徑，<br>
+                    它會發出嗶聲並保留顯示。如果您重覆按相同的控制字元，它將在符合的路<br>
+                    徑清單中循環執行。如果您同時按下 Shift 鍵與控制字元，可在清單中反<br>
+                    向移動。如果您進行編輯後再按控制字元的話，已儲存的符合路徑清單會被<br>
+                    丟棄，並建立新的清單。如果您在檔案及目錄完成功能之間切換，會有同樣<br>
+                    的情況發生。這兩個控制字元不同之處是:檔案完成字元可同時對應檔案及<br>
+                    目錄名稱，而目錄完成字元只能對應目錄名稱。如果您將檔案完成功能用在<br>
+                    內建目錄命令上 (CD，MD 或 RD) 也等於使用了目錄完成功能。</p>
+                  <p>如果您在路徑字串兩端加上引號，完成功能鍵就可正確處理包含空格或其他<br>
+                    特殊字元的檔案名稱。還有，如果您備份後，又在指令行中呼叫完成功能的<br>
+                    話，已呼叫過完成功能的指標右方的文字會被丟棄。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>comp</b></p>
+                  <p>                    比較兩個檔案或兩組檔案的內容。</p>
+                  <p><i>COMP [data1] [data2] [/D] [/A] [/L] [/N=number] [/C]</i></p>
+                  <p>data1 指定第一個或第一組要比較的檔案的位置與檔名。<br>
+                    data2 指定第二個或第二組要比較的檔案的位置與檔名。<br>
+                    /D 以十進位格式來顯示不同之處。<br>
+                    /A 以 ASCII 字元來顯示不同之處。<br>
+                    /L 顯示不同之處的行號。<br>
+                    /N=number 只比較每個檔案中第一個指定的行號。<br>
+                    /C 比較檔案時忽略 ASCII 字母的大小寫。</p>
+                  <p>要比較一組檔案，請在 data1 和 data2 參數中使用萬用字元。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>copy</b></p>
+                  <p>                      將一些檔案複製到另一個位置。</p>
+                  <p><i>COPY [/V] [/N] [/Y | /-Y] [/Z] [/A | /B ] source [/A | /B]<br>
+                    [+ source [/A | /B] [+ ...] [destination [/A | /B]</i></p>
+                  <p>source 指定要複製的檔案。<br>
+                    /A 指定一個 ASCII 文字檔案。<br>
+                    /B 指定一個二位元檔案。<br>
+                    destination 為新檔案指定目錄及(或) 檔案名稱。<br>
+                    /V 確認新檔案是否正確寫入。<br>
+                    /N 使用短檔名來複製非 8.3 名稱的檔案(如果可用的話)。<br>
+                    /Y 不顯示覆寫現存目的檔案的確認提示。<br>
+                    /-Y 顯示覆寫現存目的檔案的確認提示。<br>
+                    /Z 在可重新啟動模式中複製網路檔案。</p>
+                  <p>參數 /Y 可以預先設定在 COPYCMD 環境變數中。<br>
+                    這可能會覆寫指令行中的 /-Y。 預設值是顯示覆寫確認提示，除非<br>
+                    COPY指令是從批次檔中執行。</p>
+                  <p>如果要附加檔案，指定一個目的檔案，及數個<br>
+                    來源檔案 (使用萬用字元或 file1+file2+file3 格式)。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                        <b>date</b></p>
+                  <p>                        顯示或設定日期。</p>
+                  <p><i>DATE [/T | date]</i></p>
+                  <p>只鍵入 DATE 而不加上參數，可以顯示目前設定的日期，並且提示您輸入新<br>
+                    的日期。按 ENTER 鍵即可保持原來日期。</p>
+                  <p>如果您啟用擴充指令，DATE 指令會支援 /T 參數，這個參數<br>
+                    會讓指令只輸出目前的日期，而不提示您輸入新日期。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>del</b></p>
+                  <p>                      刪除一個或更多檔案。</p>
+                  <p><i>DEL [/P] [/F] [/S] [/Q] [/A[:]attributes] names<br>
+                    ERASE [/P] [/F] [/S] [/Q] [/A[:]attributes] names</i></p>
+                  <p>names 指定一個或更多檔案或目錄清單。可以使用萬用字元<br>
+                    來刪除多個檔案。 如果指定目錄，這個目錄內的所有<br>
+                    檔案將被刪除。</p>
+                  <p>/P 刪除每個檔案前，先提示確認。<br>
+                    /F 強制刪除唯讀檔案。<br>
+                    /S 由所有子目錄刪除指定的檔案。<br>
+                    /Q 安靜模式，不要問是否確定刪除全域萬用字元<br>
+                    /A 根據屬性選取要刪除的檔案<br>
+                    attributes R 唯讀檔案 S 系統檔案<br>
+                    H 隱藏檔案 A 準備保存的檔案<br>
+                    - 首碼表示不是</p>
+                  <p>如果您啟用擴充指令，DEL 和 ERASE 指令的變更如下:</p>
+                  <p>/S 參數的顯示方式完全相反，它只會顯示已刪除的檔案，不會顯示它找不<br>
+                    到的檔案。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>dir</b></p>
+                  <p>                      顯示檔案清單以列出目錄中的檔案及子目錄。</p>
+                  <p><i>DIR [drive:][path][filename] [/A[:]attributes] [/C] [/D] [/L] [/N]<br>
+                    [/O[:]sortorder] [/P] [/Q] [/S] [/T[:]timefield] [/W] [/X] [/4]</i></p>
+                  <p>[drive:][path][filename]<br>
+                    指定要顯示的磁碟機、目錄或檔案。</p>
+                  <p>/A 依照指定的檔案屬性來顯示檔案。<br>
+                    attributes D 目錄 R 唯讀檔<br>
+                    H 隱藏檔 A 保存檔<br>
+                    S 系統檔案 - 無意義<br>
+                    /B 使用單純格式 (沒有標頭資訊或摘要)。<br>
+                    /C 顯示檔案大小千位數分隔符號。這是預設值。<br>
+                    使用 /-C 來停用分隔符號的顯示。<br>
+                    /D 與寬的列表格式相同，但是依照欄來排序。<br>
+                    /L 使用小寫顯示。<br>
+                    /N 使用新的長列表格式，檔名會顯示在最右方。<br>
+                    /O 依照指定的排序順序來列出檔案。<br>
+                    sortorder N 依名稱 (英文字母) S 依大小 (最小的在前)<br>
+                    E 依副檔名 (英文字母) D 依照日期與時間 (日期較早的<br>
+                    在前)<br>
+                    G 先列出子目錄 - 表示相反的順序<br>
+                    /P 當資料填滿整個螢幕時暫停顯示。<br>
+                    /Q 顯示檔案擁有人。<br>
+                    /S 顯示指定目錄及所有子目錄中的檔案。<br>
+                    /T 指定用來顯示或排序的時間欄位<br>
+                    timefield C 建立<br>
+                    A 上次檔案存取時間<br>
+                    W 上次寫入檔案時間<br>
+                    /W 使用寬的列表格式。<br>
+                    /X 顯示對非 8.3 格式的檔案產生的短檔名。這個格式和 /N<br>
+                    相同，但是短檔名會插入在長檔名之前。 如果沒有長檔<br>
+                    名存在，該處會顯示空白。<br>
+                    /4 顯示四位數的年份</p>
+                  <p>參數可能會在 DIRCMD 環境變數預先設定。您可以在任何參數使用連字號<br>
+                    字首(-)來覆蓋預先的設定--例如: /-W。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>doskey</b></p>
+                  <p>                      編輯指令列，叫回 Windows 2000 指令，及建立巨集。</p>
+                  <p><i>DOSKEY [/REINSTALL] [/LISTSIZE=size] [/MACROS[:ALL | :exename]<br>
+                    [/HISTORY] [/INSERT | /OVERSTRIKE] [/EXENAME=exename]<br>
+                    [/MACROFILE=filename][macroname=[text]</i></p>
+                  <p>/REINSTALL 安裝另一份 Doskey。<br>
+                    /LISTSIZE=size 設定指令歷程緩衝區的大小。<br>
+                    /MACROS 顯示所有的 Doskey 巨集。<br>
+                    /MACROS:ALL 顯示所有執行檔中含有 Doskey 巨集的<br>
+                    Doskey 巨集。<br>
+                    /MACROS:exename 顯示指定的執行檔中的所有 Doskey 巨集。<br>
+                    /HISTORY 顯示存在記憶體中的所有指令。<br>
+                    /INSERT 指定您所鍵入的新文字插入在舊的文字中。<br>
+                    /OVERSTRIKE 指定您所鍵入的新文字覆蓋舊的文字。<br>
+                    /EXENAME=exename 指定執行檔。<br>
+                    /MACROFILE=filename 指定要安裝的巨集檔案。<br>
+                    macroname 為您建立的巨集指定名稱。<br>
+                    text 指定您要記錄的指令。</p>
+                  <p>向上與向下鍵 叫回以前的指令; ESC 清除指令列;<br>
+                    F7 顯示指令歷程; ALT+F7 清除指令歷程; F8 尋找指令歷程;<br>
+                    F9 以號碼選擇指令; ALT+F10 清除巨集定義</p>
+                  <p>以下是在 Doskey 巨集定義中的特殊碼:<br>
+                    $T 指令分隔字元。允許在一個巨集中使用多個指令。<br>
+                    $1-$9 批次檔參數。相當於批次檔中的 %1 到 %9。<br>
+                    $* 這個符號代表在指令行中巨集名稱後的所有文字。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>echo</b></p>
+                  <p>                      顯示訊息，或切換指令回應的開啟狀態。</p>
+                  <p><i>ECHO [ON | OFF]<br>
+                    ECHO [message]</i></p>
+                  <p>僅鍵入 ECHO 而不加上參數，可以顯示目前的 ECHO 設定。</p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>exit</b></p>
+                  <p>                      結束 CMD.EXE 程式 (指令直譯器) 或目前的批次檔。</p>
+                  <p><i>EXIT [exitCode]</i></p>
+                  <p>/B 指定這個參數來結束目前批次檔而不是 CMD.EXE。<br>
+                    如果是由批次檔之外執行，CMD.EXE將會結束。</p>
+                  <p>exitCode 指定一個數字。如果指定 /B，則設定 ERRORLEVEL為這個<br>
+                    數字。如果結束 CMD.EXE，設定程序結束碼為這個數字。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>fc</b></p>
+                  <p>                      比較兩個檔案或兩組檔案並且顯示其中的不同之處<br>
+                  </p>
+                  <p><i>FC [/A] [/C] [/L] [/LBn] [/N] [/T] [/W] [/nnnn] [drive1:][path1]filename1<br>
+                    [drive2:][path2]filename2<br>
+                    FC /B [drive1:][path1]filename1 [drive2:][path2]filename2</i></p>
+                  <p>/A 針對每組不同之處只要顯示其中的第一行和最後一行。<br>
+                    /B 使用二進位的內容比較。<br>
+                    /C 忽略字母的大小寫。<br>
+                    /L 以 ASCII 文字檔案方式來比較檔案。<br>
+                    /LBn 在指定的行數中設定容許的最多連續的檔案不相符。<br>
+                    /N 在 ASCII 方式的比較中顯示行數。<br>
+                    /T 不要將定位字元展開為空格。<br>
+                    /U 以 UNICODE 文字檔案方式來比較檔案。<br>
+                    /W 將空白字元 (定位字元和空格) 壓縮後再進行比較。<br>
+                    /nnnn 指定在一處不相同之後必須相同的連續行數。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>find</b></p>
+                  <p>                      搜尋檔案中的文字字串。</p>
+                  <p><i>FIND [/V] [/C] [/N] &quot;string&quot; [drive:][path]filename[ ...]</i></p>
+                  <p>/V 顯示所有不包含指定字串的行。<br>
+                    /C 只顯示包含字串的行數。<br>
+                    /N 顯示每一行及它的行號。<br>
+                    /I 當搜尋字串時，忽略字元的大小寫。<br>
+                  &quot;string&quot; 指定要尋找的文字字串。<br>
+                    [drive:][path]filename<br>
+                    指定要尋找的檔案。</p>
+                  <p><font color="#FF0000">如果沒有指定路徑，FIND 會搜尋在提示字元中所輸入的文字<br>
+                    或者在其它的命令中搜尋。</font><br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>findstr</b></p>
+                  <p>                      在檔案中搜尋字串。</p>
+                  <p><i>FINDSTR [/E] [/L] [/R] [/S] [/X] [/V] [/N] [/M] [/O] [/P] [/F:file]<br>
+                    [/C:string] [/G:file] [strings] [drive:][path]filename[ ...]</i></p>
+                  <p>/B 如果是在行的開端，則符合類型。<br>
+                    /E 如果是在行的尾端，則符合類型。<br>
+                    /L 逐字使用搜尋字串。<br>
+                    /R 使用搜尋字串為一般表示式。<br>
+                    /S 在現存目錄及所有的子目錄中搜尋符合的檔案。<br>
+                    /I 指定搜尋不區分大小寫。<br>
+                    /X 列印完全符合的行數。<br>
+                    /V 只列印不含相符字串的行數。<br>
+                    /N 列印每一行符合的行數前的行編號。<br>
+                    /M 只列印包含相符字串的檔案的檔案名稱。<br>
+                    /O 列印每一個相符行之前的字元位移。<br>
+                    /P 略過沒有可列印字元的檔案<br>
+                    /F:file 從指定的檔案讀取檔案清單 (/ 代表主控台)。<br>
+                    /C:string 使用特定的字串作為逐字搜尋的字串。<br>
+                    /G:file 從指定的檔案取得搜尋字串(/ 代表主控台)。<br>
+                    strings 要搜尋的文字。<br>
+                    [drive:][path]filename<br>
+                    指定要搜尋的一個或多個檔案。</p>
+                  <p>除非引數的字首有 /C ，否則請以空格將多重搜尋字串分開。例如，<br>
+                    'FINDSTR &quot;hello there&quot; x.y' 將會在檔案 x.y 中搜尋 &quot;hello&quot;，或&quot;there&quot;。<br>
+                    'FINDSTR /C:&quot;hello there&quot; x.y' 將會在檔案 x.y 中搜尋&quot;hello there&quot;。</p>
+                  <p>有關 FINDSTR 一般表示式的資訊，請參閱連線指令參照。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>format</b></p>
+                  <p>                      格式化磁片以供 Windows 2000 使用。</p>
+                  <p><i>formAT 磁碟機 [/FS:檔案-系統] [/V:標籤] [/Q] [/A:大小] [/C] [/X]<br>
+                    formAT 磁碟機 [/V:標籤] [/Q] [/F:大小]<br>
+                    formAT 磁碟機 [/V:標籤] [/Q] [/T:磁軌 /N:磁扇區]<br>
+                    formAT 磁碟機 [/V:標籤] [/Q] [/1] [/4]<br>
+                    formAT volume [/Q] [/1] [/4] [/8]</i></p>
+                  <p>volume 指定磁碟機代號 (後接冒號)，<br>
+                    連接點或磁碟區名稱。<br>
+                    /FS:filesystem 指定檔案系統的類型 (FAT、FAT32 或 NTFS)。<br>
+                    /V:label 指定磁碟區標記。<br>
+                    /Q 執行快速格式化。<br>
+                    /C 建立在新磁碟區上的檔案會自動壓縮。<br>
+                    /X 視需要先將磁碟區解下。<br>
+                    所有在磁碟區上開啟的控制碼都不再是正確的。<br>
+                    /A:size 覆寫預設的配置單位大小。建議在一般使用時，最<br>
+                    好使用預設設定。<br>
+                    NTFS 支援 512, 1024, 2048, 4096, 8192, 16K, 32K, 64K。<br>
+                    FAT 支援 512, 1024, 2048, 4096, 8192, 16K, 32K, 64K,<br>
+                    (128K, 256K 供磁碟區容量 &gt; 512 位元組使用)。<br>
+                    FAT32 支援 512, 1024, 2048, 4096, 8192, 16K, 32K, 64K,<br>
+                    (128K, 256K 供磁扇區容量 &gt; 512 位元組使用)。</p>
+                  <p>請注意 FAT 及 FAT32 檔案系統在磁碟區的叢集數目上<br>
+                    強制下列的限制:</p>
+                  <p>FAT: 叢集數目 &lt;= 65526<br>
+                    FAT32: 65526 &lt; 叢集數目 &lt; 268435446</p>
+                  <p>如果格式化發現使用指定的叢集大小無法符合上面的要<br>
+                    求，格式化將會自動停止執行。</p>
+                  <p>NTFS 壓縮不支援大小大於 4096 的配置單位。<br>
+                    /F:size 指定要格式化的軟碟大小 (160,<br>
+                    180, 320, 360, 640, 720, 1.2, 1.23, 1.44, 2.88, 或 20.Cool.<br>
+                    /T:tracks 為磁片各面指定磁軌數量。<br>
+                    /N:sectors 指定各條磁軌的磁碟區數量。<br>
+                    /1 格式化單面的軟式磁片。<br>
+                    /4 在高密度磁碟機內格式化 5.25 吋 360K軟式磁片。<br>
+                    /8 每條磁軌格式化八個磁碟區。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>md </b></p>
+                  <p>                    建立目錄。</p>
+                  <p><i>MKDIR [drive:]path<br>
+                    MD [drive:]path</i></p>
+                  <p>如果您啟用擴充指令，MKDIR 的變更如下：</p>
+                  <p>必要時，MKDIR 會在目錄中建立一個中間目錄。<br>
+                    例如，假設 a 不存在，則：</p>
+                  <p>mkdir abcd</p>
+                  <p>相同於：</p>
+                  <p>mkdir a<br>
+                    chdir a<br>
+                    mkdir b<br>
+                    chdir b<br>
+                    mkdir c<br>
+                    chdir c<br>
+                    mkdir d</p>
+                  <p>如果擴充功能停用的話，您必須鍵入前一種指令類型。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p>                    <b>mkdir</b></p>
+                  <p>                      建立目錄。</p>
+                  <p><i>MKDIR [drive:]path<br>
+                    MD [drive:]path</i></p>
+                  <p>如果您啟用擴充指令，MKDIR 的變更如下：</p>
+                  <p>必要時，MKDIR 會在目錄中建立一個中間目錄。<br>
+                    例如，假設 a 不存在，則：</p>
+                  <p>mkdir abcd</p>
+                  <p>相同於：</p>
+                  <p>mkdir a<br>
+                    chdir a<br>
+                    mkdir b<br>
+                    chdir b<br>
+                    mkdir c<br>
+                    chdir c<br>
+                    mkdir d</p>
+                  <p><font color="#FF0000">如果擴充功能停用的話，您必須鍵入前一種指令類型。</font><br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>more </b></p>
+                  <p>                        以一次一頁螢幕的方式來顯示輸出。</p>
+                  <p><i>MORE [/E [/C] [/P] [/S] [/Tn] [+n] &lt; [drive:][path]filename<br>
+                    command-name | MORE [/E [/C] [/P] [/S] [/Tn] [+n]<br>
+                    MORE /E [/C] [/P] [/S] [/Tn] [+n] [files]</i></p>
+                  <p>[drive:][path]filename 指定要顯示的檔案。檔案會以一次<br>
+                    一頁螢幕的方式顯示。</p>
+                  <p>command-name 指定一個命令，而它的輸出將會以<br>
+                    一次一頁螢幕的方式顯示。</p>
+                  <p>/E 啟用擴充功能。<br>
+                    /C 在顯示一頁之前先清除螢幕。<br>
+                    /P 展開 formFeed 字元。<br>
+                    /S 將數個空白行顯示為一行。<br>
+                    /Tn 將定位字元展開為 n 個空白 (預設值為</p>
+                  <p>MORE 環境變數中可以有指令選項</p>
+                  <p>+n 在第 n 行開始顯示第一個檔案。</p>
+                  <p>files 要顯示的檔案清單。在清單中的檔案用空格分開。</p>
+                  <p>如果您使用了擴充功能，您可以在 -- 其它 --提示出現時，使用下列命令:</p>
+                  <p>P n 顯示下面 n 行<br>
+                    S n 跳過下面 n 行<br>
+                    F 顯示下一個檔案<br>
+                    Q 結束<br>
+                    = 顯示行號<br>
+                    ? 顯示輔助說明行<br>
+                    顯示下一頁<br>
+                    顯示下一行<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                      <b>move </b></p>
+                  <p>                      移動或更改檔案及目錄的名稱。</p>
+                  <p>移動一個或一個以上的檔案:<br>
+                    <i>MOVE [/Y | /-Y] [drive:][path]filename1[,...] destination</i></p>
+                  <p>更改目錄名稱:<br>
+                    <i>MOVE [/Y | /-Y] [drive:][path]dirname1 dirname2</i></p>
+                  <p>[drive:][path]filename1 指定您要移動的檔案的位置與名稱。<br>
+                    destination 指定檔案的新位置。目的位置可以包含磁碟機字元<br>
+                    和冒號、目錄名稱、或是這些的組合。如果您只移<br>
+                    動一個檔案，您也可以包含檔名。這樣做會在移動<br>
+                    的同時更改檔名。<br>
+                    [drive:][path]dirname1 指定您要更改名稱的目錄。<br>
+                    dirname2 指定目錄的新名稱。</p>
+                  <p>/Y 不要提示您是否要覆蓋一個現存的目的檔案。<br>
+                    /-Y 提示您是否要覆蓋一個現存的目的檔案。</p>
+                  <p>參數 /Y 可能會在 COPYCMD 環境變數中預先設定。您可以在指令行中<br>
+                    使用 /-Y 來覆蓋預設值。預設值是除非 MOVE 命令是在批次檔中執行，<br>
+                    否則系統會提示您是否要覆寫現有檔案。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>path</b></p>
+                  <p>                      顯示或設定搜尋執行檔的路徑。</p>
+                  <p><i>PATH [drive:]path[;...][;%PATH%]<br>
+                    PATH ;</i></p>
+                  <p>鍵入 PATH ; 即可清除所有搜尋路徑的設定，並將 cmd.exe 重導為只搜尋<br>
+                    目前的目錄。鍵入 PATH 且不指定任何參數，可顯示目前的搜尋路徑。<br>
+                    在設定的新路徑中加上 %PATH%，可以將舊路徑附加到新的設定。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>rd</b></p>
+                  <p>                      移除 (刪除) 一個目錄。</p>
+                  <p><i>RMDIR [/S] [/Q] [drive:]path<br>
+                    RD [/S] [/Q] [drive:]path</i></p>
+                  <p>/S 除了目錄本身之外，一併移除指定目錄裡的所有目錄和檔案。<br>
+                    用於移除樹狀目錄結構。</p>
+                  <p>/Q 安靜模式，有 /S 時，刪除目錄樹結構不再要求確認</p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>ren</b></p>
+                  <p>                        更改檔案名稱。</p>
+                  <p><i>RENAME [drive:][path]filename1 filename2.<br>
+                    REN [drive:][path]filename1 filename2.</i></p>
+                  <p>請注意您不能為目的檔案指定新的磁碟機或路徑。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>replace</b></p>
+                  <p>                      取代檔案。</p>
+                  <p>R<i>EPLACE [drive1:][path1]filename [drive2:][path2] [/A] [/P] [/R] [/W]<br>
+                    REPLACE [drive1:][path1]filename [drive2:][path2] [/P] [/R] [/S] [/W]</i></p>
+                  <p>[drive1:][path1]filename 指定來源檔案。<br>
+                    [drive2:][path2] 指定要取代的檔案的目錄。<br>
+                    /A 將新檔案加到目地目錄。不能和<br>
+                    /S 或 /U 參數同時使用。<br>
+                    /P 當取代檔案或新增來源檔案時顯示確<br>
+                    認的提示。<br>
+                    /R 取代唯讀與未受保護的檔案。<br>
+                    /S 取代在目的目錄中所有子目錄的檔案。不能<br>
+                    和 /A 參數同時使用。<br>
+                    /W 在開始前等待您放入磁片。<br>
+                    /U 只取代 (更新) 比來源檔案早<br>
+                    的檔案。不能和 /A 參數同時使用。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><b>time </b></p>
+                  <p>                    顯示或設定系統時間。</p>
+                  <p><i>TIME [/T | time]</i></p>
+                  <p>僅鍵入 TIME 而不加上參數，可以顯示目前設定的時間，並且提示您輸入<br>
+                    新的時間。按 ENTER 鍵即可保持原來時間。</p>
+                  <p>如果您啟用擴充指令，TIME 指令將會支援/T 參數，這個參數<br>
+                    會讓指令只輸出目前的時間，而不提示您輸入新時間。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>tree </b></p>
+                  <p>                      以圖形顯示磁碟機或路徑的資料夾架構。</p>
+                  <p><i>TREE [drive:][path] [/F] [/A]</i></p>
+                  <p>/F 顯示各資料夾中檔案的名稱。<br>
+                    /A 使用 ASCII 取代延伸字元。<br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>type </b></p>
+                  <p>                      顯示文字檔案的內容。</p>
+                  <p><i>TYPE [drive:][path]filename</i><br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>ver</b></p>
+                  <p>                      顯示 Windows 2000 版本。</p>
+                  <p><i>VER</i><br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p><br>
+                    <b>vol</b></p>
+                  <p>                      顯示磁碟區標籤和序號 (若有的話)。</p>
+                  <p><i>VOL [drive:]</i><br>
+                    </p>
+                  <hr noshade style="border-style:groove">
+                  <p>                    <b>xcopy</b></p>
+                  <p>                      複製檔案和樹狀目錄。</p>
+                  <p><i>XCOPY source [destination] [/A | /M] [/D[:date] [/P] [/S [/E] [/V] [/W]<br>
+                    [/C] [/Q] [/F] [/L] [/H] [/R] [/T]<br>
+                    [/K] [/N] [/O] [/X] [/Y] [/-Y] [/Z]rn<br>
+                    [/EXCLUDE:file1[+file2][+file3]...]</i></p>
+                  <p>source 指定要複製的檔案。<br>
+                    destination 指定位置或者/以及新檔案的名稱。<br>
+                    /A 只複製設定成保存屬性的檔案，不要改變屬性的設定。<br>
+                    /M 只複製設定成保存屬性的檔案，並清除保存屬性。<br>
+                    /D:m-d-y 複製在指定日期當天或之後發生變更的檔案。如果沒有給日<br>
+                    期，只複製那些來源檔案日期比目的檔案日期為新的檔案。<br>
+                    /EXCLUDE:file1[+file2][+file3]...<br>
+                    指定檔案清單字串。如果有字串對應到要進行複製的檔案<br>
+                    絕對路徑的任何部分，這個檔案會被排除複製。例如，指定<br>
+                    字串obj 或 .obj 的話，會排除所有在 obj 目錄下副檔名是<br>
+                    .obj 的檔案複製。<br>
+                    /P 在建立每個目的檔案時顯示提示。<br>
+                    /S 複製每個目錄及其包含的子目錄，不複製空目錄。<br>
+                    /E 複製每個目錄及其包含的子目錄，也複製空目錄。/S 與 /E<br>
+                    相同，能夠用來修改 /T。<br>
+                    /V 驗證每個新檔案。<br>
+                    /W 在複製之前提示您按鍵繼續。<br>
+                    /C 如果錯誤發生時也繼續複製。<br>
+                    /I 如果目的不存在且複製一個以上的檔案的話，就假設指定的<br>
+                    目的一定是目錄。<br>
+                    /Q 在複製時不要顯示檔名。<br>
+                    /F 在複製時顯示來源及目的檔案的全部檔名。<br>
+                    /L 顯示要複製的檔案。<br>
+                    /H 時複製隱藏檔和系統檔。<br>
+                    /R 覆蓋唯讀檔案。<br>
+                    /T 建立目錄結構，但不複製其中的檔案。不包括空目錄及子目<br>
+                    錄。/T /E 會包括空目錄及子目錄。<br>
+                    /U 只複製已經存在目的位置的檔案。<br>
+                    /K 複製檔案屬性。通常 Xcopy 會重設唯讀的屬性。<br>
+                    /N 用所產生的短檔名來進行複製。<br>
+                    /O 複製檔案所有權及 ACL 資訊。<br>
+                    /X 複製檔案審查設定 (包含 /O)。<br>
+                    /Y 不要提示您確認是否要覆蓋一個已經存在的檔案。<br>
+                    /-Y 示您確認是否要覆蓋一個已經存在的檔案。<br>
+                    /Z 在可重新開始的模式中複製網路檔案。</p>
+                  <p>參數 /Y 可以在 COPYCMD 環境變數中預先設定。但可以在指令行中用<br>
+                    /-Y 參數來覆蓋原有設定。</p>
+                  <p>&nbsp;</p>
+              </blockquote>
+              <p>維基百科的DOS指令集[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]：</p>
+              <blockquote>
+                <p><a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]，是磁碟作業系統（英文：Disk Operating System）的縮寫，是個人電腦上的一類作業系統。從1981年直到1995年的15年間，<a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]在IBM PC相容機市場中佔有舉足輕重的地位。而且，若是把部份以<a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]為基礎的Microsoft Windows版本，如Windows 95、98和Me等都算進去的話，那麼其商業壽命至少可以算到2000年。<br>
+                </p>
+              <p><a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]畫面<br>
+                  <a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]家族包括MS-DOS、PC-DOS、DR-DOS、FreeDOS、PTS-DOS（英語：PTS-DOS）、ROM-DOS（英語：ROM-DOS）、JM-OS等，其中以MS-DOS最為著名。雖然這些系統常被簡稱為&quot;<a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]&quot;，但沒有任何一個系統單純以&quot;<a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]&quot;命名（只有一個毫無關連的1960年代IBM大型主機作業系統（英語：DOS/360）以此命名）。此外，有幾個和<a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]無關、在非x86的微電腦系統上執行的磁碟作業系統在名稱中也有&quot;<a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]&quot;字眼，而且在專門討論該機器的場合中也會簡稱為&quot;<a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]&quot;（例如：AmigaDOS（英語：AmigaDOS）、AMSDOS（英語：AMSDOS）、ANDOS（英語：ANDOS）、Apple DOS、Atari DOS（英語：Atari DOS）、Commodore DOS（英語：Commodore DOS）、CSI-DOS（英語：CSI-DOS）、ProDOS、TRS-DOS（英語：TRS-DOS）等），但這些系統和<a href="https://zh.m.wikipedia.org/zh-tw/DOS">DOS</a>[<a href="https://zh.m.wikipedia.org/zh-tw/DOS">2</a>]執行檔以及MS-DOS API並不相容。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>DOS指令集參考來源：</p>
+              <blockquote>
+                <p><a href="https://birdfly.666forum.com/t77-topic">https://birdfly.666forum.com/t77-topic</a></p>
+                <p><a href="https://zh.m.wikipedia.org/zh-tw/DOS">https://zh.m.wikipedia.org/zh-tw/DOS</a></p>
+                <p>&nbsp;</p>
+              </blockquote>
+
+            <!-- InstanceEndEditable --></td>
+				  </tr>
+				</table>
+			
+			
+			</td>
+          </tr>
+        </table></td>
+      </tr>
+     
+      <tr>
+        <td align="left" valign="top" style="display:none" id="mmenu_down">
+		
+			<table width="100%" border="0" cellpadding="10" cellspacing="0">
+			  <tr>
+				<td align="left" valign="top" bgcolor="#DEECF1"><b>其他資料</b><a name="d_menu_a" id="d_menu_a"></a></td>
+			  </tr>
+			  <tr>
+				<td align="left" valign="top" id="mmenu_down_data"></td>
+			  </tr>
+			</table>
+
+		</td>
+      </tr>
+      <tr>
+       <td height="80" valign="middle" bgcolor="#DEECF1" id="m_files" style="padding:20px;"></td>
+		
+		<script>
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/files.htm"; 
+			ajax_load_files.method  = 'GET'; 
+			ajax_load_files.element = 'm_files'; 
+			function start_ajax_load_files(){
+				ajax_load_files.runAJAX('');
+			}
+			setTimeout("start_ajax_load_files();",1000);
+	   </script>
+		
+      </tr>
+      <tr>
+        <td height="60" align="center" valign="middle">
+		
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="https://www.jplopsoft.idv.tw/">Jplopsoft</a> | 
+				<a href="https://twhkinc.jplopsoft.idv.tw/">THI</a> | 
+				<a href="https://app.netlify.com/sites/jplop/deploys">Netlify</a> | 
+				<a href="https://neocities.org/dashboard">NeoCities</a> | 
+				<a href="https://lionfree.net/">LionFree</a>
+			</font></p>
+			
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="util_aes_utility.html">加密工具</a> | 
+				<a href="teac_post_about.html">提交歸檔</a> | 
+				<a href="util_qrcode_online_gen_tool.html">QRCODE產生器</a> | 
+				<a href="util_gen_pass.html">密碼產生器</a>
+			</font></p>
+			
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+			
+		</td>
+      </tr>
+    </table>
+	</td>
+  </tr>
+</table>
+</BODY>
+<script>
+	
+</script>
+<!-- InstanceEnd --></HTML>
