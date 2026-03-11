@@ -1,0 +1,953 @@
+<HTML><!-- InstanceBegin template="/Templates/default.dwt" codeOutsideHTMLIsLocked="false" -->
+<HEAD>
+<!-- InstanceBeginEditable name="doctitle" -->
+<TITLE>歸檔星球 Archive Star - C++庫常用函式</TITLE>
+<!-- InstanceEndEditable -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+<!-- InstanceBeginEditable name="head" -->
+
+	<meta name="keywords" content="C++庫常用函式">
+	<meta name="pagetype" content="分享">
+	<meta name="description" content="C++庫常用函式">
+	
+	<script type="application/ld+json">
+		{
+		  "@context": "https://schema.org",
+		  "@type": "WebPage",
+		  "url": "https://jplop.netlify.app/teac_post_about.html",
+		  "name": "C++庫常用函式",
+		  "description": "C++庫常用函式相關說明、相關技術文獻。"
+		}
+	</script>
+	
+<!-- InstanceEndEditable -->
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="mm_menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/message.js"></script>		
+		<style>
+			a:link {color: #0000FF;text-decoration: none;} 
+			a:visited {color: #3366FF;text-decoration: none;}
+			a:hover {}
+			a:active {color: #FF0000;text-decoration: none;}
+			font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;}
+			input ,button , select{font-size:12px;}
+			.spoiler, .spoiler2{color: black; background-color:black;}
+			.spoiler:hover{color: white;}
+			.spoiler2:hover { background-color:white; }
+		</style>
+		
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVGMPW8LR4"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		
+		  gtag('config', 'G-SVGMPW8LR4');
+		</script>
+		
+</HEAD>
+
+<BODY leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table width="100%" height="100%" border="0" style="padding:20px;" cellspacing="0" background="images/archive_star_ban_bg_1997.jpg" id="table_top1">
+  <tr>
+    <td height="715" valign="top"><table width="100%" height="100%" border="0" cellspacing="0" bgcolor="#FFFFFF" style="padding:20px;border:1px #ccc solid;border-radius:10px;box-shadow:1px 1px 20px #ffffff;margin-right:8px;" id="table_top2">
+      <tr>
+        <td valign="top">
+		
+		<span id="j_space_top_data"></span>
+		<script>
+			var ajax_load_top = new sack();
+			ajax_load_top.requestFile = "init/top.html";
+			ajax_load_top.method  = 'GET'; 
+			ajax_load_top.element = 'j_space_top_data'; 
+	   </script>
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+
+            <td width="200" valign="top" id="mmenu"></td>
+			  <!-- InstanceBeginEditable name="EditRegion4" --> <!-- InstanceEndEditable -->
+            <td valign="top">
+			
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				  <tr>
+				    <td id="top_left_menu_td_m" align="center" bgcolor="#40588C" width="40" onClick="window.location='#d_menu_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">M</font></td>
+					<td id="top_left_menu_td_f" align="center" bgcolor="#336600" width="40" onClick="window.location='#d_file_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">F</font></td>
+					<td id="top_left_menu_td" style="text-align:right;background-color:#FFFFFF">
+							<span id="LoginBox_PC">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">About</a> | 
+								<a href="https://jplop.netlify.app/">NetLify</a> | 
+								<a href="https://jplop.neocities.org/">NeoCities</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">Project</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_M" style="display:none">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">AB</a> | 
+								<a href="https://jplop.netlify.app/">NL</a> | 
+								<a href="https://jplop.neocities.org/">NC</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">PJ</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_status"> | 
+								<a href="javascript:main_login_in_start();void(0);">管理</a> 
+							</span>
+					  </td>
+				  </tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="10" cellspacing="0">
+				  <tr>
+					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
+              <h2><img id="one_page_number_1" src="images/archive_star_ban_2022.jpg?nf_resize=fit&amp;w=532&amp;h=332" alt="C++庫常用函式" style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
+              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;C++庫常用函式&gt;&gt;</font></h2>
+              <p>C++函式庫說明：</p>
+              <blockquote>
+                <p>本文中提到的函式庫有：<i>&lt;string&gt; &lt;cctype&gt; &lt;algorithm&gt; &lt;cmath&gt; &lt;cstdlib&gt; &lt;iomanip&gt; &lt;numeric&gt;</i></p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p>C++常用函式清單：</p>
+              <blockquote>
+                <p><b>1. 標準C++庫字串類std::string的用法</b></p>
+                    <blockquote>
+                      <p>begin 得到指向字串開頭的Iterator<br>
+                        end 得到指向字串結尾的Iterator<br>
+                        rbegin 得到指向反向字串開頭的Iterator<br>
+                        rend 得到指向反向字串結尾的Iterator<br>
+                        size 得到字串的大小<br>
+                        length() 和size函式功能相同<br>
+                        max_size 字串可能的最大大小<br>
+                        capacity 在不重新分配記憶體的情況下，字串可能的大小<br>
+                        empty 判斷是否為空<br>
+                        operator[] 取第幾個元素，相當於陣列<br>
+                        c_str 取得C風格的const char* 字串<br>
+                        data 取得字串內容地址<br>
+                        operator= 賦值操作符<br>
+                        reserve 預留空間<br>
+                        swap 交換函式<br>
+                        insert 插入字元<br>
+                        append 追加字元<br>
+                        push_back 追加字元<br>
+                        erase 刪除字串<br>
+                        clear 清空字元容器中所有內容<br>
+                        resize 重新分配空間<br>
+                        assign 和賦值操作符一樣<br>
+                        replace 替代<br>
+                        copy 字串到空間<br>
+                        find 查詢,返回基於0的索引號<br>
+                        rfind 反向查詢</p>
+                      <p>find_first_of 查詢包含子串中的任何字元，返回第一個位置<br>
+                        find_first_not_of 查詢不包含子串中的任何字元，返回第一個位置<br>
+                        find_last_of 查詢包含子串中的任何字元，返回最後一個位置<br>
+                        find_last_not_of 查詢不包含子串中的任何字元，返回最後一個位置<br>
+                        substr(n1,len) 得到字串從n1開始的長度為len的子串<br>
+                        compare 比較字串(支援所有的關係運算符)<br>
+                        operator+ 字串連結<br>
+                        operator+= += 操作符<br>
+                        operator== 判斷是否相等<br>
+                        operator!= 判斷是否不等於<br>
+                        operator&lt; 判斷是否小於<br>
+                        operator&gt;&gt; 從輸入流中讀入字串<br>
+                        operator&lt;&lt; 字串寫入輸出流<br>
+                        getline 從輸入流中讀入一行</p>
+                    </blockquote>
+                    <p><b>2.cctype庫</b></p>
+                <blockquote>
+                      <p>using ::isalpha; //是否字母</p>
+                      <p>using ::iscntrl; //是否控制符</p>
+                      <p>using ::isdigit; //是否是數字</p>
+                      <p>using ::isgraph; //是否字母、數字或標點</p>
+                      <p>using ::islower; //是否小寫</p>
+                      <p>using ::isprint; //是否可列印字元</p>
+                      <p>using ::ispunct; //是否標點</p>
+                      <p>using ::isspace; //是否空格</p>
+                      <p>using ::isupper; //是否大寫</p>
+                      <p>using ::isxdigit; //是否十六進位制數字</p>
+                      <p>using ::tolower; //轉為小寫</p>
+                      <p>using ::toupper; //轉為大寫</p>
+                      </blockquote>
+              <p><b>3 algorithm.庫：</b></p>
+              <blockquote>
+                <p><table border="1" cellpadding="5" cellspacing="0" bordercolor="#CCCCCC" style="color:rgb(0,0,0);">
+                  <tbody><tr><td>
+<p align="center"><span style="color:rgb(50,62,50);">迴圈</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">對序列中的每個元素執行某項操作</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">for_each()</span></p>
+</td>
+</tr><tr><td rowspan="5">
+<p align="center"><span style="color:rgb(50,62,50);">查詢</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在序列中找出某個值的第一次出現的位置</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">find(a,a+size,n)&nbsp;</span><span style="color:rgb(50,62,50);">返回b,</span>當b=a+size即沒找到，a為指標</p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在序列中找出符合某謂詞的第一個元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">find_if()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在序列中找出一子序列的最後一次出現的位置</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">find_end()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在序列中找出第一次出現指定值集中之值位置</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">find_first_of()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在序列中找出相鄰的一對值</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">adjacent_find()</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">計數</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在序列中統計某個值出現的次數</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">count()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在序列中統計與某謂詞匹配的次數</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">count_if()</span></p>
+</td>
+</tr><tr><td rowspan="3">
+<p align="center"><span style="color:rgb(50,62,50);">比較</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">找出兩個序列相異的第一個元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">mismatch()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">兩個序列中的對應元素都相同時為真</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">equal(a,a+n,b,cmp)</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在序列中找到等於某值的連續n</span>次出現的位置</p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">equal_range(a,a+n,x)</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">搜尋</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在序列中找出一子序列的第一次出現的位置</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">search()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在序列中找出一值的連續n</span>次出現的位置</p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">search_n()</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">複製</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">從序列的第一個元素起進行復制</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">copy()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">從序列的最後一個元素起進行復制</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">copy_backward()</span></p>
+</td>
+</tr><tr><td rowspan="3">
+<p align="center"><span style="color:rgb(50,62,50);">交換</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">交換兩個元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">swap()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">交換指定範圍的元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">swap_ranges()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">交換由迭代器所指的兩個元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">iter_swap()</span></p>
+</td>
+</tr><tr><td>
+<p align="center"><span style="color:rgb(50,62,50);">變換</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">將某操作應用於指定範圍的每個元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">transform()</span></p>
+</td>
+</tr><tr><td rowspan="4">
+<p align="center"><span style="color:rgb(50,62,50);">替換</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">用一個給定值替換一些值</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">replace()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">替換滿足謂詞的一些元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">replace_if()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">複製序列時用一給定值替換元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">replace_copy()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">複製序列時替換滿足謂詞的元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">replace_copy_if()</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">填充</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">用一給定值取代所有元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">fill()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">用一給定值取代前n</span>個元素</p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">fill_n()</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">生成</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">用一操作的結果取代所有元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">generate()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">用一操作的結果取代前n</span>個元素</p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">generate_n()</span></p>
+</td>
+</tr><tr><td rowspan="4">
+<p align="center"><span style="color:rgb(50,62,50);">刪除</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">刪除具有給定值的元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">remove()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">刪除滿足謂詞的元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">remove_if()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">複製序列時刪除具有給定值的元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">remove_copy()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">複製序列時刪除滿足謂詞的元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">remove_copy_if()</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">唯一</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">刪除相鄰的重複元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">unique()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">複製序列時刪除相鄰的重複元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">unique_copy()</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">反轉</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">反轉元素的次序</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">reverse(a,a+n)</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">複製序列時反轉元素的次序</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">reverse_copy()</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">環移</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">迴圈移動元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">rotate(a,a+m,a+n)</span></p>
+<p align="left"><span style="color:rgb(50,62,50);">以m</span>位置為界交換前後序列</p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">複製序列時迴圈移動元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">rotate_copy()</span></p>
+</td>
+</tr><tr><td>
+<p align="center"><span style="color:rgb(50,62,50);">隨機</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">採用均勻分佈來隨機移動元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">random_shuffle()</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">劃分</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">將滿足某謂詞的元素都放到前面</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">partition()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">將滿足某謂詞的元素都放到前面並維持原順序</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">stable_partition()</span></p>
+</td>
+</tr><tr><td rowspan="4">
+<p align="center"><span style="color:rgb(50,62,50);">排序</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">以很好的平均效率排序</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">sort(a,a+20,cmp)</span></p>
+<p align="left"><span style="color:rgb(50,62,50);">bool cmp( int a, int b )</span></p>
+<p align="left"><span style="color:rgb(50,62,50);">{ return a&gt;b; }</span></p>
+<p align="left"><span style="color:rgb(50,62,50);">在容器中或string</span>用begin（）</p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">排序，並維持相同元素的原有順序</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">stable_sort()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">將序列的前一部分排好序</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">partial_sort()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">複製的同時將序列的前一部分排好序</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">partial_sort_copy()</span></p>
+</td>
+</tr><tr><td>
+<p align="center"><span style="color:rgb(50,62,50);">第n</span>個元素</p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">將第n</span>各元素放到它的正確位置</p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">nth_element()</span></p>
+</td>
+</tr><tr><td rowspan="4">
+<p align="center"><span style="color:rgb(50,62,50);">二分檢索</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">找到大於等於某值的第一次出現</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">lower_bound()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">找到大於某值的第一次出現</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">upper_bound()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">找到（在不破壞順序的前提下）可插入給定值的最大範圍</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">equal_range()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">在有序序列中確定給定元素是否存在</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">binary_search()</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">歸併</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">歸併兩個有序序列</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">merge()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">歸併兩個接續的有序序列</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">inplace_merge()</span></p>
+</td>
+</tr><tr><td rowspan="5">
+<p align="center"><span style="color:rgb(50,62,50);">有序結構上的集合操作</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">一序列為另一序列的子序列時為真</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">includes()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">構造兩個集合的有序並集</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">set_union()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">構造兩個集合的有序交集</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">set_intersection()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">構造兩個集合的有序差集</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">set_difference()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">構造兩個集合的有序對稱差集（並-</span>交）</p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">set_symmetric_difference()</span></p>
+</td>
+</tr><tr><td rowspan="4">
+<p align="center"><span style="color:rgb(50,62,50);">堆操作</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">向堆中加入元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">push_heap()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">從堆中彈出元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">pop_heap()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">從序列構造堆</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">make_heap()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">給堆排序</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">sort_heap()</span></p>
+</td>
+</tr><tr><td rowspan="4">
+<p align="center"><span style="color:rgb(50,62,50);">最大和最小</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">兩個值中較小的</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">min()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">兩個值中較大的</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">max()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">序列中的最小元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">min_element(a,a+n)</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">序列中的最大元素</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">max_element()</span></p>
+</td>
+</tr><tr><td>
+<p align="center"><span style="color:rgb(50,62,50);">詞典比較</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">兩個序列按字典序的第一個在前</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">lexicographical_compare()</span></p>
+</td>
+</tr><tr><td rowspan="2">
+<p align="center"><span style="color:rgb(50,62,50);">排列生成器</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">按字典序的下一個排列</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">next_permutation()</span></p>
+</td>
+</tr><tr><td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">按字典序的前一個排列</span></p>
+</td>
+<td valign="top">
+<p align="left"><span style="color:rgb(50,62,50);">prev_permutation()</span></p>
+</td>
+</tr></tbody></table> </p>
+              </blockquote>
+              <p><b>4 cmath庫</b></p>
+              <blockquote>
+                <p>using ::abs; //絕對值</p>
+                <p>using ::acos; //反餘弦</p>
+                <p>using ::acosf; //反餘弦</p>
+                <p>using ::acosl; //反餘弦</p>
+                <p>using ::asin; //反正弦</p>
+                <p>using ::asinf; //反正弦</p>
+                <p>using ::asinl; //反正弦</p>
+                <p>using ::atan; //反正切</p>
+                <p>using ::atan2; //y/x的反正切</p>
+                <p>using ::atan2f; //y/x的反正切</p>
+                <p>using ::atan2l; //y/x的反正切</p>
+                <p>using ::atanf; //反正切</p>
+                <p>using ::atanl; //反正切</p>
+                <p>using ::ceil; //上取整</p>
+                <p>using ::ceilf; //上取整</p>
+                <p>using ::ceill; //上取整</p>
+                <p>using ::cos; //餘弦</p>
+                <p>using ::cosf; //餘弦</p>
+                <p>using ::cosh; //雙曲餘弦</p>
+                <p>using ::coshf; //雙曲餘弦</p>
+                <p>using ::coshl; //雙曲餘弦</p>
+                <p>using ::cosl; //餘弦</p>
+                <p>using ::exp; //指數值</p>
+                <p>using ::expf; //指數值</p>
+                <p>using ::expl; //指數值</p>
+                <p>using ::fabs; //絕對值</p>
+                <p>using ::fabsf; //絕對值</p>
+                <p>using ::fabsl; //絕對值</p>
+                <p>using ::floor; //下取整</p>
+                <p>using ::floorf; //下取整</p>
+                <p>using ::floorl; //下取整</p>
+                <p>using ::fmod; //求餘</p>
+                <p>using ::fmodf; //求餘</p>
+                <p>using ::fmodl; //求餘</p>
+                <p>using ::frexp; //返回value=x*2n中x的值,n存貯在eptr中</p>
+                <p>using ::frexpf; //返回value=x*2n中x的值,n存貯在eptr中</p>
+                <p>using ::frexpl; //返回value=x*2n中x的值,n存貯在eptr中</p>
+                <p>using ::ldexp; //返回value*2exp的值</p>
+                <p>using ::ldexpf; //返回value*2exp的值</p>
+                <p>using ::ldexpl; //返回value*2exp的值</p>
+                <p>using ::log; //對數</p>
+                <p>using ::log10; //對數</p>
+                <p>using ::log10f; //對數</p>
+                <p>using ::log10l; //對數</p>
+                <p>using ::logf; //對數</p>
+                <p>using ::logl; //對數</p>
+                <p>using ::modf; //將雙精度數value分解成尾數和階</p>
+                <p>using ::modff; //將雙精度數value分解成尾數和階</p>
+                <p>using ::modfl; //將雙精度數value分解成尾數和階</p>
+                <p>using ::pow; //計算冪</p>
+                <p>using ::powf; //計算冪</p>
+                <p>using ::powl; //計算冪</p>
+                <p>using ::sin; //正弦</p>
+                <p>using ::sinf; //正弦</p>
+                <p>using ::sinh; //雙曲正弦</p>
+                <p>using ::sinhf; //雙曲正弦</p>
+                <p>using ::sinhl; //雙曲正弦</p>
+                <p>using ::sinl; //正弦</p>
+                <p>using ::sqrt; //開方</p>
+                <p>using ::sqrtf; //開方</p>
+                <p>using ::sqrtl; //開方</p>
+                <p>using ::tan; //正切</p>
+                <p>using ::tanf; //正切</p>
+                <p>using ::tanh; //雙曲正切</p>
+                <p>using ::tanhf; //雙曲正切</p>
+                <p>using ::tanhl; //雙曲正切</p>
+                <p>using ::tanl; //正切</p>
+              </blockquote>
+              <p><b>5.cstdlib庫</b></p>
+              <blockquote>
+                <p>double atof(const char *str);</p>
+                <p>把字串str轉換成double型別。等價於：strtod(str, (char**)NULL)。</p>
+                <p>int atoi(const char *str);</p>
+                <p>把字串str轉換成int型別。等價於：(int)strtol(str, (char**)NULL, 10)。</p>
+                <p>long atol(const char *str);</p>
+                <p>把字串str轉換成long型別。等價於：strtol(str, (char**)NULL, 10)。</p>
+                <p>double strtod(const char *start, char **end);</p>
+                <p>把字串start的字首轉換成double型別。在轉換中跳過start的前導空白符，然後逐個讀入構成數的字元，任何非浮點數成分的字元都會終止上述過程。如果end不為NULL，則把未轉換部分的指標儲存在*end中。</p>
+                <p>如果結果上溢，返回帶有適當符號的HUGE_VAL，如果結果下溢，那麼函式返回0。在這兩種情況下，errno均被置為ERANGE。</p>
+                <p>long int strtol(const char *start, char **end, int radix);</p>
+                <p>把字串start的字首轉換成long型別，在轉換中跳過start的前導空白符。如果end不為NULL，則把未轉換部分的指標儲存在*end中。</p>
+                <p>如果radix的值在2到36間之間，那麼轉換按該基數進行；如果radix為0，則基數為八進位制、十進位制、十六進位制，以0為前導的是八進位制，以0x或0X為前導的是十六進位制。無論在哪種情況下，串中的字母是表示10到radix-1之間數字的字母。如果radix是16，可以加上前導0x或0X。</p>
+                <p>如果結果上溢，則依據結果的符號返回LONG_MAX或LONG_MIN，置errno為ERANGE。</p>
+                <p>unsigned long int strtoul(const char *start, char **end, int radix);</p>
+                <p>與strtol()類似，只是結果為unsigned long型別，溢位時值為ULONG_MAX。</p>
+                <p>int rand(void);</p>
+                <p>產生一個0到RAND_MAX之間的偽隨機整數。RAND_MAX值至少為32767。</p>
+                <p>void srand(unsigned int seed);</p>
+                <p>設定新的偽隨機數序列的種子為seed。種子的初值為1。</p>
+                <p>void *calloc(size_t num, size_t size);</p>
+                <p>為num個大小為size的物件組成的陣列分配足夠的記憶體，並返回指向所分配區域的第一個位元組的指標；如果記憶體不足以滿足要求，則返回NULL。</p>
+                <p>分配的記憶體區域中的所有位被初始化為0。</p>
+                <p>void *malloc(size_t size);</p>
+                <p>為大小為size的物件分配足夠的記憶體，並返回指向所分配區域的第一個位元組的指標；如果記憶體不足以滿足要求，則返回NULL。</p>
+                <p>不對分配的記憶體區域進行初始化。</p>
+                <p>void *realloc(void *ptr, size_t size);</p>
+                <p>將ptr指向的記憶體區域的大小改為size個位元組。如果新分配的記憶體比原記憶體大，那麼原記憶體的內容保持不變，增加的空間不進行初始化。如果新分配的記憶體比原記憶體小，那麼新記憶體保持原記憶體區中前size位元組的內容。函式返回指向新分配空間的指標。如果不能滿足要求，則返回NULL，原ptr指向的記憶體區域保持不變。</p>
+                <p>如果ptr為NULL，則行為等價於malloc(size)。</p>
+                <p>如果size為0，則行為等價於free(ptr)。</p>
+                <p>void free(void *ptr);</p>
+                <p>釋放ptr指向的記憶體空間，若ptr為NULL，則什麼也不做。ptr必須指向先前用動態分配函式malloc、realloc或calloc分配的空間。</p>
+                <p>void abort(void);</p>
+                <p>使程式非正常終止。其功能類似於raise(SIGABRT)。</p>
+                <p>void exit(int status);</p>
+                <p>使程式正常終止。atexit函式以與註冊相反的順序被呼叫，所有開啟的檔案被重新整理，所有開啟的流被關閉。status的值如何被返回依具體的實現而定，但用0表示正常終止，也可用值EXIT_SUCCESS和EXIT_FAILURE。</p>
+                <p>int atexit(void (*func)(void));</p>
+                <p>註冊在程式正常終止時所要呼叫的函式func。如果成功註冊，則函式返回0值，否則返回非0值。</p>
+                <p>int system(const char *str);</p>
+                <p>把字串str傳送給執行環境。如果str為NULL，那麼在存在命令處理程式時，返回0值。如果str的值非NULL，則返回值與具體的實現有關。</p>
+                <p>char *getenv(const char *name);</p>
+                <p>返回與name相關的環境字串。如果該字串不存在，則返回NULL。其細節與具體的實現有關。</p>
+                <p>void *bsearch(const void *key, const void *base, size_t n, size_t size,</p>
+                <p>int (*compare)(const void *, const void *));</p>
+                <p>在base[0]...base[n-1]之間查詢與*key匹配的項。size指出每個元素佔有的位元組數。函式返回一個指向匹配項的指標，若不存在匹配則返回NULL。</p>
+                <p>函式指標compare指向的函式把關鍵字key和陣列元素比較，比較函式的形式為：</p>
+                <p>int func_name(const void *arg1, const void *arg2);</p>
+                <p>arg1是key指標，arg2是陣列元素指標。</p>
+                <p>返回值必須如下：</p>
+                <p>arg1 &lt; arg2時，返回值&lt;0；</p>
+                <p>arg1 == arg2時，返回值==0；</p>
+                <p>arg1 &gt; arg2時，返回值&gt;0。</p>
+                <p>陣列base必須按升序排列(與compare函式定義的大小次序一致)。</p>
+                <p>void qsort(void *base, size_t n, size_t size,</p>
+                <p>int (*compare)(const void *, const void *));</p>
+                <p>對由n個大小為size的物件構成的陣列base進行升序排序。</p>
+                <p>比較函式compare的形式如下：</p>
+                <p>int func_name(const void *arg1, const voie *arg2);</p>
+                <p>其返回值必須如下所示：</p>
+                <p>arg1 &lt; arg2，返回值&lt;0；</p>
+                <p>arg1 == arg2，返回值==0；</p>
+                <p>arg1 &gt; arg2，返回值&gt;0。</p>
+                <p>int abs(int num);</p>
+                <p>返回int變元num的絕對值。</p>
+                <p>long labs(long int num);</p>
+                <p>返回long型別變元num的絕對值。</p>
+                <p>div_t div(int numerator, int denominator);</p>
+                <p>返回numerator/denominator的商和餘數，結果分別儲存在結構型別div_t的兩個int成員quot和rem中。</p>
+                <p>ldiv_t div(long int numerator, long int denominator);</p>
+                <p>返回numerator/denominator的商和餘數，結果分別儲存在結構型別ldiv_t的兩個long成員quot和rem中。</p>
+              </blockquote>
+              <p><b>6.iomanip庫</b></p>
+              <blockquote>
+                <p>dec 置基數為10 相當於&quot;%d&quot;</p>
+                <p>hex 置基數為16 相當於&quot;%X&quot;</p>
+                <p>oct 置基數為8 相當於&quot;%o&quot;</p>
+                <p>setfill( 'c' ) 設填充字元為c</p>
+                <p>setprecision( n ) 設顯示小數精度為n位</p>
+                <p>setw( n ) 設域寬為n個字元</p>
+                <p>▲setw(n)用法： 通俗地講就是預設寬度</p>
+                <p>這個控制符的意思是保證輸出寬度為n。如：</p>
+                <p>cout &lt;&lt; setw( 3 ) &lt;&lt; 1 &lt;&lt; setw( 3 ) &lt;&lt; 10 &lt;&lt; setw( 3 ) &lt;&lt; 100 &lt;&lt;setw(3)&lt;&lt;1000&lt;&lt; endl;</p>
+                <p>結果為:</p>
+                <p>(空格)(空格）1(空格)101001000</p>
+                <p>（預設是右對齊）當輸出長度大於3時(&lt;&lt;1000)，setw(3)不起作用。</p>
+                <p>▲setfill(char c) 用法 : 就是在預設寬度中如果已存在沒用完的寬度大小，則用設定的字元c填充</p>
+                <p>如 cout&lt;&lt;setfill(‘@‘)&lt;&lt;setw(5)&lt;&lt;255&lt;&lt;endl;</p>
+                <p>結果是:</p>
+                <p>@@255</p>
+                <p>▲setbase(int n) : 將數字轉換為 n 進位制.</p>
+                <p>如 cout&lt;&lt;setbase(8)&lt;&lt;setw(5)&lt;&lt;255&lt;&lt;endl;</p>
+                <p>cout&lt;&lt;setbase(10)&lt;&lt;setw(5)&lt;&lt;255&lt;&lt;endl;</p>
+                <p>cout&lt;&lt;setbase(16)&lt;&lt;255&lt;&lt;endl;</p>
+                <p>結果是:</p>
+                <p>(空格)（空格)377</p>
+                <p>(空格)(空格) 255</p>
+                <p>(空格)(空格) f f</p>
+                <p>▲ setprecision用法</p>
+                <p>使用setprecision(n)可控制輸出流顯示浮點數的數字個數。C++預設的流輸出數值有效位是6。</p>
+                <p>如果setprecision(n)與setiosflags(ios::fixed)合用，可以控制小數點右邊的數字個數。setiosflags(ios::fixed)是用定點方式表示實數。</p>
+                <p>如果與setiosnags(ios::scientific)合用，可以控制指數表示法的小數位數。setiosflags(ios::scientific)是用指數方式表示實數。</p>
+                <p>setiosflags(ios::fixed) 固定的浮點顯示</p>
+                <p>setiosflags(ios::scientific) 指數表示</p>
+                <p>setiosflags(ios::left) 左對齊</p>
+                <p>setiosflags(ios::right) 右對齊</p>
+                <p>setiosflags(ios::skipws) 忽略前導空白</p>
+                <p>setiosflags(ios::uppercase) 16進位制數大寫輸出</p>
+                <p>setiosflags(ios::lowercase) 16進位制小寫輸出</p>
+                <p>setiosflags(ios::showpoint) 強制顯示小數點</p>
+                <p>setiosflags(ios::showpos) 強制顯示符號</p>
+              </blockquote>
+              <p><b>7.numeric庫</b></p>
+              <blockquote>
+                <p>accumulate（first ，last，n）;</p>
+                <p>求和，n為初始值；</p>
+                <p>adjacent_difference（first，last，result）;</p>
+                <p>求相鄰元素的差，後減前，result為差的序列在原序列開始的位置</p>
+                <p>checked_ adjacent_difference(first,last,result);</p>
+                <p>inner_product(first1,first2,last1,last2);</p>
+                <p>將對應元素相乘並求出累計和</p>
+                <p>partial_sum（first，last，result）;</p>
+                <p>求到任意位置的累計和，result為和的序列在原序列開始的位置</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              </blockquote>
+              <p>C++函式庫參閱資料：</p>
+              <blockquote>
+                <p><a href="https://www.796t.com/content/1548779783.html">https://www.796t.com/content/1548779783.html</a></p>
+                <p><a href="http://blog.csdn.net/candyliuxj/article/details/6313191/">http://blog.csdn.net/candyliuxj/article/details/6313191/</a></p>
+              </blockquote>
+              <p>&nbsp;</p>
+            <!-- InstanceEndEditable --></td>
+				  </tr>
+				</table>
+			
+			
+			</td>
+          </tr>
+        </table></td>
+      </tr>
+     
+      <tr>
+        <td align="left" valign="top" style="display:none" id="mmenu_down">
+		
+			<table width="100%" border="0" cellpadding="10" cellspacing="0">
+			  <tr>
+				<td align="left" valign="top" bgcolor="#DEECF1"><b>其他資料</b><a name="d_menu_a" id="d_menu_a"></a></td>
+			  </tr>
+			  <tr>
+				<td align="left" valign="top" id="mmenu_down_data"></td>
+			  </tr>
+			</table>
+
+		</td>
+      </tr>
+      <tr>
+       <td height="80" valign="middle" bgcolor="#DEECF1" id="m_files" style="padding:20px;"></td>
+		
+		<script>
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/files.htm"; 
+			ajax_load_files.method  = 'GET'; 
+			ajax_load_files.element = 'm_files'; 
+			function start_ajax_load_files(){
+				ajax_load_files.runAJAX('');
+			}
+			setTimeout("start_ajax_load_files();",1000);
+	   </script>
+		
+      </tr>
+      <tr>
+        <td height="60" align="center" valign="middle">
+		
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="https://www.jplopsoft.idv.tw/">Jplopsoft</a> | 
+				<a href="https://twhkinc.jplopsoft.idv.tw/">THI</a> | 
+				<a href="https://app.netlify.com/sites/jplop/deploys">Netlify</a> | 
+				<a href="https://neocities.org/dashboard">NeoCities</a> | 
+				<a href="https://lionfree.net/">LionFree</a>
+			</font></p>
+			
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="util_aes_utility.html">加密工具</a> | 
+				<a href="teac_post_about.html">提交歸檔</a> | 
+				<a href="util_qrcode_online_gen_tool.html">QRCODE產生器</a> | 
+				<a href="util_gen_pass.html">密碼產生器</a>
+			</font></p>
+			
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+			
+		</td>
+      </tr>
+    </table>
+	</td>
+  </tr>
+</table>
+</BODY>
+<script>
+	
+</script>
+<!-- InstanceEnd --></HTML>

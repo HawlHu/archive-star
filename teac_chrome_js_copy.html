@@ -1,0 +1,241 @@
+<HTML><!-- InstanceBegin template="/Templates/default.dwt" codeOutsideHTMLIsLocked="false" -->
+<HEAD>
+<!-- InstanceBeginEditable name="doctitle" -->
+<TITLE>歸檔星球 Archive Star - 使用JS實現書籤剪貼簿</TITLE>
+<!-- InstanceEndEditable -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+<!-- InstanceBeginEditable name="head" -->
+
+	<meta name="keywords" content="使用JS實現書籤剪貼簿">
+	<meta name="pagetype" content="教學">
+	<meta name="description" content="使用JS實現書籤剪貼簿">
+	
+	<script type="application/ld+json">
+			{
+			  "@context": "https://schema.org",
+			  "@type": "WebPage",
+			  "url": "https://jplop.netlify.app/teac_post_about.html",
+			  "name": "JS實現書籤剪貼簿",
+			  "description": "JS實現書籤剪貼簿之相關說明、相關下載、相關技術文獻。"
+			}
+	</script>
+	
+<!-- InstanceEndEditable -->
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="mm_menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/message.js"></script>		
+		<style>
+			a:link {color: #0000FF;text-decoration: none;} 
+			a:visited {color: #3366FF;text-decoration: none;}
+			a:hover {}
+			a:active {color: #FF0000;text-decoration: none;}
+			font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;}
+			input ,button , select{font-size:12px;}
+			.spoiler, .spoiler2{color: black; background-color:black;}
+			.spoiler:hover{color: white;}
+			.spoiler2:hover { background-color:white; }
+		</style>
+		
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVGMPW8LR4"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		
+		  gtag('config', 'G-SVGMPW8LR4');
+		</script>
+		
+</HEAD>
+
+<BODY leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table width="100%" height="100%" border="0" style="padding:20px;" cellspacing="0" background="images/archive_star_ban_bg_1997.jpg" id="table_top1">
+  <tr>
+    <td height="715" valign="top"><table width="100%" height="100%" border="0" cellspacing="0" bgcolor="#FFFFFF" style="padding:20px;border:1px #ccc solid;border-radius:10px;box-shadow:1px 1px 20px #ffffff;margin-right:8px;" id="table_top2">
+      <tr>
+        <td valign="top">
+		
+		<span id="j_space_top_data"></span>
+		<script>
+			var ajax_load_top = new sack();
+			ajax_load_top.requestFile = "init/top.html";
+			ajax_load_top.method  = 'GET'; 
+			ajax_load_top.element = 'j_space_top_data'; 
+	   </script>
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+
+            <td width="200" valign="top" id="mmenu"></td>
+			  <!-- InstanceBeginEditable name="EditRegion4" --> <!-- InstanceEndEditable -->
+            <td valign="top">
+			
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				  <tr>
+				    <td id="top_left_menu_td_m" align="center" bgcolor="#40588C" width="40" onClick="window.location='#d_menu_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">M</font></td>
+					<td id="top_left_menu_td_f" align="center" bgcolor="#336600" width="40" onClick="window.location='#d_file_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">F</font></td>
+					<td id="top_left_menu_td" style="text-align:right;background-color:#FFFFFF">
+							<span id="LoginBox_PC">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">About</a> | 
+								<a href="https://jplop.netlify.app/">NetLify</a> | 
+								<a href="https://jplop.neocities.org/">NeoCities</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">Project</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_M" style="display:none">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">AB</a> | 
+								<a href="https://jplop.netlify.app/">NL</a> | 
+								<a href="https://jplop.neocities.org/">NC</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">PJ</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_status"> | 
+								<a href="javascript:main_login_in_start();void(0);">管理</a> 
+							</span>
+					  </td>
+				  </tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="10" cellspacing="0">
+				  <tr>
+					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
+              <h2><img id="one_page_number_1" src="images/archive_star_ban_2022.jpg?nf_resize=fit&w=532&h=332" alt="使用JS實現書籤剪貼簿"  style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
+              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;使用JS實現書籤剪貼簿&gt;&gt;</font></h2>
+              <p><font face="Arial, Helvetica, sans-serif">使用JS實現書籤剪貼簿</font>說明：</p>
+              <blockquote>
+                <p>這段程式碼的功能非常實用，它可以幫助使用者快速將指定的文字內容複製到剪貼簿中。這意味著，當你在網站上遇到需要複製特定內容的時候，只要按下一個瀏覽器書籤，就能將該文字自動複製到剪貼簿中，讓你可以隨時在其他地方進行粘貼操作，非常方便。</p>
+                <p>假設你經常需要複製相同的文字，例如常用的電子郵件地址、網址、電話號碼，那麼這段程式碼就會變得特別實用。設想一下，在填寫訂單、申請表格或發送郵件時，每次都需要手動複製這些資訊，非常繁瑣。而有了這個程式碼，只要點擊一個書籤按鈕，所有需要的內容就會自動複製到剪貼簿中，省去了一大筆時間和操作。</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p><font face="Arial, Helvetica, sans-serif">使用JS實現書籤剪貼簿</font>適用：</p>
+              <blockquote>
+                <p>Chrome</p>
+                <p>Edge</p>
+                <p>FireFox</p>
+                <p>其他相容瀏覽器</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p><font face="Arial, Helvetica, sans-serif">使用JS實現書籤剪貼簿</font>教學：</p>
+              <blockquote>
+                <p>要將這段程式碼實現成一個瀏覽器書籤，讓電腦使用者隨時按下書籤按鈕就將特定字串放入剪貼簿中，可以按照以下步驟進行：</p>
+                <p>1. 開啟瀏覽器，建立一個新的書籤。</p>
+                <p> 2. 編輯書籤名稱，可以取一個容易辨識的名稱，例如「複製到剪貼簿」。</p>
+              <p> 3. 在書籤的網址欄位中，輸入下面這段程式碼：</p>
+              </blockquote>
+              <blockquote>
+                <p><b>
+                  <textarea name="textarea" cols="100" rows="5" wrap="off">javascript:
+var as_ct_temp_s="123", as_ct_temp = document.createElement('textarea');as_ct_temp.textContent = as_ct_temp_s;document.body.appendChild(as_ct_temp);as_ct_temp.select();document.execCommand('copy');as_ct_temp.remove();
+void(0);</textarea>
+                </b></p>
+                <p>4. 完成編輯，確保書籤已經儲存。</p>
+                <p> 完成上述步驟後，當你在瀏覽網頁時，只要點擊剛剛建立的書籤「複製到剪貼簿」，就會將字串<font color="#FF0000"><b> &quot;123&quot;</b></font> 複製到你的剪貼簿中。這對於需要經常複製相同內容的情況非常有用，例如你可以將常用的郵件地址、網址、電話號碼等放入剪貼簿書籤中，方便隨時使用。當你點擊書籤時，程式碼會自動執行，將指定的字串複製到剪貼簿中，不需要手動複製粘貼，節省了時間和操作。</p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p><font face="Arial, Helvetica, sans-serif">使用JS實現書籤剪貼簿</font>參考文獻：</p>
+              <blockquote>
+                <p><a href="https://chupai.github.io/posts/2101/clipboard/">https://chupai.github.io/posts/2101/clipboard/</a></p>
+                <p><a href="https://israynotarray.com/javascript/20220322/950742473/">https://israynotarray.com/javascript/20220322/950742473/</a></p>
+                <p><a href="https://blog.poychang.net/javascript-copy-clipboard/">https://blog.poychang.net/javascript-copy-clipboard/</a></p>
+                <p><a href="https://www.cnblogs.com/jimaww/p/16544703.html">https://www.cnblogs.com/jimaww/p/16544703.html</a></p>
+                <p><a href="https://blog.csdn.net/amyleeYMY/article/details/108577480">https://blog.csdn.net/amyleeYMY/article/details/108577480</a></p>
+                <p><a href="https://suyi.xyz/posts/js-clipboard/">https://suyi.xyz/posts/js-clipboard/</a></p>
+                <p><a href="https://www.jianshu.com/p/1ad45e4b2547">https://www.jianshu.com/p/1ad45e4b2547</a></p>
+                <p><a href="https://chat.openai.com/?model=text-davinci-002-render-sha">https://chat.openai.com/?model=text-davinci-002-render-sha</a></p>
+                <p><a href="https://ithelp.ithome.com.tw/articles/10280854">https://ithelp.ithome.com.tw/articles/10280854</a></p>
+                <p>&nbsp;</p>
+              </blockquote>
+					<!-- InstanceEndEditable --></td>
+				  </tr>
+				</table>
+			
+			
+			</td>
+          </tr>
+        </table></td>
+      </tr>
+     
+      <tr>
+        <td align="left" valign="top" style="display:none" id="mmenu_down">
+		
+			<table width="100%" border="0" cellpadding="10" cellspacing="0">
+			  <tr>
+				<td align="left" valign="top" bgcolor="#DEECF1"><b>其他資料</b><a name="d_menu_a" id="d_menu_a"></a></td>
+			  </tr>
+			  <tr>
+				<td align="left" valign="top" id="mmenu_down_data"></td>
+			  </tr>
+			</table>
+
+		</td>
+      </tr>
+      <tr>
+       <td height="80" valign="middle" bgcolor="#DEECF1" id="m_files" style="padding:20px;"></td>
+		
+		<script>
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/files.htm"; 
+			ajax_load_files.method  = 'GET'; 
+			ajax_load_files.element = 'm_files'; 
+			function start_ajax_load_files(){
+				ajax_load_files.runAJAX('');
+			}
+			setTimeout("start_ajax_load_files();",1000);
+	   </script>
+		
+      </tr>
+      <tr>
+        <td height="60" align="center" valign="middle">
+		
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="https://www.jplopsoft.idv.tw/">Jplopsoft</a> | 
+				<a href="https://twhkinc.jplopsoft.idv.tw/">THI</a> | 
+				<a href="https://app.netlify.com/sites/jplop/deploys">Netlify</a> | 
+				<a href="https://neocities.org/dashboard">NeoCities</a> | 
+				<a href="https://lionfree.net/">LionFree</a>
+			</font></p>
+			
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="util_aes_utility.html">加密工具</a> | 
+				<a href="teac_post_about.html">提交歸檔</a> | 
+				<a href="util_qrcode_online_gen_tool.html">QRCODE產生器</a> | 
+				<a href="util_gen_pass.html">密碼產生器</a>
+			</font></p>
+			
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+			
+		</td>
+      </tr>
+    </table>
+	</td>
+  </tr>
+</table>
+</BODY>
+<script>
+	
+</script>
+<!-- InstanceEnd --></HTML>

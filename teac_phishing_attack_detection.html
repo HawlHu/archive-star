@@ -1,0 +1,341 @@
+<HTML><!-- InstanceBegin template="/Templates/default.dwt" codeOutsideHTMLIsLocked="false" -->
+<HEAD>
+<!-- InstanceBeginEditable name="doctitle" -->
+<TITLE>歸檔星球 Archive Star - 利用機器學習檢測網絡釣魚攻擊</TITLE>
+<!-- InstanceEndEditable -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+<!-- InstanceBeginEditable name="head" -->
+
+	<meta name="keywords" content="利用機器學習檢測網絡釣魚攻擊">
+	<meta name="pagetype" content="分享">
+	<meta name="description" content="利用機器學習檢測網絡釣魚攻擊">
+<!-- InstanceEndEditable -->
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="mm_menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/message.js"></script>		
+		<style>
+			a:link {color: #0000FF;text-decoration: none;} 
+			a:visited {color: #3366FF;text-decoration: none;}
+			a:hover {}
+			a:active {color: #FF0000;text-decoration: none;}
+			font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;}
+			input ,button , select{font-size:12px;}
+			.spoiler, .spoiler2{color: black; background-color:black;}
+			.spoiler:hover{color: white;}
+			.spoiler2:hover { background-color:white; }
+		</style>
+		
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVGMPW8LR4"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		
+		  gtag('config', 'G-SVGMPW8LR4');
+		</script>
+		
+</HEAD>
+
+<BODY leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table width="100%" height="100%" border="0" style="padding:20px;" cellspacing="0" background="images/archive_star_ban_bg_1997.jpg" id="table_top1">
+  <tr>
+    <td height="715" valign="top"><table width="100%" height="100%" border="0" cellspacing="0" bgcolor="#FFFFFF" style="padding:20px;border:1px #ccc solid;border-radius:10px;box-shadow:1px 1px 20px #ffffff;margin-right:8px;" id="table_top2">
+      <tr>
+        <td valign="top">
+		
+		<span id="j_space_top_data"></span>
+		<script>
+			var ajax_load_top = new sack();
+			ajax_load_top.requestFile = "init/top.html";
+			ajax_load_top.method  = 'GET'; 
+			ajax_load_top.element = 'j_space_top_data'; 
+	   </script>
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+
+            <td width="200" valign="top" id="mmenu"></td>
+			  <!-- InstanceBeginEditable name="EditRegion4" --> <!-- InstanceEndEditable -->
+            <td valign="top">
+			
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				  <tr>
+				    <td id="top_left_menu_td_m" align="center" bgcolor="#40588C" width="40" onClick="window.location='#d_menu_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">M</font></td>
+					<td id="top_left_menu_td_f" align="center" bgcolor="#336600" width="40" onClick="window.location='#d_file_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">F</font></td>
+					<td id="top_left_menu_td" style="text-align:right;background-color:#FFFFFF">
+							<span id="LoginBox_PC">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">About</a> | 
+								<a href="https://jplop.netlify.app/">NetLify</a> | 
+								<a href="https://jplop.neocities.org/">NeoCities</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">Project</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_M" style="display:none">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">AB</a> | 
+								<a href="https://jplop.netlify.app/">NL</a> | 
+								<a href="https://jplop.neocities.org/">NC</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">PJ</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_status"> | 
+								<a href="javascript:main_login_in_start();void(0);">管理</a> 
+							</span>
+					  </td>
+				  </tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="10" cellspacing="0">
+				  <tr>
+					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
+              <h2><img id="one_page_number_1" src="images/archive_star_ban_2022.jpg?nf_resize=fit&amp;w=532&amp;h=332" alt="利用機器學習檢測網絡釣魚攻擊" style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
+              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;利用機器學習檢測網絡釣魚攻擊&gt;&gt;</font></h2>
+              <p>摘要</p>
+              <blockquote>
+                <p>「網絡釣魚」是一種數位攻擊，它對人們產生不利影響，客戶被引導到偽造的網站，並被欺騙以獲取他們的敏感和私人數據，其中包括記錄的關鍵詞、貨幣數據、ATM提款卡數據等。最近保護敏感的記錄，保護自己免受惡意軟件或網絡釣魚的影響是很脆弱的。</p>
+                <p>人工智能是對信息檢查的調查，對計算的邏輯調查已經顯示了結果。對抗網絡釣魚的衝刺者，具有顯著的感知力和重罪的結果，可與護理店相媲美，並定制對抗網絡釣魚的方法。本文研究了機器識字路線在識別網絡攻擊方面的關聯，並記錄了它們的優點和缺點。</p>
+                <p>有無數的機器學習計算已經被挖掘出來，以宣布相關的決定，作為反對網絡釣魚的工具。</p>
+                <p>我們製作了一個網絡釣魚部分的框架，該框架提取了預計用於識別網絡釣魚的能力。我們同樣利用了數字大綱，以及對習慣的機器學習方法的全面調查，如決策樹、隨機森林、多層感知器、XG Boost分類器、SVM、Light BGM分類器、Cat Boost分類器，以及涵蓋接地的亮點選擇，它包含了URL的元數據，並協助決定一個網站是否合法。</p>
+                <p>&nbsp;</p>
+                </blockquote>
+              <p>簡介</p>
+              <blockquote>
+                <p>機器識圖是處理管理教育的一種多學科方式，它被用來製作智能模型。它在廣泛的真正任務中具有重要意義，如圖像識別、數據挖掘、保密系統和圖像識別都包括在內。這個框架是區分釣魚網站衝刺者的材料，因為這個問題可以被改變成一個部分任務。</p>
+                <p>識別網絡釣魚的模型是利用機器教育的方式對舊的網絡衝刺者進行分類，而且這些模型可以被用來識別網絡釣魚。對於一個代表，如果一個石頭人需要檢查無論一個網站是否合法，ML模型將預見無論它是否受到保護。</p>
+                <p>成績的重要組成部分是數據集內的網絡點的亮點，以及精確部分的舊網絡釣魚點的分類，並在創建機器學習模型來反對釣魚的個性。</p>
+                <p>如果你想訪問非法網站，並發現一些敏感的數據，如吸毒者的姓名、銀行信息、銀行卡信息、關鍵詞等等。基本安全在網絡上是至關重要的，網絡釣魚已經引起了各種專家和實驗者的好奇心。每當有兩個非常相似的網絡衝刺者，並且石家莊人在活著的時候輸入了由主要衝刺者加入的數據，就應該對另一個第二衝刺者提出一個準備好的通信。</p>
+                <p>當兩個網絡短跑運動員不一樣的時候，替代短跑運動員誇大了一個合法的點是很愚蠢的，沿著這個思路，數據可以在沒有準備的情況下被傳遞，即短跑運動員是一個合法的短跑運動員，根據觀察詞，利用追逐機器，或者從一堆預先定義的短跑運動員中選擇[1]。</p>
+                <p>有一些資產、分佈和策略可以幫助網絡客戶察覺並遠離釣魚網站。目前的一部分網絡釣魚識別框架是為區分網絡釣魚網站而配備的，其準確率達到了很高的水平（&gt;99%）。而在錯誤地對真實網站進行分類時，其準確率卻低得令人吃驚（0.1%）。</p>
+                <p>儘管這些程序中有相當一部分利用計算機推理，但洞察力基本上依賴於令人難以置信的休眠特徵的安排，主要是使用詞組策略[2]。由於釣魚網站的確認方法管理和支持標記的數據集準備。按照不幸的洞察力，那些適當地需要最少的信息來準備的行政部門因此是難以想像的參與。</p>
+                <p>由於不可避免的釣魚網站，我們真的希望在起步階段遠離釣魚網站的攻擊。<br>
+                  在啟動階段遠離釣魚網站的攻擊，關注銀行、基於網絡的交換、國家和網絡客戶。儘管事實上，攻擊者利用各種機械技術在網絡上冒出客戶，但區分釣魚網站是一項麻煩的工作[3]。釣魚網站識別框架的結果在很大程度上依賴於在合理的時間內明確區分釣魚網站。作為普通釣魚網站確認方法的選擇，一些富有想像力的釣魚網站確認策略已經被創建並提出，以成功預測網站釣魚行為。</p>
+                <p>近年來，考慮到受控的人工智能程序，傑出的釣魚網站揭示策略變得更加正常，與普通的釣魚網站確認技術相比，這些策略更加靈活，對網絡環境也更加出色[4]。開展這項工作的靈感來自於釣魚網站攻擊的方式越來越現代化，而且它們的數量在Covid-19大流行期間一直在擴大。根據McAfee Covid-19威脅報告。</p>
+                <p>攻擊者一直在通過與Covid有關的有害應用程序、網絡釣魚努力和惡意軟件來控制這一流行病，並關注測試、藥品、修復和遠程工作等主題。根據KnowBe4，Covid在56%的模擬網絡釣魚測試中被視為。虛擬娛樂信息是另一種網絡釣魚攻擊。 KnowBe4點擊率最高的非正式組織電子郵件主題在類似報告中發現了秘密短語、圖片標籤和新信息。另一種是基於網絡的視頻課程，其中有人隱藏報復性網絡連接，可能會帶來網絡釣魚的高風險。</p>
+                <p>在這次審查中，我們利用隨機森林計算，這是一種它是一種用於復發、特徵描述和不同工作的綜合學習技術，其工作原理是在一個準備集中收集選擇樹，並為奇異的樹或甚至類的方法帶來一個平均期望值的類[5]。田錦浩在1995年提出了不規則選擇樹的正常策略[6]。他強調，只要任意限制的樹林只是意識到選擇的方面，那麼在傾斜的超平面旁邊穿行的樹林無疑可以隨著發展而增加準確性，而不會受到過度訓練的影響。</p>
+                <p>更加複雜的分類器的感知獲得了明顯的單調尖銳的資格的精確性，以總的信念，分類器的問題可能只是在被過度擬合激怒之前遞增到準確率的一個標誌。</p>
+                <p>本文的第2部分描述了相關的工作。第3部分研究了
+                  數據集和包括選擇，而第4部分顯示了一個更明確的程序和執行檢查。第6部分是確定，後面是參考文獻的羅列。</p>
+                </blockquote>
+              <p>&nbsp;</p>
+              <p>相關作品</p>
+              <blockquote>
+                <p>在[7]中，他們規劃了一個框架，對社會建築師的展示進行了行動。
+                  架構師，以及一個顯示心智、評估和防範社會設計基礎攻擊的總模型。他們真的提出了一個跨領域的多分法計劃，使用標準的未知方言管理方式來防範社會設計基礎的攻擊。</p>
+                <p>該揭秘能夠快速確認某個試圖訂購可怕事件的叢林殺手的揭秘特技。在這個特定的計劃中，他們利用了一個名為安全和健康教育以及處理評估（STPE）的計劃，以及這個計劃包含了一個與5個階段一起的例子。這個計劃有助於觀察來自社會計劃攻擊的脆弱的詞。在另一種風格中，他們利用一個釣魚網站</p>
+              <p>在這個特定的階段，我們公司使用Link Guard的配方來查看兩個URL，然後根據結果，處理方法將明確地進行到相應的階段。以圖片為基礎的短跑匹配是替代階段。在這一階段，將拍攝第一個網站衝刺者以及可疑的網站衝刺者的圖像；這是由法律計劃或利用網絡衝浪的牽引器拍攝網站衝刺者來完成的。從這一點來看，他們分析圖片，但首先他們改變了圖片，所以只是有一個許多檢查。他們習慣於改變類似於DFT（離散傅里葉變換）、DCT（離散餘弦變換）和交叉連接的方式。在任何情況下，如果釣魚點不能利用URL基礎評估進行連接，我們就利用視覺接近度為基礎的披露。</p>
+              <p>最近的一部分趨勢是決定一個網站是否是真實的[8]。 Waleed Ali提出了一個框架，利用管理的機器教育風格，比較了廣泛的基礎能力組織（RBFN）、Nave Bayes分類器（NB）、反向擴散腦組織（BPNN）、決策樹、k-近鄰（KNN）、隨機木（RF）和支持向量機（SVM），以及基於機器熟練度分類器的覆蓋點確定[8]。神經網絡模型在審查結束時被利用到章節週期中，但由於它的組織性不夠，所以傾向於不適合[9]。在任何情況下，只要對數據集中的每一件事進行組織，它就會過度適合準備信息收集。</p>
+              <p>&nbsp;</p>
+              </blockquote>
+              <p>數據集</p>
+              <blockquote>
+                <p>我們面臨的主要挑戰是為模型尋找合法的數據集的模型。在這個領域工作時，各種實驗者都在處理類似的問題。因此，冒險尋找一個符合每一種情況的數據集是非常脆弱的。調查設計的數據集從根本上說是從MillerSmiles和Phish Tank庫中提取的，並利用信息挖掘的計算方法進行了刪除。</p>
+                <p>數據集中被移除的元素是通過物理方式完成的，然而個別業務與框架有基本的影響，這可能會影響對網絡攻擊的弱點。這項工作所使用的數據集是由參考文獻中給出的連接完成的。 [4]. 該數據集包含了新的元素，以及一個試驗骨架，其中新的標準被分配給了其中，新的標準被分配到一些顯著的邊界。</p>
+                <p>該數據集包含三個獨特的種類和總共17個邊界，這些邊界被記錄在地址欄下。</p>
+                <p> 被記錄在地址欄接地的特徵下面。 'URL的範圍'、'URL中的IP地址'、'URL中的&quot;@&quot;圖像'、'<br>
+                    URL的長度'，'URL的深度'，'URL中的重定向'//'，'域名中的http/https'，'使用URL縮短服務&quot; Bitsy URL′′′，'域名中的前綴後綴'。圈子接地氣的功能。'DNS記錄'、'網絡業務'、'域名年齡'、'域名結束期域'。以HTML和JavaScript為基礎的功能。 'IFrame Redirection', 'Status Bar Customization, 'Handicapping<br>
+                    右鍵點擊'，網站鼓勵'。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>方法論</p>
+              <blockquote>
+                <p>這個計劃的框架條件是英特爾中心i5處理器，8GB內存和5GB免費硬盤空間。<br>
+                  GB的內存，以及5GB的自由硬盤空間。它是在GNU/Linux上運行的（但同樣也可以在Windows/Mac OS上運行）。</p>
+                <p>在Jupyter筆記本中，利用其庫做了一個Python配置。我們同樣可以利用Google Collab來做這個計劃。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>決策樹分類器</p>
+              <blockquote>
+                <p>決策樹是一種非參數調節的能力框架，用於倒退和分段。決策樹分類器將產生一個模型，利用從信息亮點中推導出的選擇能力規則來預測目標變量的評估。一批如果可能的額外選擇原則與選擇樹計算相連。儘管如此，選擇準則會更加混亂，而且模型會變得更加精確，如果樹真的更加深刻的話[10]。選擇樹分類器以類似樹的結構來驅動模型。該計算將數據集隔離成較低的子集，同時也同樣進一步發展合作的選擇樹。</p>
+                <p>最終，獲得的結果將是一棵帶有支持敲擊和選擇敲擊的樹。支持敲擊涉及到一個部分或選擇。一個選擇束是一個幾乎明明會有兩個或更多的分支。根擊是樹中可以想像到的最高的選擇束，與搶手的指標相比較。選擇樹同時監督數學和絕對信息。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>隨機森林分類器</p>
+              <blockquote>
+                <p>隨機木材是一種規範的人工智能計算，可以流暢地執行節和倒退的工作。剖面支持我們所有因素的信息的順序。</p>
+                <p>回溯支持對信息的最終產品進行預測，比如根據個人的經驗預測其薪酬。隨機森林是一個依賴於信息群的框架。裝備計算通過連接兩個或更多的相等或無誤的計算來描述對象。每當利用不一致的木材分類器時，它首先會從準備的數據集中挑選出一個不穩定的K片信息，並進一步為每一個感興趣的數據繪製選擇樹[11]。此外，我們可以順利地選擇預期的'N'個樹，無休止地重複最初的步驟。最後，對於一個新的數據點，運行每一個'N'棵樹來預見它所處的請求，並將新的數據點分配給得票最多的請求。
+                    要創建的樹的一般數量，即n個評估者，是一個可以利用的起始邊界。</p>
+                <p> 在一個不一致的木材分類器中可以利用的起始邊界。通過惆悵，這個特定的激勵將是10。邊界最極端的深刻性也同樣表徵了樹的最大深刻性。在任何情況下，如果這個邊界沒有被表徵，那麼通過惆悵，它被設置為無。</p>
+                <p>儘管如此，如果沒有的話，敲擊聲會被拉長，直到葉子徹底消失。臨近的重要邊界是最大的支持性敲擊。這個邊界被用來最好地首先增加具有最大支撐敲擊的樹木。這也是通過放棄設置為無的，顯示出無地平線的支撐物敲擊數。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>多層感知器</p>
+              <blockquote>
+                <p>人工智能網絡領域大體上被稱為
+                  稱為腦網絡的感知器，是最有價值的一種腦組織。</p>
+                <p>感知器是一個單獨的神經元模型，作為更大的大腦組織的建立而填充。 PC精明的一部分研究瞭如何利用常規智能的簡單模型來解決這個問題。<br>
+                    常規智能的直接模型如何被用來打破敏感的計算任務，與機器熟練度中的預言演示任務相類似。問題不在於建立可行的大腦模型，而在於培養持久的計算和信息結構，以用於顯示脆弱的問題。大腦網絡的力量來自於他們找到描繪你的準備信息，並將其與你需要預測的增長變量聯繫起來。</p>
+                <p>人工網絡在這個意義上學習映射。他們在數字上能夠學習任何一種規劃能力，並且已經被證明是一種廣泛的估計計算。大腦網絡的各種層次的構造增加了它們的預言能力。</p>
+                <p>信息結構有能力在生動的尺度或決定中選擇（學習如何解決）亮點，並將它們全部加入到尖端的要求亮點中。對於劃線，從線條到線條和形狀的聚集。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>XG Boost分類器</p>
+              <blockquote>
+                <p>XGBoost是地球上最引人注目的機器教育計算之一。<br>
+                  在這個星球上第二。無論如何，不管伏羲的任務是倒退還是分段[12]。 XGBoost以創造出比其他人工智能計算無限好的結果而聞名。<br>
+                  AI計算。事實上，自從它開始以來，它已經成為管理有組織信息的 &quot;尖端 &quot;機器教育計算。 XGBoost是一個適當的等級支持分類，已經被改進得令人難以置信。<br>
+                  它被改進為令人難以置信的引人注目的、可改變的和可移植的。它利用等級提升的優勢來進行機器教育計算。 XGBoost提供了類似樹的幫助（也稱為GBDT、GBM），可以迅速而準確地解決廣泛的信息洞察問題。<br>
+                  XGBoost是一種收集熟練度的安排。一般來說，它並不是可以想像，完全依賴於一個單獨的機器教育模型的工作。</p>
+                <p>裝備教育提供了一種有目的的方式來處理鞏固不同學生的預言力。其結果是一個單獨的模型，給出了不同模型的累積結果。<br>
+                    涉及裝備的模型，也就是所謂的基礎學生。<br>
+                    可以是來自類似的教育計算，也可以是來自各種能力計算。儲存和支持是大體上用於收集熟練程度的兩種不同方式。儘管這兩種不同的方式可以在轉換時利用廣泛的事實模型，但最著名的活動可能是選擇樹。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>支持向量機（SVM）</p>
+              <blockquote>
+                <p>支持向量機（SVM）是一種監督學習計算。<br>
+                      它被用於分類和回歸問題。然而，它基本上被用於機器學習的分類問題。支持向量機的計算可能會產生最好的線或選擇限制<br>
+                      可以將一個n層的區域分成不同的類別，這樣我們就可以在接近的時間內迅速將新的信息放入合適的類別分類中。</p>
+                <p>超平面是最佳選擇極限[13]。 SVM挑選出指導超平面發展的離譜的焦點/向量。這些離譜的情況被稱為幫助向量，該計算被稱為支持向量機。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>輕型BGM分類器 </p>
+              <blockquote>
+                <p>輕型GBM是一個快速的、可傳達的、卓越的表現角度的幫助系統。<br>
+                      系統，可用於定位、分類和其他各種各樣的人工智能任務[14]。它被認為是可傳達的和熟練的，具有伴隨的優勢。</p>
+                <p>- 更快的準備速度和更高的生產力。<br>
+      - 更低的內存利用率。<br>
+      - 更好的精確性。<br>
+      - 支持平等和GPU學習。<br>
+      - 配備了照顧巨大的信息。<br>
+      - 提供超過100個Light GBM的邊界。</p>
+                <p>Light GBM向上遞增樹的級別，而其他基於樹的<br>
+                    學習計算均勻地增加樹的級別。</p>
+                <p>這意味著Light GBM是逐樹發展的，而其他計算方法是逐級發展的。毫無疑問，它將選擇具有最佳delta不幸的葉子來增量。在開發類似的葉子時，從葉子的角度計算比從水平的角度計算更能真正減少不幸。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>Cat Boost分類器 </p>
+              <blockquote>
+                <p>Cat Boost是一種在選擇樹上進行傾向性幫助的計算。它是<br>
+                      它是由Yandex的分析師和架構師規劃的，並且在Yandex的搜索、建議框架、個人同事、自動駕駛汽車、天氣狀況測量以及大量不同的任務中得到了真正的利用。 Cat Boost是一台機器，它最近被公開發布，以學習<br>
+                      計算。它與穀歌的TensorFlow和蘋果的Core ML等深刻的學習結構迅速結合起來。它可以與廣泛的信息類型合作，協助組織處理廣泛的問題。此外，它還擁有同類產品中最好的精度[15]。它在兩個方面特別具有可行性。</p>
+                <p><br>
+                      - 它能產生一流的結果，而不需要其他人工智能策略通常需要的廣泛信息準備，並且<br>
+                      - 對一些組織問題後的更細微的信息組織提供了引人注目的容器外支持。 &quot;Cat Boost &quot;的標題始於兩個術語 &quot;Class &quot;和 &quot;Boosting&quot;。</p>
+                <p>&nbsp;</p>
+                </blockquote>
+              <p>結果和討論</p>
+              <blockquote>
+                <p>表1顯示了光GBM、XG Boost、多層感知、CatBoost分類器、隨機森林、決策樹和SVM等模型的準確性。圖1顯示了不同技術的性能。</p>
+                <p>通過測量準確性。與其他模型相比，LIGHT BGM的準確率為85.5%，表現出色。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>未來的範圍 </p>
+              <blockquote>
+                <p>在未來，一個廣泛的網絡釣魚攻擊發現結果網絡點，而無需石家莊人的參與。</p>
+                <p>然而，一個框架或明智的網絡吸引結果必須負責保證該點是真實的，並提前通知業主，如果一個點是要求登錄憑證或敏感信息。</p>
+                <p>網站的健康和心臟檢查在整個個人衝浪已經結束，健康和心臟檢查在整個個人衝浪已經結束是一個需求的時刻，一個常規的，除了一個強大的服務是必需的。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>結論 </p>
+              <blockquote>
+                <p>如今，網絡釣魚是對個人數據的一個重要威脅。</p>
+                <p>檢測釣魚網站實際上是一項令人厭煩的任務，因為釣魚者的結果實際上正在迅速增強。為了克服這個問題，研究人員和專家們使用了很多方法和技術，但這導致了檢測價格的降低。</p>
+                <p>在我們的工作中，我們使用了很多方法，如決策樹、隨機森林、多層感知器、XG Boost分類器、SVM、Light BGM分類器、Cat Boost分類器。我們的團隊觀察到，與表1所示的其他各種方法相比，Light GBM獲得了最大的精度，約為85.5%。而一類SVM是精度最低的，約為79.6%。</p>
+                <p>如前所述，這些算法被用來開發模型和預測結果。我們的團隊發現，輕型GBM的表現明顯優於之前討論的其他技術或算法。實際上防止了信息的過度擬合，這是一個關鍵特徵。因此，Light GBM分類器是最適合我們檢測網站是否是釣魚網站的。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>競爭性利益聲明</p>
+              <blockquote>
+                <p>作者聲明，他們沒有已知的競爭性財務利益或個人關係，可能會影響本文所報告的工作。<br>
+                      競爭的經濟利益或個人關係，可能會影響本文所報告的工作。</p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>參閱文件：</p>
+              <blockquote>
+                <p>Phishing attack detection using Machine Learning</p>
+              </blockquote>
+              <p>&nbsp;</p>
+					<!-- InstanceEndEditable --></td>
+				  </tr>
+				</table>
+			
+			
+			</td>
+          </tr>
+        </table></td>
+      </tr>
+     
+      <tr>
+        <td align="left" valign="top" style="display:none" id="mmenu_down">
+		
+			<table width="100%" border="0" cellpadding="10" cellspacing="0">
+			  <tr>
+				<td align="left" valign="top" bgcolor="#DEECF1"><b>其他資料</b><a name="d_menu_a" id="d_menu_a"></a></td>
+			  </tr>
+			  <tr>
+				<td align="left" valign="top" id="mmenu_down_data"></td>
+			  </tr>
+			</table>
+
+		</td>
+      </tr>
+      <tr>
+       <td height="80" valign="middle" bgcolor="#DEECF1" id="m_files" style="padding:20px;"></td>
+		
+		<script>
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/files.htm"; 
+			ajax_load_files.method  = 'GET'; 
+			ajax_load_files.element = 'm_files'; 
+			function start_ajax_load_files(){
+				ajax_load_files.runAJAX('');
+			}
+			setTimeout("start_ajax_load_files();",1000);
+	   </script>
+		
+      </tr>
+      <tr>
+        <td height="60" align="center" valign="middle">
+		
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="https://www.jplopsoft.idv.tw/">Jplopsoft</a> | 
+				<a href="https://twhkinc.jplopsoft.idv.tw/">THI</a> | 
+				<a href="https://app.netlify.com/sites/jplop/deploys">Netlify</a> | 
+				<a href="https://neocities.org/dashboard">NeoCities</a> | 
+				<a href="https://lionfree.net/">LionFree</a>
+			</font></p>
+			
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="util_aes_utility.html">加密工具</a> | 
+				<a href="teac_post_about.html">提交歸檔</a> | 
+				<a href="util_qrcode_online_gen_tool.html">QRCODE產生器</a> | 
+				<a href="util_gen_pass.html">密碼產生器</a>
+			</font></p>
+			
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+			
+		</td>
+      </tr>
+    </table>
+	</td>
+  </tr>
+</table>
+</BODY>
+<script>
+	
+</script>
+<!-- InstanceEnd --></HTML>

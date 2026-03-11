@@ -1,0 +1,1773 @@
+<HTML><!-- InstanceBegin template="/Templates/default.dwt" codeOutsideHTMLIsLocked="false" -->
+<HEAD>
+<!-- InstanceBeginEditable name="doctitle" -->
+<TITLE>歸檔星球 Archive Star - IOT學習筆記 ─ 使用Arduino ESP32 </TITLE>
+<!-- InstanceEndEditable -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+<!-- InstanceBeginEditable name="head" -->
+
+	<meta name="keywords" content="IOT學習筆記 ─ 使用Arduino ESP32">
+	<meta name="pagetype" content="教學">
+	<meta name="description" content="IOT學習筆記 ─ 使用Arduino ESP32">
+	
+	<script type="application/ld+json">
+		{
+		  "@context": "https://schema.org",
+		  "@type": "WebPage",
+		  "url": "https://jplop.netlify.app/teac_post_about.html",
+		  "name": "IOT學習",
+		  "description": "IOT學習筆記、相關教學、技術文獻。"
+		}
+	</script>	
+<!-- InstanceEndEditable -->
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="mm_menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/message.js"></script>		
+		<style>
+			a:link {color: #0000FF;text-decoration: none;} 
+			a:visited {color: #3366FF;text-decoration: none;}
+			a:hover {}
+			a:active {color: #FF0000;text-decoration: none;}
+			font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;}
+			input ,button , select{font-size:12px;}
+			.spoiler, .spoiler2{color: black; background-color:black;}
+			.spoiler:hover{color: white;}
+			.spoiler2:hover { background-color:white; }
+		</style>
+		
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVGMPW8LR4"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		
+		  gtag('config', 'G-SVGMPW8LR4');
+		</script>
+		
+</HEAD>
+
+<BODY leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table width="100%" height="100%" border="0" style="padding:20px;" cellspacing="0" background="images/archive_star_ban_bg_1997.jpg" id="table_top1">
+  <tr>
+    <td height="715" valign="top"><table width="100%" height="100%" border="0" cellspacing="0" bgcolor="#FFFFFF" style="padding:20px;border:1px #ccc solid;border-radius:10px;box-shadow:1px 1px 20px #ffffff;margin-right:8px;" id="table_top2">
+      <tr>
+        <td valign="top">
+		
+		<span id="j_space_top_data"></span>
+		<script>
+			var ajax_load_top = new sack();
+			ajax_load_top.requestFile = "init/top.html";
+			ajax_load_top.method  = 'GET'; 
+			ajax_load_top.element = 'j_space_top_data'; 
+	   </script>
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+
+            <td width="200" valign="top" id="mmenu"></td>
+			  <!-- InstanceBeginEditable name="EditRegion4" --> <!-- InstanceEndEditable -->
+            <td valign="top">
+			
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				  <tr>
+				    <td id="top_left_menu_td_m" align="center" bgcolor="#40588C" width="40" onClick="window.location='#d_menu_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">M</font></td>
+					<td id="top_left_menu_td_f" align="center" bgcolor="#336600" width="40" onClick="window.location='#d_file_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">F</font></td>
+					<td id="top_left_menu_td" style="text-align:right;background-color:#FFFFFF">
+							<span id="LoginBox_PC">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">About</a> | 
+								<a href="https://jplop.netlify.app/">NetLify</a> | 
+								<a href="https://jplop.neocities.org/">NeoCities</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">Project</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_M" style="display:none">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">AB</a> | 
+								<a href="https://jplop.netlify.app/">NL</a> | 
+								<a href="https://jplop.neocities.org/">NC</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">PJ</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_status"> | 
+								<a href="javascript:main_login_in_start();void(0);">管理</a> 
+							</span>
+					  </td>
+				  </tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="10" cellspacing="0">
+				  <tr>
+					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
+              <h2><font face="Arial, Helvetica, sans-serif"><script>
+			  	//宣告變數
+					var pwdl_temp_p_name2="";
+					var pwdl_temp_p_name2_edu_string="https://wisdom.nutc.edu.tw/~ccliu/im/msa111/";
+			  	//取得父親網址
+					try {pwdl_temp_p_name2=parent.window.location.href;} catch (error) {}
+					if(pwdl_temp_p_name2==pwdl_temp_p_name2_edu_string){
+						document.write("1711131010 胡仁豪 - IOT嵌入式系統(Arduino ESP32)");
+					}else{
+						document.write("IOT嵌入式系統(Arduino ESP32)");
+					}
+			  </script></font></h2>
+			  
+              <hr style="border: 3px solid #eeeeee;  border-radius: 3px;">
+              <p id="index">文件索引：</p>
+              <blockquote>
+                <table width="100%" border="1" cellpadding="10" cellspacing="0" bordercolor="#CCCCCC" bgcolor="#F2F2F2" background="images/20220929/iot_index_bg.jpg" style="background-repeat:no-repeat;background-position:right bottom;border-radius: 10px;">
+                  <tr>
+                    <td style="border-radius: 10px;">
+						<p><font size="2"><a href="#pdf_download">&lt;&lt;作業(PDF下載)&gt;&gt;</a></font>
+						<p><font size="2"><a href="#doc_source_download">&lt;&lt;練習題(WORD下載)&gt;&gt;</a></font>		
+						<p><font size="2"><a href="#youtube_play">&lt;&lt;練習題(影片撥放)&gt;&gt;</a></font>		
+						<p><font size="2"><a href="#log">&lt;&lt;學習日誌&gt;&gt;</a></font>
+						<p><font size="2"><a href="#openapi">&lt;&lt;關於OPENAPI&gt;&gt;</a></font></p>
+                      <p><font size="2"><a href="#support">&lt;&lt;文件適用&gt;&gt;</a></font></p>
+                      <p><font size="2"><a href="#document">&lt;&lt;參考文獻&gt;&gt;</a></font></p></td>
+                  </tr>
+                </table>
+                <p>&nbsp;</p>
+                </blockquote>
+              <p id="pdf_download">IOT嵌入式系統作業(PDF下載)：</p>
+              <blockquote>
+			  	<span style="padding:5px"><img src="images/20221015/forld_icon.jpg" width="25" height="25" ></span> <a href="javascript:if(document.getElementById('hidden_work_1-n').style.display==''){document.getElementById('hidden_work_1-n').style.display='none';}else{document.getElementById('hidden_work_1-n').style.display='';}void(0);">作業1： C++ 作業 [展開目錄]</a><br>
+				<div id="hidden_work_1-n">
+				<blockquote>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/t1.htm"></iframe><br>
+			  	<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/t2.htm"></iframe><br>
+			  	<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s1.htm"></iframe><br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s2.htm"></iframe><br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s3.htm"></iframe><br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s4.htm"></iframe><br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s5.htm"></iframe><br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s6.htm"></iframe><br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="136" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s8.htm"></iframe><br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s10.htm"></iframe><br>
+				</blockquote>
+				</div>
+				<script>
+					document.getElementById('hidden_work_1-n').style.display='none'; //預設關閉
+				</script>
+				<hr align="left" width="100%" size="3" noshade style="background-image: linear-gradient(to right,#cccccc, #ffffff);border:0px">
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/a1.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/a2.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/a3.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s11.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s12.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s13.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s14.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s15.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s17.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s16.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s18.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s19.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s20.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s21.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s22.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s23.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s24.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s25.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s27.htm"></iframe> <br>
+				<span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/s26.htm"></iframe> <br>
+				<p><font color="#FF0000" size="2">※需使用<a href="https://www.microsoft.com/zh-hk/windows/computers?r=1">PC Windows</a> <a href="https://www.microsoft.com/zh-tw/edge?form=MA13FJ">瀏覽器</a>下載 PDF 檔案。</font></p>
+			  </blockquote>
+			  <p>&nbsp;</p>
+			  <p id="youtube_play">IOT嵌入式系統作業(影片撥放)：</p>
+			  <blockquote>
+				  <table border="0" cellpadding="5" cellspacing="0" bordercolor="#000000" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/-XR5lLbwwys" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業2：Arduino作業 - 使得三顆 LED 輪流閃爍。</font></td>
+					  </tr>
+					</table>
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://youtube.com/embed/CwLY2X4qitA?feature=share" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業3：Arduino作業 - 使得三顆 LED 一起呼吸。</font></td>
+					  </tr>
+					</table>
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/05q9jzM8Tlc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業4：Arduino作業 - 使得三顆 LED 輪流呼吸。</font></td>
+					  </tr>
+					</table>
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/o4iZ7TMvQtU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業5：Arduino作業 - 使用ESP32實現蜂鳴器播放音樂。</font></td>
+					  </tr>
+					</table>
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/htRD5LJn7jY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業6：Arduino作業 - 實作簡易的門窗警報裝置。</font></td>
+					  </tr>
+					</table>
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/hHktmE1RR7g" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業7：Arduino作業 - 實作計數器，按一次按鈕，計數器加1，計算按鈕次數。</font></td>
+					  </tr>
+					</table>
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/9g_6WRGJcuM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業8：Arduino作業 - 每按一次按鈕，計數器加1並顯示於Monitor，同時計數器<br>　　　　為奇數時 LED ON，偶數時則 LED OFF。</font></td>
+					  </tr>
+					</table>
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/be5RAjqB3fg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業9：Arduino作業 - 實作轉動可變電阻，控制LED亮度。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/X8bM3iJ_enE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業10：實作轉動可變電阻，可變蜂鳴器音調。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/PGfHxNZWBAI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業11：實作WeMos D1 R32與WiFi 路由器/分享器 連線。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/gaJ0fiCI2w0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業12：實現 WeMos D1 R32與 Linux 主機通訊。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/tbWKJvEL6nI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業13：實現 WeMos D1 R32 使用Line Notify 傳送訊息給 LINE。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/tZCI3SIFF18" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業14：實現基於發送訊息到LINE的門窗警報系統。</font></td>
+					  </tr>
+					</table>
+					
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/e362ttSy3Sg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業15：倉庫溫度異常發送訊息到LINE。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/bzg73WWt7eY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業16：使用 Python 或 PHP 發送 LINE訊息。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/66jXVWWKYXU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業17：實現使用LCD顯示當下的溫度與濕度。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/66jXVWWKYXU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業18：實現ESP32傳送DHT-11溫濕度到Thingspeak。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/iQfTw9wEGWc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業19：使用瀏覽器透過Arduino Web Server控制兩個LED。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/lW5S196PpCA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">作業20：使用 HTML(using POST) + PHP 透過Arduino Web Server控制兩個LED。</font></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<table border="0" cellpadding="5" cellspacing="0" style="box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2); ">
+					  <tr><td><iframe width="560" height="315" src="https://www.youtube.com/embed/GFVwULIIRRs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td></tr>
+					  <tr><td><font color="#666666" size="2">題目：期末專題：分散式PORTLOG架構，使用Iot當作節點硬體。</font></td>
+					  </tr>
+					</table>
+					
+					
+					
+					
+					
+			   </blockquote>
+			  <p>&nbsp;</p>
+			  <p id="doc_source_download">IOT嵌入式系統練習題(WORD下載)：</p>
+              <blockquote>
+			  	<iframe width="100%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/w1.htm"></iframe>
+			  </blockquote>
+			  
+              <p>&nbsp;</p>
+              <p>IOT嵌入式系統學習日誌：</p>
+              <blockquote>
+                <p>&nbsp;</p>
+                <p><b>2023/1/4 - 嵌入式 Web Server 允許跨網域存取</b></p>
+                <blockquote>
+                  <p>server.enableCORS(true);</p>
+                </blockquote>
+                <p>&nbsp;</p>
+                <p><b>2022/12/28 - C++ Lamdba 匿名功能宣告</b></p>
+                <blockquote>
+                  <p>#include&lt;iostream&gt;<br>
+                    #include&lt;string&gt;<br>
+                    #include&lt;vector&gt; <br>
+                    using namespace std; <br>
+                    using std::cout; using std::cin;<br>
+                    using std::endl; using std::string;<br>
+                    using std::vector;</p>
+                <p>int main() { </p>
+                <blockquote>
+                  <p> [](){</p>
+                  <blockquote>
+                    <p> cout &lt;&lt; &quot;Lamdba&quot; &lt;&lt; endl; </p>
+                  </blockquote>
+                  <p> }(); </p>
+                </blockquote>
+                <p> }</p>
+                </blockquote>
+                <p>&nbsp;</p>
+                <p><b>2022/12/27 - 使用JSON套件</b></p>
+                <blockquote>
+                  <p><b>安裝ArduinoJson套件： </b></p>
+                  <blockquote>
+                    <p>至”工具”&gt;&gt;”管理程式庫”</p>
+                    <p>搜尋 <b>ArduinoJson</b></p>
+                    <p>作者為 <b>Benoit Blanchon</b></p>
+                    <p>&nbsp;</p>
+                  </blockquote>
+                  <p><b>原始碼：</b></p>
+                  <blockquote>
+                    <p><font color="#009900">//醬是創客 開發實作的好夥伴</font></p>
+                    <blockquote>
+                      <p><font color="#9900FF"> #include &quot;<font color="#FF0000">WiFi.h</font>&quot;<br>
+                          <b>#include &lt;ArduinoJson.h&gt;</b><br>
+                          <b>StaticJsonDocument&lt;200&gt; json_doc;</b><br>
+                            char json_output[100];<br>
+                            <b>DeserializationError json_error;</b><br>
+                            const char* payload_room;<br>
+                            const char* payload_msg;<br>
+                            <br>
+                            void setup() {</font></p>
+                      <blockquote>
+                        <p><font color="#9900FF"> Serial.begin(115200);<br>
+                              <font color="#009900">//字串轉JSON</font></font></p>
+                        <blockquote>
+                          <p><font color="#9900FF"> json_doc[&quot;room&quot;] = &quot;<font color="#FF0000">chosemaker</font>&quot;;<br>
+            json_doc[&quot;msg&quot;] = &quot;<font color="#FF0000">www.chosemaker.com</font>&quot;;<br>
+                                      <b>serializeJson(json_doc, json_output);</b><br>
+                                      Serial.println( &quot;<font color="#FF0000">string to json:</font>&quot; ); <br>
+                                      Serial.println( json_output );</font></p>
+                        </blockquote>
+                        <p><font color="#9900FF">                                    <br>
+                                    <font color="#009900">//JSON轉字串</font></font></p>
+                        <blockquote>
+                                  <p><font color="#9900FF"> <b>json_error = deserializeJson(json_doc, json_output);</b><br>
+                                    if (!json_error) {</font></p>
+                                  <blockquote>
+                                <p><font color="#9900FF"> payload_room = json_doc[&quot;<font color="#FF0000">room</font>&quot;];<br>
+            payload_msg = json_doc[&quot;<font color="#FF0000">msg</font>&quot;];<br>
+            Serial.println( &quot;<font color="#FF0000">json to string:</font>&quot; ); <br>
+            Serial.println( &quot;<font color="#FF0000">payload_room:</font>&quot; ); <br>
+                                        Serial.println(payload_room);<br>
+                                        Serial.println( &quot;<font color="#FF0000">payload_msg:</font>&quot; ); <br>
+                                        Serial.println(payload_msg);</font></p>
+                        </blockquote>
+                                  <p><font color="#9900FF"> }</font></p>
+                        </blockquote>
+                      </blockquote>
+                      <p><font color="#9900FF"> }<br>
+                                <br>
+                                void loop() {<br>
+                                <br>
+                                }</font></p>
+                    </blockquote>
+                    <p>&nbsp;</p>
+                  </blockquote>
+                <p><b>輸出：</b></p>
+                  <blockquote>
+                  <p>string to json:<br>
+                      {&quot;room&quot;:&quot;chosemaker&quot;,&quot;msg&quot;:&quot;www.chosemaker.com&quot;}<br>
+                        json to string:<br>
+                        payload_room:<br>
+                        chosemaker<br>
+                        payload_msg:<br>
+                        www.chosemaker.com<br>
+                        </p>
+                </blockquote>
+                </blockquote>
+                <p><b>2022/12/24 - 使用SD CARD 讀卡機</b></p>
+                <blockquote>
+                  <p><b>接線圖(ESP32)</b></p>
+                  <blockquote>
+                    <p><b>讀卡機 &lt;-&gt; ESP32 </b></p>
+                    <p>VCC&lt;-&gt; 5V<br>
+                        CS &lt;-&gt; GPIO 5<br>
+                        MOSI &lt;-&gt; GPIO 23<br>
+                        SCK&lt;-&gt; GPIO 18<br>
+                        MISO &lt;-&gt; GPIO 19<br>
+                        GND &lt;-&gt; GND</p>
+                  </blockquote>
+                  <p><b>外掛元件：</b></p>
+                  <blockquote>
+                    <p>1. SdFat</p>
+                    <p>2. SdFat - Adafruit</p>
+                    </blockquote>
+                <p><b>原始碼：</b></p>
+                  <blockquote>
+                    <p><font color="#9900FF"><b>#include &quot;<font color="#FF0000">FS.h</font>&quot;<br>
+  #include &quot;<font color="#FF0000">SD.h</font>&quot;<br>
+  #include &quot;<font color="#FF0000">SPI.h</font>&quot;</b></font></p>
+                  <p><font color="#9900FF">void readFile(fs::FS &amp;fs, const char * path){</font></p>
+                  <blockquote>
+                    <p><font color="#9900FF"> Serial.printf(&quot;<font color="#FF0000">Reading file: %s\n</font>&quot;, path);</font></p>
+                    <p><font color="#9900FF"> <b>File file = fs.open(path);</b><br>
+      if(!file){</font></p>
+                    <blockquote>
+                      <p><font color="#9900FF"> Serial.println(&quot;<font color="#FF0000">Failed to open file for reading</font>&quot;);<br>
+                            return;</font></p>
+                    </blockquote>
+                    <p><font color="#9900FF"> }</font></p>
+                    <p><font color="#9900FF"> Serial.print(&quot;<font color="#FF0000">Read from file: </font>&quot;);<br>
+      while(<b>file.available()</b>){</font></p>
+                    <blockquote>
+                      <p><font color="#9900FF"> Serial.write(<b>file.read()</b>);</font></p>
+                    </blockquote>
+                    <p><font color="#9900FF"> }<br>
+                        file.close();</font></p>
+                  </blockquote>
+                  <p><font color="#9900FF"> }<br>
+                    </font></p>
+                    <p><font color="#9900FF">void setup(){</font></p>
+                    <blockquote>
+                      <p><font color="#9900FF"> Serial.begin(115200);<br>
+                            if(<b>!SD.begin()</b>){</font></p>
+                      <blockquote>
+                        <p><font color="#9900FF"> Serial.println(&quot;<font color="#FF0000">Card Mount Failed</font>&quot;);<br>
+                              return;</font></p>
+                      </blockquote>
+                      <p><font color="#9900FF"> }</font></p>
+                      <p><font color="#009900"> //readFile(SD, &quot;/setting.ini&quot;);</font></p>
+                    </blockquote>
+                    <p><font color="#9900FF"> }</font></p>
+                    <p><font color="#9900FF">void loop(){</font></p>
+                    <blockquote>
+                      <p><font color="#9900FF"> readFile(SD, &quot;<font color="#FF0000">/setting.ini</font>&quot;);<br>
+                            delay(1000);</font></p>
+                    </blockquote>
+                    <p><font color="#9900FF"> }</font></p>
+                    <p>&nbsp;</p>
+                  </blockquote>
+                </blockquote>
+                <p><b>2022/12/23 - 溫度計、LCD與雲端資料庫結合</b></p>
+                  <blockquote>
+                        <p><b><font color="#9900FF">#include <font color="#FF0000">&lt;Wire.h&gt;</font></font></b><font color="#9900FF"><br>
+                            <b>#include <font color="#FF0000">&lt;LiquidCrystal_I2C.h&gt;</font></b><br>
+                            <b>#include <font color="#FF0000">&quot;DHTesp.h&quot;</font></b><br>
+                            <b>#include <font color="#FF0000">&lt;WiFi.h&gt;</font><br>
+                            #include <font color="#FF0000">&lt;HTTPClient.h&gt;</font><br>
+                            #include<font color="#FF0000"> &lt;WiFiClientSecure.h&gt;</font></b><br>
+                          #define dhtPin 4</font></p>
+                      <p><font color="#003300">//Wifi 資訊</font></p>
+                      <blockquote>
+                        <p><font color="#9900FF"> const char* ssid = &quot;<b><span class="spoiler2">hDDnyHiafAFmT</span></b>&quot;;<br>
+        const char* password = &quot;<b><span class="spoiler2">hDDnyHiafAFmT</span></b>&quot;;</font></p>
+                      </blockquote>
+                      <p><font color="#006600">//宣告</font></p>
+                      <blockquote>
+                        <p><font color="#9900FF"> String url, str;</font></p>
+                      </blockquote>
+                      <p><font color="#006600">//定義訊號要從GPIO4 進來</font></p>
+                      <blockquote>
+                        <p><font color="#9900FF"> DHTesp dht;</font></p>
+                      </blockquote>
+                      <p><font color="#006600">// 設定 LCD I2C 位址</font></p>
+                      <blockquote>
+                        <p> <font color="#9900FF"><b>LiquidCrystal_I2C lcd(0x27,16,2); <font color="#006600">// set the LCD address</font></b><font color="#003300"><br>
+                        </font>                    </font></p>
+                      </blockquote>
+                      <p><font color="#9900FF">void setup(){</font></p>
+                      <blockquote>
+                        <p><font color="#006600">//預設值</font></p>
+                        <blockquote>
+                          <p> <font color="#9900FF"><b>url=&quot;<font color="#FF0000">https://api.thingspeak.com/update?api_key=<span class="spoiler2">hDDnyHiafAFmT</span></font>&quot;;</b><br>
+                                Serial.begin(115200);</font></p>
+                        </blockquote>
+                        <p><font color="#006600"> //連接WIFI</font></p>
+                        <blockquote>
+                          <p><font color="#9900FF"> delay(10);</font></p>
+                          <p><font color="#9900FF"> Serial.print(&quot;<font color="#FF0000">Connecting to </font>&quot;);<br>
+                              Serial.println(ssid);<br>
+                              WiFi.mode(WIFI_STA);<br>
+                              WiFi.begin(ssid, password);<br>
+                              while (WiFi.status() != WL_CONNECTED) {</font></p>
+                          <blockquote>
+                            <p><font color="#9900FF"> delay(500);<br>
+        Serial.print(&quot;.&quot;);</font></p>
+                          </blockquote>
+                          <p><font color="#9900FF"> }<br>
+        Serial.println(&quot;&quot;);<br>
+        Serial.println(&quot;<font color="#FF0000">WiFi connected</font>&quot;);<br>
+        Serial.print(&quot;<font color="#FF0000">IP address: </font>&quot;);<br>
+                              Serial.println(WiFi.localIP());<br>
+                            </font></p>
+                        </blockquote>
+                        <p><font color="#006600"> //溫度感測器</font></p>
+                        <blockquote>
+                          <p><font color="#9900FF"> Serial.println(&quot;<font color="#FF0000">Humidity and temperature\n</font>&quot;);<br>
+                                <b>dht.setup(dhtPin, DHTesp::DHT11);</b></font></p>
+                        </blockquote>
+                        <p><font color="#006600"> //LCD顯示器</font></p>
+                        <blockquote>
+                          <p> <font color="#9900FF"><b>lcd.init();<br>
+                                lcd.backlight();</b></font></p>
+                        </blockquote>
+                        <p><font color="#006600"> //顯示開發者資訊</font></p>
+                        <blockquote>
+                          <p><font color="#9900FF"> Serial.println(&quot;<font color="#FF0000">------------ Developer --------------</font>&quot;); <br>
+        Serial.println(&quot;<font color="#FF0000">Info: 1711131010, 胡仁豪</font> &quot;); <br>
+        Serial.println(&quot;<font color="#FF0000">------- Monitoring parameters -------</font>&quot;); </font></p>
+                        </blockquote>
+                      </blockquote>
+                      <p><font color="#9900FF"> }</font></p>
+                        <p><font color="#9900FF">void loop(){</font></p>
+                        <blockquote>
+                          <p><font color="#006600">//取得溫度</font></p>
+                          <blockquote>
+                            <p> <font color="#9900FF"><b>float h = dht.getHumidity();<br>
+                                float t = dht.getTemperature();</b></font></p>
+                          </blockquote>
+                          <p><font color="#006600"> //顯示到SERIAL</font></p>
+                          <blockquote>
+                            <p><font color="#9900FF"> Serial.print(&quot;<font color="#FF0000">Humidity = </font>&quot;);<br>
+                                  Serial.print(h);<br>
+                                  Serial.print(&quot;<font color="#FF0000">%\t</font>&quot;);<br>
+                                  Serial.print(&quot;<font color="#FF0000">Temperature = </font>&quot;);<br>
+                                  Serial.print(t);<br>
+                                Serial.println(&quot;<font color="#FF0000">C</font>&quot;);</font></p>
+                          </blockquote>
+                          <p><font color="#006600"> //顯示到LCD</font></p>
+                          <blockquote>
+                            <p> <font color="#9900FF"><b>lcd.clear();<br>
+                                  <br>
+                                  lcd.setCursor(2,0);<br>
+                                  lcd.print(h);<br>
+                                  lcd.print(&quot;<font color="#FF0000">%</font>&quot;);<br>
+                                  lcd.setCursor(2,1);<br>
+                                  lcd.print(t);<br>
+                                  lcd.print((char)223); <font color="#006600">// 溫度符號(degree symbol)</font><br>
+                                  lcd.print(&quot;<font color="#FF0000">C</font>&quot;);</b><br>
+                            </font></p>
+                          </blockquote>
+                          <p><font color="#006600"> //上傳到API網站</font></p>
+                          <blockquote>
+                            <p> <font color="#9900FF"><b>String url1 = url + &quot;<font color="#FF0000">&amp;field1=</font>&quot; + (int)t + &quot;<font color="#FF0000">&amp;field2=</font>&quot; + (int)h;<br>
+                                  str=doGet(url1);</b><br>
+                                Serial.println(&quot;<font color="#FF0000">Return:</font>&quot; + str); <font color="#003300">//API 網站回傳值</font></font></p>
+                          </blockquote>
+                          <p>                        <font color="#9900FF"><br>
+                              <font color="#006600">//延遲五秒</font></font></p>
+                          <blockquote>
+                            <p><font color="#9900FF"> <font color="#006600">//delay(1500);</font><br>
+                                delay(20*1000);</font></p>
+                          </blockquote>
+                        </blockquote>
+                        <p><font color="#9900FF"> }</font><br>
+                        </p>
+                        <p><font color="#9900FF">String doGet(String url) {</font></p>
+                        <blockquote>
+                          <p><font color="#9900FF"> HTTPClient http; <font color="#006600">//Declare an object of class HTTPClient</font><br>
+                                String payload;<br>
+                                int httpCode;<br>
+                              if (WiFi.status() == WL_CONNECTED) { <font color="#006600">//Check WiFi connection status</font></font></p>
+                          <blockquote>
+                            <p><font color="#9900FF"> http.begin(url);<br>
+                                httpCode = http.GET(); <font color="#006600">//Send the request</font><br>
+                                if (httpCode &gt; 0){</font></p>
+                            <blockquote>
+                              <p><font color="#9900FF"> payload = http.getString();<font color="#006600"> //Get the request response payload</font></font></p>
+                            </blockquote>
+                            <p><font color="#9900FF"> }<br>
+                                http.end(); <font color="#006600">//Close connection</font></font></p>
+                          </blockquote>
+                          <p><font color="#9900FF"> }<br>
+                              delay(10);<br>
+                              return payload;</font></p>
+                        </blockquote>
+                        <p><font color="#9900FF"> }</font></p>
+                  </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/12/21 - LCD 練習使用</b></p>
+                  <blockquote>
+                        <p><font color="#FF00FF"><b>#include <font color="#FF0000">&lt;Wire.h&gt;</font><br>
+        #include <font color="#FF0000">&lt;LiquidCrystal_I2C.h&gt;</font></b></font></p>
+                        <p><font color="#006600">// 設定 LCD I2C 位址</font></p>
+                        <blockquote>
+                          <p><font color="#FF00FF"><b>LiquidCrystal_I2C lcd(0x27,16,2); <font color="#009900">// set the LCD address</font></b></font></p>
+                        </blockquote>
+                        <p><font color="#FF00FF">void setup(){</font></p>
+                        <blockquote>
+                          <p><font color="#FF00FF"> pinMode(LED_BUILTIN, OUTPUT);<br>
+                              <b>lcd.init();</b></font></p>
+                          <blockquote>
+                            <p><b><font color="#FF00FF"> lcd.backlight();<br>
+                                lcd.clear();</font></b></p>
+                            <p><b><font color="#FF00FF"> lcd.setCursor(0,0);<br>
+        lcd.print(&quot;<font color="#FF0000">hello world!</font>&quot;);</font></b></p>
+                            <p><b><font color="#FF00FF"> lcd.setCursor(0,1);<br>
+        lcd.print(&quot;<font color="#FF0000">5171</font>&quot;);</font></b></p>
+                          </blockquote>
+                        </blockquote>
+                        <p><font color="#FF00FF"> }</font></p>
+                        <p><font color="#FF00FF"> void loop(){</font></p>
+                        <blockquote>
+                          <p><font color="#FF00FF"> digitalWrite(LED_BUILTIN, HIGH);<br>
+                                delay(500);<br>
+                                digitalWrite(LED_BUILTIN, LOW);<br>
+                              delay(500);</font></p>
+                        </blockquote>
+                        <p><font color="#FF00FF"> }</font></p>
+                  </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/12/21 - HTTPClient 練習使用</b></p>
+                  <blockquote>
+                        <p><font color="#FF00FF"><b>#include <font color="#FF0000">&lt;WiFi.h&gt;</font><br>
+        #include <font color="#FF0000">&lt;HTTPClient.h&gt;</font><br>
+        #include <font color="#FF0000">&lt;WiFiClientSecure.h&gt;</font></b><br>
+                              #define LED_BUILTIN 2<br>
+                              <b>const char* ssid = &quot;<span class="spoiler2">hDDnyHiafAFmT</span>&quot;;<br>
+                              const char* password = &quot;<span class="spoiler2">hDDnyHiafAFmT</span>&quot;;</b><br>
+                            String url, str;</font></p>
+                        <p><font color="#FF00FF">void setup() {</font></p>
+                        <blockquote>
+                          <p><font color="#FF00FF"> pinMode(LED_BUILTIN,OUTPUT);<br>
+                                Serial.begin(115200);<br>
+                                delay(10);<br>
+                                Serial.print(&quot;<font color="#FF0000">Connecting to </font>&quot;);<br>
+                                Serial.println(ssid);<br>
+                                <b>WiFi.mode(WIFI_STA);<br>
+                                WiFi.begin(ssid, password);</b><br>
+                              while (WiFi.status() != WL_CONNECTED) {</font></p>
+                          <blockquote>
+                            <p><font color="#FF00FF"> delay(500);<br>
+        Serial.print(&quot;<font color="#FF0000">.</font>&quot;);</font></p>
+                          </blockquote>
+                          <p><font color="#FF00FF"> }<br>
+        Serial.println(&quot;&quot;);<br>
+        Serial.println(&quot;<font color="#FF0000">WiFi connected</font>&quot;);<br>
+        Serial.print(&quot;<font color="#FF0000">IP address: </font>&quot;);<br>
+                              Serial.println(WiFi.localIP());<br>
+                              <b>url=&quot;<font color="#FF0000">https://wisdom.nutc.edu.tw/~1711031011/hello.php?name=xxxxxxxxx</font>&quot;;<br>
+                              str=doGet(url);</b><br>
+                              Serial.println(str);</font></p>
+                        </blockquote>
+                        <p><font color="#FF00FF"> }</font></p>
+                        <p><font color="#FF00FF">void loop() {</font></p>
+                        <blockquote>
+                          <p><font color="#FF00FF"> digitalWrite(LED_BUILTIN, HIGH);<br>
+                                delay(500);<br>
+                                digitalWrite(LED_BUILTIN, LOW);<br>
+                              delay(500);</font></p>
+                        </blockquote>
+                        <p><font color="#FF00FF"> }</font></p>
+                        <p><font color="#FF00FF">String doGet(String url) {</font></p>
+                        <blockquote>
+                          <p><font color="#FF00FF"> HTTPClient http; <font color="#003300">//Declare an object of class HTTPClient</font><br>
+                                String payload;<br>
+                                int httpCode;<br>
+                              if (WiFi.status() == WL_CONNECTED) { <font color="#003300">//Check WiFi connection status</font></font></p>
+                          <blockquote>
+                            <p><font color="#FF00FF"> http.begin(url);<br>
+                                httpCode = http.GET(); <font color="#003300">//Send the request</font><br>
+                                if (httpCode &gt; 0){</font></p>
+                            <blockquote>
+                              <p><font color="#FF00FF"> payload = http.getString(); <font color="#006600">//Get the request response payload</font></font></p>
+                            </blockquote>
+                            <p><font color="#FF00FF"> }<br>
+                                http.end();<font color="#003300"> //Close connection</font></font></p>
+                          </blockquote>
+                          <p><font color="#FF00FF"> }<br>
+                              delay(10);<br>
+                              return payload;</font></p>
+                        </blockquote>
+                        <p><font color="#FF00FF"> }</font></p>
+                  </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/12/14 - 倉庫溫度異常機器人</b></p>
+                  <blockquote>
+                        <p>#include &lt;WiFi.h&gt;<br>
+                            #include &lt;WiFiClientSecure.h&gt;<br>
+                            #include &lt;SimpleDHT.h&gt;</p>
+                        <p>//請修改以下參數--------------------------------------------</p>
+                        <blockquote>
+                          <p> char SSID[] = &quot;<b><span class="spoiler2">hDDnyHiafAFmT</span></b>&quot;;<br>
+                              char PASSWORD[] = &quot;<b><span class="spoiler2">hDDnyHTafAFmT</span></b>&quot;;<br>
+                              String Linetoken = &quot;<b><span class="spoiler2">hDDnyHTTn7yjeaaeLDHhufTj7hFed7GeneiafAFmT</span></b>&quot;;<br>
+                              int pinDHT11 = 14;//假設DHT11接在腳位GPIO14，麵包板左側序號8</p>
+                        </blockquote>
+                        <p> //---------------------------------------------------------</p>
+                        <p> SimpleDHT11 dht11(pinDHT11);//DHT11物件<br>
+                              WiFiClientSecure client;//網路連線物件<br>
+                            char host[] = &quot;notify-api.line.me&quot;;//LINE Notify API網址</p>
+                        <p>void setup() {</p>
+                        <blockquote>
+                          <p> Serial.begin(115200);</p>
+                          <p> //連線到指定的WiFi SSID</p>
+                          <blockquote>
+                            <p> Serial.print(&quot;Connecting Wifi: &quot;);<br>
+                                Serial.println(SSID);<br>
+                                WiFi.begin(SSID, PASSWORD);</p>
+                            <p> while (WiFi.status() != WL_CONNECTED) {</p>
+                            <blockquote>
+                              <p> Serial.print(&quot;.&quot;);<br>
+                                    delay(500);</p>
+                            </blockquote>
+                            <p>}</p>
+                          </blockquote>
+                          <p>//連線成功，顯示取得的IP</p>
+                          <blockquote>
+                            <p> Serial.println(&quot;&quot;);<br>
+                                Serial.println(&quot;WiFi connected&quot;);<br>
+                                Serial.println(&quot;IP address: &quot;);<br>
+                                  IPAddress ip = WiFi.localIP();<br>
+                                  Serial.println(ip);<br>
+                                  //client.setInsecure();//ESP32核心 1.0.6以上</p>
+                          </blockquote>
+                        </blockquote>
+                        <p>}</p>
+                        <p>void loop() {</p>
+                        <blockquote>
+                          <p>//嘗試讀取溫濕度內容</p>
+                          <blockquote>
+                            <p> byte temperature = 0;<br>
+                                  byte humidity = 0;<br>
+                                int err = SimpleDHTErrSuccess;</p>
+                            <p> if ((err = dht11.read(&amp;temperature, &amp;humidity, NULL)) != SimpleDHTErrSuccess) {</p>
+                            <blockquote>
+                              <p> Serial.print(&quot;Read DHT11 failed, err=&quot;); Serial.println(err); delay(1000);<br>
+                                    return;</p>
+                            </blockquote>
+                            <p> }</p>
+                          </blockquote>
+                          <p><br>
+                              //讀取成功，將溫濕度顯示在序列視窗</p>
+                          <blockquote>
+                            <p> Serial.print(&quot;Sample OK: &quot;);<br>
+                                Serial.print((int)temperature); Serial.print(&quot; *C, &quot;);<br>
+                                Serial.print((int)humidity); Serial.println(&quot; H&quot;);</p>
+                          </blockquote>
+                          <p>//設定觸發LINE訊息條件為溫度超過30或濕度超過80</p>
+                          <blockquote>
+                            <p> if ((int)temperature &gt;= 30 || (int)humidity &gt;= 80) {</p>
+                            <blockquote>
+                              <p> //組成Line訊息內容</p>
+                              <blockquote>
+                                <p> String message = &quot;檢測環境發生異常，請協助儘速派人查看處理，目前環境狀態：&quot;;<br>
+                                    message += &quot;\n溫度=&quot; + String(((int)temperature)) + &quot; *C&quot;;<br>
+                                    message += &quot;\n濕度=&quot; + String(((int)humidity)) + &quot; H&quot;;<br>
+                                      Serial.println(message);</p>
+                              </blockquote>
+                              <p> if (client.connect(host, 443)) {</p>
+                              <blockquote>
+                                <p> int LEN = message.length();<br>
+                                      //傳遞POST表頭</p>
+                                <blockquote>
+                                  <p> String url = &quot;/api/notify&quot;;<br>
+                                      client.println(&quot;POST &quot; + url + &quot; HTTP/1.1&quot;);<br>
+                                      client.print(&quot;Host: &quot;); client.println(host);</p>
+                                </blockquote>
+                                <p> //權杖</p>
+                                <blockquote>
+                                  <p> client.print(&quot;Authorization: Bearer &quot;); client.println(Linetoken);<br>
+                                      client.println(&quot;Content-Type: application/x-www-form-urlencoded&quot;);<br>
+                                      client.print(&quot;Content-Length: &quot;); client.println( String((LEN + 8)) );<br>
+                                        client.println(); <br>
+                                        client.print(&quot;message=&quot;); client.println(message);<br>
+                                        client.println();</p>
+                                </blockquote>
+                                <p> //等候回應</p>
+                                <blockquote>
+                                  <p> delay(2000);<br>
+                                        String response = client.readString();</p>
+                                </blockquote>
+                                <p> //顯示傳遞結果</p>
+                                <blockquote>
+                                  <p> Serial.println(response);<br>
+                                        client.stop(); //斷線，否則只能傳5次</p>
+                                </blockquote>
+                              </blockquote>
+                              <p>}
+                                      else {</p>
+                              <blockquote>
+                                <p> //傳送失敗</p>
+                                <blockquote>
+                                  <p> Serial.println(&quot;connected fail&quot;);</p>
+                                </blockquote>
+                              </blockquote>
+                              <p>}</p>
+                            </blockquote>
+                            <p> }</p>
+                          </blockquote>
+                          <p><br>
+                              //每5秒讀取一次溫濕度</p>
+                          <blockquote>
+                            <p> delay(5000);</p>
+                          </blockquote>
+                        </blockquote>
+                        <p> }</p>
+                  </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/12/14 - 讀取溫濕度計數值</b></p>
+                  <blockquote>
+                        <p><b><font color="#FF0000">先安裝Lin：DHT sensor library for ESPx</font></b></p>
+                        <p>#include &quot;DHTesp.h&quot;<br>
+                              #define dhtPin 4<br>
+                            //定義訊號要從GPIO4 進來</p>
+                        <p>DHTesp dht;</p>
+                        <p>void setup(){</p>
+                        <blockquote>
+                          <p> Serial.begin(115200);<br>
+                              Serial.println(&quot;Humidity and temperature\n&quot;);<br>
+                              dht.setup(dhtPin, DHTesp::DHT11);</p>
+                        </blockquote>
+                        <p> }</p>
+                        <p>void loop(){</p>
+                        <blockquote>
+                          <p> float h = dht.getHumidity();<br>
+                                float t = dht.getTemperature();<br>
+                                Serial.print(&quot;Humidity = &quot;);<br>
+                                Serial.print(h);<br>
+                                Serial.print(&quot;%\t&quot;);<br>
+                                Serial.print(&quot;Temperature = &quot;);<br>
+                                Serial.print(t);<br>
+                                Serial.println(&quot;C&quot;);<br>
+                              delay(1500);</p>
+                        </blockquote>
+                        <p> }</p>
+                  </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/12/14 - PHP - Line Noity</b></p>
+                  <blockquote>
+			  	        <p>&lt;?php</p>
+			  	        <blockquote>
+			  	          <p> function lineNotifyMessage($message,$token){</p>
+			  	          <blockquote>
+			  	            <p> $headers = array(</p>
+                            <blockquote>
+                              <p>&quot;Content-Type: multipart/form-data&quot;,<br>
+&quot;Authorization: Bearer $token&quot;</p>
+                            </blockquote>
+                            <p> );</p>
+                            <p>$message = array(</p>
+                            <blockquote>
+                              <p>&quot;message&quot; =&gt; $message</p>
+                            </blockquote>
+                            <p> );</p>
+                            <p>$ch = curl_init();<br>
+                                curl_setopt($ch , CURLOPT_URL , &quot;https://notify-api.line.me/api/notify&quot;);<br>
+			  	                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);</p>
+                            <p>curl_setopt($ch, CURLOPT_POST, true);<br>
+			  	                curl_setopt($ch, CURLOPT_POSTFIELDS, $message);<br>
+			  	                $result = curl_exec($ch);<br>
+			  	                curl_close($ch);</p>
+			  	          </blockquote>
+			  	          <p> }</p>
+			  	          <p>$token=&quot;<b><span class="spoiler2">hDDnyHTTn7yjeaaeLDHhufTj7hFed7GeneiafAFmT</span></b>&quot;;<br>
+			  	              $message=&quot;Hello,Kira~&quot;;<br>
+			  	              lineNotifyMessage($message,$token);</p>
+			  	          </blockquote>
+			  	        <p> ?&gt;<br>
+			  	            </p>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/12/14 - Python - Line Noity</b></p>
+                  <blockquote>
+			  	        <p><b><font color="#FF0000">先安裝套件：pip3 install requests </font></b></p>
+			  	        <p>import requests</p>
+			  	        <p>def lineNotifyMessage(token, msg):</p>
+			  	        <blockquote>
+			  	          <p> headers = {</p>
+                          <blockquote>
+                            <p>&quot;Authorization&quot;: &quot;Bearer &quot; + token, <br>
+&quot;Content-Type&quot; : &quot;application/x-www-form-urlencoded&quot;</p>
+                          </blockquote>
+                          <p> }</p>
+                          <p> payload = {'message': msg }<br>
+                              res = requests.post(&quot;https://notify-api.line.me/api/notify&quot;, headers = headers, params = payload)<br>
+          return res.status_code</p>
+			  	        </blockquote>
+			  	        <p>if __name__ == &quot;__main__&quot;:</p>
+			  	        <blockquote>
+			  	          <p> token = '<b><span class="spoiler2">hDDnyHTTn7yjeaaeLDHhufTj7hFed7GeneiafAFmT</span></b>'<br>
+			  	                message = '基本功能測試'<br>
+			  	                stc=lineNotifyMessage(token, message)<br>
+			  	                print(stc)<br>
+		  	                  </p>
+			  	          </blockquote>
+			  	      </blockquote>
+                  <p><b>2022/12/14 - Python - 安裝、安裝套件</b></p>
+                  <blockquote>
+			  	        <p>安裝版本：Python 版本 v3.9 </p>
+			  	        <p>安裝套件指令：</p>
+			  	        <blockquote>
+			  	          <p><b>pip3 list</b></p>
+			  	          <p><b>pip3 install</b></p>
+			  	          </blockquote>
+			  	        <p>安裝套件指令：pip3 install requests </p>
+			  	        </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/12/7 - 練習使用LINE Noity</b></p>
+                  <blockquote>
+			  	        <p>#include &lt;WiFi.h&gt; //這裡是ESP8266 WIFI函式庫，如果是要用ESP32,要記得修正為WiFi.h<br>
+			  	            #include &lt;WiFiClient.h&gt;<br>
+			  	            <b>#include &lt;TridentTD_LineNotify.h&gt;<br>
+			  	            #define LINE_TOKEN &quot;<span class="spoiler2">hDDnyHTTn7yjeaaeLDHhufTj7hFed7GeneiafAFmT</span>&quot;</b></p>
+			  	      <p>// Set WiFi credentials</p>
+			  	      <blockquote>
+			  	        <p> #define WIFI_SSID &quot;HawlIPhone8&quot;<br>
+			  	            #define WIFI_PASS &quot;<span class="spoiler2">efHH7tGGMhFjfybEdFy4b3RtMbM74jD8hGnTMbu3u</span>&quot;</p>
+			  	        </blockquote>
+			  	      <p>WiFiClient client; //網路連線物件</p>
+			  	      <p>void setup(){</p>
+			  	        <blockquote>
+			  	          <p> Serial.begin(115200); // 設定速率<br>
+		  	                  // 進行無線網路連接</p>
+			  	          <blockquote>
+			  	            <p> WiFi.mode(WIFI_STA); <br>
+		  	                    WiFi.begin(WIFI_SSID, WIFI_PASS);</p>
+			  	            </blockquote>
+			  	          <p>//等待無線網路連接</p>
+			  	          <blockquote>
+			  	            <p> while (WiFi.status() != WL_CONNECTED)
+			  	                {</p>
+			  	            <blockquote>
+			  	              <p> delay(100);<br>
+			  	                  Serial.print(&quot;.&quot;);</p>
+			  	              </blockquote>
+			  	            <p> }</p>
+			  	          </blockquote>
+			  	          <p> <b>LINE.setToken(LINE_TOKEN); //設定Line Token權杖</b></p>
+			  	          <p><b> LINE.notify(&quot;\n學號：1711131010\n姓名：胡仁豪&quot;); //發送訊息到Line上面</b></p>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	        <p>void loop() {<br>
+			  	            }</p>
+			  	          <p>&nbsp;</p>
+			  	          </blockquote>
+                  <p><b>2022/12/7 - 練習讀取串列來的字串資料</b></p>
+                  <blockquote>
+			  	        <p>void setup(){</p>
+			  	        <blockquote>
+			  	          <p> Serial.begin(115200);</p>
+			  	          </blockquote>
+			  	        <p>}</p>
+			  	        <p>void loop(){</p>
+			  	        <blockquote>
+			  	          <p>if(<b> Serial.available()</b> ){</p>
+			  	          <blockquote>
+			  	            <p> int x = <b>Serial.read();</b></p>
+			  	            <p> if(x=='a'){</p>
+			  	            <blockquote>
+			  	              <p> Serial.println(&quot;red&quot;); </p>
+			  	              </blockquote>
+			  	            <p> }</p>
+			  	            <p> if(x=='b'){</p>
+			  	            <blockquote>
+			  	              <p> Serial.println(&quot;not red&quot;); </p>
+			  	              </blockquote>
+			  	            <p> }</p>
+			  	            </blockquote>
+			  	          <p> }</p>
+			  	        </blockquote>
+			  	        <p>}</p>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/11/30 - 連接WIFI簡易函式(函式庫)</b></p>
+                  <blockquote>
+			  	        <p><br>
+			  	          <b>connectToWifi.h			  	    </b></p>
+			  	        <p>void connectToWifi(const char* ssid, const char* password){</p>
+			  	        <blockquote>
+			  	          <p> Serial.println();<br>
+			  	              Serial.print(&quot;Connecting to &quot;);<br>
+			  	                Serial.println(ssid);<br>
+			  	                //WiFi.mode(WIFI_STA);<br>
+		  	                  WiFi.begin(ssid, password);</p>
+			  	          <p> while (WiFi.status() != WL_CONNECTED) {</p>
+			  	          <blockquote>
+			  	            <p> delay(500);<br>
+			  	                Serial.print(&quot;.&quot;);</p>
+			  	            </blockquote>
+			  	          <p> }</p>
+			  	          <p> Serial.println(&quot;&quot;);<br>
+			  	              Serial.println(&quot;Connected to the WiFi network&quot;); <br>
+			  	              Serial.print(&quot;IP address: &quot;);<br>
+            Serial.println(WiFi.localIP());</p>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/11/2 - 使用 millis() 功能，控制兩個 LED </b></p>
+                  <blockquote>
+			  	        <p>// each &quot;event&quot; (LED) gets their own tracking variable</p>
+			  	        <blockquote>
+			  	          <p>unsigned long previousMillisLED12=0;<br>
+		  	                  unsigned long previousMillisLED13=0;</p>
+			  	          </blockquote>
+			  	        <p>// different intervals for each LED</p>
+			  	        <blockquote>
+			  	          <p>int intervalLED12 = 500;<br>
+		  	                  int intervalLED13 = 1000;</p>
+			  	          </blockquote>
+			  	        <p>// each LED gets a state varaible</p>
+			  	        <blockquote>
+			  	          <p>boolean LED13state = false; // the LED will turn ON in the first iteration of loop()<br>
+		  	                  boolean LED12state = false; // need to seed the light to be OFF</p>
+			  	          </blockquote>
+			  	        <p>void setup() {</p>
+			  	        <blockquote>
+			  	          <p> pinMode(13, OUTPUT);<br>
+		  	                  pinMode(12, OUTPUT);</p>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	        <p> void loop() {</p>
+			  	        <blockquote>
+			  	          <p> // get current time stamp</p>
+			  	          <blockquote>
+			  	            <p> // only need one for both if-statements</p>
+			  	            <blockquote>
+			  	              <p> unsigned long currentMillis = millis();</p>
+			  	              </blockquote>
+			  	          </blockquote>
+			  	          <p> // time to toggle LED on Pin 12?</p>
+			  	          <blockquote>
+			  	            <p> if ((unsigned long)(currentMillis - previousMillisLED12) &gt;= intervalLED12) {</p>
+			  	            <blockquote>
+			  	              <p> LED12state = !LED12state;</p>
+			  	              <p> digitalWrite(12, LED12state);<br>
+			  	                  // save current time to pin 12's previousMillis<br>
+			  	                  previousMillisLED12 = currentMillis;</p>
+			  	            </blockquote>
+			  	            <p> }</p>
+			  	          </blockquote>
+			  	          <p> // time to toggle LED on Pin 13?</p>
+			  	          <blockquote>
+			  	            <p> if ((unsigned long)(currentMillis - previousMillisLED13) &gt;= intervalLED13) {</p>
+			  	            <blockquote>
+			  	              <p> LED13state = !LED13state;</p>
+			  	              <p> digitalWrite(13, LED13state);<br>
+			  	                  // save current time to pin 13's previousMillis<br>
+			  	                  previousMillisLED13 = currentMillis;</p>
+			  	            </blockquote>
+			  	            <p>}</p>
+			  	          </blockquote>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	      </blockquote>
+                  <p><b>2022/11/2 - 使用 millis() 功能，顯示時間</b></p>
+                  <blockquote>
+			  	        <p><b>unsigned long t;</b></p>
+			  	        <p>void setup(){</p>
+			  	        <blockquote>
+			  	          <p> Serial.begin(115200);</p>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	        <p>void loop(){</p>
+			  	        <blockquote>
+			  	          <p> Serial.print(&quot;Time: &quot;);</p>
+			  	          <p> <b>t= millis();</b></p>
+			  	          <p> Serial.println(t);</p>
+			  	          <p> delay(1000);</p>
+			  	        </blockquote>
+			  	        <p> }<br>
+	  	                    </p>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/11/2 - 使用 PULLUP 功能，控制 LED 亮度</b></p>
+                  <blockquote>
+			  	        <p>void setup(){</p>
+			  	        <blockquote>
+			  	          <p> Serial.begin(115200);</p>
+			  	          <p> <b>pinMode(12, INPUT_PULLUP);</b><br>
+			  	              pinMode(13, OUTPUT);</p>
+			  	        </blockquote>
+			  	        <p>}</p>
+			  	        <p>void loop(){</p>
+			  	        <blockquote>
+			  	          <p> <b>int Port12 = digitalRead(12);</b><br>
+		  	                  if (Port12 == HIGH){</p>
+			  	          <blockquote>
+			  	            <p> Serial.println(&quot;Port 12 OFF&quot;);<br>
+		  	                    digitalWrite(13, 0);</p>
+			  	            </blockquote>
+			  	          <p> }else{</p>
+			  	          <blockquote>
+			  	            <p> Serial.println(&quot;Port 12 ON&quot;);<br>
+		  	                    digitalWrite(13, 1);</p>
+			  	            </blockquote>
+			  	          <p> }<br>
+			  	              delay(100);</p>
+			  	        </blockquote>
+			  	        <p> }</p>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/11/2 - 測試 Gpio Port 有無 PULLUP 功能</b></p>
+                  <blockquote>
+			  	        <p>void setup(){</p>
+			  	        <blockquote>
+			  	          <p> Serial.begin(115200);</p>
+			  	          <p> <b>pinMode(12, INPUT_PULLUP);<br>
+			  	              pinMode(13, INPUT_PULLUP);<br>
+			  	              pinMode(14, INPUT_PULLUP);<br>
+			  	              pinMode(16, INPUT_PULLUP);<br>
+			  	              pinMode(17, INPUT_PULLUP);</b></p>
+			  	        </blockquote>
+			  	        <p> }</p>
+			  	        <p>void loop(){</p>
+			  	        <blockquote>
+			  	          <p> int Port12 = digitalRead(12);<br>
+		  	                  if (Port12 == HIGH){</p>
+			  	          <blockquote>
+			  	            <p> Serial.println(&quot;Port 12 pulsed&quot;);</p>
+			  	            </blockquote>
+			  	          <p> }</p>
+			  	          <p> int Port13 = digitalRead(13);<br>
+            if (Port13 == HIGH){</p>
+			  	          <blockquote>
+			  	            <p> Serial.println(&quot;Port 13 pulsed&quot;);</p>
+			  	            </blockquote>
+			  	          <p> }</p>
+			  	          <p> int Port14 = digitalRead(14);<br>
+            if (Port14 == HIGH){</p>
+			  	          <blockquote>
+			  	            <p> Serial.println(&quot;Port 14 pulsed&quot;);</p>
+			  	            </blockquote>
+			  	          <p> }</p>
+			  	          <p> int Port16 = digitalRead(16);<br>
+            if (Port16 == HIGH){</p>
+			  	          <blockquote>
+			  	            <p> Serial.println(&quot;Port 16 pulsed&quot;);</p>
+			  	            </blockquote>
+			  	          <p> }</p>
+			  	          <p> int Port17 = digitalRead(17);<br>
+            if (Port17 == HIGH){</p>
+			  	          <blockquote>
+			  	            <p> Serial.println(&quot;Port 17 pulsed&quot;);</p>
+			  	            </blockquote>
+			  	          <p> }</p>
+			  	          <p> delay(100);</p>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	        <p></p>
+			  	      </blockquote>
+                  <p><b>2022/10/26 - 開關控制偵測 LED </b></p>
+                  <blockquote>
+			  	        <p>void setup() {</p>
+			  	        <blockquote>
+			  	          <p> // put your setup code here, to run once:</p>
+			  	          <blockquote>
+			  	            <p> Serial.begin(115200);<br>
+		  	                      pinMode(12,INPUT);<br>
+	  	                        pinMode(14,OUTPUT);</p>
+			  	            </blockquote>
+			  	        </blockquote>
+			  	      <p> }</p>
+			  	        <p>void loop() {</p>
+			  	        <blockquote>
+			  	          <p> // put your main code here, to run repeatedly:</p>
+			  	          <blockquote>
+			  	            <p> Serial.println(digitalRead(12));<br>
+  	                            digitalWrite(14,digitalRead(12)); </p>
+			  	            </blockquote>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/10/26 - 開關控制偵測</b></p>
+                  <blockquote>
+			  	        <p>void setup() {</p>
+			  	        <blockquote>
+			  	          <p> // put your setup code here, to run once:</p>
+			  	          <blockquote>
+			  	            <p> Serial.begin(115200);<br>
+  	                            pinMode(12,INPUT);</p>
+			  	            </blockquote>
+			  	        </blockquote>
+			  	        <p> }</p>
+			  	        <p>void loop() {</p>
+			  	        <blockquote>
+			  	          <p> // put your main code here, to run repeatedly:</p>
+			  	          <blockquote>
+			  	            <p> Serial.println(digitalRead(12));</p>
+			  	            </blockquote>
+			  	        </blockquote>
+			  	        <p> }</p>
+			  	        </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/10/26 - Delay() 的另一個做法</b></p>
+                  <blockquote>
+			  	        <p>millis() 函式，取得開機後到現在之總時間 (單位 1 / 1000 秒)。</p>
+			  	        </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/10/19 - Tone 小蜜蜂範例</b></p>
+                  <blockquote>
+			  	        <p>#include &lt;Tone32.h&gt; </p>
+			  	        <p>int buzzer = 12;<br>
+			  	          int freq[] = {262,294,330,349,392};<br>
+			  	          int melody[] = {5,3,3,4,2,2,1,2,3,4,5,5,5,5,3,3,4,2,2,1,3,5,5,3,2,2,2,2,2,3,4,3,3,3,3,3,4,5,5,3,3,4,2,2,1,3,5,5,1};<br>
+			  	          int beat[] = {1,1,2,1,1,2,1,1,1,1,1,1,2,1,1,2,1,1,2,1,1,1,1,4,1,1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,2,1,1,2,1,1,1,1,4};</p>
+			  	        <p>void setup() {</p>
+			  	        <blockquote>
+			  	          <p> Serial.begin(115200);<br>
+			  	                pinMode(buzzer,OUTPUT);<br>
+			  	                delay(1000);<br>
+		  	                  Serial.println(&quot;Info: 1711131010, 胡仁豪 &quot;);</p>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	        <p>void loop() {</p>
+			  	        <blockquote>
+			  	          <p> for(int i = 0 ; i &lt; 49 ; i++){</p>
+			  	          <blockquote>
+			  	            <p> tone(buzzer, freq[melody[i]-1],beat[i]*250,0);<br>
+		  	                      noTone(buzzer,0);<br>
+	  	                        delay(0);</p>
+			  	            </blockquote>
+			  	          <p> }<br>
+			  	              delay(1000);</p>
+			  	        </blockquote>
+			  	        <p> }</p>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/10/19 - Tone 範例</b></p>
+                  <blockquote>
+			  	        <p>#include &lt;Tone32.h&gt; </p>
+			  	        <p>int buzzerPin=12; //D9 conectted to a buzzer</p>
+			  	        <p>void setup() {</p>
+			  	        <blockquote>
+			  	          <p> pinMode(buzzerPin, OUTPUT);</p>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	        <p>void loop() {</p>
+			  	        <blockquote>
+			  	          <p> alarmBeep(buzzerPin);</p>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	        <p>void alarmBeep(int pin) {</p>
+			  	        <blockquote>
+			  	          <p> tone(pin, 1000, 1000, 0);<br>
+  	                          delay(2000);</p>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	        </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/10/19 - DAC 範例</b></p>
+                  <blockquote>
+			  	        <p>#define DAC1 25</p>
+			  	        <p>int brightness = 0;<br>
+			  	            int brightStep = 5;</p>
+			  	        <p>void setup() {</p>
+			  	        <blockquote>
+			  	          <p> Serial.begin(115200);</p>
+			  	          </blockquote>
+			  	        <p> }</p>
+			  	        <p>void loop() {</p>
+			  	        <blockquote>
+			  	          <p> Serial.println(brightness);<br>
+  	                          dacWrite(DAC1, brightness);</p>
+			  	          <p> brightness = brightness + brightStep;<br>
+			  	              if(brightness &lt;=0 || brightness &gt;= 255){</p>
+			  	          <blockquote>
+			  	            <p> brightStep = -brightStep;</p>
+			  	            </blockquote>
+			  	          <p> }<br>
+			  	              delay(50);</p>
+			  	        </blockquote>
+			  	        <p> }</p>
+			  	        </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/10/12 - 電子學</b></p>
+                  <blockquote>
+			  	        <p>三用電錶的功能：</p>
+			  	        <blockquote>
+			  	          <p>測量電壓、電流、電阻。</p>
+			  	          <p>&nbsp;</p>
+			  	        </blockquote>
+			  	        <p>電阻器的二大作用：限流和降壓 [<a href="https://www.dgjs123.com/dianzu/22224.htm">Link</a>]</p>
+			  	        <blockquote>
+			  	          <p>有關電阻器的知識，在電路中電阻器主要有二大作用，一是限流，二是降壓。</p>
+			  	          <p>從歐姆定律I=U/R可知，<b>當電壓U一定時，流過電阻器的電流I與其阻值R成反比</b>。由於限流電阻R的存在，將發光二極體VD的電流限制在10mA。</p>
+			  	          <p><b>當電流流過電阻器時，必然會在電阻器上產生一定的壓降，壓降大小與電阻值R及電流I的乘積成正比，即：U=IR</b>。</p>
+			  	          <p>利用電阻器的降壓作用，可以使較高的電源電壓適應元器件工作電壓的要求。</p>
+			  	          </blockquote>
+			  	        <p>&nbsp;</p>
+			  	        <p>色環電阻的讀值與方向識別 [<a href="https://kknews.cc/zh-tw/news/nelmkvq.html">Link</a>]</p>
+			  	        <blockquote>
+			  	          <p><b>色環電阻的方向識別</b></p>
+			  	          <p>			  	          色環電阻應用廣泛，無論怎樣安裝，維修者都能通過色環讀出其阻值，便於檢測與更換。但是實踐中發現，色環電阻的排列方向不分明，尤其是體積較小的色環電阻，容易讀錯。在方向識別上，可用如下方法：<br>
+                                <br>
+                              <b>方法1：找出誤差環</b></p>
+			  	          <p>                            誤差環是末尾環（最右邊的色環），找到它便可確定方向。常用的誤差環色：金、銀、棕。特別是金、銀，絕少用於第一環（最左邊的色環），所以只要有金、銀環，就基本認定末尾環的位置。</p>
+			  	          <p><b>方法2：確定棕色環是否為誤差環</b></p>
+			  	          <p>			  	        棕色環既可為誤差環也可為數字環，並且可能同時出現在首尾環，此時可藉助色環之間的間隔判斷，通常誤差環（末尾環）與其他色環之間的間隔要遠一些。</p>
+			  	          <p><b>方法3：讀值是否為標稱阻值</b></p>
+			  	          <p>			  	        僅靠色環間距無法判定方向，可嘗試讀值，與標稱阻值進行對比，與標稱值不相符的為錯誤方向。<br>
+		  	                  例如：色序：棕、黑、黑、黃、棕，其值為：100×10KΩ=1MΩ誤差為1％，屬於正常標稱值，若反色序：棕、黃、黑、黑、棕，其值為140×1Ω=140Ω，誤差為1％，屬於非正常標稱值。</p>
+			  	          <p><b>方法4：通過測量或周圍電路預估阻值</b></p>
+			  	          <p>			  	        如果遇到色序：棕、黑、黑、棕、棕，其值為：100×10Ω=1KΩ誤差為1％，屬於正常標稱值，若反色序：棕、棕、黑、黑、棕，其值為110×1Ω=110Ω，誤差為1％，也屬於正常標稱值。但阻值相差10倍，此時需要通過測量或周邊電路來預估阻值範圍後，才能確定方向。</p>
+			  	          <p><b>電阻色碼計算器</b></p>
+			  	          <p><a href="https://www.mouser.tw/technical-resources/conversion-calculators/resistor-color-code-calculator">https://www.mouser.tw/technical-resources/conversion-calculators/resistor-color-code-calculator</a><br>
+		  	                  </p>
+			  	        </blockquote>
+			  	        <p>頻率與週期 [<a href="https://baike.baidu.hk/item/%E9%A0%BB%E7%8E%87/19505">Link</a>] <br>
+			  	          </p>
+			  	        <blockquote>
+			  	          <p><b>頻率的定義</b></p>
+			  	          <p>			  	        每秒完成周期性變化的次數叫做頻率，常用f表示。<br>
+                                <br>
+                                為了紀念德國物理學家赫茲(Hertz)的貢獻，人們把頻率的單位命名為赫茲，簡稱“赫”，符號為Hz。<br>
+                              交流電的頻率是指每秒週期性變化的次數，單位是赫茲（Hz），與週期成倒數關係。</p>
+			  	          <p>週期的定義：每週所需的時間，常用T表示，單位是秒。1ms=10-3 s; 1μs=10-6 s; 1ns=10-9 s 。</p>
+			  	          <p> <br>
+			  	              頻率：4 赫茲<br>
+			  	              週期：0.25 秒</p>
+			  	          <p><b>頻率的單位</b></p>
+			  	          <p>			  	        物理中頻率的基本單位是赫茲（Hz），簡稱赫，也常用千赫（kHz）或兆赫（MHz）或吉赫（GHz）做單位。1kHz=103 Hz，1MHz=106 Hz，1GHz=109 MHz。</p>
+			  	          <p>日常生活中的交流電的頻率一般為50Hz或60Hz，而無線電技術中涉及的交流電頻率一般較大，達到千赫茲（KHz）甚至兆赫茲（MHz）的度量。</p>
+			  	          <p>【公式】f=1/T<br>
+			  	              </p>
+			  	          </blockquote>
+			  	        <p>&nbsp;</p>
+			  	      </blockquote>
+                  <p><b>2022/10/12 - PWM(DAC) 教學</b></p>
+                  <blockquote>
+			  	        <p><b>1. WEMOS D1 R32 GPIO配置圖 [<a href="https://designtech.blogs.auckland.ac.nz/d1-r32-esp32/">參閱</a>] </b></p>
+			  	        <blockquote>
+			  	          <p><a href="images/20221013/2_Pinout_D1_R32_wemos_d1_r32_gpio.png"><img src="images/20221013/2_Pinout_D1_R32_wemos_d1_r32_gpio.png" width="408" height="338" border="0"></a></p>
+			  	          </blockquote>
+			  	        <p><b>2.PWM GPIO </b></p>
+			  	        <blockquote>
+			  	          <p><b>PIN(LED)：25, 26 </b></p>
+			  	          </blockquote>
+			  	        <p><b>3.相關函式：</b></p>
+			  	        <blockquote>
+			  	          <p> #include &lt;analogWrite.h&gt; [<a href="https://www.arduinolibraries.info/libraries/esp32-analog-write">下載</a>] </p>
+			  	          <p>pinMode(led, OUTPUT);</p>
+			  	          <p>analogWrite(led, brightness,255);</p>
+			  	          </blockquote>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/10/5 - Linux 常用指令</b></p>
+                  <blockquote>
+                        <p><b>ps</b> : 執行中的程式</p>
+                        <p><b>ifconfig</b>、<b>ip addr</b>: 看IP</p>
+                        <p><b>mv</b> : 搬移檔案</p>
+                        <p><b>rm</b> : 刪除</p>
+                        <p><b>touch</b> : 建立空白檔案、更改檔案/ 目錄日期</p>
+                        <p><b>cat</b> : 檢視檔案</p>
+                        <p><b>$HOME：</b>主目錄環境變數</p>
+                        <p><b>ps -ef</b>：看執行中的程式 </p>
+                        <p><b>logout / exit / ctrl + d </b>：登出功能</p>
+                        <p><b>more / less</b> ：檢視檔案</p>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/9/28 - Arduino 設定</b></p>
+                  <blockquote>
+			  	        <p>1. 開 ARDUINO軟體，檔案 -&gt; 偏好設定：在下方額外的開發板管理員網址：</p>
+			  	        <blockquote>
+			  	          <p>輸入：
+		  	                  <b><font color="#FF0000">https://dl.espressif.com/dl/package_esp32_index.json</font></b></p>
+			  	          </blockquote>
+			  	        <p>2. 重啟應用程式</p>
+			  	        <p>3. 選擇型號 <b>TOOLS\ Board \ WEMOS LOLIN32</b></p>
+			  	        <p>3. 設定 COM Port 速度 <b>115,200</b> </p>
+			  	        <p>4. 設定正確 COM Port (例如 COM3)<br>
+	  	                    </p>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/9/28 - Linux 常用指令</b></p>
+                  <blockquote>
+			  	        <p><b>clear</b> : 清除畫面</p>
+			  	        <p><b>who</b> ：顯示線上使用者</p>
+			  	        <p><b>pwd</b> : 顯示目前目錄</p>
+			  	        <p><b>man <font color="#FF0000">ls</font></b> ：顯示操作手冊 </p>
+			  	        <p><b>ls <font color="#FF0000">-l</font></b> ：顯示檔案清單</p>
+			  	        <p><b>cd</b> ： 切換目錄，後面不家參數，等於回到<i>&lt;&lt;家目錄&gt;&gt;</i></p>
+			  	        <p><b>cat</b>：檢視文件</p>
+			  	        <p><b>nano</b>：編輯文件</p>
+			  	        <p><b>cp</b>：複製檔案</p>
+			  	      </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/9/22 - C++作業 - 輸入數字，對應等級 A~E </b></p>
+                  <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                        <div>
+                          
+                    <p><span style="color: #af00db;">#include</span><span style="color: #a31515;">&lt;iostream&gt;</span></p>
+                        </div>
+                        <div><span style="color: #af00db;">using</span><span style="color: #000000;">&#160;</span><span style="color: #0000ff;">namespace</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">std</span><span style="color: #000000;">;&#160;</span></div>
+                        <br>
+                        <div><span style="color: #0000ff;">int</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">main</span><span style="color: #000000;">()&#160;{&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">int</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">c</span><span style="color: #000000;">;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #a31515;">"Input&#160;0~100:&#160;"</span><span style="color: #000000;">&#160;;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cin</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&gt;&gt;</span><span style="color: #001080;">c</span><span style="color: #000000;">;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">switch</span><span style="color: #000000;">(</span><span style="color: #001080;">c</span><span style="color: #000000;">)&#160;{&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">case</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">0</span><span style="color: #000000;">&#160;...&#160;</span><span style="color: #098658;">59</span><span style="color: #000000;">:&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #a31515;">"E&#160;Level"</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">break</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">case</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">60</span><span style="color: #000000;">&#160;...&#160;</span><span style="color: #098658;">69</span><span style="color: #000000;">:&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #a31515;">"D&#160;Level"</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">break</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">case</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">70</span><span style="color: #000000;">&#160;...&#160;</span><span style="color: #098658;">79</span><span style="color: #000000;">:&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #a31515;">"C&#160;Level"</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">break</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">case</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">80</span><span style="color: #000000;">&#160;...&#160;</span><span style="color: #098658;">89</span><span style="color: #000000;">:&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #a31515;">"B&#160;Level"</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">break</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">case</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">90</span><span style="color: #000000;">&#160;...&#160;</span><span style="color: #098658;">100</span><span style="color: #000000;">:&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #a31515;">"A&#160;Level"</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">break</span><span style="color: #000000;">;&#160;&#160;&#160;&#160;&#160;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">default</span><span style="color: #000000;">:&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #a31515;">"?&#160;Level"</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">break</span><span style="color: #000000;">;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;}&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">return</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">0</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">}</span></div>
+                  </div>
+                  <p>&nbsp;</p>
+                  <p><b>2022/9/22 -  C++作業 - 輸入數字，顯示對應的星期英文</b></p>
+                  <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                        <div><span style="color: #af00db;">#include</span><span style="color: #a31515;">&lt;iostream&gt;</span></div>
+                        <div><span style="color: #af00db;">#include</span><span style="color: #a31515;">&lt;string&gt;</span></div>
+                        <div><span style="color: #af00db;">#include</span><span style="color: #a31515;">&lt;vector&gt;</span><span style="color: #0000ff;">&#160;&#160;&#160;</span></div>
+                        <div><span style="color: #af00db;">using</span><span style="color: #000000;">&#160;</span><span style="color: #0000ff;">namespace</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">std</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #af00db;">using</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">std</span><span style="color: #000000;">::</span><span style="color: #001080;">cout</span><span style="color: #000000;">;&#160;</span><span style="color: #af00db;">using</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">std</span><span style="color: #000000;">::</span><span style="color: #001080;">cin</span><span style="color: #000000;">;</span></div>
+                        <div><span style="color: #af00db;">using</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">std</span><span style="color: #000000;">::</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span><span style="color: #af00db;">using</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">std</span><span style="color: #000000;">::</span><span style="color: #267f99;">string</span><span style="color: #000000;">;</span></div>
+                        <div><span style="color: #af00db;">using</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">std</span><span style="color: #000000;">::</span><span style="color: #267f99;">vector</span><span style="color: #000000;">;</span></div>
+                        <br>
+                        <div><span style="color: #0000ff;">int</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">main</span><span style="color: #000000;">()&#160;{&#160;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">int</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">c</span><span style="color: #000000;">;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #267f99;">vector</span><span style="color: #000000;">&lt;</span><span style="color: #267f99;">string</span><span style="color: #000000;">&gt;&#160;</span><span style="color: #001080;">str_arr1</span><span style="color: #000000;">&#160;=&#160;{&#160;</span><span style="color: #a31515;">"Sunday"</span><span style="color: #000000;">,&#160;</span><span style="color: #a31515;">"Monday"</span><span style="color: #000000;">,&#160;</span><span style="color: #a31515;">"Tuesday"</span><span style="color: #000000;">,&#160;&#160;</span><span style="color: #a31515;">"Wednesday"</span><span style="color: #000000;">,</span><span style="color: #a31515;">"Thursday"</span><span style="color: #000000;">,</span><span style="color: #a31515;">"Friday"</span><span style="color: #000000;">,</span><span style="color: #a31515;">"Saturday"</span><span style="color: #000000;">};</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #a31515;">"Input&#160;0~6:&#160;"</span><span style="color: #000000;">&#160;;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cin</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&gt;&gt;</span><span style="color: #001080;">c</span><span style="color: #000000;">;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">str_arr1</span><span style="color: #795e26;">[</span><span style="color: #001080;">c</span><span style="color: #795e26;">]</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">return</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">0</span><span style="color: #000000;">;&#160;</span></div>
+                        <div><span style="color: #000000;">}</span></div>
+                  </div>
+                  <p>&nbsp;</p>
+                  <p><b>2022/9/21 - C/ C++輸入文字練習</b></p>
+                  <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                        <div>
+                          <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                            <div><span style="color: #af00db;">#include</span><span style="color: #0000ff;">&#160;</span><span style="color: #a31515;">&lt;stdio.h&gt;</span></div>
+                            <br>
+                            <div><span style="color: #0000ff;">int</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">main</span><span style="color: #000000;">(</span><span style="color: #0000ff;">void</span><span style="color: #000000;">)&#160;{</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">float</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">a</span><span style="color: #000000;">,</span><span style="color: #001080;">b</span><span style="color: #000000;">;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">printf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"Input&#160;a,b:&#160;"</span><span style="color: #000000;">);</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">scanf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"</span><span style="color: #001080;">%f</span><span style="color: #a31515;">,</span><span style="color: #001080;">%f</span><span style="color: #a31515;">"</span><span style="color: #000000;">,&amp;</span><span style="color: #001080;">a</span><span style="color: #000000;">,&amp;</span><span style="color: #001080;">b</span><span style="color: #000000;">);</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">if</span><span style="color: #000000;">(</span><span style="color: #001080;">a</span><span style="color: #000000;">&gt;=</span><span style="color: #001080;">b</span><span style="color: #000000;">)</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">printf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"</span><span style="color: #001080;">%f</span><span style="color: #ee0000;">\n</span><span style="color: #a31515;">"</span><span style="color: #000000;">,</span><span style="color: #001080;">a</span><span style="color: #000000;">);&#160;&#160;&#160;&#160;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">else</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">printf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"</span><span style="color: #001080;">%f</span><span style="color: #ee0000;">\n</span><span style="color: #a31515;">"</span><span style="color: #000000;">,</span><span style="color: #001080;">b</span><span style="color: #000000;">);</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">return</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">0</span><span style="color: #000000;">;</span></div>
+                            <div><span style="color: #000000;">}</span></div>
+                          </div>
+                          <p>&nbsp;</p>
+                          <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                            <div><span style="color: #af00db;">#include</span><span style="color: #0000ff;">&#160;</span><span style="color: #a31515;">&lt;stdio.h&gt;</span></div>
+                            <br>
+                            <div><span style="color: #0000ff;">int</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">main</span><span style="color: #000000;">(</span><span style="color: #0000ff;">void</span><span style="color: #000000;">)&#160;{</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">float</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">a</span><span style="color: #000000;">,</span><span style="color: #001080;">b</span><span style="color: #000000;">;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">printf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"Input&#160;a,b:&#160;"</span><span style="color: #000000;">);</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">scanf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"</span><span style="color: #001080;">%f</span><span style="color: #a31515;">,</span><span style="color: #001080;">%f</span><span style="color: #a31515;">"</span><span style="color: #000000;">,&amp;</span><span style="color: #001080;">a</span><span style="color: #000000;">,&amp;</span><span style="color: #001080;">b</span><span style="color: #000000;">);</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">if</span><span style="color: #000000;">(</span><span style="color: #001080;">a</span><span style="color: #000000;">&gt;=</span><span style="color: #001080;">b</span><span style="color: #000000;">)</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">printf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"</span><span style="color: #001080;">%f</span><span style="color: #ee0000;">\n</span><span style="color: #a31515;">"</span><span style="color: #000000;">,</span><span style="color: #001080;">a</span><span style="color: #000000;">);&#160;&#160;&#160;&#160;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">else</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">printf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"</span><span style="color: #001080;">%f</span><span style="color: #ee0000;">\n</span><span style="color: #a31515;">"</span><span style="color: #000000;">,</span><span style="color: #001080;">b</span><span style="color: #000000;">);</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">return</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">0</span><span style="color: #000000;">;</span></div>
+                            <div><span style="color: #000000;">}</span></div>
+                          </div>
+                          <p>&nbsp;</p>
+                          <p><b>2022/9/21 - C/ C++語言的字串宣告</b></p>
+                          <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                            <div>
+                              <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                                <div><span style="color: #af00db;">#include</span><span style="color: #0000ff;">&#160;</span><span style="color: #a31515;">&lt;stdio.h&gt;</span></div>
+                                <br>
+                                <div><span style="color: #0000ff;">int</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">main</span><span style="color: #000000;">(</span><span style="color: #0000ff;">void</span><span style="color: #000000;">)&#160;{</span></div>
+                                <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">const</span><span style="color: #000000;">&#160;</span><span style="color: #0000ff;">char</span><span style="color: #000000;">&#160;*</span><span style="color: #001080;">str</span><span style="color: #000000;">=</span><span style="color: #a31515;">"Hello</span><span style="color: #ee0000;">\n</span><span style="color: #a31515;">"</span><span style="color: #000000;">;</span></div>
+                                <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">char</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">str2</span><span style="color: #0000ff;">[]</span><span style="color: #000000;">=</span><span style="color: #a31515;">"Hello2</span><span style="color: #ee0000;">\n</span><span style="color: #a31515;">"</span><span style="color: #000000;">;</span></div>
+                                <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">printf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"</span><span style="color: #001080;">%s</span><span style="color: #a31515;">,</span><span style="color: #001080;">%s</span><span style="color: #a31515;">"</span><span style="color: #000000;">,</span><span style="color: #001080;">str</span><span style="color: #000000;">,</span><span style="color: #001080;">str2</span><span style="color: #000000;">);</span></div>
+                                <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">return</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">0</span><span style="color: #000000;">;</span></div>
+                                <div><span style="color: #000000;">}</span></div>
+                              </div>
+                              <p>&nbsp;</p>
+                              <p><span style="color: #af00db;">#include</span><span style="color: #0000ff;">&#160;</span><span style="color: #a31515;">&lt;iostream&gt;</span><span style="color: #0000ff;">&#160;&#160;&#160;&#160;&#160;</span></p>
+                            </div>
+                            <div><span style="color: #af00db;">using</span><span style="color: #000000;">&#160;</span><span style="color: #0000ff;">namespace</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">std</span><span style="color: #000000;">;&#160;</span></div>
+                            <br>
+                            <div><span style="color: #0000ff;">int</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">main</span><span style="color: #000000;">()&#160;{&#160;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #267f99;">string</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">str</span><span style="color: #000000;">=</span><span style="color: #a31515;">"test1"</span><span style="color: #000000;">;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">str</span><span style="color: #795e26;">=</span><span style="color: #001080;">str</span><span style="color: #795e26;">+</span><span style="color: #a31515;">",test2"</span><span style="color: #000000;">;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #001080;">str</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">return</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">0</span><span style="color: #000000;">;&#160;</span></div>
+                            <div><span style="color: #000000;">}</span></div>
+                          </div>
+                          <p>&nbsp;</p>
+                          <p><b>2022/9/21 - 使C語言支援BOOL型別</b></p>
+                          <p><span style="color: #af00db;">#include</span><span style="color: #0000ff;">&#160;</span><span style="color: #a31515;">&lt;stdio.h&gt;</span></p>
+                        </div>
+                        <div><span style="color: #af00db;">#include</span><span style="color: #0000ff;">&#160;</span><span style="color: #a31515;">&lt;stdlib.h&gt;</span></div>
+                        <div><span style="color: #af00db;">#include</span><span style="color: #0000ff;">&#160;</span><span style="color: #a31515;">&lt;stdbool.h&gt;</span><span style="color: #0000ff;">&#160;&#160;&#160;&#160;</span><span style="color: #008000;">//放入這行使其支援&#160;BOOL&#160;型別</span></div>
+                        <br>
+                        <div><span style="color: #0000ff;">int</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">main</span><span style="color: #000000;">(</span><span style="color: #0000ff;">void</span><span style="color: #000000;">)&#160;{</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">bool</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">keep_going</span><span style="color: #000000;">&#160;=&#160;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">;&#160;&#160;</span><span style="color: #008000;">//&#160;Could&#160;also&#160;be&#160;`bool&#160;keep_going&#160;=&#160;1;`</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">bool</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">x</span><span style="color: #000000;">&#160;=&#160;</span><span style="color: #0000ff;">true</span><span style="color: #000000;">;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #008000;">/*&#160;equivalent&#160;to&#160;bool&#160;x&#160;=&#160;1;&#160;*/</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">bool</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">y</span><span style="color: #000000;">&#160;=&#160;</span><span style="color: #0000ff;">false</span><span style="color: #000000;">;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #008000;">/*&#160;equivalent&#160;to&#160;bool&#160;y&#160;=&#160;0;&#160;*/</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">while</span><span style="color: #000000;">(</span><span style="color: #001080;">keep_going</span><span style="color: #000000;">)&#160;{</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">printf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"This&#160;will&#160;run&#160;as&#160;long&#160;as&#160;keep_going&#160;is&#160;true.</span><span style="color: #ee0000;">\n</span><span style="color: #a31515;">"</span><span style="color: #000000;">);</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #001080;">keep_going</span><span style="color: #000000;">&#160;=&#160;</span><span style="color: #0000ff;">false</span><span style="color: #000000;">;&#160;&#160;&#160;&#160;</span><span style="color: #008000;">//&#160;Could&#160;also&#160;be&#160;`keep_going&#160;=&#160;0;`</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;}</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">printf</span><span style="color: #000000;">(</span><span style="color: #a31515;">"Stopping!</span><span style="color: #ee0000;">\n</span><span style="color: #a31515;">"</span><span style="color: #000000;">);</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">if</span><span style="color: #000000;">&#160;(</span><span style="color: #001080;">x</span><span style="color: #000000;">){</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">puts</span><span style="color: #000000;">(</span><span style="color: #a31515;">"This&#160;will&#160;print!"</span><span style="color: #000000;">);</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;}</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">if</span><span style="color: #000000;">&#160;(!</span><span style="color: #001080;">y</span><span style="color: #000000;">){</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span><span style="color: #795e26;">puts</span><span style="color: #000000;">(</span><span style="color: #a31515;">"This&#160;will&#160;also&#160;print!"</span><span style="color: #000000;">);</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;}</span></div>
+                        <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">return</span><span style="color: #000000;">&#160;</span><span style="color: #0000ff;">EXIT_SUCCESS</span><span style="color: #000000;">;</span></div>
+                        <div><span style="color: #000000;">}</span></div>
+                  </div>
+                  <p>&nbsp;</p>
+                  <p><b>2022/9/21 - 自訂函式庫練習</b></p>
+                  <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                        <div>
+                          <p><b><font color="#000000">【header_test.h】</font></b></p>
+                          <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                            <div><span style="color: #0000ff;">char</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">ch</span><span style="color: #000000;">[]&#160;=&#160;</span><span style="color: #a31515;">"Hi"</span><span style="color: #000000;">;</span></div>
+                            <br>
+                            <div><span style="color: #0000ff;">namespace</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">ns_test1</span><span style="color: #000000;">{</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">char</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">ch2</span><span style="color: #000000;">[]&#160;=&#160;</span><span style="color: #a31515;">"Hi2"</span><span style="color: #000000;">;</span></div>
+                            <div><span style="color: #000000;">}</span></div>
+                            <br>
+                            <div><span style="color: #0000ff;">namespace</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">ns_test2</span><span style="color: #000000;">{</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #0000ff;">char</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">ch3</span><span style="color: #000000;">[]&#160;=&#160;</span><span style="color: #a31515;">"Hi3"</span><span style="color: #000000;">;</span></div>
+                            <div><span style="color: #000000;">}</span></div>
+                          </div>
+                          <p>&nbsp;</p>
+                          <p><b>【main.cpp】</b></p>
+                          </div>
+                  </div>
+                  <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                        <div>
+                          <div style="color: #000000;background-color: #ffffff;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 5px;white-space: pre;">
+                            <div><span style="color: #af00db;">#include</span><span style="color: #0000ff;">&#160;</span><span style="color: #a31515;">&lt;iostream&gt;</span><span style="color: #0000ff;">&#160;&#160;&#160;&#160;&#160;</span></div>
+                            <div><span style="color: #af00db;">using</span><span style="color: #000000;">&#160;</span><span style="color: #0000ff;">namespace</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">std</span><span style="color: #000000;">;&#160;</span></div>
+                            <div><span style="color: #af00db;">#include</span><span style="color: #0000ff;">&#160;</span><span style="color: #a31515;">"header_test.h"</span></div>
+                            <div><span style="color: #af00db;">using</span><span style="color: #000000;">&#160;</span><span style="color: #0000ff;">namespace</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">ns_test2</span><span style="color: #000000;">;&#160;</span></div>
+                            <br>
+                            <div><span style="color: #0000ff;">int</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">main</span><span style="color: #000000;">()&#160;{&#160;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #a31515;">"Hello!&#160;World!</span><span style="color: #ee0000;">\n</span><span style="color: #a31515;">"</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">ch</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #267f99;">ns_test1</span><span style="color: #000000;">::</span><span style="color: #001080;">ch2</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #001080;">cout</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #001080;">ch3</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">&lt;&lt;</span><span style="color: #000000;">&#160;</span><span style="color: #795e26;">endl</span><span style="color: #000000;">;&#160;</span></div>
+                            <div><span style="color: #000000;">&#160;&#160;&#160;&#160;</span><span style="color: #af00db;">return</span><span style="color: #000000;">&#160;</span><span style="color: #098658;">0</span><span style="color: #000000;">;&#160;</span></div>
+                            <div><span style="color: #000000;">}</span></div>
+                          </div>
+                        </div>
+                    </div>
+                  <p>&nbsp;</p>
+                  <p><b>2022/9/21 - 使C++語言寫的程式內的中文字可以正常顯示</b></p>
+                  <p>在 CMD 模式輸入以下指令，支援中文編碼(UTF8)</p>
+                  <p><b><font color="#FF0000">chcp 65001 </font></b></p>
+                  <p><b>./hello.exe</b></p>
+                  <p>&nbsp;</p>
+                  <p><b>2022/9/14 - 使用<a href="https://www.lenovo.com/tw/zh/faqs/pc-life-faqs/what-is-Linux/">Linux</a>開發環境開發C++</b></p>
+                  <p>軟體下載：<a href="http://gofile.me/70OiW/Qb8sf3y3X">開發環境</a> (下載密碼：<font color="#FF0000">234S3530o3390F</font>) </p>
+                  <p>1. 使用<a href="https://www.putty.org/">PUTTY</a>登入Linux伺服器</p>
+                  <p>2. <a href="https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/555229/">nano</a> hello.c 或者 <a href="https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/555229/">nano</a> hello.cpp</p>
+                  <p>3. <a href="https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/555229/">nano</a> 儲存檔案：【ctrl + x】 </p>
+                  <p>4. 編制指令：<i>g++ -o hallo hallo.cpp</i></p>
+                  <p>5. 執行：<i>./hallo</i></p>
+                  <p>備註：</p>
+                  <blockquote>
+                        <p>g++ 可以用來編譯 .c 、 .cpp</p>
+                        <p>gcc 可以用來編譯 .c </p>
+                  </blockquote>
+                  <p>&nbsp;</p>
+                  <p><b>2022/9/14 - 建立<a href="https://code.visualstudio.com/">VSCode</a>開發環境筆記</b></p>
+                  <p>軟體下載：<a href="http://gofile.me/70OiW/Qb8sf3y3X">開發環境</a> (下載密碼：<font color="#FF0000">234S3530o3390F</font>) </p>
+                  <p>安裝 <a href="https://code.visualstudio.com/">VSCode</a></p>
+                  <p>安裝 <a href="https://gcc.gnu.org/">GCC</a>：</p>
+                  <blockquote>
+                        <p>解壓：<i><a href="http://gofile.me/70OiW/Qb8sf3y3X">winlibs-x86_64-posix-seh-gcc-11.2.0-mingw-w64ucrt-10.0.0-r1.7z</a></i> 至 C:\</p>
+                        <p>設置：【<a href="https://www.java.com/zh-TW/download/help/path_zh-tw.html">系統變數\ PATH</a>】 ，增加一個路徑： 【C:\mingw64\bin\】</p>
+                        <p>測試GCC：輸入指令 <i>gcc -v </i></p>
+                  </blockquote>
+                  <p>安裝專案設定檔：</p>
+                  <blockquote>
+                        <p>複製：<i><a href="http://gofile.me/70OiW/Qb8sf3y3X">msa111\C++\ftp\vscode-cpp-for-windows-maste\</a></i> 內所有檔案，至 【D:\Litech2\C++\.vscode\】 <i>中</i></p>
+                        <p>在【VSCode \ 開啟資料夾】，選擇 【 D:\Litech2\C++\】</p>
+                  </blockquote>
+                  <p>備註：</p>
+                  <blockquote>
+                      <p>C語言 副檔名： .c </p>
+                      <p>C++語言 副檔名： .cpp </p>
+          </blockquote>
+                  <p>&nbsp;</p>
+              </blockquote>
+              <p id="openapi">IOT嵌入式系統開發環境設定檔案</p>
+              <blockquote>
+                <span style="padding:5px"><img src="images/20221013/pdf_icon.jpg" width="25" height="25" ></span><iframe width="80%" height="30" scrolling="no" frameborder="0" src="init/teac_ito_edu_documents/setting.htm"></iframe><br>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>關於OpenAPI</p>
+              <blockquote>
+                <p>OpenAPI路徑：</p>
+                <p><a href="https://wisdom.nutc.edu.tw/%7E1711131010/openapi/iot/">https://wisdom.nutc.edu.tw/~1711131010/openapi/iot/</a></p>
+              </blockquote>
+              <p>&nbsp;</p>
+              <p>IOT嵌入式系統文件適用：</p>
+              <blockquote>
+                <p><a href="https://blog.techbridge.cc/2020/05/03/simple-c-language-introduction-tutorial/">C語言入門</a></p>
+                <p><a href="http://kaiching.org/pydoing/cpp-guide/unit-1-understanding-the-cpp-programming-language.html">C++語言入門</a></p>
+                <p><a href="https://www.csie.ntu.edu.tw/%7Eb6506031/Osd/embedsys.htm">嵌入式系統</a></p>
+                <p><a href="https://www.tsg.com.tw/blog_detail120_API%E6%98%AF%E4%BB%80%E9%BA%BC%EF%BC%9F%E6%B7%BA%E8%AB%87API%E6%A6%82%E5%BF%B5%E8%88%87%E9%81%8B%E7%94%A8%E6%A1%88%E4%BE%8B%EF%BD%9C%E5%A4%A9%E7%9F%BD%E7%A7%91%E6%8A%80%E5%AE%A2%E8%A3%BD%E5%8C%96%E7%B6%B2%E9%A0%81%E8%A8%AD%E8%A8%88.htm">API運用</a></p>
+                <p><a href="https://www.sap.com/taiwan/insights/what-is-iot-internet-of-things.html">物聯網架構學習</a></p>
+                <p>&nbsp;</p>
+              </blockquote>
+              <p id="document">IOT嵌入式系統參考文獻：</p>
+              <blockquote>
+                <p><a href="https://im.nutc.edu.tw/files/90-1078-15.php">&lt;&lt;劉鎮城教授</a>&gt;&gt;</p>
+                <p><a href="https://wisdom.nutc.edu.tw/%7Eccliu/im/msa111/">&lt;&lt;其他同學作品: 111&gt;&gt;</a></p>
+                <p><a href="https://wisdom.nutc.edu.tw/%7Eccliu/im/msa110/">&lt;&lt;其他學長作品: 110&gt;&gt;</a></p>
+                <p><a href="shar_arduino.html">&lt;&lt;Arduino常用函數&gt;&gt;</a></p>
+                <p><a href="https://openhome.cc/Gossip/CGossip/HelloWorld.html">https://openhome.cc/</a></p>
+                <p><a href="https://www.programiz.com/cpp-programming/examples/print-sentence">https://www.programiz.com/</a></p>
+                <p><a href="https://designtech.blogs.auckland.ac.nz/d1-r32-esp32/">https://designtech.blogs.auckland.ac.nz/</a></p>
+                <p><a href="https://www.mouser.tw/technical-resources/conversion-calculators/resistor-color-code-calculator">https://www.mouser.tw/</a></p>
+                <p><a href="https://lifeyou.net/2019/07/30/arduino_buzzer/">https://lifeyou.net/2019/07/30/arduino_buzzer/</a></p>
+                <p> <a href="http://epaper.gotop.com.tw/pdf/AEH001800.pdf">http://epaper.gotop.com.tw/pdf/AEH001800.pdf</a></p>
+                <p><a href="http://marcostudio.nde.tw/%E4%BD%BF%E7%94%A8esp32-esp8266-%E7%99%BC%E9%80%81line-%E8%A8%8A%E6%81%AF/">http://marcostudio.nde.tw/</a></p>
+              <p><a href="https://ithelp.ithome.com.tw/articles/10271219">https://ithelp.ithome.com.tw/articles/10271219</a></p>
+              <p><a href="https://youyouyou.pixnet.net/blog/post/120275932-%E7%AC%AC%E5%8D%81%E4%B8%89%E7%AF%87-esp32-line%E9%80%9A%E7%9F%A5%EF%BC%9A%E5%80%89%E5%BA%AB%E6%BA%AB%E5%BA%A6%E7%95%B0%E5%B8%B8%E6%A9%9F%E5%99%A8%E4%BA%BA">https://youyouyou.pixnet.net/blog/</a></p>
+              <p><a href="https://thingspeak.com/">https://thingspeak.com/</a></p>
+              <p><a href="https://randomnerdtutorials.com/esp32-microsd-card-arduino/">https://randomnerdtutorials.com/esp32-microsd-card-arduino/</a></p>
+              <p><a href="https://blog.jmaker.com.tw/arduino-sdcard/">https://blog.jmaker.com.tw/arduino-sdcard/</a></p>
+              <p><a href="https://diyi0t.com/sd-card-arduino-esp8266-esp32/">https://diyi0t.com/sd-card-arduino-esp8266-esp32/</a></p>
+              <p><a href="https://www.chosemaker.com/board/esp32/lesson-9/">https://www.chosemaker.com/board/esp32/lesson-9/</a></p>
+              <p><a href="http://www.jplopsoft.idv.tw/neocities/php/ito/portlog/">http://www.jplopsoft.idv.tw/neocities/php/ito/portlog/</a></p>
+              <p>&nbsp;</p>
+              </blockquote>
+              <!-- InstanceEndEditable --></td>
+				  </tr>
+				</table>
+			
+			
+			</td>
+          </tr>
+        </table></td>
+      </tr>
+     
+      <tr>
+        <td align="left" valign="top" style="display:none" id="mmenu_down">
+		
+			<table width="100%" border="0" cellpadding="10" cellspacing="0">
+			  <tr>
+				<td align="left" valign="top" bgcolor="#DEECF1"><b>其他資料</b><a name="d_menu_a" id="d_menu_a"></a></td>
+			  </tr>
+			  <tr>
+				<td align="left" valign="top" id="mmenu_down_data"></td>
+			  </tr>
+			</table>
+
+		</td>
+      </tr>
+      <tr>
+       <td height="80" valign="middle" bgcolor="#DEECF1" id="m_files" style="padding:20px;"></td>
+		
+		<script>
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/files.htm"; 
+			ajax_load_files.method  = 'GET'; 
+			ajax_load_files.element = 'm_files'; 
+			function start_ajax_load_files(){
+				ajax_load_files.runAJAX('');
+			}
+			setTimeout("start_ajax_load_files();",1000);
+	   </script>
+		
+      </tr>
+      <tr>
+        <td height="60" align="center" valign="middle">
+		
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="https://www.jplopsoft.idv.tw/">Jplopsoft</a> | 
+				<a href="https://twhkinc.jplopsoft.idv.tw/">THI</a> | 
+				<a href="https://app.netlify.com/sites/jplop/deploys">Netlify</a> | 
+				<a href="https://neocities.org/dashboard">NeoCities</a> | 
+				<a href="https://lionfree.net/">LionFree</a>
+			</font></p>
+			
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="util_aes_utility.html">加密工具</a> | 
+				<a href="teac_post_about.html">提交歸檔</a> | 
+				<a href="util_qrcode_online_gen_tool.html">QRCODE產生器</a> | 
+				<a href="util_gen_pass.html">密碼產生器</a>
+			</font></p>
+			
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+			
+		</td>
+      </tr>
+    </table>
+	</td>
+  </tr>
+</table>
+</BODY>
+<script>
+	
+</script>
+<!-- InstanceEnd --></HTML>
