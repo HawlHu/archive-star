@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歸檔星球資料搜尋</title>
+    <meta name="description" content="歸檔星球資料庫搜尋頁面">
+    
+    <script src="db/jsez_search.js"></script>
+    <script type="text/javascript" src="js/default.js"></script>
+    <script type="text/javascript" src="js/database.js"></script>
+    <script type="text/javascript" src="js/aes.js"></script>
+    <script type="text/javascript" src="js/sha1.js"></script>
+    <script type="text/javascript" src="js/rc4.js"></script>
+    <script type="text/javascript" src="js/base64.js"></script>
+    <script type="text/javascript" src="js/ex_md1.js"></script>
+    <script type="text/javascript" src="js/ex_md2.js"></script>
+    <script type="text/javascript" src="js/ez_mc.js"></script>
+    <script type="text/javascript" src="js/tw-sack.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/qrcode.js"></script>
+
+    <style type="text/css">
+        /* =========================================
+           CSS Reset & Basic Setup (兼容 IE6)
+           ========================================= */
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", Arial, sans-serif;
+            background-color: #000000;
+            /* 建議：若圖片太大，IE6 載入可能會慢，保持原樣 */
+            background-image: url('images/archive_star_ban_bg_1997.jpg');
+            background-repeat: repeat;
+            background-attachment: fixed;
+            background-position: center top;
+            color: #e0e0e0;
+            line-height: 1.6;
+            text-align: center; /* IE6 容器置中 Hack 1 */
+        }
+
+        /* =========================================
+           Layout Container
+           ========================================= */
+        .container {
+            width: 95%;
+            /* 現代瀏覽器 */
+            max-width: 1000px;
+            /* IE6 不支援 max-width，這裡給個固定寬度 fallback，或者使用 expression (不推薦但有效) */
+            _width: 960px; /* IE6 專用 hack */
+            
+            margin: 40px auto;
+            padding: 20px;
+            
+            /* 背景色：現代瀏覽器用 rgba，IE6 降級為純黑或深灰 */
+            background: #111; 
+            background: rgba(0, 0, 0, 0.75);
+            
+            border: 1px solid #444;
+            
+            /* IE6 不支援 border-radius 和 box-shadow，會自動忽略，呈現直角 */
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            
+            text-align: left; /* 修正 body 的 text-align: center */
+            position: relative; /* 為了佈局穩定 */
+        }
+
+        /* =========================================
+           Search Header Area
+           ========================================= */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .search-box-wrapper {
+            /* 移除 Flexbox，改用傳統佈局 */
+            padding: 10px;
+            text-align: center;
+        }
+
+        input.search-input {
+            width: 60%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #666;
+            background-color: #222;
+            color: #fff;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+
+        button.search-btn {
+            padding: 8px 20px;
+            font-size: 16px;
+            background-color: #444;
+            color: #fff;
+            border: 1px solid #666;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        button.search-btn:hover {
+            background-color: #666;
+        }
+
+        /* =========================================
+           Search Results List
+           ========================================= */
+        #result-status {
+            margin-bottom: 15px;
+            font-size: 14px; /* 轉為 px 比較保險 */
+            color: #aaa;
+            text-align: left;
+        }
+
+        .result-item {
+            /* IE6 對 rgba 支援度為 0，改用 fallback */
+            background-color: #222;
+            border-left: 4px solid #555;
+            padding: 15px;
+            margin-bottom: 15px;
+            overflow: hidden; /* 清除浮動 */
+            zoom: 1; /* IE6 hasLayout 觸發 */
+        }
+
+        .result-item:hover {
+            background-color: #333;
+            border-left-color: #00aaff;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .result-title a {
+            color: #4db8ff;
+            text-decoration: none;
+        }
+
+        .result-title a:hover {
+            text-decoration: underline;
+            color: #80cfff;
+        }
+
+        .result-meta {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .result-keyword {
+            color: #ffcc00;
+            margin-right: 10px;
+        }
+
+        .result-summary {
+            font-size: 14px;
+            color: #ccc;
+            word-wrap: break-word; /* IE 支援 */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>歸檔星球資料搜尋</h1>
+            <div class="search-box-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="請輸入關鍵字..." autocomplete="off">
+                <button id="searchBtn" type="button" class="search-btn">搜尋</button>
+            </div>
+        </header>
+
+        <div id="result-status">準備就緒</div>
+        <div id="results-container">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        /**
+         * 相容 IE6 的 JavaScript (ES3 標準)
+         * 1. 使用 var 取代 const/let
+         * 2. 使用 function 取代箭頭函式
+         * 3. 手寫 URL 參數解析
+         * 4. 使用 for 迴圈取代 filter/forEach
+         */
+
+        (function() {
+            // IE6 不支援 'use strict'，寫了也沒關係，它會忽略
+            
+            // DOM 元素
+            var searchInput = document.getElementById('searchInput');
+            var searchBtn = document.getElementById('searchBtn');
+            var resultsContainer = document.getElementById('results-container');
+            var resultStatus = document.getElementById('result-status');
+
+            // 跨瀏覽器事件綁定 (相容 IE6 attachEvent)
+            function addEvent(elem, type, handler) {
+                if (elem.addEventListener) {
+                    elem.addEventListener(type, handler, false);
+                } else if (elem.attachEvent) {
+                    elem.attachEvent("on" + type, handler);
+                } else {
+                    elem["on" + type] = handler;
+                }
+            }
+
+            // 設定 innerHTML 或 innerText (相容 IE)
+            function setText(elem, text) {
+                if (elem.textContent !== undefined) {
+                    elem.textContent = text;
+                } else {
+                    elem.innerText = text;
+                }
+            }
+
+            // 初始化
+            addEvent(window, 'load', function() {
+                init();
+            });
+
+            function init() {
+                // 1. 檢查資料庫
+                if (typeof searchData === 'undefined') {
+                    renderError("錯誤：資料庫檔案 (db/jsez_search.js) 未載入。");
+                    return;
+                }
+
+                // 2. 取得 URL 參數 (IE6 沒有 URLSearchParams)
+                var query = getQueryString('q');
+
+                // 3. 執行邏輯
+                if (query) {
+                    // 解碼
+                    var decodedQuery = decodeURIComponent(query);
+                    searchInput.value = decodedQuery;
+                    performSearch(decodedQuery);
+                } else {
+                    setText(resultStatus, "請在上方輸入關鍵字進行搜尋。");
+                }
+
+                // 4. 綁定事件
+                addEvent(searchBtn, 'click', function() {
+                    handleNewSearch();
+                });
+
+                addEvent(searchInput, 'keypress', function(e) {
+                    e = e || window.event;
+                    var key = e.which || e.keyCode;
+                    if (key === 13) { // Enter 鍵
+                        handleNewSearch();
+                        // 阻止預設行為 (如果有 form 的話)
+                        if (e.preventDefault) e.preventDefault();
+                        else e.returnValue = false;
+                    }
+                });
+            }
+
+            // 取得 URL 參數的相容寫法
+            function getQueryString(name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+                var r = window.location.search.substr(1).match(reg);
+                if (r != null) return r[2]; 
+                return null;
+            }
+
+            function handleNewSearch() {
+                // IE6 String 原型沒有 trim，手動去除空白
+                var val = searchInput.value.replace(/^\s+|\s+$/g, '');
+                if (val) {
+                    // IE6 支援 window.location.href
+                    // 使用 encodeURIComponent 進行編碼
+                    window.location.href = "info_search.html?q=" + encodeURIComponent(val);
+                }
+            }
+
+            function performSearch(keyword) {
+                resultsContainer.innerHTML = '';
+                
+                var cleanKeyword = keyword.replace(/^\s+|\s+$/g, '');
+                if (!cleanKeyword) {
+                    setText(resultStatus, "關鍵字為空。");
+                    return;
+                }
+
+                var lowerKeyword = cleanKeyword.toLowerCase();
+                var matches = [];
+
+                // 使用傳統 for 迴圈取代 filter
+                for (var i = 0; i < searchData.length; i++) {
+                    var item = searchData[i];
+                    var title = item.title ? item.title.toLowerCase() : '';
+                    var kwd = item.keyword ? item.keyword.toLowerCase() : '';
+                    var summary = item.summary ? item.summary.toLowerCase() : '';
+
+                    // 使用 indexOf 取代 includes
+                    if (title.indexOf(lowerKeyword) !== -1 || 
+                        kwd.indexOf(lowerKeyword) !== -1 || 
+                        summary.indexOf(lowerKeyword) !== -1) {
+                        matches.push(item);
+                    }
+                }
+
+                renderResults(matches, cleanKeyword);
+            }
+
+            function renderResults(data, keyword) {
+                if (data.length === 0) {
+                    resultStatus.innerHTML = '關鍵字 "<strong>' + escapeHtml(keyword) + '</strong>" 查無資料。';
+                    return;
+                }
+
+                resultStatus.innerHTML = '關鍵字 "<strong>' + escapeHtml(keyword) + '</strong>" 共找到 ' + data.length + ' 筆資料：';
+
+                // 使用傳統 for 迴圈取代 forEach
+                for (var i = 0; i < data.length; i++) {
+                    var item = data[i];
+                    var card = document.createElement('div');
+                    card.className = 'result-item';
+
+                    var linkUrl = item.filename;
+                    var safeTitle = escapeHtml(item.title || '(無標題)');
+                    var safeKeyword = escapeHtml(item.keyword || '');
+                    var safeSummary = escapeHtml(item.summary || '');
+                    var safeFilename = escapeHtml(item.filename || '');
+
+                    // 傳統字串串接
+                    var htmlStr = '';
+                    htmlStr += '<div class="result-title">';
+                    htmlStr += '  <a href="' + linkUrl + '" target="_self">' + safeTitle + '</a>';
+                    htmlStr += '</div>';
+                    htmlStr += '<div class="result-meta">';
+                    if (safeKeyword) {
+                        htmlStr += '<span class="result-keyword">#' + safeKeyword + '</span> ';
+                    }
+                    htmlStr += '<span class="result-file">檔案: ' + safeFilename + '</span>';
+                    htmlStr += '</div>';
+                    htmlStr += '<div class="result-summary">' + safeSummary + '</div>';
+
+                    card.innerHTML = htmlStr;
+                    resultsContainer.appendChild(card);
+                }
+            }
+
+            function renderError(msg) {
+                resultsContainer.innerHTML = '<div style="color: #ff5555; padding: 20px; text-align: center; border: 1px dashed #ff5555;">' + msg + '</div>';
+                setText(resultStatus, "發生錯誤");
+            }
+
+            function escapeHtml(text) {
+                if (!text) return text;
+                return String(text)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+        })();
+    </script>
+</body>
+</html>

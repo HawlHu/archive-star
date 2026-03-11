@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /php/
+Disallow: /Templates/
+Disallow: /db/
+Disallow: /file_date/
+Disallow: /openapi/

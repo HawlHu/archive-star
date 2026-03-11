@@ -1,0 +1,285 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>歸檔星球 Archive Star</title>
+		<script data-cfasync="false"></script>
+		<meta property="og:title" content="歸檔星球 Archive Star">
+		<meta property="og:type" content="article">
+		<meta property="og:description" content="歸檔星球 Archive Star：保存這星球上的大小事">
+		<meta property="og:site_name" content="歸檔星球 Archive Star">
+		<meta name="keywords" content="歸檔星球 Archive Star 保存這星球上的大小事">
+		<meta name="pagetype" content="歸檔星球 Archive Star">
+		<meta name="description" content="歸檔星球 Archive Star：保存這星球上的大小事">
+		<script type="application/ld+json">
+		{
+		  "@context": "https://schema.org",
+		  "@type": "WebPage",
+		  "url": "https://jplop.netlify.app/teac_post_about.html",
+		  "name": "首頁",
+		  "description": "歸檔星球 Archive Star 的首頁"
+		}
+		</script>
+
+		<script>
+			//IE瀏覽器直接跳轉
+				if (navigator.userAgent.indexOf("MSIE") > -1 || navigator.userAgent.indexOf("Trident") > -1) {
+					window.location = "shar_as_about.html";
+				}
+		</script>
+	<style>
+    body { margin: 0; overflow: hidden; background-color: black; }
+    canvas { display: block; }
+
+    /* 疊在中央的連結群組 */
+    .overlay-link {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 15px 20px;
+      border-radius: 12px;
+      border: 0px solid white;
+	  pointer-events: auto; /* 允許自己可點擊 */
+    }
+
+    .overlay-link a {
+      color: white;
+      text-decoration: none;
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background-color: rgba(0, 0, 0, 0.2);
+      text-align: center;
+      
+    }
+
+    .overlay-link a:hover {
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+  </style>
+</head>
+<body>
+	<!-- 中央的連結按鈕 -->
+	   <span class="overlay-link" id="as_main_menu_area">
+			<a href="shar_as_about.html">歸檔星球(Home)</a>
+			<a href="http://users3.smartgb.com/g/g.php?a=s&i=g36-35085-25" style="display:none">意見反饋(SmartGB)</a>
+			<a href="info_web_index.html">網站索引(Index)</a>
+			<a href="util_aes_utility.html">解密服務(AESxKEY)</a>
+			<a id="test_ben_func" href="./">穩定測試(Test)</a>
+	  </span>	
+  
+  <!-- 引入 Three.js CDN -->
+	  <script src="js/three.min.js"></script>
+	  <script>
+	  
+	  			//判斷是否有硬體加速
+					function detectGPUInfo() {
+						  const canvas = document.createElement('canvas');
+						  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+						  
+						  if (!gl) return 'WebGL not supported';
+						
+						  const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+						  if (debugInfo) {
+							const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+							const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+							return { renderer, vendor };
+						  } else {
+							return 'WEBGL_debug_renderer_info not supported';
+						  }
+					}
+				
+				//取得參數	
+					var f_urlParams = new URLSearchParams(window.location.search);
+					var f_test = f_urlParams.get('test');   // 1
+					var f_d3d = f_urlParams.get('d3d');     // 64
+					var f_size = f_urlParams.get('size');   // 4
+					var f_earth = f_urlParams.get('earth');   // 1
+					
+					//防呆
+						if(f_test=='' || f_test== null){
+						}else{
+							//hidden menu
+								document.getElementById("as_main_menu_area").style.display='none';
+						
+							if(f_d3d>=2048)f_d3d=2048;
+							if(f_size>=8)f_size=8;
+							if(f_earth>=4)f_earth=4;
+						}
+					
+					const gpuInfo = detectGPUInfo();
+					 if (/swift/i.test(gpuInfo.renderer)) {
+							var cis_gpu=false;
+							var delta_max=240;
+					 }else{
+							var cis_gpu=true;
+							var delta_max=30;
+					 }
+				
+					if(f_test=='' || f_test== null){
+					}else{
+						delta_max=1;
+					}
+	  
+				// 建立場景
+					const scene = new THREE.Scene();
+			
+				// 建立攝影機
+					const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+					camera.position.z = ((Math.random() * 1) + 2);
+			
+				// 建立渲染器
+					const renderer = new THREE.WebGLRenderer({ antialias: true });
+					renderer.setSize(window.innerWidth, window.innerHeight);
+					
+					if(f_test=='' || f_test== null){
+						renderer.setPixelRatio(0.8); // 降低畫面精度，加快速度
+					}else{
+						renderer.setPixelRatio(f_size); // 降低畫面精度，加快速度
+					}
+					
+					document.body.appendChild(renderer.domElement);
+					
+			
+				// 加在 scene 建立後，讓背景變星空
+					const starTexture = new THREE.TextureLoader().load('images/milky-way-full-stars-space'+Math.round(((Math.random() * 3) + 1),0)+'.jpg');
+					scene.background = starTexture;
+			
+				// 建立球體幾何 + 材質（星球感覺）
+					//const geometry = new THREE.SphereGeometry(1, 64, 64);
+					if(f_test=='' || f_test== null){
+						var geometry = new THREE.SphereGeometry(1, 32, 32);
+					}else{
+						var geometry = new THREE.SphereGeometry(1, f_d3d, f_d3d);
+					}
+					
+					if(f_test=='' || f_test== null){
+						var google_maps_id=Math.round(((Math.random() * 3) + 1),0);
+					}else{
+						var google_maps_id=f_earth;
+					}
+					
+					//修改按紐
+						document.getElementById("test_ben_func").href="./?test=1&d3d=64&size=0.9&earth="+google_maps_id ;
+					
+					const texture = new THREE.TextureLoader().load('images/archive_star_earth_lights_2048'+google_maps_id+'.jpg'); // 地球圖
+					
+					const material = new THREE.MeshStandardMaterial({ map: texture });
+					//const material = new THREE.MeshBasicMaterial({ map: texture });
+					
+					const sphere = new THREE.Mesh(geometry, material);
+					sphere.rotation.y = Math.random() * Math.PI ;  // 角度
+					scene.add(sphere);
+			
+				// 燈光
+					const light = new THREE.DirectionalLight(0xffffff, 1);
+					//light.position.set(5, 5, 5).normalize();
+					light.position.set( ((Math.random() * 3) + 2), 
+										((Math.random() * 3) + 2), 
+										((Math.random() * 3) + 2)).normalize();
+					light.intensity = (Math.random() * 10) + 10;
+					scene.add(light);
+			
+				// 自動旋轉動畫
+					let lastTime = 0;
+					function animate(time) {
+					  requestAnimationFrame(animate);
+					  const delta = time - lastTime;
+					
+					  if (delta > delta_max) { // 只跑每 ~30 FPS（1000/30 ≈ 33ms）
+						sphere.rotation.y += 0.0005;
+						renderer.render(scene, camera);
+						lastTime = time;
+					  }
+					}
+					animate();
+			
+				// 畫面自動調整大小
+					window.addEventListener('resize', () => {
+					  camera.aspect = window.innerWidth / window.innerHeight;
+					  camera.updateProjectionMatrix();
+					  renderer.setSize(window.innerWidth, window.innerHeight);
+					});
+			
+			// =============== 點擊星球 → 跳轉 Google Map ===============
+				  const raycaster = new THREE.Raycaster();
+				  const mouse = new THREE.Vector2();
+				
+				  function getRandomLatLng() {
+					const lat = (Math.random() * 180) - 90;     // -90 ~ 90
+					const lng = (Math.random() * 360) - 180;    // -180 ~ 180
+					return { lat: lat.toFixed(6), lng: lng.toFixed(6) };
+				  }
+				
+				  function onClick(event) {
+					mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+					mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+					raycaster.setFromCamera(mouse, camera);
+					const intersects = raycaster.intersectObject(sphere);
+				
+					if (intersects.length > 0) {
+					  const pos = getRandomLatLng();
+					  
+						  //google_maps_id=1 地圖
+						  //google_maps_id=2 火星
+						  if(f_test=='' || f_test== null){
+							  if(google_maps_id==1){
+									window.location=`https://www.google.com/maps?q=${pos.lat},${pos.lng}`;
+							  }else if(google_maps_id==2){
+									window.location=`https://www.google.com/maps/space/mars/`;
+							  }else if(google_maps_id==3){
+									window.location=`https://www.google.com/maps/space/moon/`;
+							  }else{
+									window.location=`https://www.google.com/maps/space/titan/`;
+							  }
+						  }else{
+						  	  		window.location=`./`;
+						  }
+					}
+				  }
+				
+				  renderer.domElement.addEventListener('click', onClick);
+			
+			
+			//------------------------------------------------------------------------------------------------------------------------
+			
+			///學校網址
+				var edu_url = "wisdom.nutc.edu.tw";
+			
+			//跳轉
+				function link_index() {
+					if (window.location.host == edu_url) {
+						//校園首頁
+						window.location = "teac_ito_edu_documents.html";
+					} else {
+						//預設首頁
+						window.location = "shar_as_about.html";
+					}
+				}
+			
+			// 取得使用者代理字串
+				var ua = navigator.userAgent;
+			
+				if (ua.search("Windows NT") > -1 || ua.search("Macintosh") > -1) {
+					//加速
+						if (window.location.host == edu_url) {
+							//校園首頁
+							//document.getElementById("quick_iframe").src="teac_ito_edu_documents.html";
+							link_index();
+						} else {
+							//預設首頁
+							//document.getElementById("quick_iframe").src="teac_game_pubg.html";
+							//link_index();
+						}
+				} else {
+					//手機等設備
+						link_index();
+				}
+	
+  </script>
+</body>
+</html>

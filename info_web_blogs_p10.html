@@ -1,0 +1,246 @@
+<HTML>
+	<HEAD>
+	<TITLE>歸檔星球 Archive Star - 部落格</TITLE>
+	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="keywords" content="歸檔星球(Archive Star)部落格">
+		<meta name="pagetype" content="系統">
+		<meta name="description" content="歸檔星球(Archive Star)部落格">
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+	    
+		<script type="application/ld+json">
+			{
+			  "@context": "https://schema.org",
+			  "@type": "WebPage",
+			  "url": "https://jplop.netlify.app/teac_post_about.html",
+			  "name": "歸檔星球索引",
+			  "description": "歸檔星球索引，相關伺服器、部落格清單等的相關說明、相關技術文獻。"
+			}
+		</script>
+		
+			<style>
+				a:link {color: #0000FF;text-decoration: none;} 
+				a:visited {color: #3366FF;text-decoration: none;}
+				a:hover {text-decoration:dashed underline;color: #FF0000;}
+				a:active {color: #FF0000;text-decoration: none;}
+				font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;text-shadow: 0.1em 0.1em 0.1em #ffffff;}
+				input ,button , select{font-size:12px;}
+			</style>
+			
+			
+	</HEAD>
+	<BODY leftmargin="20" topmargin="20" marginwidth="20" marginheight="20" style="background-attachment: fixed;" background="images/archive_star_index_background_2024.jpg">
+	
+		<div><img id="obj_umg_a1_f1" src="images/archive_star_index_background_2024.gif" width="100" height="100" style="z-index:-1;position: fixed; " ></div>
+		<div><img id="obj_umg_a1_f2" src="images/archive_star_index_background_2024.gif" width="30" height="15" style="z-index:-1;position: fixed;  left: 1100px;" ></div>
+		<div><img id="obj_umg_a1_f3" src="images/archive_star_index_background_2024.gif" width="20" height="8" style="z-index:-1;position: fixed; " ></div>
+		<div><img id="obj_umg_a1_f4" src="images/archive_star_index_background_20242.gif" width="20" height="8" style="z-index:-1;position: fixed; " ></div>
+			<div><img id="obj_umg_a1_f4f" src="images/archive_star_index_background_20242f.gif" width="20" height="8" style="opacity: .2;z-index:-1;position: fixed; " ></div>
+		<div><img id="obj_umg_a1_f5" src="images/archive_star_index_background_20242.gif" width="18" height="6" style="z-index:-1;position: fixed; " ></div>
+			<div><img id="obj_umg_a1_f5f" src="images/archive_star_index_background_20242f.gif" width="20" height="8" style="opacity: .2;z-index:-1;position: fixed; " ></div>
+		<script>
+		
+			//母鑑
+				var obj_umg_a1_f1_func_x_temp=1200;
+				function obj_umg_a1_f1_func(){
+					document.getElementById("obj_umg_a1_f1").style.top=(0-(window.scrollY/7))+500+"px";
+					obj_umg_a1_f1_func_x_temp=obj_umg_a1_f1_func_x_temp+0.0008;
+					document.getElementById("obj_umg_a1_f1").style.left=obj_umg_a1_f1_func_x_temp+"px";
+				}			
+			
+			//護衛鑑1
+				function obj_umg_a1_f2_func(){
+					document.getElementById("obj_umg_a1_f2").style.top=(0-(window.scrollY/9))+600+"px";
+				}			
+			
+			//護衛鑑2
+				var obj_umg_a1_f3_func_x_temp=1400;
+				function obj_umg_a1_f3_func(){
+					document.getElementById("obj_umg_a1_f3").style.top=(0-(window.scrollY/9.5))+550+"px";
+					obj_umg_a1_f3_func_x_temp=obj_umg_a1_f3_func_x_temp-0.0005;
+					document.getElementById("obj_umg_a1_f3").style.left=obj_umg_a1_f3_func_x_temp+"px";
+				}			
+			
+			//巡邏鑑1,2
+				var obj_umg_a1_f45_func_x_temp_off=1; //加權
+					var obj_umg_a1_f4_func_x_temp=500;
+					function obj_umg_a1_f4_func(){
+						var obj_temp_x=0;
+						var obj_temp_y=0;
+						
+						obj_temp_y=(0-(window.scrollY/7.5))+650;
+						document.getElementById("obj_umg_a1_f4").style.top=obj_temp_y+"px";
+						
+						obj_umg_a1_f4_func_x_temp=obj_umg_a1_f4_func_x_temp+ (0.1*obj_umg_a1_f45_func_x_temp_off);
+						if(obj_umg_a1_f4_func_x_temp>document.documentElement.scrollWidth+100){
+							obj_umg_a1_f4_func_x_temp=-100;
+						}
+						obj_temp_x=obj_umg_a1_f4_func_x_temp;
+						document.getElementById("obj_umg_a1_f4").style.left=obj_temp_x+"px";
+						
+						//火焰
+							if(obj_umg_a1_f45_func_x_temp_off>=4){
+								document.getElementById("obj_umg_a1_f4f").style.display="";
+							}else{
+								document.getElementById("obj_umg_a1_f4f").style.display="none";
+							}
+							document.getElementById("obj_umg_a1_f4f").style.top=obj_temp_y+"px";
+							document.getElementById("obj_umg_a1_f4f").style.left=(obj_temp_x-10)+"px";
+					}
+					var obj_umg_a1_f5_func_x_temp=550;
+					function obj_umg_a1_f5_func(){
+						var obj_temp_x=0;
+						var obj_temp_y=0;
+						
+						obj_temp_y=(0-(window.scrollY/7.5))+630;
+						document.getElementById("obj_umg_a1_f5").style.top=obj_temp_y+"px";
+						
+						obj_umg_a1_f5_func_x_temp=obj_umg_a1_f5_func_x_temp+ (0.095*obj_umg_a1_f45_func_x_temp_off);
+						if(obj_umg_a1_f5_func_x_temp>document.documentElement.scrollWidth+100){
+							obj_umg_a1_f5_func_x_temp=-100;
+						}
+						obj_temp_x=obj_umg_a1_f5_func_x_temp;
+						document.getElementById("obj_umg_a1_f5").style.left=obj_temp_x+"px";
+						
+						//火焰
+							if(obj_umg_a1_f45_func_x_temp_off>=4){
+								document.getElementById("obj_umg_a1_f5f").style.display="";
+							}else{
+								document.getElementById("obj_umg_a1_f5f").style.display="none";
+							}
+							document.getElementById("obj_umg_a1_f5f").style.top=obj_temp_y+"px";
+							document.getElementById("obj_umg_a1_f5f").style.left=(obj_temp_x-10)+"px";
+					}
+		</script>
+		
+		<script>
+			//Set
+				var ss_gui_bg_img_y_temp_base=6500;	//def 6500
+				var ss_gui_bg_img_x_temp_base=-900; //def 0
+				
+				var ss_gui_bg_img_x_speed=0.05; //def 0.05
+				var ss_gui_bg_img_y_speed=10;	//def 10
+				var ss_gui_bg_img_x_temp_new_base_speed=100;//def 100
+			
+			var ss_gui_bg_img_x_temp_new_base=-900;//def 0
+			var ss_gui_bg_img_x_temp=0; //def 0
+			
+			function ss_gui_bg_img(){
+				ss_gui_bg_img_x_temp=ss_gui_bg_img_x_temp+ss_gui_bg_img_x_speed; //左右
+				
+				if(ss_gui_bg_img_x_temp_base>ss_gui_bg_img_x_temp_new_base){
+					ss_gui_bg_img_x_temp_base=ss_gui_bg_img_x_temp_base-
+												ss_gui_bg_img_x_temp_new_base_speed;
+				}
+				if(ss_gui_bg_img_x_temp_base<ss_gui_bg_img_x_temp_new_base){
+					ss_gui_bg_img_x_temp_base=ss_gui_bg_img_x_temp_base+
+												ss_gui_bg_img_x_temp_new_base_speed;
+				}
+				
+				document.body.style.backgroundPosition = "top "+
+														(ss_gui_bg_img_y_temp_base - 
+														(window.scrollY / ss_gui_bg_img_y_speed) )+
+														"px right "+ 
+														(ss_gui_bg_img_x_temp_base + ss_gui_bg_img_x_temp) +
+														"px";
+			}
+			setInterval(
+							function(){
+								ss_gui_bg_img();
+								obj_umg_a1_f1_func();
+								obj_umg_a1_f2_func();
+								obj_umg_a1_f3_func();
+								obj_umg_a1_f4_func();
+								obj_umg_a1_f5_func();
+							}, 10
+						);
+			
+		</script>
+		
+		<H1 style="line-height:38px;margin:1px 1px 1px 1px">歸檔星球部落格</H1>
+		<h5 style="line-height:14px;margin:1px 1px 1px 1px">所在星球：<span id="host_name"></span></h5>
+		<h5 style="line-height:14px;margin:1px 1px 1px 1px">最後更新：2026-02-06</h5>
+		<h5 style="line-height:14px;margin:1px 1px 1px 1px">搜尋功能：<a href="info_search.html">歸檔星球文件搜尋</a></h5>
+		<script>
+			document.getElementById("host_name").innerHTML=location.host;
+		</script>
+		<table width="100%"  cellpadding="10" cellspacing="0" style="background-image: linear-gradient(to top, #dddddd, #ffffff); border-collapse: collapse;  border-style: hidden; box-shadow: 0 0 0 0px #000; border-radius: 5px;">
+		  <tr align="center">
+			<td width="100"><a style="text-shadow: 0.3em 0.3em 0.3em #999999;font-size:16px" href="info_web_index_p0.html">索引</a></td>
+						<td width="100"><a style="text-shadow: 0.3em 0.3em 0.3em #999999;font-size:16px" href="info_web_servers.html">伺服器</a></td>
+						<td width="100"><a style="text-shadow: 0.3em 0.3em 0.3em #999999;font-size:16px" href="info_web_utility.html">工具</a></td>
+						<td width="100"><a style="text-shadow: 0.3em 0.3em 0.3em #999999;font-size:16px" href="info_web_blogs_p0.html">部落格</a></td>
+						<td width="100"><a style="text-shadow: 0.3em 0.3em 0.3em #999999;font-size:16px" href="info_web_quick_keys_p0.html">參考</a></td>
+						
+			<td></td>
+		  </tr>
+		</table>
+		
+		
+		<p><a href="http://www.osho.tw/">Osho</a>: <a href="http://www.osho.tw/osho/upload/home.php?mod=space&uid=2066&do=profile">[前往]</a></p><p><a href="https://www.ncku1897.net/">Ncku1897</a>: <a href="https://www.ncku1897.net/forum/home.php?mod=space&uid=28118&do=profile&from=space">[前往]</a></p><p><a href="https://www.525cg.com/">525cg</a>: <a href="https://www.525cg.com/home.php?mod=space&uid=401">[前往]</a></p><p><a href="http://bbs.roheya.com/">Roheya</a>: <a href="http://bbs.roheya.com/u.php?a=info&uid=93912">[前往]</a></p><p><a href="https://loog7777.mymailer.com.tw/">Mymailer</a>: <a href="https://loog7777.mymailer.com.tw/home.php?mod=space&uid=34967&do=profile&from=space">[前往]</a></p><p><a href="https://bbs.lineage-w.tw/">Lineage</a>: <a href="https://bbs.lineage-w.tw/home.php?mod=space&uid=2498">[前往]</a></p><p><a href="https://nxtc.tw/">Nxtc</a>: <a href="https://nxtc.tw/home.php?mod=space&uid=26027">[前往]</a></p><p><a href="https://www.koitw.com.tw/">Koitw</a>: <a href="https://www.koitw.com.tw/discuz/home.php?mod=space&uid=131447&do=profile">[前往]</a></p><p><a href="https://xn--ihqt9ag0qy7ae4zn7g.xn--kbto70f.com/">xn--kbto70f</a>: <a href="https://xn--ihqt9ag0qy7ae4zn7g.xn--kbto70f.com/home.php?mod=space&uid=1190&do=profile&from=space">[前往]</a></p><p><a href="https://cgezs.com/">Cgezs</a>: <a href="https://cgezs.com/home.php?mod=space&uid=2931&do=profile&from=space">[前往]</a></p><p><a href="http://monyiro.com/">Monyiro</a>: <a href="http://monyiro.com/home.php?mod=space&uid=27952&do=profile&from=space">[前往]</a></p><p><a href="https://www.17play.biz/">17play</a>: <a href="https://www.17play.biz/home.php?mod=space&uid=50828&do=profile&from=space">[前往]</a></p><p><a href="https://purple.idcpf.com/">Idcpf</a>: <a href="https://purple.idcpf.com/home.php?mod=space&uid=1312">[前往]</a></p><p><a href="https://www.phoenixstoneage.com/">Phoenixstoneage</a>: <a href="https://www.phoenixstoneage.com/phoenixsa/home.php?mod=space&uid=4626">[前往]</a></p><p><a href="https://dnaxcattalk.dnaxcat.net/">Dnaxcat</a>: <a href="https://dnaxcattalk.dnaxcat.net/home.php?mod=space&uid=17093">[前往]</a></p><p><a href="https://godmusic.idcpf.com/">Idcpf</a>: <a href="https://godmusic.idcpf.com/home.php?mod=space&uid=1046">[前往]</a></p><p><a href="https://armani.sytes.me/">Sytes</a>: <a href="https://armani.sytes.me/home.php?mod=space&uid=1713">[前往]</a></p><p><a href="https://lin182.onlinehost.cc/">OnlineHost</a>: <a href="https://lin182.onlinehost.cc/home.php?mod=space&uid=5190">[前往]</a></p><p><a href="https://79.lineag1.cc/">Lineag1</a>: <a href="https://79.lineag1.cc/home.php?mod=space&uid=416">[前往]</a></p><p><a href="https://xn--cksr0ar23k9ta.xn--kbto70f.com/">Kbto70f</a>: <a href="https://xn--cksr0ar23k9ta.xn--kbto70f.com/home.php?mod=space&uid=313">[前往]</a></p><p><a href="https://taiwan-swine.com/">TaiwanSwine</a>: <a href="https://taiwan-swine.com/home.php?mod=space&uid=34113">[前往]</a></p><p><a href="https://www.pokeuniv.com/bbs/">Pokeuniv</a>: <a href="https://www.pokeuniv.com/bbs/home.php?mod=space&uid=13944">[前往]</a></p><p><a href="https://www.wuwuji.tw/forum/">Wuwuji</a>: <a href="https://www.wuwuji.tw/forum/home.php?mod=space&uid=708187">[前往]</a></p><p><a href="https://www.angeling-studio.com/">Angeling</a>: <a href="https://www.angeling-studio.com/home.php?mod=space&uid=262">[前往]</a></p><p><a href="https://www.taiwan-yaris-club.tw/">TYC</a>: <a href="https://www.taiwan-yaris-club.tw/home.php?mod=space&uid=9343">[前往]</a></p><p><a href="https://shumo.com/forum/">Shumo</a>: <a href="https://shumo.com/forum/home.php?mod=space&uid=798442">[前往]</a></p><p><a href="https://www.c-hr.tw/">C-hr</a>: <a href="https://www.c-hr.tw/home.php?mod=space&uid=7533">[前往]</a></p><p><a href="https://www.hamtalk.asia/">HamtalkAsia</a>: <a href="https://www.hamtalk.asia/home.php?mod=space&uid=140273&do=profile">[前往]</a></p><p><a href="https://iber.idcpf.com/">Idcpf</a>: <a href="https://iber.idcpf.com/home.php?mod=space&uid=331">[前往]</a></p><p><a href="https://lin123.gamehost.cc/">GameHost</a>: <a href="https://lin123.gamehost.cc/?33380">[前往]</a></p><p><a href="https://hiking.biji.co/">Biji</a>: <a href="https://hiking.biji.co/index.php?q=member&act=profile&member=2039765">[前往]</a></p><p><a href="http://www.sexline998.com/">Sexline998</a>: <a href="http://www.sexline998.com/home.php?mod=space&uid=7631&do=profile">[前往]</a></p><br><br><center><span id="pm_spanid_1"><a href="info_web_blogs_p0.html"> 1 </a></span> | <span id="pm_spanid_2"><a href="info_web_blogs_p1.html"> 2 </a></span> | <span id="pm_spanid_3"><a href="info_web_blogs_p2.html"> 3 </a></span> | <span id="pm_spanid_4"><a href="info_web_blogs_p3.html"> 4 </a></span> | <span id="pm_spanid_5"><a href="info_web_blogs_p4.html"> 5 </a></span> | <span id="pm_spanid_6"><a href="info_web_blogs_p5.html"> 6 </a></span> | <span id="pm_spanid_7"><a href="info_web_blogs_p6.html"> 7 </a></span> | <span id="pm_spanid_8"><a href="info_web_blogs_p7.html"> 8 </a></span> | <span id="pm_spanid_9"><a href="info_web_blogs_p8.html"> 9 </a></span> | <span id="pm_spanid_10"><a href="info_web_blogs_p9.html"> 10 </a></span> | <span id="pm_spanid_11"><a href="info_web_blogs_p10.html"> 11 </a></span> | <span id="pm_spanid_12"><a href="info_web_blogs_p11.html"> 12 </a></span> | <span id="pm_spanid_13"><a href="info_web_blogs_p12.html"> 13 </a></span> | <span id="pm_spanid_14"><a href="info_web_blogs_p13.html"> 14 </a></span> | <span id="pm_spanid_15"><a href="info_web_blogs_p14.html"> 15 </a></span> | <span id="pm_spanid_16"><a href="info_web_blogs_p15.html"> 16 </a></span> | <span id="pm_spanid_17"><a href="info_web_blogs_p16.html"> 17 </a></span> | <span id="pm_spanid_18"><a href="info_web_blogs_p17.html"> 18 </a></span> | <span id="pm_spanid_19"><a href="info_web_blogs_p18.html"> 19 </a></span> | <span id="pm_spanid_20"><a href="info_web_blogs_p19.html"> 20 </a></span> | <span id="pm_spanid_21"><a href="info_web_blogs_p20.html"> 21 </a></span> | <span id="pm_spanid_22"><a href="info_web_blogs_p21.html"> 22 </a></span> | <span id="pm_spanid_23"><a href="info_web_blogs_p22.html"> 23 </a></span> | </center><script>document.getElementById("pm_spanid_11").innerHTML = " <b><u>[11]</u></b> ";</script>
+
+
+		<hr color="#CCCCCC">
+		<p><center><font face="Verdana, Arial, Helvetica, sans-serif">Power by Archive Star</font></center></p>
+		<span style="display:none">
+			<iframe src="https://www.google.com/search?q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&sca_esv=68f73f6b1576676c&hl=zh-TW&source=hp&ei=KgceaIuDDOLDvr0P7MaP-AM&iflsig=ACkRmUkAAAAAaB4VOoZBHyHzpPt_tQfHlVqCWXJCv0ja&oq=%E6%AD%B8&gs_lp=Egdnd3Mtd2l6IgnmrbjmqpTmmJ8qAggAMggQABiiBBiJBTIFEAAY7wUyCBAAGKIEGIkFMgUQABjvBTIIEAAYgAQYogRIkUBQ6AJY1w9wAXgAkAEAmAE8oAH8A6oBAjExuAEByAEA-AEBmAILoAKtBKgCAMICBRAAGIAEwgIFEC4YgATCAgsQLhiABBjRAxjHAcICCBAAGIAEGLEDwgIKEAAYgAQYQxiKBcICBxAAGIAEGA2YAwLxBXC_8Xkc37AykgcCMTGgB5cksgcCMTG4B60E&sclient=gws-wiz" width="1200" height="800"></iframe>
+			<a href="https://www.google.com/search?q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&sca_esv=68f73f6b1576676c&hl=zh-TW&source=hp&ei=KgceaIuDDOLDvr0P7MaP-AM&iflsig=ACkRmUkAAAAAaB4VOoZBHyHzpPt_tQfHlVqCWXJCv0ja&oq=%E6%AD%B8&gs_lp=Egdnd3Mtd2l6IgnmrbjmqpTmmJ8qAggAMggQABiiBBiJBTIFEAAY7wUyCBAAGKIEGIkFMgUQABjvBTIIEAAYgAQYogRIkUBQ6AJY1w9wAXgAkAEAmAE8oAH8A6oBAjExuAEByAEA-AEBmAILoAKtBKgCAMICBRAAGIAEwgIFEC4YgATCAgsQLhiABBjRAxjHAcICCBAAGIAEGLEDwgIKEAAYgAQYQxiKBcICBxAAGIAEGA2YAwLxBXC_8Xkc37AykgcCMTGgB5cksgcCMTG4B60E&sclient=gws-wiz">Google 歸檔星球</a>
+			
+			<iframe src="https://www.google.com/search?q=%22AI%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E5%89%B5%E5%BB%BA%E3%80%81%E7%94%9F%E6%88%90%E7%9A%84%E7%85%A7%E7%89%87%7E%22&sca_esv=4fd0dc4fbda9541c&udm=2&biw=1920&bih=929&ei=33iOZtitLJDc1e8Phd2vwAw&ved=0ahUKEwiYmY-ft5yHAxUQbvUHHYXuC8gQ4dUDCBA&uact=5&oq=%22AI%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E5%89%B5%E5%BB%BA%E3%80%81%E7%94%9F%E6%88%90%E7%9A%84%E7%85%A7%E7%89%87%7E%22&gs_lp=Egxnd3Mtd2l6LXNlcnAiKSJBSea3seW6puWtuOe_kuWJteW7uuOAgeeUn-aIkOeahOeFp-eJh34iSOoQUPgGWKMPcAF4AJABAJgBJaABRqoBATK4AQPIAQD4AQGYAgCgAgCYAwCIBgGSBwCgB2Y&sclient=gws-wiz-serp&safe=active&ssui=on" width="1200" height="800"></iframe>
+			<a href="https://www.google.com/search?q=%22AI%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E5%89%B5%E5%BB%BA%E3%80%81%E7%94%9F%E6%88%90%E7%9A%84%E7%85%A7%E7%89%87%7E%22&sca_esv=4fd0dc4fbda9541c&udm=2&biw=1920&bih=929&ei=33iOZtitLJDc1e8Phd2vwAw&ved=0ahUKEwiYmY-ft5yHAxUQbvUHHYXuC8gQ4dUDCBA&uact=5&oq=%22AI%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E5%89%B5%E5%BB%BA%E3%80%81%E7%94%9F%E6%88%90%E7%9A%84%E7%85%A7%E7%89%87%7E%22&gs_lp=Egxnd3Mtd2l6LXNlcnAiKSJBSea3seW6puWtuOe_kuWJteW7uuOAgeeUn-aIkOeahOeFp-eJh34iSOoQUPgGWKMPcAF4AJABAJgBJaABRqoBATK4AQPIAQD4AQGYAgCgAgCYAwCIBgGSBwCgB2Y&sclient=gws-wiz-serp&safe=active&ssui=on">Google 歸檔星球</a>
+			
+			<iframe src="https://www.google.com/search?sca_esv=588853371&q=%22AESXKEY%E7%94%B3%E8%AB%8B%22&nfpr=1&sa=X&ved=2ahUKEwiSqaCWmP6CAxXgc_UHHV6LDCkQvgUoAXoECAgQAw&cshid=1701981789726146&biw=1920&bih=931&dpr=1" width="1200" height="800"></iframe>
+			<a href="https://www.google.com/search?sca_esv=588853371&q=%22AESXKEY%E7%94%B3%E8%AB%8B%22&nfpr=1&sa=X&ved=2ahUKEwiSqaCWmP6CAxXgc_UHHV6LDCkQvgUoAXoECAgQAw&cshid=1701981789726146&biw=1920&bih=931&dpr=1">Google AESXKEY申請</a>
+			
+			<iframe src="https://www.bing.com/search?q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&form=QBLH&sp=-1&ghc=1&lq=0&pq=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&sc=2-4&qs=n&sk=&cvid=C55581E9342546D8943B25B5F01AC0C5&ghsh=0&ghacc=0&ghpl="></iframe>
+			<a href="https://www.bing.com/search?q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&form=QBLH&sp=-1&ghc=1&lq=0&pq=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&sc=2-4&qs=n&sk=&cvid=C55581E9342546D8943B25B5F01AC0C5&ghsh=0&ghacc=0&ghpl=">Bing 歸檔星球</a>
+			
+			<iframe src="https://www.bing.com/search?q=AESXKEY%E7%94%B3%E8%AB%8B&form=QBLH&sp=-1&lq=0&pq=aesxkey%E7%94%B3%E8%AB%8B&sc=0-9&qs=n&sk=&cvid=6A2CF36D7C714E4D9B8D11A6646D9630&ghsh=0&ghacc=0&ghpl="></iframe>
+			<a href="https://www.bing.com/search?q=AESXKEY%E7%94%B3%E8%AB%8B&form=QBLH&sp=-1&lq=0&pq=aesxkey%E7%94%B3%E8%AB%8B&sc=0-9&qs=n&sk=&cvid=6A2CF36D7C714E4D9B8D11A6646D9630&ghsh=0&ghacc=0&ghpl=">Bing AESXKEY申請</a>
+			
+			<iframe src="https://tw.search.yahoo.com/search?p=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&fr=yfp-search-sb"></iframe>
+			<a href="https://tw.search.yahoo.com/search?p=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&fr=yfp-search-sb">Yahoo 歸檔星球</a>
+			
+			<iframe src="https://tw.search.yahoo.com/search?p=AESXKEY%E7%94%B3%E8%AB%8B&fr=yfp-search-sb"></iframe>
+			<a href="https://tw.search.yahoo.com/search?p=AESXKEY%E7%94%B3%E8%AB%8B&fr=yfp-search-sb">Yahoo AESXKEY申請</a>
+			
+			<iframe src="https://duckduckgo.com/?t=h_&q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&ia=web"></iframe>
+			<a href="https://duckduckgo.com/?t=h_&q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&ia=web">DuckDuckGo 歸檔星球</a>
+			
+			<iframe src="https://duckduckgo.com/?t=h_&q=AESXKEY%E7%94%B3%E8%AB%8B&ia=web"></iframe>
+			<a href="https://duckduckgo.com/?t=h_&q=AESXKEY%E7%94%B3%E8%AB%8B&ia=web">DuckDuckGo AESXKEY申請</a>
+			
+			<iframe src="https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&fenlei=256&rsv_pq=0xa0ef24e80009c9d3&rsv_t=2244MXtw%2Fab85bVNMy7MSLU3Cq57pZ1ldxJ7VJTpxnSJLHIM6%2Fo8nfuczpr0&rqlang=en&rsv_enter=1&rsv_dl=tb&rsv_sug3=17&rsv_sug1=5&rsv_sug7=100&rsv_sug2=0&rsv_btype=i&inputT=4400&rsv_sug4=4812"></iframe>
+			<a href="https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&fenlei=256&rsv_pq=0xa0ef24e80009c9d3&rsv_t=2244MXtw%2Fab85bVNMy7MSLU3Cq57pZ1ldxJ7VJTpxnSJLHIM6%2Fo8nfuczpr0&rqlang=en&rsv_enter=1&rsv_dl=tb&rsv_sug3=17&rsv_sug1=5&rsv_sug7=100&rsv_sug2=0&rsv_btype=i&inputT=4400&rsv_sug4=4812">baidu 歸檔星球</a>
+			
+			<iframe src="https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=AESXKEY%E7%94%B3%E8%AB%8B&fenlei=256&oq=A%2526gt%253BSXK%2526gt%253BY%25E7%2594%25B3%25E8%25AB%258B&rsv_pq=835cdbc80011673b&rsv_t=ca926Y2XVStDfV8xxERRTvVNkF%2FEONOoAib5KiKj%2F52KIAwjOagCsrfKHfs&rqlang=cn&rsv_dl=tb&rsv_enter=0&rsv_btype=t&prefixsug=A%2526gt%253BSXK%2526gt%253BY%25E7%2594%25B3%25E8%25AB%258B&rsp=0"></iframe>
+			<a href="https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=AESXKEY%E7%94%B3%E8%AB%8B&fenlei=256&oq=A%2526gt%253BSXK%2526gt%253BY%25E7%2594%25B3%25E8%25AB%258B&rsv_pq=835cdbc80011673b&rsv_t=ca926Y2XVStDfV8xxERRTvVNkF%2FEONOoAib5KiKj%2F52KIAwjOagCsrfKHfs&rqlang=cn&rsv_dl=tb&rsv_enter=0&rsv_btype=t&prefixsug=A%2526gt%253BSXK%2526gt%253BY%25E7%2594%25B3%25E8%25AB%258B&rsp=0">baidu AESXKEY申請</a>
+			
+		</span>
+		
+		<center>
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+		</center>
+		
+	</BODY>
+</HTML>
+<script>obj_umg_a1_f45_func_x_temp_off=4;</script>
+						
