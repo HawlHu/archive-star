@@ -1,0 +1,437 @@
+<HTML><!-- InstanceBegin template="/Templates/default.dwt" codeOutsideHTMLIsLocked="false" -->
+<HEAD>
+<!-- InstanceBeginEditable name="doctitle" -->
+<TITLE>歸檔星球 Archive Star - 線上手寫風格書寫工具</TITLE>
+<!-- InstanceEndEditable -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+<!-- InstanceBeginEditable name="head" -->
+
+	<meta name="keywords" content="線上手寫風格書寫工具">
+	<meta name="pagetype" content="教學">
+	<meta name="description" content="線上手寫風格書寫工具">
+	
+	<script type="application/ld+json">
+			{
+			  "@context": "https://schema.org",
+			  "@type": "WebPage",
+			  "url": "https://jplop.netlify.app/teac_post_about.html",
+			  "name": "線上手寫風格書寫工具",
+			  "description": "線上手寫風格書寫工具相關說明、相關下載、相關技術文獻。"
+			}
+	</script>
+	
+	<style>
+@font-face {
+  font-family: "ChenYuluoyan";
+  src: url("css/ChenYuluoyan-Thin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "YRDZSTJF";
+  src: url("css/YRDZSTJF.woff2") format("woff2");
+}
+
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.toolbar button,
+.toolbar select,
+.toolbar input[type="color"],
+.toolbar input[type="number"] {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 14px;
+}
+.toolbar button:hover {
+  background: #eee;
+}
+textarea {
+  width: 100%;
+  aspect-ratio: 16 / 7;  /* 高度自動依寬度計算 */
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 50px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  font-family: ChenYuluoyan;
+  transition: all 0.2s ease;
+}
+textarea:focus {
+  box-shadow: 0 0 0 2px #88c9ff;
+}
+
+
+    </style>
+	
+<!-- InstanceEndEditable -->
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="mm_menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/message.js"></script>		
+		<style>
+			a:link {color: #0000FF;text-decoration: none;} 
+			a:visited {color: #3366FF;text-decoration: none;}
+			a:hover {}
+			a:active {color: #FF0000;text-decoration: none;}
+			font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;}
+			input ,button , select{font-size:12px;}
+			.spoiler, .spoiler2{color: black; background-color:black;}
+			.spoiler:hover{color: white;}
+			.spoiler2:hover { background-color:white; }
+		</style>
+		
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVGMPW8LR4"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		
+		  gtag('config', 'G-SVGMPW8LR4');
+		</script>
+		
+</HEAD>
+
+<BODY leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table width="100%" height="100%" border="0" style="padding:20px;" cellspacing="0" background="images/archive_star_ban_bg_1997.jpg" id="table_top1">
+  <tr>
+    <td height="715" valign="top"><table width="100%" height="100%" border="0" cellspacing="0" bgcolor="#FFFFFF" style="padding:20px;border:1px #ccc solid;border-radius:10px;box-shadow:1px 1px 20px #ffffff;margin-right:8px;" id="table_top2">
+      <tr>
+        <td valign="top">
+		
+		<span id="j_space_top_data"></span>
+		<script>
+			var ajax_load_top = new sack();
+			ajax_load_top.requestFile = "init/top.html";
+			ajax_load_top.method  = 'GET'; 
+			ajax_load_top.element = 'j_space_top_data'; 
+	   </script>
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+
+            <td width="200" valign="top" id="mmenu"></td>
+			  <!-- InstanceBeginEditable name="EditRegion4" --> <!-- InstanceEndEditable -->
+            <td valign="top">
+			
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				  <tr>
+				    <td id="top_left_menu_td_m" align="center" bgcolor="#40588C" width="40" onClick="window.location='#d_menu_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">M</font></td>
+					<td id="top_left_menu_td_f" align="center" bgcolor="#336600" width="40" onClick="window.location='#d_file_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">F</font></td>
+					<td id="top_left_menu_td" style="text-align:right;background-color:#FFFFFF">
+							<span id="LoginBox_PC">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">About</a> | 
+								<a href="https://jplop.netlify.app/">NetLify</a> | 
+								<a href="https://jplop.neocities.org/">NeoCities</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">Project</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_M" style="display:none">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">AB</a> | 
+								<a href="https://jplop.netlify.app/">NL</a> | 
+								<a href="https://jplop.neocities.org/">NC</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">PJ</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_status"> | 
+								<a href="javascript:main_login_in_start();void(0);">管理</a> 
+							</span>
+					  </td>
+				  </tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="10" cellspacing="0">
+				  <tr>
+					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
+              
+			  
+			  
+			  <h2><img id="one_page_number_1" src="images/archive_star_ban_2020.jpg" alt="線上手寫風格書寫工具"  style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
+              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;線上手寫風格書寫工具&gt;&gt;</font></h2>
+              
+			  
+			  <div class="toolbar">
+				  <label>文字大小：
+					<input type="number" id="fontSize" value="50" min="10" max="999"> px
+				  </label>
+				
+				  <label>文字顏色：
+					<input type="color" id="fontColor" value="#0000FF">
+				  </label>
+				
+				  <label>背景顏色：
+					<input type="color" id="bgColor" value="#ffffff">
+				  </label>
+				
+				  <select id="fontFamily">
+					<option value="">預設字型</option>
+					<option value="ChenYuluoyan" selected>辰宇落雁體</option>
+					<option value="YRDZSTJF">楊任東竹石體</option>
+				  </select>
+				
+				  <button onclick="toggleStyle('bold')"><b>B</b></button>
+				  <button onclick="toggleStyle('italic')"><i>I</i></button>
+				  <button onclick="toggleStyle('underline')"><u>U</u></button>
+				  <button onclick="toggleShadow()">陰影</button>
+				    <button onclick="alignText('left')">靠左</button>
+					  <button onclick="alignText('center')">置中</button>
+					  <button onclick="alignText('right')">靠右</button>
+					  
+					  <button onclick="window.location.href='?demo='+encodeURIComponent('從第一次遇見你的那刻起，我的世界便悄悄改變。每一次微笑、每一句問候，都在我的心中留下溫暖的痕跡。無論日子多忙碌，我總想把最好的一面留給你。我希望能陪你走過每個晨昏，分享喜悅與淚水。請允許我牽著你的手，成為你最安心的依靠，讓我們一起寫下屬於我們的美麗故事。');">示範</button>
+				  
+				  <button onclick="printFullscreenTextarea()">🖨 全螢幕列印</button>
+				  
+				  </div>
+				
+				
+				  <textarea id="editor" style="color:#0000FF;" placeholder="在這裡輸入浪漫的文字吧～"></textarea>
+				  
+				<script>
+				const editor = document.getElementById('editor');
+				const fontSize = document.getElementById('fontSize');
+				const fontColor = document.getElementById('fontColor');
+				const bgColor = document.getElementById('bgColor');
+				const fontFamily = document.getElementById('fontFamily');
+				
+				fontSize.addEventListener('input', () => {
+				  editor.style.fontSize = fontSize.value + 'px';
+				});
+				
+				fontColor.addEventListener('input', () => {
+				  editor.style.color = fontColor.value;
+				});
+				
+				bgColor.addEventListener('input', () => {
+				  editor.style.backgroundColor = bgColor.value;
+				});
+				
+				fontFamily.addEventListener('change', () => {
+				  editor.style.fontFamily = fontFamily.value || '"Microsoft JhengHei", sans-serif';
+				});
+				
+				function toggleShadow() {
+				  if ( editor.style.textShadow && editor.style.textShadow !== 'none') {
+					editor.style.textShadow = 'none'; // 關閉陰影
+				  } else {
+					// 開啟陰影：2px 2px 偏移、藍色
+					editor.style.textShadow = '2px 2px 2px rgba(0,0,0,0.2)';
+				  }
+				}
+				
+				function toggleStyle(style) {
+				  if (style === 'bold') {
+					editor.style.fontWeight = (editor.style.fontWeight === 'bold') ? 'normal' : 'bold';
+				  }
+				  if (style === 'italic') {
+					editor.style.fontStyle = (editor.style.fontStyle === 'italic') ? 'normal' : 'italic';
+				  }
+				  if (style === 'underline') {
+					editor.style.textDecoration = (editor.style.textDecoration === 'underline') ? 'none' : 'underline';
+				  }
+				}
+				
+				function alignText(direction) {
+				  editor.style.textAlign = direction;
+				}
+				
+				
+				
+				function printFullscreenTextarea() {
+					  const textarea = document.getElementById("editor");
+					  const printDiv = document.getElementById("text_area_print");
+					
+					  // 複製文字（保留換行）
+					  printDiv.textContent = textarea.value;
+					
+					  // 取得 textarea 的所有實際樣式
+					  const computedStyle = window.getComputedStyle(textarea);
+					  let styleText = "";
+					  for (let i = 0; i < computedStyle.length; i++) {
+						const prop = computedStyle[i];
+						const val = computedStyle.getPropertyValue(prop);
+						styleText += `${prop}: ${val};`;
+					  }
+					
+					  // 套用樣式，並覆蓋必要的列印屬性
+					  printDiv.style.cssText = styleText + `
+						display: block !important;
+						position: fixed !important;
+						inset: 0 !important;
+						width: 100% !important;
+						height: 100% !important;
+						box-sizing: border-box !important;
+						overflow: auto !important;
+						white-space: pre-wrap !important;
+						z-index: 9999 !important;
+					  `;
+					   printDiv.style.border = "0px";
+					
+					  // 隱藏其他內容
+					  document.getElementById("table_top1").style.display="none";
+					
+					  // 加入背景色列印設定
+					  const style = document.createElement("style");
+					  style.textContent = "@media print { * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }";
+					  document.head.appendChild(style);
+					
+					  // 列印
+					  window.print();
+					
+					  // 列印完恢復畫面
+					  setTimeout(() => {
+						printDiv.style.display = "none";
+						document.getElementById("table_top1").style.display="";
+					  }, 500);
+					}
+				
+			  
+				   window.addEventListener('DOMContentLoaded', () => {
+					  //const editor = document.getElementById('editor');
+					
+					  // 解析 query string
+					  const params = new URLSearchParams(window.location.search);
+					  const demoText = params.get('demo'); // ?demo=xxx
+					
+					  if (demoText) {
+						editor.value = decodeURIComponent(demoText);
+					  }
+					});
+			  
+			    </script>
+                  
+				  
+				  
+				  
+				<p><b>功能說明</b></p>
+				<blockquote>
+				  <p>本工具為「浪漫文字工具」，可將使用者輸入的文字即時顯示為多種字型樣式，並提供列印功能。<br>
+                     適合製作詩詞卡片、情書、福音文案、創作練習等，讓文字更具溫度與美感。</p>
+				  </blockquote>
+				<p><b> 使用方式</b></p>
+				<blockquote>
+				  <p>在上方輸入框中輸入文字內容。</p>
+				  <p>於「字型選單」中選擇想要使用的字體（如：辰宇落雁體、楊任東竹石體等）。</p>
+				  <p>可依需求調整字型大小、顏色。</p>
+				  <p>點擊「列印」按鈕。</p>
+				  </blockquote>
+				<p><b><font color="#FF0000">字型授權與免責聲明</font></b></p>
+         <blockquote>
+           <p>本工具使用之字型均屬開放授權，特此感謝以下作者與專案：</p>
+           <ul>
+             <li><i>辰宇落雁體（ChenYuluoyan）<br>
+               <br>
+                       </i></li>
+             <li><i>楊任東竹石體（YRDZSTJF）
+                       </i></li>
+           </ul>
+           <p>本工具僅供非商業、個人創作或教學研究用途。</p>
+           <p>若您將字型應用於商業項目，請自行確認原始授權條款並遵守相關規範。</p>
+           <p> 開發者對於使用本工具或字型所導致的任何損失，概不負責。</p>
+         </blockquote>
+         <!-- InstanceEndEditable --></td>
+				  </tr>
+				</table>
+			
+			
+			</td>
+          </tr>
+        </table></td>
+      </tr>
+     
+      <tr>
+        <td align="left" valign="top" style="display:none" id="mmenu_down">
+		
+			<table width="100%" border="0" cellpadding="10" cellspacing="0">
+			  <tr>
+				<td align="left" valign="top" bgcolor="#DEECF1"><b>其他資料</b><a name="d_menu_a" id="d_menu_a"></a></td>
+			  </tr>
+			  <tr>
+				<td align="left" valign="top" id="mmenu_down_data"></td>
+			  </tr>
+			</table>
+
+		</td>
+      </tr>
+      <tr>
+       <td height="80" valign="middle" bgcolor="#DEECF1" id="m_files" style="padding:20px;"></td>
+		
+		<script>
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/files.htm"; 
+			ajax_load_files.method  = 'GET'; 
+			ajax_load_files.element = 'm_files'; 
+			function start_ajax_load_files(){
+				ajax_load_files.runAJAX('');
+			}
+			setTimeout("start_ajax_load_files();",1000);
+	   </script>
+		
+      </tr>
+      <tr>
+        <td height="60" align="center" valign="middle">
+		
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="https://www.jplopsoft.idv.tw/">Jplopsoft</a> | 
+				<a href="https://twhkinc.jplopsoft.idv.tw/">THI</a> | 
+				<a href="https://app.netlify.com/sites/jplop/deploys">Netlify</a> | 
+				<a href="https://neocities.org/dashboard">NeoCities</a> | 
+				<a href="https://lionfree.net/">LionFree</a>
+			</font></p>
+			
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="util_aes_utility.html">加密工具</a> | 
+				<a href="teac_post_about.html">提交歸檔</a> | 
+				<a href="util_qrcode_online_gen_tool.html">QRCODE產生器</a> | 
+				<a href="util_gen_pass.html">密碼產生器</a>
+			</font></p>
+			
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+			
+		</td>
+      </tr>
+    </table>
+	</td>
+  </tr>
+</table>
+</BODY>
+<script>
+	
+</script>
+<!-- InstanceEnd --></HTML>
