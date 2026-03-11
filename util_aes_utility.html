@@ -1,0 +1,388 @@
+<HTML><!-- InstanceBegin template="/Templates/default.dwt" codeOutsideHTMLIsLocked="false" -->
+<HEAD>
+<!-- InstanceBeginEditable name="doctitle" -->
+<TITLE>歸檔星球 Archive Star - AES Javascript加解密工具</TITLE>
+<!-- InstanceEndEditable -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+<!-- InstanceBeginEditable name="head" -->
+
+	<meta name="keywords" content="AES Javascript加解密工具">
+	<meta name="pagetype" content="工具">
+	<meta name="description" content="AES Javascript加解密工具">
+	<script type="application/ld+json">
+		{
+		  "@context": "https://schema.org",
+		  "@type": "WebPage",
+		  "url": "https://jplop.netlify.app/teac_post_about.html",
+		  "name": "AES Javascript 加解密工具",
+		  "description": "免費的線上純前端AES Javascript加解密工具"
+		}
+	</script>
+	<script language="JavaScript" type="text/JavaScript" src="js/StrongPasswordGenerator.js"></script>
+<!-- InstanceEndEditable -->
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="mm_menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/message.js"></script>		
+		<style>
+			a:link {color: #0000FF;text-decoration: none;} 
+			a:visited {color: #3366FF;text-decoration: none;}
+			a:hover {}
+			a:active {color: #FF0000;text-decoration: none;}
+			font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;}
+			input ,button , select{font-size:12px;}
+			.spoiler, .spoiler2{color: black; background-color:black;}
+			.spoiler:hover{color: white;}
+			.spoiler2:hover { background-color:white; }
+		</style>
+		
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVGMPW8LR4"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		
+		  gtag('config', 'G-SVGMPW8LR4');
+		</script>
+		
+</HEAD>
+
+<BODY leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table width="100%" height="100%" border="0" style="padding:20px;" cellspacing="0" background="images/archive_star_ban_bg_1997.jpg" id="table_top1">
+  <tr>
+    <td height="715" valign="top"><table width="100%" height="100%" border="0" cellspacing="0" bgcolor="#FFFFFF" style="padding:20px;border:1px #ccc solid;border-radius:10px;box-shadow:1px 1px 20px #ffffff;margin-right:8px;" id="table_top2">
+      <tr>
+        <td valign="top">
+		
+		<span id="j_space_top_data"></span>
+		<script>
+			var ajax_load_top = new sack();
+			ajax_load_top.requestFile = "init/top.html";
+			ajax_load_top.method  = 'GET'; 
+			ajax_load_top.element = 'j_space_top_data'; 
+	   </script>
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+
+            <td width="200" valign="top" id="mmenu"></td>
+			  <!-- InstanceBeginEditable name="EditRegion4" --> <!-- InstanceEndEditable -->
+            <td valign="top">
+			
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				  <tr>
+				    <td id="top_left_menu_td_m" align="center" bgcolor="#40588C" width="40" onClick="window.location='#d_menu_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">M</font></td>
+					<td id="top_left_menu_td_f" align="center" bgcolor="#336600" width="40" onClick="window.location='#d_file_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">F</font></td>
+					<td id="top_left_menu_td" style="text-align:right;background-color:#FFFFFF">
+							<span id="LoginBox_PC">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">About</a> | 
+								<a href="https://jplop.netlify.app/">NetLify</a> | 
+								<a href="https://jplop.neocities.org/">NeoCities</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">Project</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_M" style="display:none">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">AB</a> | 
+								<a href="https://jplop.netlify.app/">NL</a> | 
+								<a href="https://jplop.neocities.org/">NC</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">PJ</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_status"> | 
+								<a href="javascript:main_login_in_start();void(0);">管理</a> 
+							</span>
+					  </td>
+				  </tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="10" cellspacing="0">
+				  <tr>
+					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
+              <h2><img id="one_page_number_1" src="images/archive_star_ban_2022.jpg?nf_resize=fit&w=532&h=332" alt="AES Javascript加解密工具"  style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
+              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;AES JS加解密工具&gt;&gt;</font></h2>
+              <p><b><font face="Verdana, Arial, Helvetica, sans-serif">
+                密鑰：<font color=blue><b>[<span id="source_key_check_type_display">No AESXKEY</span> | <a href="javascript:document.getElementById('key').value=SPG_GenPassword(getRandomInt(64)+64,false,'AeSXkEYrNdX1');source_key_check_type_display_func(document.getElementById('key').value);void(0)">隨機產生一組</a>]</b></font>
+				  
+				  <script>
+				  	function source_key_check_type_display_func(data){
+							//判斷 Key CRC
+								
+								if(data!=""){
+									document.getElementById('source_key_check_type_display').innerHTML="No AESXKEY";
+									for(var i=0;i!=web_system_main_json_datas.user_group.length;i++){
+										if(ex_md1_rand_check(data,web_system_main_json_datas.user_group[i].ex_md1)){
+											document.getElementById('source_key_check_type_display').innerHTML=web_system_main_json_datas.user_group[i].group+" EX_MD1";
+										}
+									}
+								}else{
+									document.getElementById('source_key_check_type_display').innerHTML="No AESXKEY";
+								}
+
+					}
+					if(readCookie("j_system_login_group")!="" && readCookie("j_aeskey")!=""){
+						source_key_check_type_display_func(readCookie("j_aeskey"));
+					}
+				  </script>
+				  </font></b></p>
+              <blockquote>
+                <p><b><font face="Verdana, Arial, Helvetica, sans-serif">                    <input id="key" type="text" value="test" style="width:80% " onKeyUp="source_key_check_type_display_func(this.value)">
+                </font></b><b><font face="Verdana, Arial, Helvetica, sans-serif">
+                <script>
+							if(readCookie("j_aeskey")!=""){
+									document.getElementById('key').value=readCookie("j_aeskey");
+							}else{
+									document.getElementById('key').value=SPG_GenPassword(getRandomInt(64)+64,false,'AeSXkEYrNdX1');
+							}
+							source_key_check_type_display_func(document.getElementById('key').value);
+					  </script>
+                    </font></b></p>
+              </blockquote>
+              <p><b><font face="Verdana, Arial, Helvetica, sans-serif">內容：</font></b></p>
+              <blockquote>
+                <p><b><font face="Verdana, Arial, Helvetica, sans-serif">
+					<script>
+						function auto_btn_check(data){
+							if(document.getElementById('key').value!="" && data!=""){
+								if(data.substr(0,10)=="U2FsdGVkX1"){
+									document.getElementById('btn_start_2').click();
+								}else{
+									document.getElementById('btn_start_1').click();
+								}
+							}
+						}
+					</script>
+                    <textarea id="data" style="width:100%;" wrap="off" onKeyUp="if(event.keyCode==86){auto_btn_check(this.value);}"></textarea>
+					<script>
+						var data_data_ok_top_high=350;
+						document.getElementById('data').style.height=(document.body.clientHeight-data_data_ok_top_high)/2;
+					</script>
+					
+</font></b></p>
+                
+				<script>
+					function change_btn_bg_color(id){
+						if(id==1){
+							document.getElementById('btn_table_bg_color_1').style.backgroundColor="#FFD5D6";
+							document.getElementById('btn_table_bg_color_2').style.backgroundColor="";
+						}else{
+							document.getElementById('btn_table_bg_color_1').style.backgroundColor="";
+							document.getElementById('btn_table_bg_color_2').style.backgroundColor="#00FFFF";
+						}
+					}				
+				</script>
+              <table border="0" cellpadding="5" cellspacing="0">
+                  <tr>
+                    <td id="btn_table_bg_color_1"><b><font face="Verdana, Arial, Helvetica, sans-serif">
+                      <input id="btn_start_1" type="button" value="加密" onClick="change_btn_bg_color(1);if(document.getElementById('encode_use_url_encode').checked){document.getElementById('data_ok').value=AesEncrypt(document.getElementById('data').value,document.getElementById('key').value).replace(/\//gi,'\_');}else{document.getElementById('data_ok').value=AesEncrypt(document.getElementById('data').value,document.getElementById('key').value);}document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
+                    </font></b></td>
+                    
+                    <td id="btn_table_bg_color_2"><b><font face="Verdana, Arial, Helvetica, sans-serif">
+                      <input id="btn_start_2" type="button" value="解密" onClick="change_btn_bg_color(2);document.getElementById('data_ok').value=AesDecrypt(document.getElementById('data').value.replace(/_/gi,'/'),document.getElementById('key').value);document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
+                    </font></b></td>
+					<td id="btn_table_bg_color_3"><input type="checkbox" name="checkbox" value="checkbox" id="encode_use_url_encode">
+					  URL編碼(相容檔名)</td>
+                  </tr>
+                </table>
+              </blockquote>
+              <p><b><font face="Verdana, Arial, Helvetica, sans-serif">結果[<a href="javascript:document.getElementById('data_ok').select();document.execCommand('copy');document.getElementById('btn_copy_ok').innerHTML='<font color=red>(已在剪貼簿)</font>';document.getElementById('data').focus();void(0);">複製</a> | <a href="javascript:prompt('快速解密連接','//'+document.location.host + document.location.pathname + '?q=' + encodeURI(document.getElementById('data_ok').value) );void(0);">解密連接</a>]<span id="btn_copy_ok"></span>：</font></b></p>
+              <blockquote>
+                <p><b><font face="Verdana, Arial, Helvetica, sans-serif">
+                    <textarea id="data_ok" style="width:100%;" wrap="off" readonly></textarea>
+					<script>
+						document.getElementById('data_ok').style.height=(document.body.clientHeight-data_data_ok_top_high)/2;
+					</script>
+</font></b></p>
+                <p><b><font face="Verdana, Arial, Helvetica, sans-serif">[<a href="https://www.base64-image.de/">圖片轉BASE64</a> | <a href="https://base64.guru/converter/encode/file">BIN轉BASE64</a> | <a href="teac_ex_md1.html">EX_MD1加密</a> |<a href="info_aesxkey_application.html"> AESXKEY申請 </a>]</font></b></p>
+                </blockquote>
+              <p>&nbsp;</p>
+			  
+			  <p><b>AES加解密工具(PHP用模組)<font face="Verdana, Arial, Helvetica, sans-serif"></b>：
+			  <a href="data:@file/x-php;base64,PD9waHANCi8qKg0KICogQ3J5cHRvSlMgQUVTIENvbXBhdGlibGUgSW1wbGVtZW50YXRpb24NCiAqIFRhcmdldDogUEhQIDQuMCB+IFBIUCA4LngNCiAqIEZpeGVzOiBSZW1vdmVkIHRyeS9jYXRjaCAoUEhQNSspLCBmaXhlZCBtZDUgcmF3IG91dHB1dCAoUEhQNSspLCBmaXhlZCBzdHJpbmcgYWNjZXNzIChQSFA4IGNvbXBhdGliaWxpdHkpLg0KICovDQoNCi8vIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQovLyBHbG9iYWwgV3JhcHBlciBGdW5jdGlvbnMNCi8vIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQoNCmZ1bmN0aW9uIEFlc0VuY3J5cHQoJHdvcmQsICRwd2QpIHsNCiAgICAvLyAxLiBHZW5lcmF0ZSByYW5kb20gOC1ieXRlIHNhbHQNCiAgICAkc2FsdCA9IENyeXB0b0pTQUVTOjpyYW5kb21CeXRlcyg4KTsNCiAgICANCiAgICAvLyAyLiBEZXJpdmUgS2V5IGFuZCBJVg0KICAgICRkZXJpdmVkID0gQ3J5cHRvSlNBRVM6OmV2cEtERigkcHdkLCAkc2FsdCk7DQogICAgJGtleSA9ICRkZXJpdmVkWydrZXknXTsNCiAgICAkaXYgID0gJGRlcml2ZWRbJ2l2J107DQogICAgDQogICAgLy8gMy4gRW5jcnlwdA0KICAgICRjaXBoZXJ0ZXh0ID0gQ3J5cHRvSlNBRVM6OmVuY3J5cHRDQkMoJHdvcmQsICRrZXksICRpdik7DQogICAgDQogICAgLy8gNC4gQ29tYmluZSBhbmQgQmFzZTY0IGVuY29kZQ0KICAgIHJldHVybiBiYXNlNjRfZW5jb2RlKCJTYWx0ZWRfXyIgLiAkc2FsdCAuICRjaXBoZXJ0ZXh0KTsNCn0NCg0KZnVuY3Rpb24gQWVzRGVjcnlwdCgkd29yZCwgJHB3ZCkgew0KICAgICRjaXBoZXJ0ZXh0V2l0aEhlYWRlciA9IGJhc2U2NF9kZWNvZGUoJHdvcmQpOw0KICAgIA0KICAgIC8vIENoZWNrIGZvciBPcGVuU1NMIE1hZ2ljIEhlYWRlciAiU2FsdGVkX18iDQogICAgaWYgKHN1YnN0cigkY2lwaGVydGV4dFdpdGhIZWFkZXIsIDAsIDgpICE9PSAiU2FsdGVkX18iKSB7DQogICAgICAgIHJldHVybiBmYWxzZTsNCiAgICB9DQogICAgDQogICAgJHNhbHQgPSBzdWJzdHIoJGNpcGhlcnRleHRXaXRoSGVhZGVyLCA4LCA4KTsNCiAgICAkY2lwaGVydGV4dCA9IHN1YnN0cigkY2lwaGVydGV4dFdpdGhIZWFkZXIsIDE2KTsNCiAgICANCiAgICAvLyBEZXJpdmUgS2V5IGFuZCBJVg0KICAgICRkZXJpdmVkID0gQ3J5cHRvSlNBRVM6OmV2cEtERigkcHdkLCAkc2FsdCk7DQogICAgJGtleSA9ICRkZXJpdmVkWydrZXknXTsNCiAgICAkaXYgID0gJGRlcml2ZWRbJ2l2J107DQogICAgDQogICAgLy8gRGVjcnlwdA0KICAgIHJldHVybiBDcnlwdG9KU0FFUzo6ZGVjcnlwdENCQygkY2lwaGVydGV4dCwgJGtleSwgJGl2KTsNCn0NCg0KLy8gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCi8vIENvcmUgQ2xhc3M6IENyeXB0b0pTQUVTDQovLyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KDQpjbGFzcyBDcnlwdG9KU0FFUyB7DQogICAgDQogICAgLyoqDQogICAgICogQ3Jvc3MtdmVyc2lvbiBNRDUgUmF3IE91dHB1dA0KICAgICAqIFBIUCA0LjAgbWQ1KCkgZG9lcyBub3Qgc3VwcG9ydCB0aGUgc2Vjb25kIGFyZ3VtZW50Lg0KICAgICAqLw0KICAgIGZ1bmN0aW9uIG1kNVJhdygkZGF0YSkgew0KICAgICAgICByZXR1cm4gcGFjaygnSConLCBtZDUoJGRhdGEpKTsNCiAgICB9DQoNCiAgICAvKioNCiAgICAgKiBFdnBLREYgKE9wZW5TU0wgS2V5IERlcml2YXRpb24pDQogICAgICovDQogICAgZnVuY3Rpb24gZXZwS0RGKCRwYXNzd29yZCwgJHNhbHQpIHsNCiAgICAgICAgJGtleVNpemUgPSAzMjsNCiAgICAgICAgJGl2U2l6ZSA9IDE2Ow0KICAgICAgICAkdGFyZ2V0S2V5U2l6ZSA9ICRrZXlTaXplICsgJGl2U2l6ZTsNCiAgICAgICAgJGRlcml2ZWRCeXRlcyA9ICIiOw0KICAgICAgICAkYmxvY2sgPSBudWxsOw0KICAgICAgICANCiAgICAgICAgd2hpbGUgKHN0cmxlbigkZGVyaXZlZEJ5dGVzKSA8ICR0YXJnZXRLZXlTaXplKSB7DQogICAgICAgICAgICBpZiAoJGJsb2NrICE9PSBudWxsKSB7DQogICAgICAgICAgICAgICAgJGJsb2NrID0gQ3J5cHRvSlNBRVM6Om1kNVJhdygkYmxvY2sgLiAkcGFzc3dvcmQgLiAkc2FsdCk7DQogICAgICAgICAgICB9IGVsc2Ugew0KICAgICAgICAgICAgICAgICRibG9jayA9IENyeXB0b0pTQUVTOjptZDVSYXcoJHBhc3N3b3JkIC4gJHNhbHQpOw0KICAgICAgICAgICAgfQ0KICAgICAgICAgICAgJGRlcml2ZWRCeXRlcyAuPSAkYmxvY2s7DQogICAgICAgIH0NCiAgICAgICAgDQogICAgICAgIHJldHVybiBhcnJheSgNCiAgICAgICAgICAgICdrZXknID0+IHN1YnN0cigkZGVyaXZlZEJ5dGVzLCAwLCAka2V5U2l6ZSksDQogICAgICAgICAgICAnaXYnICA9PiBzdWJzdHIoJGRlcml2ZWRCeXRlcywgJGtleVNpemUsICRpdlNpemUpDQogICAgICAgICk7DQogICAgfQ0KDQogICAgLyoqDQogICAgICogQ0JDIE1vZGUgRW5jcnlwdGlvbg0KICAgICAqLw0KICAgIGZ1bmN0aW9uIGVuY3J5cHRDQkMoJHBsYWludGV4dCwgJGtleSwgJGl2KSB7DQogICAgICAgICRwbGFpbnRleHQgPSBDcnlwdG9KU0FFUzo6cGtjczdQYWQoJHBsYWludGV4dCk7DQogICAgICAgICRsZW4gPSBzdHJsZW4oJHBsYWludGV4dCk7DQogICAgICAgICRibG9ja0NvdW50ID0gJGxlbiAvIDE2OyAvLyBJbiBQSFAgNCBhcml0aG1ldGljIHRoaXMgaXMgZmluZSBmb3IgZXhhY3QgbXVsdGlwbGVzDQogICAgICAgIA0KICAgICAgICAkY2lwaGVydGV4dCA9ICIiOw0KICAgICAgICAkcHJldkJsb2NrID0gJGl2Ow0KICAgICAgICANCiAgICAgICAgJGtleVNjaGVkdWxlID0gQ3J5cHRvSlNBRVM6OmtleUV4cGFuc2lvbigka2V5KTsNCiAgICAgICAgDQogICAgICAgIGZvciAoJGkgPSAwOyAkaSA8ICRibG9ja0NvdW50OyAkaSsrKSB7DQogICAgICAgICAgICAkYmxvY2sgPSBzdWJzdHIoJHBsYWludGV4dCwgJGkgKiAxNiwgMTYpOw0KICAgICAgICAgICAgJGJsb2NrID0gQ3J5cHRvSlNBRVM6OnhvckJsb2NrKCRibG9jaywgJHByZXZCbG9jayk7DQogICAgICAgICAgICAkZW5jcnlwdGVkQmxvY2sgPSBDcnlwdG9KU0FFUzo6Y2lwaGVyKCRibG9jaywgJGtleVNjaGVkdWxlKTsNCiAgICAgICAgICAgICRjaXBoZXJ0ZXh0IC49ICRlbmNyeXB0ZWRCbG9jazsNCiAgICAgICAgICAgICRwcmV2QmxvY2sgPSAkZW5jcnlwdGVkQmxvY2s7DQogICAgICAgIH0NCiAgICAgICAgDQogICAgICAgIHJldHVybiAkY2lwaGVydGV4dDsNCiAgICB9DQoNCiAgICAvKioNCiAgICAgKiBDQkMgTW9kZSBEZWNyeXB0aW9uDQogICAgICovDQogICAgZnVuY3Rpb24gZGVjcnlwdENCQygkY2lwaGVydGV4dCwgJGtleSwgJGl2KSB7DQogICAgICAgICRsZW4gPSBzdHJsZW4oJGNpcGhlcnRleHQpOw0KICAgICAgICAkYmxvY2tDb3VudCA9ICRsZW4gLyAxNjsNCiAgICAgICAgDQogICAgICAgICRwbGFpbnRleHQgPSAiIjsNCiAgICAgICAgJHByZXZCbG9jayA9ICRpdjsNCiAgICAgICAgDQogICAgICAgICRrZXlTY2hlZHVsZSA9IENyeXB0b0pTQUVTOjprZXlFeHBhbnNpb24oJGtleSk7DQogICAgICAgIA0KICAgICAgICBmb3IgKCRpID0gMDsgJGkgPCAkYmxvY2tDb3VudDsgJGkrKykgew0KICAgICAgICAgICAgJGJsb2NrID0gc3Vic3RyKCRjaXBoZXJ0ZXh0LCAkaSAqIDE2LCAxNik7DQogICAgICAgICAgICAkZGVjcnlwdGVkQmxvY2sgPSBDcnlwdG9KU0FFUzo6aW52Q2lwaGVyKCRibG9jaywgJGtleVNjaGVkdWxlKTsNCiAgICAgICAgICAgICRkZWNyeXB0ZWRCbG9jayA9IENyeXB0b0pTQUVTOjp4b3JCbG9jaygkZGVjcnlwdGVkQmxvY2ssICRwcmV2QmxvY2spOw0KICAgICAgICAgICAgJHBsYWludGV4dCAuPSAkZGVjcnlwdGVkQmxvY2s7DQogICAgICAgICAgICAkcHJldkJsb2NrID0gJGJsb2NrOw0KICAgICAgICB9DQogICAgICAgIA0KICAgICAgICByZXR1cm4gQ3J5cHRvSlNBRVM6OnBrY3M3VW5wYWQoJHBsYWludGV4dCk7DQogICAgfQ0KDQogICAgZnVuY3Rpb24geG9yQmxvY2soJGIxLCAkYjIpIHsNCiAgICAgICAgJHJlcyA9ICIiOw0KICAgICAgICAvLyBVc2UgbWFudWFsIGxvb3AgdG8gYmUgc2FmZSBhY3Jvc3MgYWxsIHZlcnNpb25zDQogICAgICAgIGZvciAoJGkgPSAwOyAkaSA8IDE2OyAkaSsrKSB7DQogICAgICAgICAgICAvLyBzdWJzdHIgaXMgc2FmZXIgdGhhbiBbXSBvciB7fSBmb3IgUEhQIDQtOCBjb21wYXQNCiAgICAgICAgICAgICRjMSA9IG9yZChzdWJzdHIoJGIxLCAkaSwgMSkpOw0KICAgICAgICAgICAgJGMyID0gb3JkKHN1YnN0cigkYjIsICRpLCAxKSk7DQogICAgICAgICAgICAkcmVzIC49IGNocigkYzEgXiAkYzIpOw0KICAgICAgICB9DQogICAgICAgIHJldHVybiAkcmVzOw0KICAgIH0NCg0KICAgIGZ1bmN0aW9uIHBrY3M3UGFkKCR0ZXh0KSB7DQogICAgICAgICRibG9ja1NpemUgPSAxNjsNCiAgICAgICAgJHBhZCA9ICRibG9ja1NpemUgLSAoc3RybGVuKCR0ZXh0KSAlICRibG9ja1NpemUpOw0KICAgICAgICByZXR1cm4gJHRleHQgLiBzdHJfcmVwZWF0KGNocigkcGFkKSwgJHBhZCk7DQogICAgfQ0KDQogICAgZnVuY3Rpb24gcGtjczdVbnBhZCgkdGV4dCkgew0KICAgICAgICAkbGVuID0gc3RybGVuKCR0ZXh0KTsNCiAgICAgICAgaWYgKCRsZW4gPT0gMCkgcmV0dXJuICIiOw0KICAgICAgICANCiAgICAgICAgLy8gR2V0IGxhc3QgY2hhciBzYWZlbHkNCiAgICAgICAgJHBhZCA9IG9yZChzdWJzdHIoJHRleHQsICRsZW4gLSAxLCAxKSk7DQogICAgICAgIA0KICAgICAgICBpZiAoJHBhZCA8IDEgfHwgJHBhZCA+IDE2KSByZXR1cm4gJHRleHQ7DQogICAgICAgIHJldHVybiBzdWJzdHIoJHRleHQsIDAsICRsZW4gLSAkcGFkKTsNCiAgICB9DQoNCiAgICBmdW5jdGlvbiByYW5kb21CeXRlcygkbGVuKSB7DQogICAgICAgICRyZXN1bHQgPSAiIjsNCiAgICAgICAgLy8gUEhQIDcrIGNoZWNrIChubyB0cnkvY2F0Y2ggdG8gYXZvaWQgUEhQIDQgcGFyc2UgZXJyb3IpDQogICAgICAgIGlmIChmdW5jdGlvbl9leGlzdHMoJ3JhbmRvbV9ieXRlcycpKSB7DQogICAgICAgICAgICAkcmVzdWx0ID0gY2FsbF91c2VyX2Z1bmMoJ3JhbmRvbV9ieXRlcycsICRsZW4pOw0KICAgICAgICAgICAgaWYgKHN0cmxlbigkcmVzdWx0KSA9PT0gJGxlbikgcmV0dXJuICRyZXN1bHQ7DQogICAgICAgIH0NCiAgICAgICAgDQogICAgICAgIGlmIChmdW5jdGlvbl9leGlzdHMoJ29wZW5zc2xfcmFuZG9tX3BzZXVkb19ieXRlcycpKSB7DQogICAgICAgICAgICAkcmVzdWx0ID0gb3BlbnNzbF9yYW5kb21fcHNldWRvX2J5dGVzKCRsZW4pOw0KICAgICAgICAgICAgaWYgKHN0cmxlbigkcmVzdWx0KSA9PT0gJGxlbikgcmV0dXJuICRyZXN1bHQ7DQogICAgICAgIH0NCiAgICAgICAgDQogICAgICAgIC8vIEZhbGxiYWNrIGZvciBQSFAgNA0KICAgICAgICBmb3IgKCRpID0gMDsgJGkgPCAkbGVuOyAkaSsrKSB7DQogICAgICAgICAgICAkcmVzdWx0IC49IGNocihtdF9yYW5kKDAsIDI1NSkpOw0KICAgICAgICB9DQogICAgICAgIHJldHVybiAkcmVzdWx0Ow0KICAgIH0NCg0KICAgIC8vIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCiAgICAvLyBBRVMgQ29yZSBMb2dpYw0KICAgIC8vIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCg0KICAgIGZ1bmN0aW9uIHNCb3goJGkpIHsNCiAgICAgICAgc3RhdGljICRzQm94ID0gYXJyYXkoDQogICAgICAgICAgICAweDYzLCAweDdjLCAweDc3LCAweDdiLCAweGYyLCAweDZiLCAweDZmLCAweGM1LCAweDMwLCAweDAxLCAweDY3LCAweDJiLCAweGZlLCAweGQ3LCAweGFiLCAweDc2LA0KICAgICAgICAgICAgMHhjYSwgMHg4MiwgMHhjOSwgMHg3ZCwgMHhmYSwgMHg1OSwgMHg0NywgMHhmMCwgMHhhZCwgMHhkNCwgMHhhMiwgMHhhZiwgMHg5YywgMHhhNCwgMHg3MiwgMHhjMCwNCiAgICAgICAgICAgIDB4YjcsIDB4ZmQsIDB4OTMsIDB4MjYsIDB4MzYsIDB4M2YsIDB4ZjcsIDB4Y2MsIDB4MzQsIDB4YTUsIDB4ZTUsIDB4ZjEsIDB4NzEsIDB4ZDgsIDB4MzEsIDB4MTUsDQogICAgICAgICAgICAweDA0LCAweGM3LCAweDIzLCAweGMzLCAweDE4LCAweDk2LCAweDA1LCAweDlhLCAweDA3LCAweDEyLCAweDgwLCAweGUyLCAweGViLCAweDI3LCAweGIyLCAweDc1LA0KICAgICAgICAgICAgMHgwOSwgMHg4MywgMHgyYywgMHgxYSwgMHgxYiwgMHg2ZSwgMHg1YSwgMHhhMCwgMHg1MiwgMHgzYiwgMHhkNiwgMHhiMywgMHgyOSwgMHhlMywgMHgyZiwgMHg4NCwNCiAgICAgICAgICAgIDB4NTMsIDB4ZDEsIDB4MDAsIDB4ZWQsIDB4MjAsIDB4ZmMsIDB4YjEsIDB4NWIsIDB4NmEsIDB4Y2IsIDB4YmUsIDB4MzksIDB4NGEsIDB4NGMsIDB4NTgsIDB4Y2YsDQogICAgICAgICAgICAweGQwLCAweGVmLCAweGFhLCAweGZiLCAweDQzLCAweDRkLCAweDMzLCAweDg1LCAweDQ1LCAweGY5LCAweDAyLCAweDdmLCAweDUwLCAweDNjLCAweDlmLCAweGE4LA0KICAgICAgICAgICAgMHg1MSwgMHhhMywgMHg0MCwgMHg4ZiwgMHg5MiwgMHg5ZCwgMHgzOCwgMHhmNSwgMHhiYywgMHhiNiwgMHhkYSwgMHgyMSwgMHgxMCwgMHhmZiwgMHhmMywgMHhkMiwNCiAgICAgICAgICAgIDB4Y2QsIDB4MGMsIDB4MTMsIDB4ZWMsIDB4NWYsIDB4OTcsIDB4NDQsIDB4MTcsIDB4YzQsIDB4YTcsIDB4N2UsIDB4M2QsIDB4NjQsIDB4NWQsIDB4MTksIDB4NzMsDQogICAgICAgICAgICAweDYwLCAweDgxLCAweDRmLCAweGRjLCAweDIyLCAweDJhLCAweDkwLCAweDg4LCAweDQ2LCAweGVlLCAweGI4LCAweDE0LCAweGRlLCAweDVlLCAweDBiLCAweGRiLA0KICAgICAgICAgICAgMHhlMCwgMHgzMiwgMHgzYSwgMHgwYSwgMHg0OSwgMHgwNiwgMHgyNCwgMHg1YywgMHhjMiwgMHhkMywgMHhhYywgMHg2MiwgMHg5MSwgMHg5NSwgMHhlNCwgMHg3OSwNCiAgICAgICAgICAgIDB4ZTcsIDB4YzgsIDB4MzcsIDB4NmQsIDB4OGQsIDB4ZDUsIDB4NGUsIDB4YTksIDB4NmMsIDB4NTYsIDB4ZjQsIDB4ZWEsIDB4NjUsIDB4N2EsIDB4YWUsIDB4MDgsDQogICAgICAgICAgICAweGJhLCAweDc4LCAweDI1LCAweDJlLCAweDFjLCAweGE2LCAweGI0LCAweGM2LCAweGU4LCAweGRkLCAweDc0LCAweDFmLCAweDRiLCAweGJkLCAweDhiLCAweDhhLA0KICAgICAgICAgICAgMHg3MCwgMHgzZSwgMHhiNSwgMHg2NiwgMHg0OCwgMHgwMywgMHhmNiwgMHgwZSwgMHg2MSwgMHgzNSwgMHg1NywgMHhiOSwgMHg4NiwgMHhjMSwgMHgxZCwgMHg5ZSwNCiAgICAgICAgICAgIDB4ZTEsIDB4ZjgsIDB4OTgsIDB4MTEsIDB4NjksIDB4ZDksIDB4OGUsIDB4OTQsIDB4OWIsIDB4MWUsIDB4ODcsIDB4ZTksIDB4Y2UsIDB4NTUsIDB4MjgsIDB4ZGYsDQogICAgICAgICAgICAweDhjLCAweGExLCAweDg5LCAweDBkLCAweGJmLCAweGU2LCAweDQyLCAweDY4LCAweDQxLCAweDk5LCAweDJkLCAweDBmLCAweGIwLCAweDU0LCAweGJiLCAweDE2DQogICAgICAgICk7DQogICAgICAgIHJldHVybiAkc0JveFskaV07DQogICAgfQ0KDQogICAgZnVuY3Rpb24gcnNCb3goJGkpIHsNCiAgICAgICAgc3RhdGljICRyc0JveCA9IGFycmF5KA0KICAgICAgICAgICAgMHg1MiwgMHgwOSwgMHg2YSwgMHhkNSwgMHgzMCwgMHgzNiwgMHhhNSwgMHgzOCwgMHhiZiwgMHg0MCwgMHhhMywgMHg5ZSwgMHg4MSwgMHhmMywgMHhkNywgMHhmYiwNCiAgICAgICAgICAgIDB4N2MsIDB4ZTMsIDB4MzksIDB4ODIsIDB4OWIsIDB4MmYsIDB4ZmYsIDB4ODcsIDB4MzQsIDB4OGUsIDB4NDMsIDB4NDQsIDB4YzQsIDB4ZGUsIDB4ZTksIDB4Y2IsDQogICAgICAgICAgICAweDU0LCAweDdiLCAweDk0LCAweDMyLCAweGE2LCAweGMyLCAweDIzLCAweDNkLCAweGVlLCAweDRjLCAweDk1LCAweDBiLCAweDQyLCAweGZhLCAweGMzLCAweDRlLA0KICAgICAgICAgICAgMHgwOCwgMHgyZSwgMHhhMSwgMHg2NiwgMHgyOCwgMHhkOSwgMHgyNCwgMHhiMiwgMHg3NiwgMHg1YiwgMHhhMiwgMHg0OSwgMHg2ZCwgMHg4YiwgMHhkMSwgMHgyNSwNCiAgICAgICAgICAgIDB4NzIsIDB4ZjgsIDB4ZjYsIDB4NjQsIDB4ODYsIDB4NjgsIDB4OTgsIDB4MTYsIDB4ZDQsIDB4YTQsIDB4NWMsIDB4Y2MsIDB4NWQsIDB4NjUsIDB4YjYsIDB4OTIsDQogICAgICAgICAgICAweDZjLCAweDcwLCAweDQ4LCAweDUwLCAweGZkLCAweGVkLCAweGI5LCAweGRhLCAweDVlLCAweDE1LCAweDQ2LCAweDU3LCAweGE3LCAweDhkLCAweDlkLCAweDg0LA0KICAgICAgICAgICAgMHg5MCwgMHhkOCwgMHhhYiwgMHgwMCwgMHg4YywgMHhiYywgMHhkMywgMHgwYSwgMHhmNywgMHhlNCwgMHg1OCwgMHgwNSwgMHhiOCwgMHhiMywgMHg0NSwgMHgwNiwNCiAgICAgICAgICAgIDB4ZDAsIDB4MmMsIDB4MWUsIDB4OGYsIDB4Y2EsIDB4M2YsIDB4MGYsIDB4MDIsIDB4YzEsIDB4YWYsIDB4YmQsIDB4MDMsIDB4MDEsIDB4MTMsIDB4OGEsIDB4NmIsDQogICAgICAgICAgICAweDNhLCAweDkxLCAweDExLCAweDQxLCAweDRmLCAweDY3LCAweGRjLCAweGVhLCAweDk3LCAweGYyLCAweGNmLCAweGNlLCAweGYwLCAweGI0LCAweGU2LCAweDczLA0KICAgICAgICAgICAgMHg5NiwgMHhhYywgMHg3NCwgMHgyMiwgMHhlNywgMHhhZCwgMHgzNSwgMHg4NSwgMHhlMiwgMHhmOSwgMHgzNywgMHhlOCwgMHgxYywgMHg3NSwgMHhkZiwgMHg2ZSwNCiAgICAgICAgICAgIDB4NDcsIDB4ZjEsIDB4MWEsIDB4NzEsIDB4MWQsIDB4MjksIDB4YzUsIDB4ODksIDB4NmYsIDB4YjcsIDB4NjIsIDB4MGUsIDB4YWEsIDB4MTgsIDB4YmUsIDB4MWIsDQogICAgICAgICAgICAweGZjLCAweDU2LCAweDNlLCAweDRiLCAweGM2LCAweGQyLCAweDc5LCAweDIwLCAweDlhLCAweGRiLCAweGMwLCAweGZlLCAweDc4LCAweGNkLCAweDVhLCAweGY0LA0KICAgICAgICAgICAgMHgxZiwgMHhkZCwgMHhhOCwgMHgzMywgMHg4OCwgMHgwNywgMHhjNywgMHgzMSwgMHhiMSwgMHgxMiwgMHgxMCwgMHg1OSwgMHgyNywgMHg4MCwgMHhlYywgMHg1ZiwNCiAgICAgICAgICAgIDB4NjAsIDB4NTEsIDB4N2YsIDB4YTksIDB4MTksIDB4YjUsIDB4NGEsIDB4MGQsIDB4MmQsIDB4ZTUsIDB4N2EsIDB4OWYsIDB4OTMsIDB4YzksIDB4OWMsIDB4ZWYsDQogICAgICAgICAgICAweGEwLCAweGUwLCAweDNiLCAweDRkLCAweGFlLCAweDJhLCAweGY1LCAweGIwLCAweGM4LCAweGViLCAweGJiLCAweDNjLCAweDgzLCAweDUzLCAweDk5LCAweDYxLA0KICAgICAgICAgICAgMHgxNywgMHgyYiwgMHgwNCwgMHg3ZSwgMHhiYSwgMHg3NywgMHhkNiwgMHgyNiwgMHhlMSwgMHg2OSwgMHgxNCwgMHg2MywgMHg1NSwgMHgyMSwgMHgwYywgMHg3ZA0KICAgICAgICApOw0KICAgICAgICByZXR1cm4gJHJzQm94WyRpXTsNCiAgICB9DQoNCiAgICBmdW5jdGlvbiByQ29uKCRpKSB7DQogICAgICAgIHN0YXRpYyAkckNvbiA9IGFycmF5KA0KICAgICAgICAgICAgMHgwMCwgMHgwMSwgMHgwMiwgMHgwNCwgMHgwOCwgMHgxMCwgMHgyMCwgMHg0MCwgMHg4MCwgMHgxYiwgMHgzNiwgMHg2YywgMHhkOCwgMHhhYiwgMHg0ZCwgMHg5YSwNCiAgICAgICAgICAgIDB4MmYsIDB4NWUsIDB4YmMsIDB4NjMsIDB4YzYsIDB4OTcsIDB4MzUsIDB4NmEsIDB4ZDQsIDB4YjMsIDB4N2QsIDB4ZmEsIDB4ZWYsIDB4YzUsIDB4OTEsIDB4MzkNCiAgICAgICAgKTsNCiAgICAgICAgcmV0dXJuICRyQ29uWyRpXTsNCiAgICB9DQoNCiAgICBmdW5jdGlvbiBnbXVsKCRhLCAkYikgew0KICAgICAgICAkcCA9IDA7DQogICAgICAgIGZvciAoJGkgPSAwOyAkaSA8IDg7ICRpKyspIHsNCiAgICAgICAgICAgIGlmICgoJGIgJiAxKSAhPSAwKSB7DQogICAgICAgICAgICAgICAgJHAgXj0gJGE7DQogICAgICAgICAgICB9DQogICAgICAgICAgICAkaGlfYml0X3NldCA9ICgkYSAmIDB4ODApOw0KICAgICAgICAgICAgJGEgPSAoJGEgPDwgMSkgJiAweEZGOw0KICAgICAgICAgICAgaWYgKCRoaV9iaXRfc2V0KSB7DQogICAgICAgICAgICAgICAgJGEgXj0gMHgxYjsgDQogICAgICAgICAgICB9DQogICAgICAgICAgICAkYiA+Pj0gMTsNCiAgICAgICAgfQ0KICAgICAgICByZXR1cm4gJHA7DQogICAgfQ0KDQogICAgZnVuY3Rpb24ga2V5RXhwYW5zaW9uKCRrZXkpIHsNCiAgICAgICAgJGtleUxlbiA9IHN0cmxlbigka2V5KTsNCiAgICAgICAgJHcgPSBhcnJheSgpOw0KICAgICAgICANCiAgICAgICAgZm9yICgkaSA9IDA7ICRpIDwgJGtleUxlbjsgJGkgKz0gNCkgew0KICAgICAgICAgICAgLy8gVXNlIHN1YnN0ciArIG9yZCBmb3IgUEhQIDQtOCBzYWZldHkNCiAgICAgICAgICAgICRiMCA9IG9yZChzdWJzdHIoJGtleSwgJGksIDEpKTsNCiAgICAgICAgICAgICRiMSA9IG9yZChzdWJzdHIoJGtleSwgJGkrMSwgMSkpOw0KICAgICAgICAgICAgJGIyID0gb3JkKHN1YnN0cigka2V5LCAkaSsyLCAxKSk7DQogICAgICAgICAgICAkYjMgPSBvcmQoc3Vic3RyKCRrZXksICRpKzMsIDEpKTsNCiAgICAgICAgICAgIA0KICAgICAgICAgICAgJHdbXSA9ICgkYjAgPDwgMjQpIHwgKCRiMSA8PCAxNikgfCAoJGIyIDw8IDgpIHwgJGIzOw0KICAgICAgICB9DQogICAgICAgIA0KICAgICAgICAkTmsgPSAka2V5TGVuIC8gNDsNCiAgICAgICAgJE5yID0gJE5rICsgNjsNCiAgICAgICAgDQogICAgICAgIGZvciAoJGkgPSAkTms7ICRpIDwgNCAqICgkTnIgKyAxKTsgJGkrKykgew0KICAgICAgICAgICAgJHRlbXAgPSAkd1skaSAtIDFdOw0KICAgICAgICAgICAgaWYgKCRpICUgJE5rID09IDApIHsNCiAgICAgICAgICAgICAgICAvLyBSb3RXb3JkDQogICAgICAgICAgICAgICAgJHRlbXAgPSAoKCR0ZW1wIDw8IDgpIHwgKCgkdGVtcCA+PiAyNCkgJiAweEZGKSk7IA0KICAgICAgICAgICAgICAgIC8vIFN1YldvcmQNCiAgICAgICAgICAgICAgICAkdGVtcCA9IChDcnlwdG9KU0FFUzo6c0JveCgoJHRlbXAgPj4gMjQpICYgMHhGRikgPDwgMjQpIHwgDQogICAgICAgICAgICAgICAgICAgICAgICAoQ3J5cHRvSlNBRVM6OnNCb3goKCR0ZW1wID4+IDE2KSAmIDB4RkYpIDw8IDE2KSB8IA0KICAgICAgICAgICAgICAgICAgICAgICAgKENyeXB0b0pTQUVTOjpzQm94KCgkdGVtcCA+PiA4KSAmIDB4RkYpIDw8IDgpICB8IA0KICAgICAgICAgICAgICAgICAgICAgICAgQ3J5cHRvSlNBRVM6OnNCb3goJHRlbXAgJiAweEZGKTsNCiAgICAgICAgICAgICAgICAvLyBYb3IgUmNvbg0KICAgICAgICAgICAgICAgIC8vIFVzZSBmbG9vcigpIHRvIGVuc3VyZSBpbnRlZ2VyIGluZGV4IGluIG9sZGVyIFBIUA0KICAgICAgICAgICAgICAgICR0ZW1wIF49IChDcnlwdG9KU0FFUzo6ckNvbihmbG9vcigkaSAvICROaykpIDw8IDI0KTsNCiAgICAgICAgICAgIH0gZWxzZSBpZiAoJE5rID4gNiAmJiAoJGkgJSAkTmsgPT0gNCkpIHsNCiAgICAgICAgICAgICAgICAkdGVtcCA9IChDcnlwdG9KU0FFUzo6c0JveCgoJHRlbXAgPj4gMjQpICYgMHhGRikgPDwgMjQpIHwgDQogICAgICAgICAgICAgICAgICAgICAgICAoQ3J5cHRvSlNBRVM6OnNCb3goKCR0ZW1wID4+IDE2KSAmIDB4RkYpIDw8IDE2KSB8IA0KICAgICAgICAgICAgICAgICAgICAgICAgKENyeXB0b0pTQUVTOjpzQm94KCgkdGVtcCA+PiA4KSAmIDB4RkYpIDw8IDgpICB8IA0KICAgICAgICAgICAgICAgICAgICAgICAgQ3J5cHRvSlNBRVM6OnNCb3goJHRlbXAgJiAweEZGKTsNCiAgICAgICAgICAgIH0NCiAgICAgICAgICAgICR3WyRpXSA9ICR3WyRpIC0gJE5rXSBeICR0ZW1wOw0KICAgICAgICB9DQogICAgICAgIHJldHVybiAkdzsNCiAgICB9DQoNCiAgICBmdW5jdGlvbiBjaXBoZXIoJGlucHV0LCAkdykgew0KICAgICAgICAkTmIgPSA0Ow0KICAgICAgICAkTnIgPSBjb3VudCgkdykgLyAkTmIgLSAxOw0KICAgICAgICANCiAgICAgICAgJHN0YXRlID0gYXJyYXkoKTsNCiAgICAgICAgZm9yICgkaSA9IDA7ICRpIDwgNCAqICROYjsgJGkrKykgew0KICAgICAgICAgICAgLy8gVXNlIHN1YnN0ciBmb3Igc2FmZXR5DQogICAgICAgICAgICAkc3RhdGVbJGkgJSA0XVtmbG9vcigkaSAvIDQpXSA9IG9yZChzdWJzdHIoJGlucHV0LCAkaSwgMSkpOw0KICAgICAgICB9DQogICAgICAgIA0KICAgICAgICBDcnlwdG9KU0FFUzo6YWRkUm91bmRLZXkoJHN0YXRlLCAkdywgMCwgJE5iKTsNCiAgICAgICAgDQogICAgICAgIGZvciAoJHJvdW5kID0gMTsgJHJvdW5kIDwgJE5yOyAkcm91bmQrKykgew0KICAgICAgICAgICAgQ3J5cHRvSlNBRVM6OnN1YkJ5dGVzKCRzdGF0ZSwgJE5iKTsNCiAgICAgICAgICAgIENyeXB0b0pTQUVTOjpzaGlmdFJvd3MoJHN0YXRlLCAkTmIpOw0KICAgICAgICAgICAgQ3J5cHRvSlNBRVM6Om1peENvbHVtbnMoJHN0YXRlLCAkTmIpOw0KICAgICAgICAgICAgQ3J5cHRvSlNBRVM6OmFkZFJvdW5kS2V5KCRzdGF0ZSwgJHcsICRyb3VuZCwgJE5iKTsNCiAgICAgICAgfQ0KICAgICAgICANCiAgICAgICAgQ3J5cHRvSlNBRVM6OnN1YkJ5dGVzKCRzdGF0ZSwgJE5iKTsNCiAgICAgICAgQ3J5cHRvSlNBRVM6OnNoaWZ0Um93cygkc3RhdGUsICROYik7DQogICAgICAgIENyeXB0b0pTQUVTOjphZGRSb3VuZEtleSgkc3RhdGUsICR3LCAkTnIsICROYik7DQogICAgICAgIA0KICAgICAgICAkb3V0cHV0ID0gIiI7DQogICAgICAgIGZvciAoJGkgPSAwOyAkaSA8IDQgKiAkTmI7ICRpKyspIHsNCiAgICAgICAgICAgICRvdXRwdXQgLj0gY2hyKCRzdGF0ZVskaSAlIDRdW2Zsb29yKCRpIC8gNCldKTsNCiAgICAgICAgfQ0KICAgICAgICByZXR1cm4gJG91dHB1dDsNCiAgICB9DQoNCiAgICBmdW5jdGlvbiBpbnZDaXBoZXIoJGlucHV0LCAkdykgew0KICAgICAgICAkTmIgPSA0Ow0KICAgICAgICAkTnIgPSBjb3VudCgkdykgLyAkTmIgLSAxOw0KICAgICAgICANCiAgICAgICAgJHN0YXRlID0gYXJyYXkoKTsNCiAgICAgICAgZm9yICgkaSA9IDA7ICRpIDwgNCAqICROYjsgJGkrKykgew0KICAgICAgICAgICAgJHN0YXRlWyRpICUgNF1bZmxvb3IoJGkgLyA0KV0gPSBvcmQoc3Vic3RyKCRpbnB1dCwgJGksIDEpKTsNCiAgICAgICAgfQ0KICAgICAgICANCiAgICAgICAgQ3J5cHRvSlNBRVM6OmFkZFJvdW5kS2V5KCRzdGF0ZSwgJHcsICROciwgJE5iKTsNCiAgICAgICAgDQogICAgICAgIGZvciAoJHJvdW5kID0gJE5yIC0gMTsgJHJvdW5kID49IDE7ICRyb3VuZC0tKSB7DQogICAgICAgICAgICBDcnlwdG9KU0FFUzo6aW52U2hpZnRSb3dzKCRzdGF0ZSwgJE5iKTsNCiAgICAgICAgICAgIENyeXB0b0pTQUVTOjppbnZTdWJCeXRlcygkc3RhdGUsICROYik7DQogICAgICAgICAgICBDcnlwdG9KU0FFUzo6YWRkUm91bmRLZXkoJHN0YXRlLCAkdywgJHJvdW5kLCAkTmIpOw0KICAgICAgICAgICAgQ3J5cHRvSlNBRVM6Omludk1peENvbHVtbnMoJHN0YXRlLCAkTmIpOw0KICAgICAgICB9DQogICAgICAgIA0KICAgICAgICBDcnlwdG9KU0FFUzo6aW52U2hpZnRSb3dzKCRzdGF0ZSwgJE5iKTsNCiAgICAgICAgQ3J5cHRvSlNBRVM6OmludlN1YkJ5dGVzKCRzdGF0ZSwgJE5iKTsNCiAgICAgICAgQ3J5cHRvSlNBRVM6OmFkZFJvdW5kS2V5KCRzdGF0ZSwgJHcsIDAsICROYik7DQogICAgICAgIA0KICAgICAgICAkb3V0cHV0ID0gIiI7DQogICAgICAgIGZvciAoJGkgPSAwOyAkaSA8IDQgKiAkTmI7ICRpKyspIHsNCiAgICAgICAgICAgICRvdXRwdXQgLj0gY2hyKCRzdGF0ZVskaSAlIDRdW2Zsb29yKCRpIC8gNCldKTsNCiAgICAgICAgfQ0KICAgICAgICByZXR1cm4gJG91dHB1dDsNCiAgICB9DQogICAgDQogICAgZnVuY3Rpb24gc3ViQnl0ZXMoJiRzdGF0ZSwgJE5iKSB7DQogICAgICAgIGZvciAoJHIgPSAwOyAkciA8IDQ7ICRyKyspIHsNCiAgICAgICAgICAgIGZvciAoJGMgPSAwOyAkYyA8ICROYjsgJGMrKykgew0KICAgICAgICAgICAgICAgICRzdGF0ZVskcl1bJGNdID0gQ3J5cHRvSlNBRVM6OnNCb3goJHN0YXRlWyRyXVskY10pOw0KICAgICAgICAgICAgfQ0KICAgICAgICB9DQogICAgfQ0KICAgIA0KICAgIGZ1bmN0aW9uIGludlN1YkJ5dGVzKCYkc3RhdGUsICROYikgew0KICAgICAgICBmb3IgKCRyID0gMDsgJHIgPCA0OyAkcisrKSB7DQogICAgICAgICAgICBmb3IgKCRjID0gMDsgJGMgPCAkTmI7ICRjKyspIHsNCiAgICAgICAgICAgICAgICAkc3RhdGVbJHJdWyRjXSA9IENyeXB0b0pTQUVTOjpyc0JveCgkc3RhdGVbJHJdWyRjXSk7DQogICAgICAgICAgICB9DQogICAgICAgIH0NCiAgICB9DQogICAgDQogICAgZnVuY3Rpb24gc2hpZnRSb3dzKCYkc3RhdGUsICROYikgew0KICAgICAgICAkdCA9IGFycmF5KCk7DQogICAgICAgIGZvciAoJHIgPSAxOyAkciA8IDQ7ICRyKyspIHsNCiAgICAgICAgICAgIGZvciAoJGMgPSAwOyAkYyA8ICROYjsgJGMrKykgew0KICAgICAgICAgICAgICAgICR0WyRjXSA9ICRzdGF0ZVskcl1bKCRjICsgJHIpICUgJE5iXTsNCiAgICAgICAgICAgIH0NCiAgICAgICAgICAgIGZvciAoJGMgPSAwOyAkYyA8ICROYjsgJGMrKykgew0KICAgICAgICAgICAgICAgICRzdGF0ZVskcl1bJGNdID0gJHRbJGNdOw0KICAgICAgICAgICAgfQ0KICAgICAgICB9DQogICAgfQ0KICAgIA0KICAgIGZ1bmN0aW9uIGludlNoaWZ0Um93cygmJHN0YXRlLCAkTmIpIHsNCiAgICAgICAgJHQgPSBhcnJheSgpOw0KICAgICAgICBmb3IgKCRyID0gMTsgJHIgPCA0OyAkcisrKSB7DQogICAgICAgICAgICBmb3IgKCRjID0gMDsgJGMgPCAkTmI7ICRjKyspIHsNCiAgICAgICAgICAgICAgICAkdFsoJGMgKyAkcikgJSAkTmJdID0gJHN0YXRlWyRyXVskY107DQogICAgICAgICAgICB9DQogICAgICAgICAgICBmb3IgKCRjID0gMDsgJGMgPCAkTmI7ICRjKyspIHsNCiAgICAgICAgICAgICAgICAkc3RhdGVbJHJdWyRjXSA9ICR0WyRjXTsNCiAgICAgICAgICAgIH0NCiAgICAgICAgfQ0KICAgIH0NCiAgICANCiAgICBmdW5jdGlvbiBtaXhDb2x1bW5zKCYkc3RhdGUsICROYikgew0KICAgICAgICBmb3IgKCRjID0gMDsgJGMgPCAkTmI7ICRjKyspIHsNCiAgICAgICAgICAgICRhID0gYXJyYXkoJHN0YXRlWzBdWyRjXSwgJHN0YXRlWzFdWyRjXSwgJHN0YXRlWzJdWyRjXSwgJHN0YXRlWzNdWyRjXSk7DQogICAgICAgICAgICAkc3RhdGVbMF1bJGNdID0gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbMF0sIDIpIF4gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbMV0sIDMpIF4gJGFbMl0gXiAkYVszXTsNCiAgICAgICAgICAgICRzdGF0ZVsxXVskY10gPSAkYVswXSBeIENyeXB0b0pTQUVTOjpnbXVsKCRhWzFdLCAyKSBeIENyeXB0b0pTQUVTOjpnbXVsKCRhWzJdLCAzKSBeICRhWzNdOw0KICAgICAgICAgICAgJHN0YXRlWzJdWyRjXSA9ICRhWzBdIF4gJGFbMV0gXiBDcnlwdG9KU0FFUzo6Z211bCgkYVsyXSwgMikgXiBDcnlwdG9KU0FFUzo6Z211bCgkYVszXSwgMyk7DQogICAgICAgICAgICAkc3RhdGVbM11bJGNdID0gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbMF0sIDMpIF4gJGFbMV0gXiAkYVsyXSBeIENyeXB0b0pTQUVTOjpnbXVsKCRhWzNdLCAyKTsNCiAgICAgICAgfQ0KICAgIH0NCiAgICANCiAgICBmdW5jdGlvbiBpbnZNaXhDb2x1bW5zKCYkc3RhdGUsICROYikgew0KICAgICAgICBmb3IgKCRjID0gMDsgJGMgPCAkTmI7ICRjKyspIHsNCiAgICAgICAgICAgICRhID0gYXJyYXkoJHN0YXRlWzBdWyRjXSwgJHN0YXRlWzFdWyRjXSwgJHN0YXRlWzJdWyRjXSwgJHN0YXRlWzNdWyRjXSk7DQogICAgICAgICAgICAkc3RhdGVbMF1bJGNdID0gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbMF0sIDB4MGUpIF4gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbMV0sIDB4MGIpIF4gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbMl0sIDB4MGQpIF4gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbM10sIDB4MDkpOw0KICAgICAgICAgICAgJHN0YXRlWzFdWyRjXSA9IENyeXB0b0pTQUVTOjpnbXVsKCRhWzBdLCAweDA5KSBeIENyeXB0b0pTQUVTOjpnbXVsKCRhWzFdLCAweDBlKSBeIENyeXB0b0pTQUVTOjpnbXVsKCRhWzJdLCAweDBiKSBeIENyeXB0b0pTQUVTOjpnbXVsKCRhWzNdLCAweDBkKTsNCiAgICAgICAgICAgICRzdGF0ZVsyXVskY10gPSBDcnlwdG9KU0FFUzo6Z211bCgkYVswXSwgMHgwZCkgXiBDcnlwdG9KU0FFUzo6Z211bCgkYVsxXSwgMHgwOSkgXiBDcnlwdG9KU0FFUzo6Z211bCgkYVsyXSwgMHgwZSkgXiBDcnlwdG9KU0FFUzo6Z211bCgkYVszXSwgMHgwYik7DQogICAgICAgICAgICAkc3RhdGVbM11bJGNdID0gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbMF0sIDB4MGIpIF4gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbMV0sIDB4MGQpIF4gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbMl0sIDB4MDkpIF4gQ3J5cHRvSlNBRVM6OmdtdWwoJGFbM10sIDB4MGUpOw0KICAgICAgICB9DQogICAgfQ0KICAgIA0KICAgIGZ1bmN0aW9uIGFkZFJvdW5kS2V5KCYkc3RhdGUsICR3LCAkcm91bmQsICROYikgew0KICAgICAgICBmb3IgKCRjID0gMDsgJGMgPCAkTmI7ICRjKyspIHsNCiAgICAgICAgICAgICRrZXlXb3JkID0gJHdbJHJvdW5kICogJE5iICsgJGNdOw0KICAgICAgICAgICAgJHN0YXRlWzBdWyRjXSBePSAoJGtleVdvcmQgPj4gMjQpICYgMHhGRjsNCiAgICAgICAgICAgICRzdGF0ZVsxXVskY10gXj0gKCRrZXlXb3JkID4+IDE2KSAmIDB4RkY7DQogICAgICAgICAgICAkc3RhdGVbMl1bJGNdIF49ICgka2V5V29yZCA+PiA4KSAmIDB4RkY7DQogICAgICAgICAgICAkc3RhdGVbM11bJGNdIF49ICRrZXlXb3JkICYgMHhGRjsNCiAgICAgICAgfQ0KICAgIH0NCn0NCi8qDQokcD1BZXNFbmNyeXB0KCIxMjMiLCIxMjM0Iik7DQplY2hvICRwLiI8aHI+IjsNCiRwPUFlc0RlY3J5cHQoJHAsIjEyMzQiKTsNCmVjaG8gJHAuIjxocj4iOw0KKi8NCj8+" download="jplopsoft_mod_aes.php">jplopsoft_mod_aes.php</a></p>
+              <p></p>
+			  <p><b>AESXKEY編譯工具<font face="Verdana, Arial, Helvetica, sans-serif">：
+              </font></b></p>
+			  <input name="" type="button" value="啟動" style="width:100px" onClick="document.getElementById('uau_acc_tools_span').style.display='';this.style.display='none';">
+              <span id="uau_acc_tools_span" style="display:none" >
+			  <blockquote>
+               
+					<script>
+						function as_pass_gen(){
+							if(readCookie("j_system_login_group")=="Admin"){
+								//判斷是否已登入
+									//document.getElementById('LoginBox_status').innerHTML=" | <a alt=\""+readCookie("j_system_login_cname")+"\" title=\""+readCookie("j_system_login_cname")+"\" href=\"javascript:writeCookie('j_system_login_cname', '', 99999999);writeCookie('j_aeskey', '', 99999999);history.go(0);void(0);\">登出</a>";
+										if(
+											document.getElementById('as_user_name').value =="" ||
+											document.getElementById('as_group_key').value =="" ||
+											document.getElementById('as_group').value =="" ||
+											document.getElementById('as_password').value ==""){
+											
+												show_message("必要欄位為空。");
+										
+										}else{
+											
+											document.getElementById('asg_out1').innerHTML="<p>組合："+document.getElementById('as_user_name').value + 
+																							web_system_main_json_datas.user_login_center_key +
+																							document.getElementById('as_password').value+"</p>";
+											document.getElementById('asg_out2').innerHTML="<p>EX_MD1："+ex_md1(
+																							document.getElementById('as_user_name').value + 
+																							web_system_main_json_datas.user_login_center_key +
+																							document.getElementById('as_password').value
+																					)+"</p>";
+											document.getElementById('asg_out4').innerHTML="<p>檔名：/db/user_"+document.getElementById('as_user_name').value+".js</p>";
+											document.getElementById('asg_out3').value="loginstart_callback(\n"+
+"	\""+AesEncrypt(document.getElementById('as_group_key').value ,ex_md1(
+			document.getElementById('as_user_name').value + 
+			web_system_main_json_datas.user_login_center_key +
+			document.getElementById('as_password').value
+	))+"\",\n"+
+"	\""+document.getElementById('as_cname').value+"\",\n"+
+"	\""+document.getElementById('as_group').value+"\"\n"+
+");";
+										}
+							}else{
+									show_message("需登入最高權限。");
+							}
+							
+						}
+					</script>
+                   <p>帳號：<input type="text" id="as_user_name"></p>
+                <p>密碼：                    <input type="text" id="as_password"></p>
+                
+				<p>名稱：                  <input type="text" id="as_cname" value="小明"></p>
+
+				 <script>
+				  	if(readCookie("j_system_login_group")=="Admin"){
+						for(var i=0;i!=web_system_main_json_datas.user_group.length;i++){
+				  			document.write(
+								" [<a href=\"javascript:document.getElementById('as_group_key').value='"+ 
+										AesDecrypt(web_system_main_json_datas.user_group[i].key,readCookie("j_aeskey")) +
+								"';document.getElementById('as_group').value='"+web_system_main_json_datas.user_group[i].group+"';void(0);\">"+
+										web_system_main_json_datas.user_group[i].group+
+								"</a>] "
+							);
+						}
+					}
+				  </script>
+
+                <p>群組名稱：                  <input type="text" id="as_group" value="" readonly=""></p>
+				
+				<p>群組蜜鑰：                  <input type="text" id="as_group_key" style="width:70% " readonly=""></p>
+                <p>                  <input type="button" value="產生" onClick="as_pass_gen();" style="width:100px "></p>
+                
+				<span id="asg_out1" style="background-color:#CCCCCC;"></span>
+				<span id="asg_out2" style="background-color:#CCCCCC;"></span>
+				<span id="asg_out4" style="background-color:#CCCCCC;"></span>
+				<p>
+				<textarea rows="6" wrap="OFF" id="asg_out3" style="width:80% "></textarea>
+				</p>
+              </blockquote>
+			  </span>			  
+              <p>&nbsp;</p>
+			  
+			  
+			  <script>
+				 //快速解密 
+					 if(document.location.search!=""){
+						var qe_temp=document.location.search.split("?q=");
+						if(qe_temp.length==2){
+							document.getElementById('data').value=qe_temp[1];
+							if(readCookie("j_aeskey")!=""){
+								document.getElementById('btn_start_2').click();
+							}
+						}
+					 }
+			  </script>
+					<!-- InstanceEndEditable --></td>
+				  </tr>
+				</table>
+			
+			
+			</td>
+          </tr>
+        </table></td>
+      </tr>
+     
+      <tr>
+        <td align="left" valign="top" style="display:none" id="mmenu_down">
+		
+			<table width="100%" border="0" cellpadding="10" cellspacing="0">
+			  <tr>
+				<td align="left" valign="top" bgcolor="#DEECF1"><b>其他資料</b><a name="d_menu_a" id="d_menu_a"></a></td>
+			  </tr>
+			  <tr>
+				<td align="left" valign="top" id="mmenu_down_data"></td>
+			  </tr>
+			</table>
+
+		</td>
+      </tr>
+      <tr>
+       <td height="80" valign="middle" bgcolor="#DEECF1" id="m_files" style="padding:20px;"></td>
+		
+		<script>
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/files.htm"; 
+			ajax_load_files.method  = 'GET'; 
+			ajax_load_files.element = 'm_files'; 
+			function start_ajax_load_files(){
+				ajax_load_files.runAJAX('');
+			}
+			setTimeout("start_ajax_load_files();",1000);
+	   </script>
+		
+      </tr>
+      <tr>
+        <td height="60" align="center" valign="middle">
+		
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="https://www.jplopsoft.idv.tw/">Jplopsoft</a> | 
+				<a href="https://twhkinc.jplopsoft.idv.tw/">THI</a> | 
+				<a href="https://app.netlify.com/sites/jplop/deploys">Netlify</a> | 
+				<a href="https://neocities.org/dashboard">NeoCities</a> | 
+				<a href="https://lionfree.net/">LionFree</a>
+			</font></p>
+			
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="util_aes_utility.html">加密工具</a> | 
+				<a href="teac_post_about.html">提交歸檔</a> | 
+				<a href="util_qrcode_online_gen_tool.html">QRCODE產生器</a> | 
+				<a href="util_gen_pass.html">密碼產生器</a>
+			</font></p>
+			
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+			
+		</td>
+      </tr>
+    </table>
+	</td>
+  </tr>
+</table>
+</BODY>
+<script>
+	
+</script>
+<!-- InstanceEnd --></HTML>
