@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<title>歸檔星球 Archive Star - 下雪特效</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+
+	<meta name="keywords" content="下雪特效">
+	<meta name="pagetype" content="教學">
+	<meta name="description" content="下雪特效">
+	
+	<script type="application/ld+json">
+			{
+			  "@context": "https://schema.org",
+			  "@type": "WebPage",
+			  "url": "https://jplop.netlify.app/teac_post_about.html",
+			  "name": "下雪特效",
+			  "description": "下雪特效相關範例、相關下載、相關文件。"
+			}
+	</script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000000; /* 深藍色背景看得出白雪 */
+    }
+    canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+	
+	 #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1;
+      color: white;
+      font-size: 24px;
+      font-family: "Microsoft JhengHei", sans-serif;
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+	
+	 #text {
+	 		font-size:40px;
+	 		color: white;
+			font-weight: bold;
+			text-shadow: 
+			2px 2px 4px rgba(0, 0, 0, 0.6),  
+			0 0 20px #fff; 
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+	
+  </style>
+</head>
+<body>
+	<div id="info"></div>
+	<div id="text"></div>
+	
+  <canvas id="snowCanvas"></canvas>
+  
+  <!-- jQuery CDN -->
+  <script src="js/jquery.min.js"></script>
+  <script>
+  		//取得參數	
+		var f_urlParams = new URLSearchParams(window.location.search);
+		var title_s = f_urlParams.get('title');   
+		var snum_s = f_urlParams.get('snum');   
+		var bgi_s = f_urlParams.get('bgi');   
+		if(title_s=='' || title_s== null){
+			title_s="2025 中科大資管系友會茶會 - 5/24(六)15:30 / 地點1403C";
+		}
+		if(snum_s=='' || snum_s== null){
+			snum_s=200;
+		}
+		if(bgi_s=='' || bgi_s== null){
+			bgi_s="images/20250521/h5_bg.jpg"; //預設圖片，富士山
+		}
+		
+  </script>
+  <script>$('#info').html("[<a href='./util_h5_snow.html?title=title%20test&snum=100&bgi=images/20250521/h5_bg.jpg'> <font color=#ffffff>+</font> </a>] "+title_s);</script>
+
+  <script>
+    $(function() {
+      const canvas = document.getElementById("snowCanvas");
+      const ctx = canvas.getContext("2d");
+
+      let w = window.innerWidth;
+      let h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
+
+	  document.body.style.background = "url('" + bgi_s + "') no-repeat center center fixed";
+	  document.body.style.backgroundSize = "cover";
+	  
+      const snowCount = snum_s; // 雪花數量
+      const snows = [];
+
+      // 初始化雪花
+      for (let i = 0; i < snowCount; i++) {
+        snows.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 3 + 1, // 半徑
+          d: Math.random() * snowCount // 密度
+        });
+      }
+
+	function drawSnow() {
+	  ctx.clearRect(0, 0, w, h);
+	  ctx.beginPath();
+	  for (let i = 0; i < snowCount; i++) {
+		const s = snows[i];
+		
+		// 計算透明度，避免超出範圍
+		const opacity = Math.max(0, Math.min(1, 1 - (s.y / h)));
+	
+		ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+		ctx.beginPath();
+		ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2, true);
+		ctx.fill();
+	  }
+	  moveSnow();
+	}
+
+      let angle = 0;
+
+      function moveSnow() {
+        angle += 0.01;
+        for (let i = 0; i < snowCount; i++) {
+          const s = snows[i];
+          s.y += Math.cos(angle + s.d) + 1 + s.r / 2;
+          s.x += Math.sin(angle) * 2;
+
+          // 超出畫布時重設位置
+          if (s.x > w || s.x < 0 || s.y > h) {
+            snows[i] = {
+              x: Math.random() * w,
+              y: 0,
+              r: s.r,
+              d: s.d
+            };
+          }
+        }
+      }
+
+      setInterval(drawSnow, 33);
+
+      // 窗口大小改變時自動調整
+      $(window).resize(function() {
+        w = window.innerWidth;
+        h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+      });
+	  
+	  
+    });
+  </script>
+  
+  
+  
+   <script>
+       const texts = [
+  "工作經驗", "回憶校園", "老師近況", "同學現況", "創業經驗",
+  "產業趨勢", "升遷經歷", "家庭生活", "結婚經驗", "育兒心得",
+  "人生轉折點", "求學歷程", "社團活動", "實習經驗", "住校趣事",
+  "租屋經驗", "最難忘的課", "最討厭的課", "校園戀愛", "暗戀誰",
+  "夜衝經驗", "打工回憶", "學長姐分享", "學弟妹互動", "未來目標",
+  "如何保持熱情", "職涯規劃", "讀研究所心得", "國外留學經歷", "異地生活分享",
+  "生活價值觀改變", "人脈建立", "推薦書單", "推薦電影", "Podcast 推薦",
+  "共同回憶影片欣賞", "重遊舊地", "拍照打卡", "合照紀念", "老照片分享",
+  "創業失敗經驗", "求職面試技巧", "職場潛規則", "遠距工作經驗", "產後重返職場",
+  "年齡焦慮分享", "如何保持健康", "運動習慣", "旅遊經驗", "出差趣事",
+  "參觀校園新設施", "校友會介紹", "如何支持母校", "捐款經驗", "校友互助方案",
+  "建立LINE群組", "交換名片", "小遊戲互動", "摸彩活動", "共同寫明信片",
+  "簽到牆留言", "參觀宿舍", "參觀圖書館", "科技發展討論", "AI趨勢",
+  "資安經驗", "資料分析分享", "Web3或區塊鏈經驗", "網路創業案例", "退休規劃",
+  "房地產經驗", "投資理財", "股票心得", "自媒體經營", "部落格寫作",
+  "拍Vlog紀錄", "錄Podcast現場", "心理健康", "職場倦怠", "時間管理",
+  "學習新技能", "線上課程推薦", "斜槓人生", "數位轉型經驗", "帶領團隊經驗",
+  "換工作歷程", "非本科出路", "轉職跨界經驗", "升學轉系心得", "軍旅生涯",
+  "感情挫折", "校園霸凌處理", "老師教學風格回憶", "老同學的八卦", "失聯同學尋人",
+  "老師退休消息", "學校改名討論", "校園食物回憶", "以前的老店", "生活物價變化",
+  "畢業旅行回憶", "志工經驗", "校刊回顧", "交換學生故事", "環島回憶",
+  "數位轉型下的教育", "學生時代愛用APP", "舊制服試穿活動", "校歌合唱", "畢業照重拍"
+];
+
+        let index = 0;
+
+        function showText() {
+            const textElement = document.getElementById("text");
+            textElement.textContent = texts[index];
+			
+
+            // 隨機位置
+            textElement.style.left = (Math.random() * (window.innerWidth - (9*60))) + 'px';
+            textElement.style.top =  (Math.random() * (window.innerHeight -60)) + 'px';
+			textElement.style.fontSize = ((Math.random() *30)+30) + "px";
+
+            // 淡入
+            textElement.style.opacity = 1;
+
+            // 淡出後切換到下一個文字
+            setTimeout(() => {
+                textElement.style.opacity = 0;
+                index = (index + 1) % texts.length; // 循環索引
+            }, 3000); // 顯示時間
+
+            // 再次呼叫顯示文字
+            setTimeout(showText, 4000); // 等待淡出後再顯示下一個
+        }
+
+        // 開始顯示文字
+        showText();
+    </script>
+  
+  
+</body>
+</html>

@@ -1,0 +1,618 @@
+<HTML>
+							<HEAD>
+							<TITLE>歸檔星球 Archive Star - 部落格</TITLE>
+							<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+							<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+								<meta name="keywords" content="歸檔星球(Archive Star)部落格">
+								<meta name="pagetype" content="系統">
+								<meta name="description" content="歸檔星球(Archive Star)部落格">
+								<script data-cfasync="false"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+								<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+							
+									<style>
+										a:link {color: #0000FF;text-decoration: none;} 
+										a:visited {color: #3366FF;text-decoration: none;}
+										a:hover {text-decoration:dashed underline;color: #FF0000;}
+										a:active {color: #FF0000;text-decoration: none;}
+										font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;text-shadow: 0.1em 0.1em 0.1em #ffffff;}
+										input ,button , select{font-size:12px;}
+									</style>
+									
+									
+							</HEAD>
+							<BODY leftmargin="20" topmargin="20" marginwidth="20" marginheight="20" style="background-attachment: fixed;" background="images/archive_star_index_background_2024.jpg">
+							
+								<div><img id="obj_umg_a1_f1" src="images/archive_star_index_background_2024.gif" width="100" height="100" style="z-index:-1;position: fixed; " ></div>
+								<div><img id="obj_umg_a1_f2" src="images/archive_star_index_background_2024.gif" width="30" height="15" style="z-index:-1;position: fixed;  left: 1100px;" ></div>
+								<div><img id="obj_umg_a1_f3" src="images/archive_star_index_background_2024.gif" width="20" height="8" style="z-index:-1;position: fixed; " ></div>
+								<div><img id="obj_umg_a1_f4" src="images/archive_star_index_background_20242.gif" width="20" height="8" style="z-index:-1;position: fixed; " ></div>
+									<div><img id="obj_umg_a1_f4f" src="images/archive_star_index_background_20242f.gif" width="20" height="8" style="opacity: .2;z-index:-1;position: fixed; " ></div>
+								<div><img id="obj_umg_a1_f5" src="images/archive_star_index_background_20242.gif" width="18" height="6" style="z-index:-1;position: fixed; " ></div>
+									<div><img id="obj_umg_a1_f5f" src="images/archive_star_index_background_20242f.gif" width="20" height="8" style="opacity: .2;z-index:-1;position: fixed; " ></div>
+								<script>
+								
+									//母鑑
+										var obj_umg_a1_f1_func_x_temp=1200;
+										function obj_umg_a1_f1_func(){
+											document.getElementById("obj_umg_a1_f1").style.top=(0-(window.scrollY/7))+500+"px";
+											obj_umg_a1_f1_func_x_temp=obj_umg_a1_f1_func_x_temp+0.0008;
+											document.getElementById("obj_umg_a1_f1").style.left=obj_umg_a1_f1_func_x_temp+"px";
+										}			
+									
+									//護衛鑑1
+										function obj_umg_a1_f2_func(){
+											document.getElementById("obj_umg_a1_f2").style.top=(0-(window.scrollY/9))+600+"px";
+										}			
+									
+									//護衛鑑2
+										var obj_umg_a1_f3_func_x_temp=1400;
+										function obj_umg_a1_f3_func(){
+											document.getElementById("obj_umg_a1_f3").style.top=(0-(window.scrollY/9.5))+550+"px";
+											obj_umg_a1_f3_func_x_temp=obj_umg_a1_f3_func_x_temp-0.0005;
+											document.getElementById("obj_umg_a1_f3").style.left=obj_umg_a1_f3_func_x_temp+"px";
+										}			
+									
+									//巡邏鑑1,2
+										var obj_umg_a1_f45_func_x_temp_off=1; //加權
+											var obj_umg_a1_f4_func_x_temp=500;
+											function obj_umg_a1_f4_func(){
+												var obj_temp_x=0;
+												var obj_temp_y=0;
+												
+												obj_temp_y=(0-(window.scrollY/7.5))+650;
+												document.getElementById("obj_umg_a1_f4").style.top=obj_temp_y+"px";
+												
+												obj_umg_a1_f4_func_x_temp=obj_umg_a1_f4_func_x_temp+ (0.1*obj_umg_a1_f45_func_x_temp_off);
+												if(obj_umg_a1_f4_func_x_temp>document.documentElement.scrollWidth+100){
+													obj_umg_a1_f4_func_x_temp=-100;
+												}
+												obj_temp_x=obj_umg_a1_f4_func_x_temp;
+												document.getElementById("obj_umg_a1_f4").style.left=obj_temp_x+"px";
+												
+												//火焰
+													if(obj_umg_a1_f45_func_x_temp_off>=4){
+														document.getElementById("obj_umg_a1_f4f").style.display="";
+													}else{
+														document.getElementById("obj_umg_a1_f4f").style.display="none";
+													}
+													document.getElementById("obj_umg_a1_f4f").style.top=obj_temp_y+"px";
+													document.getElementById("obj_umg_a1_f4f").style.left=(obj_temp_x-10)+"px";
+											}
+											var obj_umg_a1_f5_func_x_temp=550;
+											function obj_umg_a1_f5_func(){
+												var obj_temp_x=0;
+												var obj_temp_y=0;
+												
+												obj_temp_y=(0-(window.scrollY/7.5))+630;
+												document.getElementById("obj_umg_a1_f5").style.top=obj_temp_y+"px";
+												
+												obj_umg_a1_f5_func_x_temp=obj_umg_a1_f5_func_x_temp+ (0.095*obj_umg_a1_f45_func_x_temp_off);
+												if(obj_umg_a1_f5_func_x_temp>document.documentElement.scrollWidth+100){
+													obj_umg_a1_f5_func_x_temp=-100;
+												}
+												obj_temp_x=obj_umg_a1_f5_func_x_temp;
+												document.getElementById("obj_umg_a1_f5").style.left=obj_temp_x+"px";
+												
+												//火焰
+													if(obj_umg_a1_f45_func_x_temp_off>=4){
+														document.getElementById("obj_umg_a1_f5f").style.display="";
+													}else{
+														document.getElementById("obj_umg_a1_f5f").style.display="none";
+													}
+													document.getElementById("obj_umg_a1_f5f").style.top=obj_temp_y+"px";
+													document.getElementById("obj_umg_a1_f5f").style.left=(obj_temp_x-10)+"px";
+											}
+								</script>
+								
+								<script>
+									//Set
+										var ss_gui_bg_img_y_temp_base=6500;	//def 6500
+										var ss_gui_bg_img_x_temp_base=-900; //def 0
+										
+										var ss_gui_bg_img_x_speed=0.05; //def 0.05
+										var ss_gui_bg_img_y_speed=10;	//def 10
+										var ss_gui_bg_img_x_temp_new_base_speed=100;//def 100
+									
+									var ss_gui_bg_img_x_temp_new_base=-900;//def 0
+									var ss_gui_bg_img_x_temp=0; //def 0
+									
+									function ss_gui_bg_img(){
+										ss_gui_bg_img_x_temp=ss_gui_bg_img_x_temp+ss_gui_bg_img_x_speed; //左右
+										
+										if(ss_gui_bg_img_x_temp_base>ss_gui_bg_img_x_temp_new_base){
+											ss_gui_bg_img_x_temp_base=ss_gui_bg_img_x_temp_base-
+																		ss_gui_bg_img_x_temp_new_base_speed;
+										}
+										if(ss_gui_bg_img_x_temp_base<ss_gui_bg_img_x_temp_new_base){
+											ss_gui_bg_img_x_temp_base=ss_gui_bg_img_x_temp_base+
+																		ss_gui_bg_img_x_temp_new_base_speed;
+										}
+										
+										document.body.style.backgroundPosition = "top "+
+																				(ss_gui_bg_img_y_temp_base - 
+																				(window.scrollY / ss_gui_bg_img_y_speed) )+
+																				"px right "+ 
+																				(ss_gui_bg_img_x_temp_base + ss_gui_bg_img_x_temp) +
+																				"px";
+									}
+									setInterval(
+													function(){
+														ss_gui_bg_img();
+														obj_umg_a1_f1_func();
+														obj_umg_a1_f2_func();
+														obj_umg_a1_f3_func();
+														obj_umg_a1_f4_func();
+														obj_umg_a1_f5_func();
+													}, 10
+												);
+									
+								</script>
+								
+								<H1>歸檔星球( <span id="host_name"></span> )部落格 [2025-03-07]</H1>
+								<script>
+									document.getElementById("host_name").innerHTML=location.host;
+								</script>
+								<table width="100%"  cellpadding="10" cellspacing="0" style="background-image: linear-gradient(to top, #dddddd, #ffffff); border-collapse: collapse;  border-style: hidden; box-shadow: 0 0 0 0px #000; border-radius: 5px;">
+								  <tr align="center">
+									<td width="100"><a style="text-shadow: 0.3em 0.3em 0.3em #999999;font-size:16px" href="info_web_index.html">索引</a></td>
+						<td width="100"><a style="text-shadow: 0.3em 0.3em 0.3em #999999;font-size:16px" href="info_web_servers.html">伺服器</a></td>
+						<td width="100"><a style="text-shadow: 0.3em 0.3em 0.3em #999999;font-size:16px" href="info_web_utility.html">工具</a></td>
+						<td width="100"><a style="text-shadow: 0.3em 0.3em 0.3em #999999;font-size:16px" href="info_web_blogs.html">部落格</a></td>
+						<td width="100"><a style="text-shadow: 0.3em 0.3em 0.3em #999999;font-size:16px" href="info_web_quick_keys_p0.html">參考</a></td>
+						
+									<td></td>
+								  </tr>
+								</table>
+								
+								
+														<p><a href="https://www.pixnet.net/">Pixnet</a>: <a href="https://a2369555.pixnet.net/blog/post/107792326?utm_source=PIXNET&utm_medium=pcard_article&utm_content=1510264d33e769a8b8">[前往]</a></p>
+						<p><a href="https://www.blogger.com/about/?hl=zh-TW">Blogger</a>: <a href="https://as202301.blogspot.com/2023/09/archive-star.html">[前往]</a></p>									
+						<p><a href="https://medium.com/">Medium</a>: <a href="https://medium.com/@a2369555/%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83-archive-star-6c5629a02bea">[前往]</a></p>									
+						<p><a href="https://matters.town/">Matters</a>: <a href="https://matters.town/@hawlremotek/440305-%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83-archive-star-bafybeic3wsdavehwpmdvrryommx7udanbgs2cg4ttkdyg2wzni3vhzn5wq">[前往]</a></p>									
+						<p><a href="https://www.webnode.com/zh/">WebNode</a>: <a href="https://guidangxingqiu.webnode.tw/">[前往]</a></p>									
+						<p><a href="https://zh.wix.com/">WIX</a>: <a href="https://as55555.wixsite.com/index">[前往]</a></p>							
+						<p><a href="https://www.instagram.com/">Instagram</a>: <a href="https://www.instagram.com/p/CxC7yIWSpsZ/">[前往]</a></p>	
+						<p><a href="https://tw.strikingly.com/">Strikingly</a>: <a href="https://as2023.mystrikingly.com/blog/archive-star">[前往]</a></p>	
+						<p><a href="https://www.odoo.com/zh_TW">Odoo</a>: <a href="https://as2023.odoo.com/blog/zui-xin-xiao-xi-2/gui-dang-xing-qiu-1">[前往]</a></p>	
+						<p><a href="https://www.weebly.com/?lang=zh_TW">Weebly</a>: <a href="https://as2023.weebly.com/">[前往]</a></p>	
+						<p><a href="https://www.jimdo.com/">Jimdo</a>: <a href="https://as2023.jimdosite.com/">[前往]</a></p>	
+						<p><a href="https://www.yola.com/">Yola</a>: <a href="https://khiungs-flat-schloasm.yolasite.com/">[前往]</a></p>	
+						<p><a href="https://www.youtube.com/">Youtube</a>: <a href="https://www.youtube.com/watch?v=OarmkpS6KUk">[前往]</a></p>
+						<p><a href="https://www.potatomedia.co/posts">PotatoMedia</a>: <a href="https://www.potatomedia.co/post/636e73c7-4915-4e28-aa86-25cb82df2df1">[前往]</a></p>	
+						<p><a href="https://udn.com/news/index">UDN</a>: <a href="https://blog.udn.com/G_115004008169259866/179866562">[前往]</a></p>
+						<p><a href="https://vocus.cc/">Vocus</a>: <a href="https://vocus.cc/article/64febf79fd897800018b1093">[前往]</a></p>	
+						<p><a href="https://ameblo.jp/">Ameblo</a>: <a href="https://ameblo.jp/hawlhu/entry-12820398095.html">[前往]</a></p>	
+						<p><a href="https://portaly.cc/">Portaly</a>: <a href="https://portaly.cc/as2023">[前往]</a></p>	
+						<p><a href="https://www.gamer.com.tw/">Gamer</a>: <a href="https://forum.gamer.com.tw/C.php?bsn=18531&snA=184&subbsn=0&page=1&s_author=&gothis=553#553">[前往]</a></p>	
+						<p><a href="https://wordpress.com/">WordPress</a>: <a href="https://hawl2025.wordpress.com/">[前往]</a></p>
+						<p><a href="https://www.ulifestyle.com.hk/">UlifeStyle</a>: <a href="https://blog.ulifestyle.com.hk/article/as2024/4273494/%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83-archive-star">[前往]</a></p>	
+						<p><a href="https://episode.cc/">Episode</a>: <a href="https://episode.cc/read/a2369555/my.230915.110944/0">[前往]</a></p>
+						<p><a href="https://pub46.bravenet.com/bravesites/dashboard">BraveSites</a>: <a href="https://as2023.bravesites.com/entries/general/%E9%98%BF%E5%BD%8C%E9%99%80%E4%BD%9B">[前往]</a></p>
+						<p><a href="https://docs.google.com/document/u/0/">GoogleDocs</a>: <a href="https://docs.google.com/document/d/1Yyw9lBiw6dfmam1p0lxL5dwMwoWdj2_Qv8pQlWfhdJ0/edit">[前往]</a></p>
+						<p><a href="https://www.awardspace.com/user-login/">MyGamesOnline</a>: <a href="http://an2098.mygamesonline.org/">[前往]</a></p>
+						<p><a href="https://www.microsoft.com/zh-tw/microsoft-365/onedrive/online-cloud-storage">OneDrive</a>: <a href="https://onedrive.live.com/view.aspx?resid=FEB92ED37882D45D!545&ithint=file%2cdocx&wdo=2&authkey=!AK2RUu1SkjpnJ_s">[前往]</a></p>
+						<p><a href="https://www.icloud.com/">ICloud</a>: <a href="https://www.icloud.com/pages/0fcXqdza2yXHRNL2AFILLWnFg#%E6%99%82%E5%85%89%E7%9A%84%E8%A9%A6%E7%85%89_-_%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83">[前往]</a></p>
+						<p><a href="https://www.ruten.com.tw/">Ruten</a>: <a href="https://www.ruten.com.tw/item/show?22338731817869&_gl=1*1nhjc90*_ga*MTU3MDgwMDM3Mi4xNjM0NzY1MTI1*_ga_2VP4WXLL56*MTY5NTE5ODk4Mi4xODM1LjEuMTY5NTIwMTI3NC41Ny4wLjA.">[前往]</a></p>
+						<p><a href="https://twitter.com/home?lang=zh-Hant">Twitter</a>: <a href="https://twitter.com/shjizhyn120071">[前往]</a></p>
+						<p><a href="https://odysee.com/">Odysee</a>: <a href="https://odysee.com/ATun86Rt:4">[前往]</a></p>
+						<p><a href="https://somee.com/">Somee</a>: <a href="http://as2024.somee.com/">[前往]</a></p>
+						<p><a href="https://sites.google.com/new">Google Sites</a>: <a href="https://sites.google.com/view/archivestar/">[前往]</a></p>
+						<p><a href="https://line.me/tw/">LINE ME</a>: <a href="https://linevoom.line.me/user/_dfI0FYfDnHD2sTRJvsGqpD3i1bb_WS153Xa_U4w?utm_medium=windows&utm_source=desktop&utm_campaign=Profile">[前往]</a></p>
+						<p><a href="https://shopee.tw/">Shopee</a>: <a href="https://shopee.tw/product/354866012/23483958093/">[前往]</a></p>
+						<p><a href="https://www.mobile01.com/">Mobile01</a>: <a href="https://www.mobile01.com/topicdetail.php?f=37&t=6869218">[前往]</a></p>
+						<p><a href="https://picsee.soci.vip/?utm_source=picsee-redirect&utm_medium=referral&utm_term=pse.is">PSE</a>: <a href="https://pse.is/5ches3">[前往]</a></p>
+						<p><a href="https://www.google.com/maps/@25.0171709,121.1544756,6346a,20y,90h/data=!3m1!1e3?hl=zh-TW">GMAP</a>: <a href="https://www.google.com.tw/maps/place/%E8%87%BA%E4%B8%AD%E4%B8%80%E4%B8%AD%E5%9C%96%E6%9B%B8%E5%AE%A4/@24.1505184,120.6773274,16z/data=!4m10!1m2!2m1!1z6Ie65Lit5LiA5Lit5ZyW5pu45a6k!3m6!1s0x34693ddbba933231:0x6e1261fefce14aaa!8m2!3d24.1505184!4d120.6868546!15sChXoh7rkuK3kuIDkuK3lnJbmm7jlrqSSAQdsaWJyYXJ54AEA!16s%2Fg%2F11vkjxw8gt?entry=ttu">[前往]</a></p>
+						<p><a href="https://github.com/">GitHub</a>: <a href="https://github.com/HawlHu">[前往]</a></p>
+						<p><a href="https://www.eyny.com/">VEyny</a>: <a href="https://video.eyny.com/channel/UCyEzN1EYqv">[前往]</a></p>
+						<p><a href="https://www.eyny.com/">Eyny</a>: <a href="https://www.eyny.com/space-uid-20445046.html">[前往]</a></p>
+						<p><a href="https://155384.co/">155384</a>: <a href="https://155384.co/home.php?mod=space&uid=594779&do=profile">[前往]</a></p>
+						<p><a href="https://www.tiktok.com/zh-Hant-TW/">TikTok</a>: <a href="https://www.tiktok.com/@hawl_hu">[前往]</a></p>
+						<p><a href="https://linkgoods.com/">LinkGoods</a>: <a href="https://linkgoods.com/archivestar">[前往]</a></p>
+						<p><a href="https://www.designcap.com/tw/">DesignCap</a>: <a href="https://www.designcap.com/share/vd885889.html">[前往]</a></p>
+						<p><a href="https://www.popdaily.com.tw/">PopDaily</a>: <a href="https://www.popdaily.com.tw/user/451956">[前往]</a></p>
+						<p><a href="https://tw.godaddy.com/zh/websites">GodaddySites</a>: <a href="https://gui1dang4xing1qiu2.godaddysites.com/">[前往]</a></p>
+						<p><a href="https://docs.google.com/document/u/0/">GoogleExcel</a>: <a href="https://docs.google.com/spreadsheets/d/1sZNdRl6PMqvnCx2Z6yeU1nT72oPluOTy4Eq6bys75Xc/edit?usp=sharing">[前往]</a></p>
+						<p><a href="https://24h.pchome.com.tw/">Pchome</a>: <a href="https://mypaper.pchome.com.tw/jplop/bookmark">[前往]</a></p>
+						<p><a href="https://docs.google.com/document/u/0/">GooglePPT</a>: <a href="https://docs.google.com/presentation/d/1j64Z99O6TiWrYmKDl_lp4F0EIQPOe-5jYjNCN23u9AM">[前往]</a></p>
+						<p><a href="https://chat.openai.com/">ChatGPT</a>: <a href="https://chat.openai.com/share/00e760e5-8449-42b0-bbfb-c85b56164d90">[前往]</a></p>
+						<p><a href="https://onedrive.live.com/">Microsoft Excel</a>: <a href="https://onedrive.live.com/view.aspx?resid=FEB92ED37882D45D%21562&authkey=!AGWW32wHEsVBiW8">[前往]</a></p>
+						<p><a href="https://www.icloud.com/">ICloud Excel</a>: <a href="https://www.icloud.com/numbers/08bvnFXbcLfgyBv9GT2mW4FuA#%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83_Archive_Star">[前往]</a></p>
+						<p><a href="https://www.dropbox.com/home">DropBox</a>: <a href="https://www.dropbox.com/scl/fi/7nwn12rb2yud85xrnyqc8/Archive-Star.paper?rlkey=gve39gyqa5f3caw8lmgzp366d&dl=0">[前往]</a></p>
+						<p><a href="https://mega.nz/">Mega</a>: <a href="https://mega.nz/file/j5wQGR7L#au5XXIWODen4iEHBYY4rOaGh70bct0O7n02pSMNAS4U">[前往]</a></p>
+						<p><a href="https://icedrive.net/">IceDrive</a>: <a href="https://icedrive.net/s/yYuT781iyhjk7YWizatij8XStNWP">[前往]</a></p>
+						<p><a href="https://reurl.cc/">ReUrl</a>: <a href="https://reurl.cc/L68b1K">[前往]</a></p>
+						<p><a href="https://lurl.cc/">LUrl</a>: <a href="https://lurl.cc/WqozYW">[前往]</a></p>
+						<p><a href="https://is.gd/">IS</a>: <a href="https://is.gd/sgz4jK">[前往]</a></p>
+						<p><a href="https://www.shorturl.at/">ShortUrl</a>: <a href="https://shorturl.at/gsDM6">[前往]</a></p>
+						<p><a href="https://bitly.com/">Bit</a>: <a href="https://bit.ly/3Rv5Ryt">[前往]</a></p>
+						<p><a href="https://myppt.cc/">MyPpt</a>: <a href="https://myppt.cc/YSTuQe">[前往]</a></p>
+						<p><a href="https://ssur.cc/">SSur</a>: <a href="https://ssur.cc/zut8hxG">[前往]</a></p>
+						<p><a href="https://risu.io/">Risu</a>: <a href="https://risu.io/vn521">[前往]</a></p>
+						<p><a href="https://ppt.cc/">Ppt</a>: <a href="https://ppt.cc/fS5Zxx">[前往]</a></p>										
+						<p><a href="https://0rz.tw/">0rz</a>: <a href="https://0rz.tw/iqDvG">[前往]</a></p>
+						<p><a href="https://colab.research.google.com/?hl=zh-tw">COLab</a>: <a href="https://colab.research.google.com/drive/1d2du3OZPTYahUyq8IdC9P8vrOUzulwvI">[前往]</a></p>
+						<p><a href="https://www.000webhost.com/">000webhostapp</a>: <a href="https://as2026.000webhostapp.com/">[前往]</a></p>
+						<p><a href="https://vk.com/feed">VK</a>: <a href="https://vk.com/archivestar">[前往]</a></p>
+						<p><a href="https://hk.wopop.com/">IWOPop</a>: <a href="http://as2023.iwopop.top/">[前往]</a></p>
+						<p><a href="https://www.framer.com/">Framer WebSite</a>: <a href="https://as2023.framer.website/">[前往]</a></p>
+						<p><a href="https://www.framer.com/">Framer APP</a>: <a href="https://fun-mind-713413.framer.app/">[前往]</a></p>
+						<p><a href="https://webflow.com/">WebFlow</a>: <a href="https://as2024.webflow.io/">[前往]</a></p>
+						<p><a href="https://tilda.cc/">Tilda</a>: <a href="https://as2099.tilda.ws/">[前往]</a></p>
+						<p><a href="https://www.figma.com/">Figma</a>: <a href="https://www.figma.com/file/4zPV3PexWCpkHVgUzjIrXC/%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83(Archive-Star)?type=design&node-id=0-1&mode=design">[前往]</a></p>
+						<p><a href="https://www.notion.so/">Notion</a>: <a href="https://empty-hare-4a6.notion.site/Archive-Star-5c81e77b695e46efb7a7ca91d2d6799e">[前往]</a></p>
+						<p><a href="https://codepen.io/trending">CodePen</a>: <a href="https://codepen.io/rczbeiqx-the-bashful/pen/qBgemKb">[前往]</a></p>
+						<p><a href="https://www.canva.com/">Canva</a>: <a href="https://www.canva.com/design/DAF3aTr4614/OlQ1Jgr8CLqdjGV_lGCqJA/edit?utm_content=DAF3aTr4614&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton">[前往]</a></p>
+						<p><a href="https://www.cakeresume.com/dashboard">CakeResume</a>: <a href="https://www.cakeresume.com/portfolios/archive-star">[前往]</a></p>
+						<p><a href="https://www.kickresume.com/dashboard/resumes/">KickResume</a>: <a href="https://www.kickresume.com/cv/X95gvb/">[前往]</a></p>
+						<p><a href="https://www.kickresume.com/dashboard/resumes/">KickResume Web</a>: <a href="https://www.kickresume.com/cv/as2026/">[前往]</a></p>
+						<p><a href="https://www.fotor.com/">Fotor</a>: <a href="https://www.fotor.com/share/fb5e9bcf-0321-409e-812a-4c440e22b92a">[前往]</a></p>
+						<p><a href="https://www.buymeacoffee.com/">BuyMeACoffee</a>: <a href="https://www.buymeacoffee.com/archivestar/wehegovote">[前往]</a></p>
+						<p><a href="https://www.dcard.tw/f">Dcard</a>: <a href="https://www.dcard.tw/f/whysoserious/p/254259934">[前往]</a></p>
+						<p><a href="https://neocities.org/">國立台中科技大學</a>: <a href="https://ntu2024.neocities.org/">[前往]</a></p>
+						<p><a href="https://gotomax.one/">GotoMax</a>: <a href="https://gotomax.one/gui-dang-xing-qiu.html">[前往]</a></p>
+						<p><a href="https://www.hd.club.tw/">HD.Club</a>: <a href="https://www.hd.club.tw/space-uid-2984505.html">[前往]</a></p>
+						<p><a href="https://www.bluecg.net/">BlueCG</a>: <a href="https://www.bluecg.net/home.php?mod=space&uid=191647">[前往]</a></p>
+						<p><a href="https://bbs.onmyojigame.com/">OnMyOjiGame</a>: <a href="https://bbs.onmyojigame.com/space-uid-3234261.html">[前往]</a></p>
+						<p><a href="https://slashtw.space/">SlashTW</a>: <a href="https://slashtw.space/home.php?mod=space&uid=82133">[前往]</a></p>
+						<p><a href="https://bingfong.com/">BingFong</a>: <a href="https://bingfong.com/space-uid-432341.html">[前往]</a></p>
+						<p><a href="http://tucaptions.org/">Tucaptions</a>: <a href="http://tucaptions.org/home.php?mod=space&uid=16345">[前往]</a></p>
+						<p><a href="https://amh.sh/">AMH</a>: <a href="https://amh.sh/bbs/space-uid-46476.htm">[前往]</a></p>
+						<p><a href="https://www.solidworks.org.tw/">Solidworks</a>: <a href="https://www.solidworks.org.tw/home.php?mod=space&uid=121615&do=profile">[前往]</a></p>
+						<p><a href="https://boss.why3s.cc/">Why3s</a>: <a href="https://boss.why3s.cc/boss/home.php?mod=space&uid=136966">[前往]</a></p>
+						<p><a href="http://www.pinkcorpse.org/">PinkCorpse</a>: <a href="http://www.pinkcorpse.org/home.php?mod=space&uid=48561&do=profile">[前往]</a></p>
+						<p><a href="https://www.coco-in.net/">Coco-IN</a>: <a href="https://www.coco-in.net/space-uid-41836.html">[前往]</a></p>
+						<p><a href="https://forum.jorsindo.com/">Jorsindo</a>: <a href="https://forum.jorsindo.com/home.php?mod=space&uid=397370">[前往]</a></p>
+						<p><a href="https://www.subarist.net/">Subarist</a>: <a href="https://www.subarist.net/users/38792/posts">[前往]</a></p>
+						<p><a href="http://www.75one.net/">75one</a>: <a href="http://www.75one.net/home.php?mod=space&uid=74919&do=profile&from=space">[前往]</a></p>
+						<p><a href="http://www.mmluna2.com/">Mmluna2</a>: <a href="http://www.mmluna2.com/u.php?a=info&uid=6922">[前往]</a></p>
+						<p><a href="https://byet.host/">ByetHost 1</a>: <a href="http://as2024.22web.org/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 2</a>: <a href="http://as2024.10001mb.com/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 3</a>: <a href="http://as2024.2kool4u.net/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 4</a>: <a href="http://as2024.66ghz.com/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 5</a>: <a href="http://as2024.a0001.net/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 6</a>: <a href="http://as2024.fast-page.org/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 7</a>: <a href="http://as2024.fanclub.rocks/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 8</a>: <a href="http://as2024.html-5.me/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 9</a>: <a href="http://as2024.iblogger.org/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 10</a>: <a href="http://as2024.is-best.net/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 11</a>: <a href="http://as2024.is-great.net/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 12</a>: <a href="http://as2024.is-great.org/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 13</a>: <a href="http://as2024.likesyou.org/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 14</a>: <a href="http://as2024.loveslife.biz/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 15</a>: <a href="http://as2024.my-board.org/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 16</a>: <a href="http://as2024.my-style.in/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 17</a>: <a href="http://as2024.mydiscussion.net/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 18</a>: <a href="http://as2024.nichesite.org/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 19</a>: <a href="http://as2024.social-networking.me/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 20</a>: <a href="http://as2024.synergize.co/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 21</a>: <a href="http://as2024.talk4fun.net/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 22</a>: <a href="http://as2024.web1337.net/">[前往]</a></p><p><a href="https://byet.host/">ByetHost 23</a>: <a href="http://as2024.totalh.net/">[前往]</a></p>						<p><a href="https://www.asuswebstorage.com/">AsusWebStorage</a>: <a href="https://www.asuswebstorage.com/navigate/a/#/s/99DF42F72A7C4355BA1DA1FFF712850DY?type=previewPageCover">[前往]</a></p>
+						<p><a href="https://www.jplopsoft.idv.tw/">JplopsoftIndex</a>: <a href="https://www.jplopsoft.idv.tw/neocities_index/">[前往]</a></p>
+						<p><a href="https://www.box.com/personal">BoxDrive</a>: <a href="https://app.box.com/s/71ajbsd7vqrdv2j8lmulg2hzdm6aetfn">[前往]</a></p>
+						<p><a href="https://e.pcloud.link/">PCloud</a>: <a href="https://e.pcloud.link/publink/show?code=XZ3HjeZwoFNuEKng17xavNGccyulQzkE6nk">[前往]</a></p>
+						<p><a href="https://www.facebook.com/">FaceBook</a>: <a href="https://www.facebook.com/profile.php?id=61555358565905">[前往]</a></p>
+						<p><a href="https://www.evernote.com/">Evernote</a>: <a href="https://www.evernote.com/shard/s452/sh/88054a8b-4403-ad9e-9b4a-286549d1950d/gpAigrYRU2lyS-1tuniYtOtu98NxozqXXnXu4BdXzx9smH1DM4FlBdCGcg">[前往]</a></p>
+						<p><a href="https://app.simplenote.com/">SimpleNote</a>: <a href="https://app.simplenote.com/p/dMbfGx">[前往]</a></p>
+						<p><a href="https://www.tumblr.com/">Tumblr</a>: <a href="https://www.tumblr.com/blog/spookyblazefart">[前往]</a></p>
+						<p><a href="https://www.pinterest.com/">Pinterest</a>: <a href="https://www.pinterest.com/a2369555/_created">[前往]</a></p>
+						<p><a href="https://www.easybank.com.tw/">WMHP</a>: <a href="http://wmhp.easybank.com.tw/">[前往]</a></p>
+						<p><a href="https://coin028.com/">YT小礦工挖挖礦</a>: <a href="https://coin028.com/">[前往]</a></p>
+						<p><a href="https://www.infinityfree.com/">Infinityfreeapp 1</a>: <a href="http://archivestar.infinityfreeapp.com/">[前往]</a></p>
+						<p><a href="https://www.infinityfree.com/">Infinityfreeapp 2</a>: <a href="http://archivestar.great-site.net/">[前往]</a></p>
+						<p><a href="https://www.infinityfree.com/">Infinityfreeapp 3</a>: <a href="http://archivestar.lovestoblog.com/">[前往]</a></p>
+						<p><a href="https://profreehost.com/account/">Unaux 1</a>: <a href="http://archives.unaux.com/">[前往]</a></p>
+						<p><a href="https://profreehost.com/account/">Unaux 2</a>: <a href="http://as2024.unaux.com/">[前往]</a></p>
+						<p><a href="https://aeonfree.com/">Hstn</a>: <a href="http://archives.hstn.me/">[前往]</a></p>
+						<p><a href="https://aeonfree.com/">Iceiy</a>: <a href="http://archives.iceiy.com/">[前往]</a></p>
+						<p><a href="https://trello.com/">Trello</a>: <a href="https://trello.com/b/tRDKqGCf/%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83archive-star">[前往]</a></p>
+						<p><a href="https://app.mural.co/">Mural</a>: <a href="https://app.mural.co/t/as20247840/m/as20247840/1707273755134/8eaaa4c8d8e2dbecf1256d6cf39e9ba7e7e27707?sender=8d169b67-9666-4d4c-9b6e-8ea89e3bc9b6">[前往]</a></p>
+						<p><a href="https://miro.com/">Miro</a>: <a href="https://miro.com/app/board/uXjVNwQpfk4=/?share_link_id=54095641736">[前往]</a></p>
+						<p><a href="https://www.threads.net/">Threads</a>: <a href="https://www.threads.net/@nanacute0605">[前往]</a></p>
+						<p><a href="https://start-page.buffer.com/">Buffer</a>: <a href="https://archivestar.start.page/">[前往]</a></p>
+						<p><a href="https://www.site123.com/">Site123</a>: <a href="https://65d016b663ee6.site123.me/">[前往]</a></p>
+						<p><a href="https://edublogs.org/">EduBlogs</a>: <a href="https://archivestar.edublogs.org/">[前往]</a></p>
+						<p><a href="https://www.holkee.com/">Holkee</a>: <a href="https://www.holkee.com/eqyDYasVJzKYVriYPbLS">[前往]</a></p>
+						<p><a href="https://admin.easystore.co/settings">EasyStore</a>: <a href="https://archivestar.easy.co/products/aesxkey">[前往]</a></p>
+						<p><a href="https://steamcommunity.com/">Steam</a>: <a href="https://steamcommunity.com/id/archive_star">[前往]</a></p>
+						<p><a href="https://www.everybbs.com/">Everybbs</a>: <a href="https://www.everybbs.com/show1.php?o=t&f=305&t=121">[前往]</a></p>
+						<p><a href="https://terabox.com/">TeraBox</a>: <a href="https://www.terabox.com/chinese/sharing/link?surl=SzJ3cDD7aURun6atlSmIBA">[前往]</a></p>
+						<p><a href="https://www.tapatalk.com/">TapaTalk</a>: <a href="https://www.tapatalk.com/groups/metrocity/archive-star-t29533.html">[前往]</a></p>
+						<p><a href="https://note.com/">Note</a>: <a href="https://note.com/as2024/n/nd46785c5e357">[前往]</a></p>
+						<p><a href="https://infogram.com/">Infogram</a>: <a href="https://infogram.com/archive-star-1h7v4pdnl7p5j4k?live">[前往]</a></p>
+						<p><a href="https://www.plus28.com/">Plus28</a>: <a href="https://www.plus28.com/viewthread.php?tid=7076498&pid=2135997847&page=1&extra=page%3D1#pid2135997847">[前往]</a></p>
+						<p><a href="https://groups.google.com/">Groups Google</a>: <a href="https://groups.google.com/g/taipeiscientist-google-group-public/c/OVrzC3L4jqM/m/zrFCdCptFQAJ">[前往]</a></p>
+						<p><a href="https://public.flourish.studio/">Flourish</a>: <a href="https://public.flourish.studio/visualisation/17073801/">[前往]</a></p>
+						<p><a href="https://math.pro/db/">Math</a>: <a href="https://math.pro/db/viewthread.php?tid=1029&pid=25575&page=1&extra=page%3D1#pid25575">[前往]</a></p>
+						<p><a href="https://katfile.com/">Katfile</a>: <a href="https://katfile.com/cj0int7uyppw/%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83(Archive_Star)[jplop.neocities.org].txt.html">[前往]</a> | <a href="https://katfile.com/users/archivestar">[前往]</a></p>
+						<p><a href="https://www.wenxuecity.com/">Wenxuecity</a>: <a href="https://blog.wenxuecity.com/myblog/81265/202403/12674.html">[前往]</a></p>
+						<p><a href="https://web.bc3ts.net/">Bc3ts</a>: <a href="https://web.bc3ts.net/user/archivestar">[前往]</a></p>
+						<p><a href="https://www.6parkbbs.com/">6ParkBBS</a>: <a href="https://www.6parkbbs.com/index.php?app=index&act=bloghome&uname=NTI1OTUwODc%3D">[前往]</a></p>
+						<p><a href="https://old.zhinanzhen.org/xcx/">Zhinanzhen</a>: <a href="https://old.zhinanzhen.org/xcx/user.php?uid=8492">[前往]</a></p>
+						<p><a href="https://line.me/">Line.ME</a>: <a href="https://line.me/ti/g2/47CiBQmP44NC4rh8z7PX6mMFD1BtP3tLmYtuXA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default">[前往]</a></p>
+						<p><a href="https://open.firstory.me/">Firstory</a>: <a href="https://open.firstory.me/user/cltqoer370kgo01tp9ohn0kso/comments">[前往]</a></p>
+						<p><a href="https://fc2.com/">FC2</a>: <a href="https://archivestar.sns.fc2.com/exec/member/forum/view/44699/">[前往]</a></p>
+						<p><a href="http://www.storyonline.com.tw/">Storyonline</a>: <a href="http://www.storyonline.com.tw/profile.php?id=2372">[前往]</a></p>
+						<p><a href="https://surface3d.com.tw/">Surface3D</a>: <a href="https://surface3d.com.tw/forum/topic/%e6%98%9f%e9%9a%9b%e9%be%8d%e9%ad%94/#postid-5070">[前往]</a></p>
+						<p><a href="https://firewar888.tw/">Firewar888</a>: <a href="https://firewar888.tw/home.php?mod=space&uid=191472">[前往]</a></p>
+						<p><a href="https://www.hkepc.com/forum/">Hkepc</a>: <a href="https://www.hkepc.com/forum/viewthread.php?fid=221&tid=2719825&extra=page%3D1">[前往]</a></p>
+						<p><a href="https://zltravel.com.tw/">Zltravel</a>: <a href="https://zltravel.com.tw/blog?id=353">[前往]</a></p>
+						<p><a href="https://zltravel.com.tw/">Zltravel Search 1</a>: <a href="https://zltravel.com.tw/Blog/blog_Search?d=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83">[前往]</a></p>
+						<p><a href="https://zltravel.com.tw/">Zltravel Search 2</a>: <a href="https://zltravel.com.tw/Blog/blog_Search?d=%E9%87%91%E5%BE%97%E6%98%A5%E6%8D%B2">[前往]</a></p>
+						<p><a href="https://zltravel.com.tw/">Zltravel Search 3</a>: <a href="https://zltravel.com.tw/Blog/blog_Search?d=Archive%20Star">[前往]</a></p>
+						<p><a href="https://zltravel.com.tw/">Zltravel Search 4</a>: <a href="https://zltravel.com.tw/Blog/blog_Search?d=%E6%B8%85%E6%98%8E%E7%AF%80">[前往]</a></p>
+						<p><a href="https://www.pandaro.xyz/">Pandaro</a>: <a href="https://www.pandaro.xyz/forum.php?mod=viewthread&tid=10175&extra=page%3D1">[前往]</a></p>
+						<p><a href="https://www.google.com/">GoogleEdit</a>: <a href="https://www.google.com/maps/d/edit?mid=11UQcFurCAvaHis_MHSw-mdYKIk0ZVWg&usp=sharing">[前往]</a></p>
+						<p><a href="https://www.2000fun.com/">2000fun</a>: <a href="https://www.2000fun.com/home-space-uid-4819015-do-profile.html">[前往]</a></p>
+						<p><a href="https://sway.cloud.microsoft/">Sway</a>: <a href="https://sway.cloud.microsoft/s0Ex7fVvdZiDsnkR?ref=Link">[前往]</a></p>
+						<p><a href="https://kartinfo.me/">Kartinfo</a>: <a href="https://kartinfo.me/home.php?mod=space&uid=65896&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://bhmtsff.com/">Bhmtsff</a>: <a href="https://bhmtsff.com/home.php?mod=space&uid=81944&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://ds-hk.net/">DS-HK</a>: <a href="https://ds-hk.net/space.php?217596">[前往]</a></p>
+						<p><a href="https://myself-bbs.com/">Myself-BBS</a>: <a href="https://myself-bbs.com/space-uid-207023.html">[前往]</a></p>
+						<p><a href="https://bbs.pigoo.com/">Pigoo</a>: <a href="https://bbs.pigoo.com/space-uid-191233.html">[前往]</a></p>
+						<p><a href="https://oursogo.com/">OurSOGO</a>: <a href="https://oursogo.com/space-uid-3382902.html">[前往]</a></p>
+						<p><a href="https://wuso.me/">Wuso</a>: <a href="https://wuso.me/home.php?mod=space&uid=1017370">[前往]</a></p>
+						<p><a href="https://ai.igcps.com/">Igcps</a>: <a href="https://ai.igcps.com/home.php?mod=space&uid=711442&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://app.yamol.tw/">Yamol</a>: <a href="https://app.yamol.tw/forum/topic/24026">[前往]</a></p>
+						<p><a href="https://post76.hk/">Post76</a>: <a href="https://post76.hk/home.php?mod=space&uid=129578">[前往]</a></p>
+						<p><a href="https://jiaoyi.vip/">Jiaoyi</a>: <a href="https://jiaoyi.vip/space-uid-151729.html">[前往]</a></p>
+						<p><a href="https://zentalk.asus.com/">Asus</a>: <a href="https://zentalk.asus.com/t5/%E7%AD%86%E8%A8%98%E5%9E%8B%E9%9B%BB%E8%85%A6%E8%A8%8E%E8%AB%96/%E5%9C%A8momo%E4%B8%8A%E6%96%B0%E8%B2%B7%E7%9A%84%E7%AD%86%E9%9B%BB%E4%BF%9D%E5%9B%BA%E5%BA%8F%E8%99%9F%E8%A2%AB%E4%BD%BF%E7%94%A8%E9%81%8E/td-p/422346">[前往]</a></p>
+						<p><a href="http://www.chip123.com/">Chip123</a>: <a href="http://www.chip123.com/home.php?mod=space&uid=291704&do=profile">[前往]</a></p>
+						<p><a href="https://istartw.lineageinc.com/">Lineageinc</a>: <a href="https://istartw.lineageinc.com/home.php?mod=space&uid=1771919">[前往]</a></p>
+						<p><a href="https://newhigo.com/">Newhigo</a>: <a href="https://newhigo.com/home.php?mod=space&uid=24716">[前往]</a></p>
+						<p><a href="https://bbs.toysdaily.com/">Toysdaily</a>: <a href="https://bbs.toysdaily.com/space-uid-243764.html">[前往]</a></p>
+						<p><a href="https://lslv168.com/">Lslv168</a>: <a href="https://lslv168.com/home.php?mod=space&uid=629143">[前往]</a></p>
+						<p><a href="https://mem168new.com/">Mem168new</a>: <a href="https://mem168new.com/home.php?mod=space&uid=220301&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://hker2uk.com/">Hker2uk</a>: <a href="https://hker2uk.com/home.php?mod=space&uid=1609175">[前往]</a></p>
+						<p><a href="https://123.briian.com/">Briian</a>: <a href="https://123.briian.com/home.php?mod=space&uid=150543">[前往]</a></p>
+						<p><a href="https://www.softether.net/">Rube3050</a>: <a href="http://rube3050.softether.net/">[前往]</a></p>
+						<p><a href="http://www.123pk.me/">123pk</a>: <a href="http://www.123pk.me/space-uid-1184.html">[前往]</a></p>
+						<p><a href="https://rolab.org/">Rolab</a>: <a href="https://rolab.org/space-uid-20070.html">[前往]</a></p>
+						<p><a href="https://mem168.com/">Mem168</a>: <a href="https://mem168.com/bbs/home.php?mod=space&uid=27244">[前往]</a></p>
+						<p><a href="https://www.sg588.tw/">Sg588</a>: <a href="https://www.sg588.tw/home.php?mod=space&uid=373598">[前往]</a></p>
+						<p><a href="https://inonameteam.com/">Inonameteam</a>: <a href="https://inonameteam.com/home.php?mod=space&uid=36741">[前往]</a></p>
+						<p><a href="https://www.soe-parrot.com/">SoeParrot</a>: <a href="https://www.soe-parrot.com/home.php?mod=space&uid=167145">[前往]</a></p>
+						<p><a href="https://demo01.zzart.me/">Zzart</a>: <a href="https://demo01.zzart.me/home.php?mod=space&uid=3629963">[前往]</a></p>
+						<p><a href="https://www.okaywan.com/">Okaywan</a>: <a href="https://www.okaywan.com/home.php?mod=space&uid=501927">[前往]</a></p>
+						<p><a href="https://lineage45.com/">Lineage45</a>: <a href="https://lineage45.com/home.php?mod=space&uid=62819">[前往]</a></p>
+						<p><a href="https://game155.com/">Game155</a>: <a href="https://game155.com/home.php?mod=space&uid=253872&do=profile">[前往]</a></p>
+						<p><a href="https://rock8899.com/">Rock8899</a>: <a href="https://rock8899.com/home.php?mod=space&uid=1406812&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://xn--u0q11pjzan37r.xn--kbto70f.com/">xn--kbto70f</a>: <a href="https://xn--u0q11pjzan37r.xn--kbto70f.com/home.php?mod=space&uid=213&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://www.crazys.cc/">Crazys</a>: <a href="https://www.crazys.cc/forum/space-uid-1163334.html">[前往]</a></p>
+						<p><a href="http://www.2home.com.tw/">2home</a>: <a href="http://www.2home.com.tw/bbs/home.php?mod=space&uid=129025">[前往]</a></p>
+						<p><a href="https://www.suncg.net/">Suncg</a>: <a href="https://www.suncg.net/home.php?mod=space&uid=1154637">[前往]</a></p>
+						<p><a href="https://www.gooldenxxx.com/">Gooldenxxx</a>: <a href="https://www.gooldenxxx.com/home.php?mod=space&uid=29661">[前往]</a></p>
+						<p><a href="https://www.game735.com/">Game735</a>: <a href="https://www.game735.com/home.php?mod=space&uid=486677&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://www.teafish.cc/">Teafish</a>: <a href="https://www.teafish.cc/home.php?mod=space&uid=3279465">[前往]</a></p>
+						<p><a href="https://qoos.com/">Qoos</a>: <a href="https://qoos.com/home.php?mod=space&uid=63799">[前往]</a></p>
+						<p><a href="https://sweetheartrock.com/">SweeThearTrock</a>: <a href="https://sweetheartrock.com/home.php?mod=space&uid=391613">[前往]</a></p>
+						<p><a href="http://www.lin16888.com/">Lin16888</a>: <a href="http://www.lin16888.com/home.php?mod=space&uid=339">[前往]</a></p>
+						<p><a href="https://utbbs.net/">Utbbs</a>: <a href="https://utbbs.net/home.php?mod=space&uid=701207">[前往]</a></p>
+						<p><a href="https://k1019.jjvk.com/">JJVK</a>: <a href="https://k1019.jjvk.com/bdsn/dx1/upload/home.php?mod=space&uid=168528">[前往]</a></p>
+						<p><a href="https://www.pusacgn.org/">Pusacgn</a>: <a href="https://www.pusacgn.org/home.php?mod=space&uid=137932&do=profile">[前往]</a></p>
+						<p><a href="https://94intr.com/">94intr</a>: <a href="https://94intr.com/home.php?mod=space&uid=286098">[前往]</a></p>
+						<p><a href="https://5278.cc/">5278</a>: <a href="https://5278.cc/home.php?mod=space&uid=1796119&do=profile">[前往]</a></p>
+						<p><a href="https://seeuu.cc/">Seeuu</a>: <a href="https://seeuu.cc/forum.php?mod=viewthread&tid=196436">[前往]</a></p>
+						<p><a href="https://www.taisha.ca/">Taisha</a>: <a href="https://www.taisha.ca/home.php?mod=space&uid=1674801&do=profile">[前往]</a></p>
+						<p><a href="https://bbs.boniu123.cc/">Boniu123</a>: <a href="https://bbs.boniu123.cc/home.php?mod=space&uid=631478&do=profile">[前往]</a></p>
+						<p><a href="http://www.yilubbs.com/">Yilubbs</a>: <a href="http://www.yilubbs.com/space-uid-16316.html">[前往]</a></p>
+						<p><a href="https://www.coolaler.com/">Coolaler</a>: <a href="https://www.coolaler.com/forums/members/archivestar.336318/#about">[前往]</a></p>
+						<p><a href="https://www.hkmensa.net/">Hkmensa</a>: <a href="https://www.hkmensa.net/home.php?mod=space&uid=445014">[前往]</a></p>
+						<p><a href="http://www.bjyou4122.com/">Bjyou4122</a>: <a href="http://www.bjyou4122.com/home.php?mod=space&uid=225979">[前往]</a></p>
+						<p><a href="https://fun1.cc/">Fun1</a>: <a href="https://fun1.cc/space-uid-1093.html">[前往]</a></p>
+						<p><a href="https://newlover.org/">Newlover</a>: <a href="https://newlover.org/home.php?mod=space&uid=6913&do=profile">[前往]</a></p>
+						<p><a href="https://crazy.pokuyo.com/">Pokuyo</a>: <a href="https://crazy.pokuyo.com/home.php?mod=space&uid=107983&do=profile">[前往]</a></p>
+						<p><a href="https://www.play56.net/">Play56</a>: <a href="https://www.play56.net/home.php?mod=space&uid=2563920">[前往]</a></p>
+						<p><a href="http://wecan.skybbs.biz/">Skybbs</a>: <a href="http://wecan.skybbs.biz/home.php?mod=space&uid=1346534">[前往]</a></p>
+						<p><a href="https://www.lohastw.net/">Lohastw</a>: <a href="https://www.lohastw.net/home.php?mod=space&uid=13655">[前往]</a></p>
+						<p><a href="https://memes.tw/">Memes</a>: <a href="https://memes.tw/user/306983">[前往]</a></p>
+						<p><a href="https://family.saycoo.com/">Saycoo</a>: <a href="https://family.saycoo.com/home.php?mod=space&uid=324627&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://sienta-club.tw/">Sienta-club</a>: <a href="https://sienta-club.tw/home.php?mod=space&uid=17287">[前往]</a></p>
+						<p><a href="https://rav4-club.tw/">Rav4-club</a>: <a href="https://rav4-club.tw/home.php?mod=space&uid=15598">[前往]</a></p>
+						<p><a href="https://o4ooo.com/">O4ooo</a>: <a href="https://o4ooo.com/flowers/home.php?mod=space&uid=7549615&do=profile">[前往]</a></p>
+						<p><a href="http://34.100.194.145/">34.100.194.145</a>: <a href="http://34.100.194.145/home.php?mod=space&uid=4449&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://tktower.com/">Tktower</a>: <a href="https://tktower.com/discuss.html?Rs_WK=Rs_List1&Area=5&No=255831&TSS=R#255831">[前往]</a></p>
+						<p><a href="https://cncfa.com/">Cncfa</a>: <a href="https://cncfa.com/home.php?mod=space&uid=1735740">[前往]</a></p>
+						<p><a href="https://bbs.yeeapps.com/">Yeeapps</a>: <a href="https://bbs.yeeapps.com/home.php?mod=space&uid=25976">[前往]</a></p>
+						<p><a href="https://www.xinbiao-aicl.com/">Xinbiao-aicl</a>: <a href="https://www.xinbiao-aicl.com/home.php?mod=space&uid=142644&do=profile">[前往]</a></p>
+						<p><a href="https://bbs.icnkr.com/">Icnkr</a>: <a href="https://bbs.icnkr.com/space-uid-2745273.html">[前往]</a></p>
+						<p><a href="https://jiaoyi.cool/">Jiaoyi</a>: <a href="https://jiaoyi.cool/thread-2256-1-1.html">[前往]</a></p>
+						<p><a href="http://5156share.com/">5156share</a>: <a href="http://5156share.com/home.php?mod=space&uid=63650">[前往]</a></p>
+						<p><a href="https://bbs.qupu123.com/">Qupu123</a>: <a href="https://bbs.qupu123.com/space-uid-1788073.html">[前往]</a></p>
+						<p><a href="https://forum.vanpeople.com/">Vanpeople</a>: <a href="https://forum.vanpeople.com/home.php?mod=space&uid=777073">[前往]</a></p>
+						<p><a href="https://bbs.talkop.com/">Talkop</a>: <a href="https://bbs.talkop.com/home.php?mod=space&uid=237603&do=profile&from=space">[前往]</a></p>
+						<p><a href="http://www.citytalk.tw/">Citytalk</a>: <a href="http://www.citytalk.tw/bbs/forum.php?mod=viewthread&tid=447301&extra=page%3D1">[前往]</a></p>
+						<p><a href="https://www.fossic.org/">Fossic</a>: <a href="https://www.fossic.org/space-uid-62539.html">[前往]</a></p>
+						<p><a href="https://bbs.ra2diy.com/">Ra2diy</a>: <a href="https://bbs.ra2diy.com/forum.php?mod=viewthread&tid=23484&page=1&extra=#pid133498">[前往]</a></p>
+						<p><a href="https://bbs.nyasama.com/">Nyasama</a>: <a href="https://bbs.nyasama.com/home.php?mod=space&uid=270563&do=profile">[前往]</a></p>
+						<p><a href="https://www.rxyhzx.com/">Rxyhzx</a>: <a href="https://www.rxyhzx.com/home.php?mod=space&uid=133919">[前往]</a></p>
+						<p><a href="http://avno1.playno1.com/">Playno1</a>: <a href="http://avno1.playno1.com/home.php?mod=space&uid=546499&do=profile">[前往]</a></p>
+						<p><a href="https://www.xocat.com/">Xocat</a>: <a href="https://www.xocat.com/f/home.php?mod=space&uid=1093081&do=profile">[前往]</a></p>
+						<p><a href="https://sogclub.com/">Sogclub</a>: <a href="https://sogclub.com/home.php?mod=space&uid=889423&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://www.new141.online/">New141</a>: <a href="https://www.new141.online/bb/home.php?mod=space&uid=137287">[前往]</a></p>
+						<p><a href="https://ninini573r.uk/">Ninini573r</a>: <a href="https://ninini573r.uk/home.php?mod=space&uid=898039">[前往]</a></p>
+						<p><a href="https://www.chaforum.net/">Chaforum</a>: <a href="https://www.chaforum.net/home.php?mod=space&uid=133185&do=profile">[前往]</a></p>
+						<p><a href="https://c.cari.com.my/">Cari</a>: <a href="https://c.cari.com.my/home.php?mod=space&uid=2541744&do=profile">[前往]</a></p>
+						<p><a href="https://uichin.net/">Uichin</a>: <a href="https://uichin.net/ui/home.php?mod=space&uid=369470">[前往]</a></p>
+						<p><a href="http://xiaoping777.com/">Xiaoping777</a>: <a href="http://xiaoping777.com/home.php?mod=space&uid=57959">[前往]</a></p>
+						<p><a href="http://www.s-star.com.tw/">S-Star</a>: <a href="http://www.s-star.com.tw/phpbb2/space.php?47624">[前往]</a></p>
+						<p><a href="https://kater.me/">Kater</a>: <a href="https://kater.me/u/archivestar">[前往]</a></p>
+						<p><a href="https://www.hiendy.com/">Hiendy</a>: <a href="https://www.hiendy.com/hififorum/home.php?mod=space&uid=135548&do=profile">[前往]</a></p>
+						<p><a href="http://a.8fnu.com/">8fnu</a>: <a href="http://a.8fnu.com/home.php?mod=space&uid=2171269&do=profile">[前往]</a></p>
+						<p><a href="https://apk.tw/">Apk</a>: <a href="https://apk.tw/home.php?mod=space&uid=6281220&do=profile">[前往]</a></p>
+						<p><a href="https://www.angelcg.net/">Angelcg</a>: <a href="https://www.angelcg.net/home.php?mod=space&username=archivestar">[前往]</a></p>
+						<p><a href="https://mamaclub.com/">Mamaclub</a>: <a href="https://mamaclub.com/chat/home.php?mod=space&uid=418158&do=thread&view=me&from=space">[前往]</a></p>
+						<p><a href="https://bbs.ra2diy.com/">Ra2diy</a>: <a href="https://bbs.ra2diy.com/home.php?mod=space&uid=23321&do=profile">[前往]</a></p>
+						<p><a href="https://home.gamer.com.tw/">Gamer</a>: <a href="https://home.gamer.com.tw/creationDetail.php?sn=5911809">[前往]</a></p>
+						<p><a href="https://rctw.net/">Rctw</a>: <a href="https://rctw.net/home.php?mod=space&uid=231770&do=profile">[前往]</a></p>
+						<p><a href="https://www.gilineage.com/">Gilineage</a>: <a href="https://www.gilineage.com/home.php?mod=space&uid=12892&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://www.2girl.net/">2girl</a>: <a href="https://www.2girl.net/home.php?mod=space&uid=229691&do=profile">[前往]</a></p>
+						<p><a href="http://www.168gamesf.com/">168gamesf</a>: <a href="http://www.168gamesf.com/space-uid-644190.html">[前往]</a></p>
+						<p><a href="https://xn--9rqs0sjza524bk8g.online/">Online</a>: <a href="https://xn--9rqs0sjza524bk8g.online/home.php?mod=space&uid=28723&do=profile&from=space">[前往]</a></p>
+						<p><a href="http://quanji.dinglou.com/">Dinglou</a>: <a href="http://quanji.dinglou.com/home.php?mod=space&uid=450377">[前往]</a></p>
+						<p><a href="http://fit-club.org/">FitClub</a>: <a href="http://fit-club.org/home.php?mod=space&uid=194379">[前往]</a></p>
+						<p><a href="https://lineage2tw.com/">Lineage2tw</a>: <a href="https://lineage2tw.com/home.php?mod=space&uid=156771">[前往]</a></p>
+						<p><a href="https://nine.win1.me/">Win1</a>: <a href="https://nine.win1.me/space-uid-176.html">[前往]</a></p>
+						<p><a href="https://forum.m2.hk/">M2</a>: <a href="https://forum.m2.hk/home.php?mod=space&uid=100273">[前往]</a></p>
+						<p><a href="https://seasgod.com/">Seasgod</a>: <a href="https://seasgod.com/home.php?mod=space&uid=3335">[前往]</a></p>
+						<p><a href="https://www.chinesecj.com/">Chinesecj</a>: <a href="https://www.chinesecj.com/forum/home.php?mod=space&uid=35535">[前往]</a></p>
+						<p><a href="https://nyro.cc/">Nyro</a>: <a href="https://nyro.cc/nyro_forum/space-uid-839.html">[前往]</a></p>
+						<p><a href="https://robofun.net/">Robofun</a>: <a href="https://robofun.net/forum/home.php?mod=space&uid=33809">[前往]</a></p>
+						<p><a href="https://mouse.ee.aeust.edu.tw/">Aeust</a>: <a href="https://mouse.ee.aeust.edu.tw/home.php?mod=space&uid=634">[前往]</a></p>
+						<p><a href="https://nessummon.com/">Nessummon</a>: <a href="https://nessummon.com/home.php?mod=space&uid=339">[前往]</a></p>
+						<p><a href="https://www.photobuddha.net/">Photobuddha</a>: <a href="https://www.photobuddha.net/home.php?mod=space&uid=797&do=profile">[前往]</a></p>
+						<p><a href="https://lohu.org.tw/">Lohu</a>: <a href="https://lohu.org.tw/BBS/home.php?mod=space&uid=102399">[前往]</a></p>
+						<p><a href="https://alpha.go1.games/">Alpha</a>: <a href="https://alpha.go1.games/home.php?mod=space&uid=220">[前往]</a></p>
+						<p><a href="https://bassadv.com/">Bassadv</a>: <a href="https://bassadv.com/topic.php?id=8084326710">[前往]</a></p>
+						<p><a href="https://ddininder.com/">Ddininder</a>: <a href="https://ddininder.com/home.php?mod=space&uid=53009">[前往]</a></p>
+						<p><a href="https://www.xlsq17.com/">Xlsq17</a>: <a href="https://www.xlsq17.com/u.php?a=info&uid=508160">[前往]</a></p>
+						<p><a href="https://www.dcfever.com/">Dcfever1</a>: <a href="https://www.dcfever.com/users/profile.php?id=1190715">[前往]</a></p>
+						<p><a href="https://www.dcfever.com/">Dcfever2</a>: <a href="https://www.dcfever.com/trading/profile.php?id=1190715">[前往]</a></p>
+						<p><a href="https://142game.com/">142game</a>: <a href="https://142game.com/space-uid-16798.html">[前往]</a></p>
+						<p><a href="https://www.supergame.one/">Supergame</a>: <a href="https://www.supergame.one/home.php?mod=space&uid=43511">[前往]</a></p>
+						<p><a href="https://www.suma.tw/">Suma</a>: <a href="https://www.suma.tw/home.php?mod=space&uid=38953&do=profile">[前往]</a></p>
+						<p><a href="https://forum.kteam.tw/">Kteam</a>: <a href="https://forum.kteam.tw/space-uid-3525.html">[前往]</a></p>
+						<p><a href="https://www.ppxclub.com/">Ppxclub</a>: <a href="https://www.ppxclub.com/home.php?mod=space&uid=659135">[前往]</a></p>
+						<p><a href="https://vanquishloong.com/">Vanquishloong</a>: <a href="https://vanquishloong.com/vanquishloong/home.php?mod=space&uid=74563&do=profile">[前往]</a></p>
+						<p><a href="https://www.tenda-team.com/">Tenda-team</a>: <a href="https://www.tenda-team.com/home.php?mod=space&uid=304">[前往]</a></p>
+						<p><a href="https://east6.me/">East6</a>: <a href="https://east6.me/home.php?mod=space&uid=27830&do=profile">[前往]</a></p>
+						<p><a href="http://www.zhiyoucheng.co/">Zhiyoucheng</a>: <a href="http://www.zhiyoucheng.co/home.php?mod=space&uid=77934&do=profile">[前往]</a></p>
+						<p><a href="https://wkbilibili.com/">Wkbilibili</a>: <a href="https://wkbilibili.com/home.php?mod=space&uid=900981">[前往]</a></p>
+						<p><a href="https://ntd2u.net/">Ntd2u</a>: <a href="https://ntd2u.net/home.php?mod=space&uid=31631&do=profile">[前往]</a></p>
+						<p><a href="https://www.microduo.tw/">Microduo</a>: <a href="https://www.microduo.tw/home.php?mod=space&uid=7383669&do=profile">[前往]</a></p>
+						<p><a href="https://dmhg.me/">Dmhg</a>: <a href="https://dmhg.me/home.php?mod=space&uid=3171&do=profile&from=space">[前往]</a></p>
+						<p><a href="http://mir2.tw/">Mir2</a>: <a href="http://mir2.tw/home.php?mod=space&uid=1709">[前往]</a></p>
+						<p><a href="https://www.new-3lunch.net/">New3lunch</a>: <a href="https://www.new-3lunch.net/space-uid-499187.html">[前往]</a></p>
+						<p><a href="http://gdl.gamehuse.cc/">Gamehuse</a>: <a href="http://gdl.gamehuse.cc/home.php?mod=space&uid=120">[前往]</a></p>
+						<p><a href="https://www.ruike1.com/">Ruike1</a>: <a href="https://www.ruike1.com/space-uid-75128.html">[前往]</a></p>
+						<p><a href="https://www.wechurch.tw/">Wechurch</a>: <a href="https://www.wechurch.tw/home.php?mod=space&uid=187408&do=profile">[前往]</a></p>
+						<p><a href="https://www.cantonese.asia/">Cantonese</a>: <a href="https://www.cantonese.asia/home.php?mod=space&uid=394916&do=profile">[前往]</a></p>
+						<p><a href="https://bbs.lineagem.tw/">Lineagem</a>: <a href="https://bbs.lineagem.tw/home.php?mod=space&uid=33709">[前往]</a></p>
+						<p><a href="https://www.unitehk.com/">Unitehk</a>: <a href="https://www.unitehk.com/home.php?mod=space&uid=19494&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://hi.lineag1.cc/">Lineag1</a>: <a href="https://hi.lineag1.cc/home.php?mod=space&uid=20">[前往]</a></p>
+						<p><a href="https://www.taaisclub.com/">Taaisclub</a>: <a href="https://www.taaisclub.com/bbs/home.php?mod=space&uid=22064">[前往]</a></p>
+						<p><a href="https://www.jplopsoft.idv.tw/discuz2024/">Jplopsoft</a>: <a href="https://www.jplopsoft.idv.tw/discuz2024/">[前往]</a></p>
+						<p><a href="http://forum.agames.hk/">Agames</a>: <a href="http://forum.agames.hk/home.php?mod=space&uid=434788">[前往]</a></p>
+						<p><a href="http://linkto.jfa.com.tw/add.php">短網址產生器</a>: <a href="http://linkto.jfa.com.tw/add.php">[前往]</a></p>
+						<p><a href="http://l.jplopsoft.idv.tw/add.php">短網址產生器</a>: <a href="http://l.jplopsoft.idv.tw/add.php">[前往]</a></p>
+						<p><a href="https://www.quyushuju.com/home.php?mod=space&uid=34073&do=profile">Quyushuju</a>: <a href="https://www.quyushuju.com/home.php?mod=space&uid=34073&do=profile">[前往]</a></p>
+						<p><a href="https://www.dahan.com.tw/">Dahan</a>: <a href="https://www.dahan.com.tw/home.php?mod=space&uid=33519">[前往]</a></p>
+						<p><a href="https://fh.lineage66.com/">Lineage66</a>: <a href="https://fh.lineage66.com/space-uid-20988.html">[前往]</a></p>
+						<p><a href="https://mop.idcpf.com/">Idcpf</a>: <a href="https://mop.idcpf.com/home.php?mod=space&uid=120">[前往]</a></p>
+						<p><a href="https://www.fans17.com/">Fans17</a>: <a href="https://www.fans17.com/u/archivestar">[前往]</a></p>
+						<p><a href="https://apex.acdccollege.com/">Acdccollege</a>: <a href="https://apex.acdccollege.com/home.php?mod=space&uid=2546&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://lawshare.tw/">Lawshare</a>: <a href="https://lawshare.tw/home.php?mod=space&uid=195414">[前往]</a></p>
+						<p><a href="http://www.osho.tw/">Osho</a>: <a href="http://www.osho.tw/osho/upload/home.php?mod=space&uid=2066&do=profile">[前往]</a></p>
+						<p><a href="https://www.ncku1897.net/">Ncku1897</a>: <a href="https://www.ncku1897.net/forum/home.php?mod=space&uid=28118&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://www.525cg.com/">525cg</a>: <a href="https://www.525cg.com/home.php?mod=space&uid=401">[前往]</a></p>
+						<p><a href="http://bbs.roheya.com/">Roheya</a>: <a href="http://bbs.roheya.com/u.php?a=info&uid=93912">[前往]</a></p>
+						<p><a href="https://loog7777.mymailer.com.tw/">Mymailer</a>: <a href="https://loog7777.mymailer.com.tw/home.php?mod=space&uid=34967&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://bbs.lineage-w.tw/">Lineage</a>: <a href="https://bbs.lineage-w.tw/home.php?mod=space&uid=2498">[前往]</a></p>
+						<p><a href="https://nxtc.tw/">Nxtc</a>: <a href="https://nxtc.tw/home.php?mod=space&uid=26027">[前往]</a></p>
+						<p><a href="https://www.koitw.com.tw/">Koitw</a>: <a href="https://www.koitw.com.tw/discuz/home.php?mod=space&uid=131447&do=profile">[前往]</a></p>
+						<p><a href="https://xn--ihqt9ag0qy7ae4zn7g.xn--kbto70f.com/">xn--kbto70f</a>: <a href="https://xn--ihqt9ag0qy7ae4zn7g.xn--kbto70f.com/home.php?mod=space&uid=1190&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://cgezs.com/">Cgezs</a>: <a href="https://cgezs.com/home.php?mod=space&uid=2931&do=profile&from=space">[前往]</a></p>
+						<p><a href="http://monyiro.com/">Monyiro</a>: <a href="http://monyiro.com/home.php?mod=space&uid=27952&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://www.17play.biz/">17play</a>: <a href="https://www.17play.biz/home.php?mod=space&uid=50828&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://purple.idcpf.com/">Idcpf</a>: <a href="https://purple.idcpf.com/home.php?mod=space&uid=1312">[前往]</a></p>
+						<p><a href="https://www.phoenixstoneage.com/">Phoenixstoneage</a>: <a href="https://www.phoenixstoneage.com/phoenixsa/home.php?mod=space&uid=4626">[前往]</a></p>
+						<p><a href="https://dnaxcattalk.dnaxcat.net/">Dnaxcat</a>: <a href="https://dnaxcattalk.dnaxcat.net/home.php?mod=space&uid=17093">[前往]</a></p>
+						<p><a href="https://godmusic.idcpf.com/">Idcpf</a>: <a href="https://godmusic.idcpf.com/home.php?mod=space&uid=1046">[前往]</a></p>
+						<p><a href="https://armani.sytes.me/">Sytes</a>: <a href="https://armani.sytes.me/home.php?mod=space&uid=1713">[前往]</a></p>
+						<p><a href="https://lin182.onlinehost.cc/">OnlineHost</a>: <a href="https://lin182.onlinehost.cc/home.php?mod=space&uid=5190">[前往]</a></p>
+						<p><a href="https://79.lineag1.cc/">Lineag1</a>: <a href="https://79.lineag1.cc/home.php?mod=space&uid=416">[前往]</a></p>
+						<p><a href="https://xn--cksr0ar23k9ta.xn--kbto70f.com/">Kbto70f</a>: <a href="https://xn--cksr0ar23k9ta.xn--kbto70f.com/home.php?mod=space&uid=313">[前往]</a></p>
+						<p><a href="https://taiwan-swine.com/">TaiwanSwine</a>: <a href="https://taiwan-swine.com/home.php?mod=space&uid=34113">[前往]</a></p>
+						<p><a href="https://www.pokeuniv.com/bbs/">Pokeuniv</a>: <a href="https://www.pokeuniv.com/bbs/home.php?mod=space&uid=13944">[前往]</a></p>
+						<p><a href="https://www.wuwuji.tw/forum/">Wuwuji</a>: <a href="https://www.wuwuji.tw/forum/home.php?mod=space&uid=708187">[前往]</a></p>
+						<p><a href="https://www.angeling-studio.com/">Angeling</a>: <a href="https://www.angeling-studio.com/home.php?mod=space&uid=262">[前往]</a></p>
+						<p><a href="https://www.taiwan-yaris-club.tw/">TYC</a>: <a href="https://www.taiwan-yaris-club.tw/home.php?mod=space&uid=9343">[前往]</a></p>
+						<p><a href="https://shumo.com/forum/">Shumo</a>: <a href="https://shumo.com/forum/home.php?mod=space&uid=798442">[前往]</a></p>
+						<p><a href="https://www.c-hr.tw/">C-hr</a>: <a href="https://www.c-hr.tw/home.php?mod=space&uid=7533">[前往]</a></p>
+						<p><a href="https://www.hamtalk.asia/">HamtalkAsia</a>: <a href="https://www.hamtalk.asia/home.php?mod=space&uid=140273&do=profile">[前往]</a></p>
+						<p><a href="https://iber.idcpf.com/">Idcpf</a>: <a href="https://iber.idcpf.com/home.php?mod=space&uid=331">[前往]</a></p>
+						<p><a href="https://lin123.gamehost.cc/">GameHost</a>: <a href="https://lin123.gamehost.cc/?33380">[前往]</a></p>
+						<p><a href="https://hiking.biji.co/">Biji</a>: <a href="https://hiking.biji.co/index.php?q=member&act=profile&member=2039765">[前往]</a></p>
+						<p><a href="http://www.sexline998.com/">Sexline998</a>: <a href="http://www.sexline998.com/home.php?mod=space&uid=7631&do=profile">[前往]</a></p>
+						<p><a href="https://www.g-years.com/">G-years</a>: <a href="https://www.g-years.com/2006/u.php?a=info&uid=232575">[前往]</a></p>
+						<p><a href="https://www.grandmotherbear.net/">Grandmotherbear</a>: <a href="https://www.grandmotherbear.net/?39">[前往]</a></p>
+						<p><a href="http://218-161-23-131.hinet-ip.hinet.net/?13440">Hinet</a>: <a href="http://218-161-23-131.hinet-ip.hinet.net/?13440">[前往]</a></p>
+						<p><a href="http://ttonline.hopto.org/">Hopto</a>: <a href="http://ttonline.hopto.org/?4408">[前往]</a></p>
+						<p><a href="https://freero.org/l">Freero</a>: <a href="https://freero.org/space-uid-20919.html">[前往]</a></p>
+						<p><a href="https://xinyue.win1.me/">Win1</a>: <a href="https://xinyue.win1.me/?81">[前往]</a></p>
+						<p><a href="https://fala.win1.me/">Win1</a>: <a href="https://fala.win1.me/?465">[前往]</a></p>
+						<p><a href="http://momo365.tw/">Momo365</a>: <a href="http://momo365.tw/?113245">[前往]</a></p>
+						<p><a href="https://www.orangeonline.co/">Orangeonline</a>: <a href="https://www.orangeonline.co/?1220648">[前往]</a></p>
+						<p><a href="https://hilux-club.tw/">Hilux-Club</a>: <a href="https://hilux-club.tw/?3885">[前往]</a></p>
+						<p><a href="https://2022old.com/">2022old</a>: <a href="https://2022old.com/?264760">[前往]</a></p>
+						<p><a href="https://myth1l.com/">Myth1l</a>: <a href="https://myth1l.com/?96011">[前往]</a></p>
+						<p><a href="https://edsanew.com/bbs/">Edsanew</a>: <a href="https://edsanew.com/bbs/?20466">[前往]</a></p>
+						<p><a href="https://forum.doraforum.com/">Doraforum</a>: <a href="https://forum.doraforum.com/home.php?mod=space&uid=18355&do=profile&from=space">[前往]</a></p>
+						<p><a href="https://www.pinkoi.com/">Pinkoi</a>: <a href="https://www.pinkoi.com/user/gg_108922504564977736564">[前往]</a></p>
+						<p><a href="http://taikwu.com.tw/dsz/">Taikwu</a>: <a href="http://taikwu.com.tw/dsz/?484426">[前往]</a></p>
+						<p><a href="http://60-251-32-214.hinet-ip.hinet.net/">Hinet</a>: <a href="http://60-251-32-214.hinet-ip.hinet.net/home.php?mod=space&uid=85966&do=profile">[前往]</a></p>
+						<p><a href="https://gulavaw.com/dzx34/">Gulavaw</a>: <a href="https://gulavaw.com/dzx34/home.php?mod=space&uid=104098&do=profile">[前往]</a></p>
+						<p><a href="https://www.audionet.com.tw/">Audionet</a>: <a href="https://www.audionet.com.tw/home.php?mod=space&uid=10752&do=profile">[前往]</a></p>
+						<p><a href="https://www.sunnypoint.com.tw/">旗袍</a>: <a href="https://www.sunnypoint.com.tw/">[前往]</a></p>
+						<p><a href="https://www.optionshare.tw/">OptionShare</a>: <a href="https://www.optionshare.tw/?1824219">[前往]</a></p>
+						<p><a href="https://xn--cksr0a682dnnjxvp.xn--kbto70f.com/">kbto70f</a>: <a href="https://詠玖緣天堂.官網.com/?80">[前往]</a></p>
+						<p><a href="https://www.bbs.ysponder.com.tw/">Ysponder</a>: <a href="https://www.bbs.ysponder.com.tw/?38756">[前往]</a></p>
+						<p><a href="https://intern.ee.aeust.edu.tw/">Aeust</a>: <a href="https://intern.ee.aeust.edu.tw/?1442481">[前往]</a></p>
+						<p><a href="https://www.twmini.com.tw/">TwMini</a>: <a href="https://www.twmini.com.tw/dzx/home.php?mod=space&uid=133573&do=profile">[前往]</a></p>
+						<p><a href="http://www.bestlong.idv.tw/">BestLong</a>: <a href="http://www.bestlong.idv.tw/?6327">[前往]</a></p>
+						<p><a href="https://carrd.co/">Carrd</a>: <a href="https://archive1993.carrd.co/">[前往]</a></p>
+						<p><a href="https://www.events18.hk/">Events18</a>: <a href="https://www.events18.hk/?52200">[前往]</a></p>
+						<p><a href="https://static.app/">Static.App</a>: <a href="https://archivestar.static.domains/">[前往]</a></p>
+						<p><a href="https://static.app/">Static.App</a>: <a href="https://aszero.static.domains/">[前往]</a></p>
+						<p><a href="https://www.plurk.com/">Plurk</a>: <a href="https://www.plurk.com/archivestar">[前往]</a></p>
+						<p><a href="https://yay.boo/">Yay.Boo</a>: <a href="https://as2025.yay.boo/">[前往]</a></p>
+						<p><a href="https://felo.ai/">Felo.ai</a>: <a href="https://felo.ai/search/9KNfNw3xwXccYq5cztMU6P?invite=WPODmXv0W3Mj0">[前往]</a></p>
+						<p><a href="https://copilot.microsoft.com/">Copilot</a>: <a href="https://copilot.microsoft.com/shares/J9HFejUSANQq7kpRaKciz">[前往]</a></p>
+						<p><a href="https://grok.com/">Grok</a>: <a href="https://grok.com/share/bGVnYWN5_57ad0a66-ad49-480c-987f-e4681c7513f3">[前往]</a></p>
+						<p><a href="https://peatix.com/">Peatix</a>: <a href="https://archivestar.peatix.com/activity/7eef89d3-f981-11ef-81bf-0a59150fa0e2">[前往]</a></p>
+						<p><a href="https://haltonbbs.com/?657856">HaltonBbs</a>: <a href="https://haltonbbs.com/?657856">[前往]</a></p>
+						<p><a href="http://www.loxa.edu.tw/">Loxa</a>: <a href="http://www.loxa.edu.tw/classweb/webView/index2.php?m_Id=32736&m_Type=4&m_Sort=7&webId=26314&teacher=sir1116&postId=37288&page=1">[前往]</a></p>
+						<p><a href="http://www.meworks.net/">Meworks</a>: <a href="http://www.meworks.net/meworksv2a/meworks/page1.aspx?step=2&no=201034&threadno=130787">[前往]</a></p>
+						
+
+
+								<hr color="#CCCCCC">
+								<p><center><font face="Verdana, Arial, Helvetica, sans-serif">Power by Archive Star</font></center></p>
+								<span style="display:none">
+									<iframe src="https://www.google.com/search?q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&sourceid=chrome&ie=UTF-8" width="1200" height="800"></iframe>
+									<a href="https://www.google.com/search?q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&sourceid=chrome&ie=UTF-8">Google 歸檔星球</a>
+									
+									<iframe src="https://www.google.com/search?q=%22AI%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E5%89%B5%E5%BB%BA%E3%80%81%E7%94%9F%E6%88%90%E7%9A%84%E7%85%A7%E7%89%87%7E%22&sca_esv=4fd0dc4fbda9541c&udm=2&biw=1920&bih=929&ei=33iOZtitLJDc1e8Phd2vwAw&ved=0ahUKEwiYmY-ft5yHAxUQbvUHHYXuC8gQ4dUDCBA&uact=5&oq=%22AI%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E5%89%B5%E5%BB%BA%E3%80%81%E7%94%9F%E6%88%90%E7%9A%84%E7%85%A7%E7%89%87%7E%22&gs_lp=Egxnd3Mtd2l6LXNlcnAiKSJBSea3seW6puWtuOe_kuWJteW7uuOAgeeUn-aIkOeahOeFp-eJh34iSOoQUPgGWKMPcAF4AJABAJgBJaABRqoBATK4AQPIAQD4AQGYAgCgAgCYAwCIBgGSBwCgB2Y&sclient=gws-wiz-serp&safe=active&ssui=on" width="1200" height="800"></iframe>
+									<a href="https://www.google.com/search?q=%22AI%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E5%89%B5%E5%BB%BA%E3%80%81%E7%94%9F%E6%88%90%E7%9A%84%E7%85%A7%E7%89%87%7E%22&sca_esv=4fd0dc4fbda9541c&udm=2&biw=1920&bih=929&ei=33iOZtitLJDc1e8Phd2vwAw&ved=0ahUKEwiYmY-ft5yHAxUQbvUHHYXuC8gQ4dUDCBA&uact=5&oq=%22AI%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E5%89%B5%E5%BB%BA%E3%80%81%E7%94%9F%E6%88%90%E7%9A%84%E7%85%A7%E7%89%87%7E%22&gs_lp=Egxnd3Mtd2l6LXNlcnAiKSJBSea3seW6puWtuOe_kuWJteW7uuOAgeeUn-aIkOeahOeFp-eJh34iSOoQUPgGWKMPcAF4AJABAJgBJaABRqoBATK4AQPIAQD4AQGYAgCgAgCYAwCIBgGSBwCgB2Y&sclient=gws-wiz-serp&safe=active&ssui=on">Google 歸檔星球</a>
+									
+									<iframe src="https://www.google.com/search?sca_esv=588853371&q=%22AESXKEY%E7%94%B3%E8%AB%8B%22&nfpr=1&sa=X&ved=2ahUKEwiSqaCWmP6CAxXgc_UHHV6LDCkQvgUoAXoECAgQAw&cshid=1701981789726146&biw=1920&bih=931&dpr=1" width="1200" height="800"></iframe>
+									<a href="https://www.google.com/search?sca_esv=588853371&q=%22AESXKEY%E7%94%B3%E8%AB%8B%22&nfpr=1&sa=X&ved=2ahUKEwiSqaCWmP6CAxXgc_UHHV6LDCkQvgUoAXoECAgQAw&cshid=1701981789726146&biw=1920&bih=931&dpr=1">Google AESXKEY申請</a>
+									
+									<iframe src="https://www.bing.com/search?q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&form=QBLH&sp=-1&ghc=1&lq=0&pq=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&sc=2-4&qs=n&sk=&cvid=C55581E9342546D8943B25B5F01AC0C5&ghsh=0&ghacc=0&ghpl="></iframe>
+									<a href="https://www.bing.com/search?q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&form=QBLH&sp=-1&ghc=1&lq=0&pq=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&sc=2-4&qs=n&sk=&cvid=C55581E9342546D8943B25B5F01AC0C5&ghsh=0&ghacc=0&ghpl=">Bing 歸檔星球</a>
+									
+									<iframe src="https://www.bing.com/search?q=AESXKEY%E7%94%B3%E8%AB%8B&form=QBLH&sp=-1&lq=0&pq=aesxkey%E7%94%B3%E8%AB%8B&sc=0-9&qs=n&sk=&cvid=6A2CF36D7C714E4D9B8D11A6646D9630&ghsh=0&ghacc=0&ghpl="></iframe>
+									<a href="https://www.bing.com/search?q=AESXKEY%E7%94%B3%E8%AB%8B&form=QBLH&sp=-1&lq=0&pq=aesxkey%E7%94%B3%E8%AB%8B&sc=0-9&qs=n&sk=&cvid=6A2CF36D7C714E4D9B8D11A6646D9630&ghsh=0&ghacc=0&ghpl=">Bing AESXKEY申請</a>
+									
+									<iframe src="https://tw.search.yahoo.com/search?p=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&fr=yfp-search-sb"></iframe>
+									<a href="https://tw.search.yahoo.com/search?p=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&fr=yfp-search-sb">Yahoo 歸檔星球</a>
+									
+									<iframe src="https://tw.search.yahoo.com/search?p=AESXKEY%E7%94%B3%E8%AB%8B&fr=yfp-search-sb"></iframe>
+									<a href="https://tw.search.yahoo.com/search?p=AESXKEY%E7%94%B3%E8%AB%8B&fr=yfp-search-sb">Yahoo AESXKEY申請</a>
+									
+									<iframe src="https://duckduckgo.com/?t=h_&q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&ia=web"></iframe>
+									<a href="https://duckduckgo.com/?t=h_&q=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&ia=web">DuckDuckGo 歸檔星球</a>
+									
+									<iframe src="https://duckduckgo.com/?t=h_&q=AESXKEY%E7%94%B3%E8%AB%8B&ia=web"></iframe>
+									<a href="https://duckduckgo.com/?t=h_&q=AESXKEY%E7%94%B3%E8%AB%8B&ia=web">DuckDuckGo AESXKEY申請</a>
+									
+									<iframe src="https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&fenlei=256&rsv_pq=0xa0ef24e80009c9d3&rsv_t=2244MXtw%2Fab85bVNMy7MSLU3Cq57pZ1ldxJ7VJTpxnSJLHIM6%2Fo8nfuczpr0&rqlang=en&rsv_enter=1&rsv_dl=tb&rsv_sug3=17&rsv_sug1=5&rsv_sug7=100&rsv_sug2=0&rsv_btype=i&inputT=4400&rsv_sug4=4812"></iframe>
+									<a href="https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=%E6%AD%B8%E6%AA%94%E6%98%9F%E7%90%83&fenlei=256&rsv_pq=0xa0ef24e80009c9d3&rsv_t=2244MXtw%2Fab85bVNMy7MSLU3Cq57pZ1ldxJ7VJTpxnSJLHIM6%2Fo8nfuczpr0&rqlang=en&rsv_enter=1&rsv_dl=tb&rsv_sug3=17&rsv_sug1=5&rsv_sug7=100&rsv_sug2=0&rsv_btype=i&inputT=4400&rsv_sug4=4812">baidu 歸檔星球</a>
+									
+									<iframe src="https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=AESXKEY%E7%94%B3%E8%AB%8B&fenlei=256&oq=A%2526gt%253BSXK%2526gt%253BY%25E7%2594%25B3%25E8%25AB%258B&rsv_pq=835cdbc80011673b&rsv_t=ca926Y2XVStDfV8xxERRTvVNkF%2FEONOoAib5KiKj%2F52KIAwjOagCsrfKHfs&rqlang=cn&rsv_dl=tb&rsv_enter=0&rsv_btype=t&prefixsug=A%2526gt%253BSXK%2526gt%253BY%25E7%2594%25B3%25E8%25AB%258B&rsp=0"></iframe>
+									<a href="https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=AESXKEY%E7%94%B3%E8%AB%8B&fenlei=256&oq=A%2526gt%253BSXK%2526gt%253BY%25E7%2594%25B3%25E8%25AB%258B&rsv_pq=835cdbc80011673b&rsv_t=ca926Y2XVStDfV8xxERRTvVNkF%2FEONOoAib5KiKj%2F52KIAwjOagCsrfKHfs&rqlang=cn&rsv_dl=tb&rsv_enter=0&rsv_btype=t&prefixsug=A%2526gt%253BSXK%2526gt%253BY%25E7%2594%25B3%25E8%25AB%258B&rsp=0">baidu AESXKEY申請</a>
+									
+								</span>
+								
+								<center>
+									<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+									このコメント部分は削除して頂いても結構です。-->
+									<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+									
+									<!-- 
+										<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+									-->
+								</center>
+								
+							</BODY>
+						</HTML>
+						<script>obj_umg_a1_f45_func_x_temp_off=4;</script>
+						
