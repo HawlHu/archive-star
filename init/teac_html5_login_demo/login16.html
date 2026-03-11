@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux Terminal - Remote Access</title>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* --- Linux 終端機風格設定 --- */
+        :root {
+            --term-bg: #1e1e1e; /* Ubuntu 終端機深色背景 */
+            --term-fg: #ffffff; /* 標準白字 */
+            --term-green: #87ff5f; /* 亮綠色 (使用者/Prompt) */
+            --term-blue: #5fafff;  /* 藍色 (目錄) */
+            --term-cyan: #00ffff;  /* 青色 (連結/執行檔) */
+            --term-gray: #808080;  /* 灰色 (註解/細節) */
+            --font-stack: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--term-bg);
+            color: var(--term-fg);
+            font-family: var(--font-stack);
+            overflow: hidden;
+            font-size: 18px; /* Linux 通常預設字體稍小一點 */
+            line-height: 1.3;
+        }
+
+        /* --- 終端機容器 --- */
+        #terminal {
+            width: 100%;
+            height: 100%;
+            padding: 15px;
+            overflow-y: auto;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            cursor: text;
+        }
+
+        /* 隱藏捲動條但保留功能 (Webkit) */
+        #terminal::-webkit-scrollbar {
+            width: 8px;
+            background: var(--term-bg);
+        }
+        #terminal::-webkit-scrollbar-thumb {
+            background: #444; 
+            border-radius: 4px;
+        }
+
+        /* --- 內容樣式 --- */
+        .line {
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-bottom: 0px; /* Linux log 通常較緊湊 */
+        }
+        
+        /* 顏色工具類 */
+        .text-green { color: var(--term-green); font-weight: bold; }
+        .text-blue { color: var(--term-blue); font-weight: bold; }
+        .text-cyan { color: var(--term-cyan); font-weight: bold; }
+        .text-gray { color: var(--term-gray); }
+        .text-error { color: #ff5f5f; }
+
+        /* --- 輸入區塊 --- */
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        /* Prompt 樣式 user@host:path$ */
+        .prompt-user { color: var(--term-green); font-weight: bold; }
+        .prompt-host { color: var(--term-green); font-weight: bold; }
+        .prompt-path { color: var(--term-blue); font-weight: bold; }
+        .prompt-symbol { color: var(--term-fg); }
+
+        /* 隱藏 Input，用來接收鍵盤 */
+        #cmd-input {
+            position: absolute;
+            opacity: 0;
+            top: -9999px;
+            left: -9999px;
+        }
+
+        /* 模擬的光標 */
+        #cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background-color: var(--term-fg); /* 實心方塊光標 */
+            vertical-align: middle;
+            margin-left: 1px;
+            animation: blink 1s step-end infinite;
+        }
+        
+        #current-typing {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* --- CRT 掃描線特效 (保留但調淡，更現代感) --- */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%, /* 比較淡的掃描線 */
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* --- RWD 調整 --- */
+        @media (max-width: 768px) {
+            body, html { font-size: 14px; }
+            #terminal { padding: 10px; }
+            #cursor { width: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+    
+    <div id="terminal" onclick="focusInput()">
+        <div id="output"></div>
+        <div class="input-line" id="input-wrapper" style="display:none;">
+            <span id="prompt-area">
+                <span class="prompt-user">guest</span><span class="prompt-symbol">@</span><span class="prompt-host">linux-server</span><span class="prompt-symbol">:</span><span class="prompt-path">~</span><span class="prompt-symbol">$ </span>
+            </span>
+            <span id="current-typing"></span><span id="cursor"></span>
+        </div>
+    </div>
+
+    <input type="text" id="cmd-input" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+
+    <script>
+        /**
+         * Linux Terminal Simulation & Secure Login System
+         * Version: 2.0 (Linux Edition)
+         * Strict Strict Mode Enabled
+         */
+        "use strict";
+
+        // --- 核心設定 ---
+        const config = {
+            hostname: "linux-server",
+            user: "guest",
+            homeDir: "/home/guest",
+            // 登入後跳轉位置
+            jumpBackUrl: "sys_login_start_fear4ddju.php" 
+        };
+
+        const state = {
+            isLoggedIn: false,
+            currentPath: "~", // 顯示用路徑
+            realPath: "/home/guest", // 邏輯路徑
+            bootComplete: false,
+            commandHistory: [],
+            historyIndex: -1
+        };
+
+        // 模擬檔案系統 (Linux 風格)
+        const fileSystem = [
+            { name: "login", size: "24K", date: "Jan 01 12:00", permissions: "-rwxr-xr-x", owner: "root", group: "root", type: "EXE" },
+            { name: "readme.txt", size: "215", date: "Dec 13 08:00", permissions: "-rw-r--r--", owner: "guest", group: "guest", type: "FILE" },
+            { name: "config.conf", size: "128", date: "Dec 13 08:00", permissions: "-rw-r--r--", owner: "root", group: "root", type: "FILE" },
+            { name: "bin", size: "4096", date: "May 31 06:22", permissions: "drwxr-xr-x", owner: "root", group: "root", type: "DIR" }
+        ];
+
+        // --- 登入驗證資料 (沿用舊系統) ---
+        const lkd = [
+            { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" }, // admin
+            { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }  // test
+        ];
+
+        // --- DOM Cache ---
+        const terminal = document.getElementById('terminal');
+        const outputDiv = document.getElementById('output');
+        const inputWrapper = document.getElementById('input-wrapper');
+        const currentTyping = document.getElementById('current-typing');
+        const cmdInput = document.getElementById('cmd-input');
+        const promptPathSpan = document.querySelector('.prompt-path');
+
+        // --- 工具函數 ---
+
+        // 安全的輸出函數 (防止 XSS)
+        function print(htmlContent, delay = 0) {
+            if (delay === 0) {
+                const div = document.createElement('div');
+                div.className = 'line';
+                div.innerHTML = htmlContent; // 允許 HTML 以顯示顏色
+                outputDiv.appendChild(div);
+                scrollToBottom();
+            } else {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        print(htmlContent);
+                        resolve();
+                    }, delay);
+                });
+            }
+        }
+
+        function scrollToBottom() {
+            terminal.scrollTop = terminal.scrollHeight;
+            // 確保視窗也在最底部 (針對手機瀏覽器)
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function focusInput() {
+            if (state.bootComplete) {
+                cmdInput.focus();
+            }
+        }
+
+        function updatePrompt() {
+            promptPathSpan.innerText = state.currentPath;
+        }
+
+        // --- Linux 開機流程模擬 ---
+        async function bootSequence() {
+            // 隱藏輸入框
+            inputWrapper.style.display = 'none';
+
+            // 模擬 Kernel Boot Messages
+            const bootLogs = [
+                "[    0.000000] Linux version 5.15.0-91-generic (buildd@lcy02-amd64-001) (gcc version 11.4.0)",
+                "[    0.000000] Command line: BOOT_IMAGE=/boot/vmlinuz-5.15.0-91-generic ro quiet splash",
+                "[    0.213340] x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'",
+                "[    0.540120] pci 0000:00:01.0: PIIX3: Enabling Passive Release",
+                "[    0.651000] piix4_smbus 0000:00:07.3: SMBus Host Controller at 0xb100, revision 0",
+                "[    1.023300] systemd[1]: Detected architecture x86-64.",
+                "[  OK  ] <span class='text-green'>Started Show Plymouth Boot Screen.</span>",
+                "[  OK  ] <span class='text-green'>Reached target Paths.</span>",
+                "[  OK  ] <span class='text-green'>Reached target Basic System.</span>",
+                "[  OK  ] <span class='text-green'>Started Regular Background Processing.</span>",
+                "[  OK  ] <span class='text-green'>Started System Logging Service.</span>",
+                "[  OK  ] <span class='text-green'>Started Network Manager.</span>",
+                "[  OK  ] <span class='text-green'>Reached target Network.</span>",
+                "[  OK  ] <span class='text-green'>Reached target Multi-User System.</span>",
+                "[  OK  ] <span class='text-green'>Reached target Graphical Interface.</span>",
+            ];
+
+            for (let log of bootLogs) {
+                // 隨機延遲，模擬真實載入速度不一
+                const delay = Math.floor(Math.random() * 100) + 20;
+                await print(log, delay);
+            }
+
+            await print("<br>");
+            await print(`Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 5.15.0-91-generic x86_64)`);
+            await print(` * Documentation:  https://help.ubuntu.com`);
+            await print(` * Management:     https://landscape.canonical.com`);
+            await print(` * Support:        https://ubuntu.com/advantage`);
+            await print(`<br>System load:  0.02               Processes:  112`);
+            await print(`Usage of /:   15.3% of 29.35GB   Users logged in: 0`);
+            await print(`Memory usage: 18%                IPv4 address for eth0: 192.168.1.56`);
+            await print(`<br><span class='text-gray'>Last login: ${new Date().toUTCString()} from 10.0.0.1</span><br>`);
+
+            state.bootComplete = true;
+            inputWrapper.style.display = 'flex';
+            focusInput();
+        }
+
+        // --- 輸入處理 ---
+
+        cmdInput.addEventListener('input', () => {
+            // Linux 區分大小寫，這裡保留使用者原輸入，不做 UpperCase
+            currentTyping.innerText = cmdInput.value; 
+            scrollToBottom();
+        });
+
+        cmdInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const rawCommand = cmdInput.value;
+                const commandLine = rawCommand.trim();
+                
+                // 顯示歷史指令 (包含 Prompt)
+                const historyHtml = `<span class='prompt-user'>${config.user}</span><span class='prompt-symbol'>@</span><span class='prompt-host'>${config.hostname}</span><span class='prompt-symbol'>:</span><span class='prompt-path'>${state.currentPath}</span><span class='prompt-symbol'>$ </span>${escapeHtml(rawCommand)}`;
+                print(historyHtml);
+
+                if (commandLine) {
+                    processCommand(commandLine);
+                    state.commandHistory.push(commandLine);
+                    state.historyIndex = state.commandHistory.length;
+                }
+
+                cmdInput.value = "";
+                currentTyping.innerText = "";
+                scrollToBottom();
+            }
+        });
+        
+        // 簡單的 HTML 跳脫函數
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // --- 指令解析核心 (Linux Style) ---
+
+        function processCommand(input) {
+            const args = input.trim().split(/\s+/);
+            const cmd = args[0].toLowerCase(); // 指令本體轉小寫，但參數保留大小寫
+
+            // 登入指令 (相容舊版參數結構)
+            if (cmd === 'login' || cmd === './login') {
+                handleLogin(args);
+                return;
+            }
+
+            if (cmd === 'sudo' && args[1] === 'login') {
+                // 支援 sudo login 写法
+                handleLogin(args.slice(1));
+                return;
+            }
+
+            // 一般指令
+            switch (cmd) {
+                case 'help':
+                    print("GNU bash, version 5.1.16(1)-release (x86_64-pc-linux-gnu)");
+                    print("These shell commands are defined internally.  Type 'help' to see this list.");
+                    print("<br>Available commands:");
+                    print("  <span class='text-cyan'>login [user] [pass]</span>  Authenticate to system");
+                    print("  <span class='text-cyan'>ls, ll</span>               List directory contents");
+                    print("  <span class='text-cyan'>cd [dir]</span>             Change directory");
+                    print("  <span class='text-cyan'>cat [file]</span>           Concatenate files to standard output");
+                    print("  <span class='text-cyan'>clear</span>                Clear the terminal screen");
+                    print("  <span class='text-cyan'>uname -a</span>             Print system information");
+                    print("  <span class='text-cyan'>whoami</span>               Print effective userid");
+                    break;
+
+                case 'ls':
+                case 'll':
+                    showDir(args.includes('-a') || cmd === 'll');
+                    break;
+                
+                case 'clear':
+                    outputDiv.innerHTML = "";
+                    break;
+
+                case 'uname':
+                    if (args[1] === '-a') {
+                        print("Linux linux-server 5.15.0-91-generic #101-Ubuntu SMP Tue Nov 14 13:30:08 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux");
+                    } else {
+                        print("Linux");
+                    }
+                    break;
+
+                case 'whoami':
+                    print(config.user);
+                    break;
+
+                case 'pwd':
+                    print(state.realPath);
+                    break;
+
+                case 'cat':
+                    if (args[1]) {
+                        if (args[1] === 'readme.txt') {
+                            print("This is a secured system. Unauthorized access is prohibited.");
+                        } else if (args[1] === 'config.conf') {
+                            print("ServerIP=192.168.1.56<br>Port=22");
+                        } else {
+                            print(`cat: ${args[1]}: No such file or directory`);
+                        }
+                    } else {
+                        print("Usage: cat [filename]");
+                    }
+                    break;
+
+                case 'cd':
+                    handleCd(args[1]);
+                    break;
+                
+                case 'exit':
+                    print("logout");
+                    // 模擬斷線重連
+                    setTimeout(() => location.reload(), 1000);
+                    break;
+
+                default:
+                    print(`<span class='text-error'>${cmd}: command not found</span>`);
+                    break;
+            }
+        }
+
+        // --- 目錄切換邏輯 ---
+        function handleCd(target) {
+            if (!target || target === '~') {
+                state.currentPath = "~";
+                state.realPath = "/home/guest";
+            } else if (target === "..") {
+                if (state.realPath === "/home/guest") {
+                    state.currentPath = "/home";
+                    state.realPath = "/home";
+                } else if (state.realPath === "/home") {
+                    state.currentPath = "/";
+                    state.realPath = "/";
+                }
+            } else if (target === "/") {
+                state.currentPath = "/";
+                state.realPath = "/";
+            } else {
+                // 簡單模擬，不做完整路徑解析
+                print(`bash: cd: ${target}: No such file or directory`);
+                return;
+            }
+            updatePrompt();
+        }
+
+        // --- 檔案列表邏輯 ---
+        function showDir(showHidden) {
+            const total = "total 28";
+            print(total);
+            // 模擬 . 和 ..
+            print(`<span class='text-blue'>drwxr-xr-x</span> 4 ${config.user} ${config.user} 4096 Dec 13 08:00 <span class='text-blue'>.</span>`);
+            print(`<span class='text-blue'>drwxr-xr-x</span> 3 root  root  4096 Dec 13 08:00 <span class='text-blue'>..</span>`);
+
+            fileSystem.forEach(f => {
+                let nameHtml = f.name;
+                if (f.type === 'DIR') nameHtml = `<span class='text-blue'>${f.name}</span>`;
+                else if (f.type === 'EXE') nameHtml = `<span class='text-green'>${f.name}</span>`;
+                
+                // Pad fields manually for alignment (simple logic)
+                const size = f.size.padStart(5);
+                
+                print(`<span class='text-gray'>${f.permissions}</span> 1 ${f.owner} ${f.group} ${size} ${f.date} ${nameHtml}`);
+            });
+        }
+
+        // --- 核心登入驗證 (關鍵邏輯) ---
+        function handleLogin(args) {
+            // 語法: login user pass
+            if (args.length < 3) {
+                print("Usage: login [username] [password]");
+                return;
+            }
+
+            const userid = args[1];
+            const pwd = args[2];
+            
+            print("Verifying password...");
+
+            // 防呆：確保外部加密庫已載入
+            if (typeof AesDecrypt === 'undefined' || typeof ex_md2 === 'undefined') {
+                print("<span class='text-error'>Error: Crypto libraries failed to load. Check network connection.</span>");
+                return;
+            }
+
+            const uk = ex_md2n("aes_" + userid + "_" + pwd,100000);
+            let authenticated = false;
+
+            for (let i = 0; i < lkd.length; i++) {
+                try {
+                    // 嘗試解密，若成功則傳回非空字串
+                    const decryptedKey = AesDecrypt(lkd[i].ckey, uk);
+                    
+                    if (decryptedKey !== "") {
+                        authenticated = true;
+                        
+                        // 設定 Cookies
+                        document.cookie = "jobs_login_key=" + escape(decryptedKey);
+                        document.cookie = "jobs_login_pwd=" + ex_md2(pwd);
+                        document.cookie = "jobs_login_name=" + userid;
+                        
+                        state.isLoggedIn = true;
+                        config.user = userid; // Update prompt user
+                        
+                        print(`<span class='text-green'>Access Granted.</span>`);
+                        print("Initializing session...");
+                        
+                        // 更新 Prompt 顯示已登入使用者
+                        document.querySelector('.prompt-user').innerText = userid;
+
+                        setTimeout(() => {
+                            window.location.href = config.jumpBackUrl;
+                        }, 800);
+                        
+                        break;
+                    }
+                } catch (e) {
+                    console.error("Decryption attempt failed", e);
+                }
+            }
+
+            if (!authenticated) {
+                print("<span class='text-error'>Permission denied (publickey,password).</span>");
+            }
+        }
+
+        // --- 啟動入口 ---
+        window.onload = function() {
+            // 監聽視窗變化以調整捲動
+            window.visualViewport.addEventListener('resize', scrollToBottom);
+            bootSequence();
+        };
+
+    </script>
+</body>
+</html>

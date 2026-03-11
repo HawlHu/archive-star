@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MS-DOS 6.22</title>
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* --- 基礎設定 --- */
+        :root {
+            --dos-bg: #000000;
+            --dos-fg: #c0c0c0; /* 標準 DOS 灰色 */
+            --dos-cursor: #c0c0c0;
+            --font-stack: 'Consolas', 'Monaco', 'Courier New', monospace; /* 優先使用系統等寬字 */
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dos-bg);
+            color: var(--dos-fg);
+            font-family: var(--font-stack);
+            overflow: hidden; /* 防止捲動條出現，由內部終端機控制 */
+            font-size: 20px; /* 桌面預設大小 */
+            line-height: 1.2;
+        }
+
+        /* --- 終端機容器 --- */
+        #terminal {
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto; /* 內容過多時捲動 */
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* --- 內容樣式 --- */
+        .line {
+            white-space: pre-wrap; /* 保留空白並允許換行 */
+            word-break: break-all;
+            margin-bottom: 2px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* --- 輸入區塊 --- */
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            margin-right: 0px;
+        }
+
+        /* 隱藏的 Input，實際上是用來接收鍵盤訊號 */
+        #cmd-input {
+            background: transparent;
+            border: none;
+            color: transparent; /* 文字透明，我們用 cursor 模擬 */
+            outline: none;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            position: absolute;
+            top: -1000px;
+        }
+
+        /* 模擬的光標與即時文字顯示 */
+        #cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background-color: var(--dos-fg);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 1px;
+        }
+
+        #current-typing {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* --- CRT 掃描線特效 (增加真實感，不影響操作) --- */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none; /* 點擊穿透 */
+        }
+
+        /* --- RWD 調整 --- */
+        @media (max-width: 768px) {
+            body, html {
+                font-size: 16px; /* 手機字體縮小 */
+            }
+            #terminal {
+                padding: 10px;
+            }
+            #cursor {
+                height: 14px;
+                width: 8px;
+            }
+        }
+        
+        @media (min-width: 2560px) { /* 2K/4K */
+             body, html {
+                font-size: 32px;
+            }
+             #cursor {
+                height: 28px;
+                width: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+    
+    <div id="terminal" onclick="focusInput()">
+        <div id="output"></div>
+        <div class="input-line" id="input-wrapper" style="display:none;">
+            <span class="prompt" id="prompt-text">C:\&gt;</span>
+            <span id="current-typing"></span><span id="cursor"></span>
+        </div>
+    </div>
+
+    <input type="text" id="cmd-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+    <script>
+        /**
+         * DOS 6.22 Simulation Core
+         * Designed for High Compatibility & Strict Logic
+         */
+
+        // 系統狀態
+        const state = {
+            isLoggedIn: false,
+            currentPath: "C:\\",
+            bootComplete: false,
+            commandHistory: [],
+            historyIndex: -1
+        };
+
+        // 模擬檔案系統 (DIR 顯示用)
+        const fileSystem = [
+            { name: "COMMAND.COM", size: "54,645", date: "05-31-94", time: "6:22a" },
+            { name: "DOS", type: "DIR", date: "05-31-94", time: "6:22a" },
+            { name: "AUTOEXEC.BAT", size: "215", date: "12-13-25", time: "8:00a" },
+            { name: "CONFIG.SYS", size: "128", date: "12-13-25", time: "8:00a" },
+            { name: "LOGIN.EXE", size: "24,512", date: "01-01-24", time: "12:00p" }
+        ];
+
+        // 登入資料與跳轉設定 (來自您提供的代碼)
+        const lkd = [
+            { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" }, // admin
+            { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }  // test
+        ];
+        const jump_back_page_address = "sys_login_start_fear4ddju.php";
+
+        // DOM 元素
+        const terminal = document.getElementById('terminal');
+        const outputDiv = document.getElementById('output');
+        const inputWrapper = document.getElementById('input-wrapper');
+        const promptText = document.getElementById('prompt-text');
+        const currentTyping = document.getElementById('current-typing');
+        const cmdInput = document.getElementById('cmd-input');
+
+        // --- 核心功能函數 ---
+
+        function print(text, delay = 0) {
+            if (delay === 0) {
+                const div = document.createElement('div');
+                div.className = 'line';
+                div.innerText = text;
+                outputDiv.appendChild(div);
+                scrollToBottom();
+            } else {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        print(text);
+                        resolve();
+                    }, delay);
+                });
+            }
+        }
+
+        function scrollToBottom() {
+            terminal.scrollTop = terminal.scrollHeight;
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function focusInput() {
+            if (state.bootComplete) {
+                cmdInput.focus();
+            }
+        }
+
+        // --- 開機程序模擬 ---
+        async function bootSequence() {
+            await print("Starting MS-DOS...");
+            await print("", 500);
+            
+            // 模擬 BIOS 記憶體計數
+            const memLine = document.createElement('div');
+            memLine.className = 'line';
+            outputDiv.appendChild(memLine);
+            
+            for (let i = 0; i <= 640; i += 32) {
+                memLine.innerText = `HIMEM is testing extended memory...done.`;
+                if(i < 640) {
+                     // 簡單模擬，不逐字跳動以免太慢，直接顯示最後結果
+                }
+                await new Promise(r => setTimeout(r, 10)); 
+            }
+            
+            await print("");
+            await print("C:\\>ver");
+            await print("");
+            await print("MS-DOS Version 6.22");
+            await print("");
+            
+            state.bootComplete = true;
+            inputWrapper.style.display = 'flex';
+            cmdInput.focus();
+        }
+
+        // --- 輸入處理 ---
+
+        // 監聽輸入框變化並同步到螢幕
+        cmdInput.addEventListener('input', (e) => {
+            currentTyping.innerText = cmdInput.value.toUpperCase(); // DOS 習慣大寫
+            scrollToBottom();
+        });
+
+        // 監聽 Enter 鍵
+        cmdInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const rawCommand = cmdInput.value;
+                const commandLine = rawCommand.trim();
+                
+                // 顯示使用者剛剛輸入的行
+                const historyLine = document.createElement('div');
+                historyLine.className = 'line';
+                historyLine.innerText = state.currentPath + ">" + rawCommand.toUpperCase();
+                outputDiv.appendChild(historyLine);
+
+                // 處理指令
+                if (commandLine) {
+                    processCommand(commandLine);
+                    // 儲存歷史 (簡易版)
+                    state.commandHistory.push(commandLine);
+                    state.historyIndex = state.commandHistory.length;
+                }
+
+                // 重置輸入框
+                cmdInput.value = "";
+                currentTyping.innerText = "";
+                scrollToBottom();
+            }
+        });
+
+        // --- 指令解析與執行 ---
+
+        function processCommand(input) {
+            // 切割指令與參數
+            const args = input.trim().split(/\s+/);
+            const cmd = args[0].toLowerCase();
+
+            // 特殊指令：Login (無論是否登入都可以嘗試，或用於切換使用者)
+            if (cmd === 'login' || cmd === 'login.exe') {
+                handleLogin(args);
+                return;
+            }
+
+            // 系統指令 (不需要登入即可使用)
+            if (['ver', 'help', 'cls', 'exit'].includes(cmd)) {
+                switch (cmd) {
+                    case 'ver':
+                        print("");
+                        print("MS-DOS Version 6.22");
+                        print("");
+                        break;
+                    case 'cls':
+                        outputDiv.innerHTML = "";
+                        break;
+                    case 'exit':
+                         // 在網頁中無法真正關閉視窗，模擬重開機或提示
+                         print("Command interpreter cannot be unloaded.");
+                         break;
+                    case 'help':
+                        print("Supported commands:");
+                        print("  LOGIN [USER] [PASS] - Authenticate user");
+                        print("  DIR                 - List files");
+                        print("  CD [PATH]           - Change directory");
+                        print("  CLS                 - Clear screen");
+                        print("  VER                 - Show version");
+                        break;
+                }
+                return;
+            }
+
+            // 安全保護：未登入攔截
+            if (!state.isLoggedIn) {
+                print("Bad command or file name");
+                print("Access denied. Please use LOGIN.EXE to authenticate first.");
+                return;
+            }
+
+            // 已登入後的指令邏輯
+            switch (cmd) {
+                case 'dir':
+                    showDir();
+                    break;
+                case 'cd':
+                    if (args[1]) {
+                        // 簡單的視覺模擬，不真的做檔案系統遍歷
+                        if (args[1] === '..') {
+                            // 回上一層 (簡單邏輯：回到 C:\)
+                            state.currentPath = "C:\\";
+                        } else {
+                            // 進入目錄 (簡單邏輯：字串疊加)
+                            // 移除結尾斜線
+                            let newDir = args[1].replace(/\\$/, '');
+                            if (newDir.startsWith("C:\\")) {
+                                state.currentPath = newDir;
+                            } else {
+                                if (state.currentPath.endsWith("\\")) {
+                                    state.currentPath += newDir;
+                                } else {
+                                    state.currentPath += "\\" + newDir;
+                                }
+                            }
+                        }
+                        updatePrompt();
+                    } else {
+                        print(state.currentPath);
+                    }
+                    break;
+                default:
+                    print("Bad command or file name");
+            }
+        }
+
+        function updatePrompt() {
+            promptText.innerText = state.currentPath + ">";
+        }
+
+        function showDir() {
+            print("");
+            print(` Volume in drive C is MS-DOS_6`);
+            print(` Volume Serial Number is 1234-5678`);
+            print(` Directory of ${state.currentPath}`);
+            print("");
+            
+            let fileCount = 0;
+            let dirCount = 0;
+
+            fileSystem.forEach(f => {
+                let sizeStr = f.type === 'DIR' ? '<DIR>     ' : f.size.padStart(10, ' ');
+                // 對齊調整
+                let name = f.name.padEnd(9, ' '); 
+                // 簡單拆分副檔名顯示 (DOS 風格)
+                if (f.name.includes('.') && f.type !== 'DIR') {
+                    const parts = f.name.split('.');
+                    name = parts[0].padEnd(8, ' ') + " " + parts[1].padEnd(3, ' ');
+                } else {
+                    name = f.name.padEnd(8, ' ') + "    ";
+                }
+
+                print(`${name} ${sizeStr}  ${f.date}  ${f.time}`);
+                if (f.type === 'DIR') dirCount++; else fileCount++;
+            });
+
+            print(`        ${fileCount} file(s)        80,123 bytes`);
+            print(`        ${dirCount} dir(s)     210,544,128 bytes free`);
+            print("");
+        }
+
+        // --- 登入邏輯 (高還原度整合) ---
+
+        function handleLogin(args) {
+            // 格式檢查：login user pass
+            if (args.length < 3) {
+                print("Usage: LOGIN [User ID] [Password]");
+                return;
+            }
+
+            const userid = args[1];
+            const pwd = args[2];
+            
+            print("Authenticating...");
+
+            // 確保加密庫已載入
+            if (typeof AesDecrypt === 'undefined' || typeof ex_md2 === 'undefined') {
+                print("Error: Cryptographic libraries missing. Cannot verify.");
+                return;
+            }
+
+            // 執行驗證邏輯 (複製自您的需求)
+            const uk = ex_md2n("aes_" + userid + "_" + pwd,100000);
+            let noany = true;
+
+            for (let i = 0; i != lkd.length; i++) {
+                try {
+                    if (AesDecrypt(lkd[i].ckey, uk) != "") {
+                        
+                        // 登入成功
+                        const decryptedKey = AesDecrypt(lkd[i].ckey, uk);
+                        
+                        // 寫入 Cookie
+                        document.cookie = "jobs_login_key=" + escape(decryptedKey);
+                        document.cookie = "jobs_login_pwd=" + ex_md2(pwd);
+                        document.cookie = "jobs_login_name=" + userid;
+                        
+                        state.isLoggedIn = true;
+                        noany = false;
+                        
+                        print("Authentication Successful.");
+                        print("Loading user profile...");
+                        
+                        // 延遲跳轉以讓使用者看到訊息
+                        setTimeout(() => {
+                            window.location.href = jump_back_page_address;
+                        }, 1000);
+                        
+                        break;
+                    }
+                } catch (e) {
+                    // 解密失敗會拋錯，忽略即可
+                }
+            }
+
+            if (noany) {
+                // 失敗
+                print("Access Denied: Invalid credentials.");
+            }
+        }
+
+        // --- 初始化 ---
+        window.onload = function() {
+            // 讓輸入框永遠保持在可視區域 (針對手機鍵盤彈出)
+            window.visualViewport.addEventListener('resize', scrollToBottom);
+            
+            // 啟動
+            bootSequence();
+        };
+
+    </script>
+</body>
+</html>

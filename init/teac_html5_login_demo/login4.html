@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SYSTEM CORE :: ACCESS CONTROL</title>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* --- 全域變數設定 --- */
+        :root {
+            --matrix-green: #0F0;
+            --matrix-dark-green: #003300;
+            --matrix-white: #ccffcc;
+            --glass-bg: rgba(0, 20, 0, 0.65);
+            --glass-border: rgba(0, 255, 0, 0.4);
+            --error-red: #ff3333;
+        }
+
+        /* --- 基礎 Reset 與排版 --- */
+        * {
+            box-sizing: border-box; /* 關鍵：確保 Padding 不會撐大元素 */
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 防止捲軸出現 */
+            background-color: #000;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            color: var(--matrix-green);
+            /* 防止手機雙擊縮放 */
+            touch-action: manipulation; 
+        }
+
+        /* --- 背景 Canvas (數位雨) --- */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            display: block;
+            /* 確保 canvas 在高解析度螢幕上填滿 */
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- 掃描線特效 (CRT Monitor Effect) --- */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none; /* 點擊穿透 */
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            animation: scanlineScroll 10s linear infinite;
+        }
+
+        @keyframes scanlineScroll {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+
+        /* --- 登入框容器 (Flexbox 置中) --- */
+        #login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
+            padding: 20px; /* 預留邊距，防止手機太貼邊 */
+        }
+
+        /* --- 登入框本體 (預設桌面樣式) --- */
+        .login-box {
+            width: 400px; /* 鎖定桌面寬度 */
+            max-width: 100%; /* 防止溢出小螢幕 */
+            padding: 40px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 4px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.2), 
+                inset 0 0 30px rgba(0, 255, 0, 0.1);
+            position: relative;
+            transform: scale(0.95); /* 初始比例 */
+            animation: breatheBox 4s infinite ease-in-out;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        @keyframes breatheBox {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.2), inset 0 0 30px rgba(0, 255, 0, 0.1); border-color: rgba(0, 255, 0, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 0, 0.4), inset 0 0 50px rgba(0, 255, 0, 0.2); border-color: rgba(0, 255, 0, 0.8); }
+        }
+
+        /* 四角裝飾 */
+        .corner {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid var(--matrix-green);
+            transition: all 0.3s;
+            box-shadow: 0 0 10px var(--matrix-green);
+        }
+        .tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        /* 標題 */
+        .login-title {
+            margin: 0 0 30px 0;
+            font-size: 24px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            text-align: center;
+            color: var(--matrix-white);
+            text-shadow: 0 0 10px var(--matrix-green), 0 0 20px var(--matrix-green);
+            position: relative;
+        }
+        
+        /* 輸入框組 */
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            letter-spacing: 2px;
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(0, 255, 0, 0.8);
+            text-shadow: 0 0 5px var(--matrix-dark-green);
+        }
+
+        .input-group input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #333;
+            border-left: 3px solid var(--matrix-green);
+            color: #fff;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 16px; /* iOS Safari 預設 16px 以下會強制放大，這裡鎖定 16px */
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            background: rgba(0, 50, 0, 0.8);
+            border-color: var(--matrix-green);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+        }
+
+        /* 送出按鈕 */
+        .btn-submit {
+            background: #000;
+            color: var(--matrix-green);
+            border: 1px solid var(--matrix-green);
+            padding: 15px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+            -webkit-tap-highlight-color: transparent; /* 移除手機點擊高亮 */
+        }
+
+        .btn-submit:hover {
+            background: var(--matrix-green);
+            color: #000;
+            box-shadow: 0 0 30px var(--matrix-green);
+        }
+        
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        /* --- 錯誤訊息 Modal --- */
+        #error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+            border-radius: 4px;
+        }
+
+        #error-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .error-content {
+            color: var(--error-red);
+            text-align: center;
+            border: 2px solid var(--error-red);
+            padding: 30px;
+            background: rgba(20, 0, 0, 0.8);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 0, 0, 0.2);
+            animation: errorShake 0.4s ease-in-out;
+            width: 80%;
+            max-width: 300px; /* 限制錯誤框最大寬度 */
+        }
+
+        .error-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--error-red);
+        }
+
+        .error-msg {
+            font-size: 12px;
+            margin-bottom: 20px;
+            color: #fff;
+            letter-spacing: 1px;
+            line-height: 1.4;
+        }
+
+        .btn-retry {
+            background: transparent;
+            color: var(--error-red);
+            border: 1px solid var(--error-red);
+            padding: 10px 25px;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+        }
+
+        .btn-retry:hover {
+            background: var(--error-red);
+            color: #fff;
+            box-shadow: 0 0 20px var(--error-red);
+        }
+
+        @keyframes errorShake {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-10px, 0); }
+            40% { transform: translate(10px, 0); }
+            60% { transform: translate(-10px, 0); }
+            80% { transform: translate(10px, 0); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* --- RWD Media Queries (響應式核心) --- */
+
+        /* 平板與小型筆電 (寬度小於 1024px) */
+        @media screen and (max-width: 1024px) {
+            .login-box {
+                /* 稍微縮小寬度比例 */
+                width: 400px; 
+            }
+        }
+
+        /* 手機版 (寬度小於 768px) */
+        @media screen and (max-width: 767px) {
+            .login-box {
+                width: 90%; /* 寬度改為相對百分比 */
+                padding: 25px; /* 減少內距以節省空間 */
+            }
+
+            .login-title {
+                font-size: 20px; /* 標題縮小 */
+                margin-bottom: 20px;
+            }
+
+            .input-group {
+                margin-bottom: 20px;
+            }
+
+            .btn-submit {
+                padding: 12px;
+                letter-spacing: 2px;
+            }
+
+            /* 手機上隱藏過於細緻的陰影以提升效能，或稍微減弱 */
+            .scanlines {
+                background-size: 100% 3px; /* 掃描線變細 */
+                opacity: 0.5;
+            }
+        }
+
+        /* 極小螢幕 (如 iPhone SE 或摺疊機封面螢幕) */
+        @media screen and (max-width: 360px) {
+            .login-box {
+                padding: 15px;
+            }
+            .login-title {
+                font-size: 18px;
+                letter-spacing: 3px;
+            }
+            .corner {
+                width: 10px;
+                height: 10px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix-canvas"></canvas>
+    
+    <div class="scanlines"></div>
+
+    <div id="login-container">
+        <div class="login-box">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            
+            <h2 class="login-title">SYSTEM LOGIN</h2>
+            
+            <form action="" method="POST" id="loginForm">
+                <div class="input-group">
+                    <label for="userid">USER ID //</label>
+                    <input type="text" id="userid" name="userid" autocomplete="off" required placeholder="_" inputmode="text">
+                </div>
+                
+                <div class="input-group">
+                    <label for="pwd">ACCESS CODE //</label>
+                    <input type="password" id="pwd" name="pwd" required placeholder="******" inputmode="text">
+                </div>
+                
+                <button type="submit" class="btn-submit">ENTER THE MATRIX</button>
+
+                <div id="error-overlay">
+                    <div class="error-content">
+                        <div class="error-title">ACCESS DENIED</div>
+                        <div class="error-msg">INVALID CREDENTIALS DETECTED</div>
+                        <button type="button" class="btn-retry" id="btn-retry-click">RETRY</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Matrix Rain Canvas Controller
+         * 包含 High-DPI 螢幕 (2K/4K/Retina) 的優化支援
+         */
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let columns;
+        let drops = [];
+        const fontSize = 16;
+        
+        // 字元集
+        const katakana = 'ごじゅうおんごじゅうおんごじゅうおんごじゅうおんごじゅうおん';
+        const chinese = '天地玄宇宙洪荒日月盈昃辰宿列張寒來暑往秋收冬藏雷電風雨代碼系統權限核心';
+        const korean = '한글자모한글자모한글자모한글자모한글자모한글자모한글자모';
+        const numbers = '0123456789';
+        const symbols = ':<>=@#+&%';
+        const alphabet = katakana + chinese + korean + numbers + symbols;
+
+        function initCanvas() {
+            // 取得螢幕的像素比率 (Retina 螢幕通常是 2 或 3)
+            const dpr = window.devicePixelRatio || 1;
+            
+            // 設定 CSS 顯示尺寸
+            const displayWidth = window.innerWidth;
+            const displayHeight = window.innerHeight;
+
+            // 如果尺寸沒有實質變化 (例如手機網址列縮放)，則不重置
+            // 這邊做一個簡單檢查，如果寬度沒變，通常不重置 drops，避免鍵盤彈出時重繪
+            const newColumns = Math.floor(displayWidth / fontSize);
+            const isResizingWidth = (width !== displayWidth);
+
+            width = displayWidth;
+            height = displayHeight;
+
+            // 設定 Canvas 真實像素尺寸 (支援 2K/4K 銳利度)
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+
+            // 縮放繪圖 Context
+            ctx.scale(dpr, dpr);
+
+            columns = newColumns;
+
+            // 初始化或重置雨滴 (只有在寬度改變時才重置，避免手機鍵盤彈出干擾)
+            if (isResizingWidth || drops.length === 0) {
+                drops = [];
+                for(let x = 0; x < columns; x++) {
+                    drops[x] = Math.random() * -100;
+                }
+            }
+        }
+
+        function draw() {
+            // 半透明黑色遮罩 (拖影效果)
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < drops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                
+                // 顏色邏輯
+                ctx.fillStyle = '#0F0'; 
+                
+                // 隨機閃爍白色
+                if (Math.random() > 0.98) {
+                    ctx.fillStyle = '#FFF'; 
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#0F0';
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // 雨滴循環
+                if(drops[i] * fontSize > height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                drops[i]++;
+            }
+        }
+
+        // 動畫循環控制
+        let lastTime = 0;
+        const fps = 30; 
+        const nextFrame = 1000/fps;
+
+        function animate(time) {
+            const deltaTime = time - lastTime;
+            if (deltaTime > nextFrame) {
+                draw();
+                lastTime = time;
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // 啟動
+        initCanvas();
+        animate(0);
+
+        // 監聽視窗變化 (優化防抖動)
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                initCanvas();
+            }, 100);
+        });
+    </script>
+
+    <script>
+        /**
+         * Login Logic Controller
+         * 保留原始驗證邏輯與參數
+         */
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault(); 
+
+            // --- 資料定義 ---
+            var lkd = [
+                { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
+                { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+            ];
+            
+            var jump_back_page_address = "sys_login_start_fear4ddju.php";
+            
+            var userid_val = document.getElementById("userid").value;
+            var pwd_val = document.getElementById("pwd").value;
+            var uk = ex_md2n("aes_" + userid_val + "_" + pwd_val,100000);
+            var noany = true;
+        
+            // --- 驗證邏輯 ---
+            for(var i = 0; i != lkd.length; i++){
+                try {
+                    // 安全檢查：確認 AesDecrypt 函式存在 (避免網路問題導致 JS 未載入而報錯)
+                    if(typeof AesDecrypt === 'function') {
+                        var decrypted = AesDecrypt(lkd[i].ckey, uk);
+                        if(decrypted != "") {
+                            // 登入成功
+                            document.cookie = "jobs_login_key=" + escape(decrypted);
+                            
+                            if (typeof ex_md2 === 'function') {
+                                document.cookie = "jobs_login_pwd=" + ex_md2(pwd_val);
+                            }
+                            document.cookie = "jobs_login_name=" + userid_val;
+                            
+                            // UI 動畫：登入框縮小消失
+                            const box = document.querySelector('.login-box');
+                            box.style.transform = 'scale(0)';
+                            box.style.opacity = '0';
+                            
+                            setTimeout(() => {
+                                window.location.href = jump_back_page_address;
+                            }, 500);
+
+                            noany = false;
+                            break;
+                        }
+                    } else {
+                        console.warn("Security Module Loading...");
+                        alert("System Loading, please try again.");
+                        return; // 中斷執行
+                    }
+                } catch (e) {
+                    console.error("Crypto Error:", e);
+                }
+            }
+        
+            // --- 失敗處理 ---
+            if(noany){
+                const errorOverlay = document.getElementById("error-overlay");
+                const pwdInput = document.getElementById("pwd");
+                
+                errorOverlay.classList.add("active");
+                
+                // 確保只綁定一次事件，防止重複綁定
+                const retryBtn = document.getElementById("btn-retry-click");
+                // 移除舊的監聽器 (Clone node hack or set onclick)
+                retryBtn.onclick = function() {
+                    errorOverlay.classList.remove("active");
+                    pwdInput.value = ""; 
+                    pwdInput.focus();
+                };
+            }
+        });
+    </script>
+</body>
+</html>

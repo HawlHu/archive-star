@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NASA :: KM SYSTEM ACCESS // ORBITAL LINK</title>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* --- 1. 全域變數與基礎設定 --- */
+        :root {
+            --nasa-blue: #0b3d91;
+            --neon-cyan: #00f3ff;
+            --neon-blue: #2196f3;
+            --alert-red: #ff3333;
+            --hud-bg: rgba(0, 10, 20, 0.75);
+            --glass-border: rgba(0, 243, 255, 0.2);
+            --font-terminal: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 防止捲軸 */
+            background-color: #000;
+            font-family: var(--font-terminal);
+            color: var(--neon-cyan);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- 2. 背景層次 (Z-Index 管理) --- */
+        
+        /* L0: 您指定的靜態背景圖 */
+        #bg-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('//jplop.netlify.app/images/20251212/nasa_bg_2025.jpg') no-repeat center center;
+            background-size: cover;
+            z-index: 0;
+            /* 輕微暗化以凸顯 UI */
+            filter: brightness(0.8) contrast(1.1); 
+        }
+
+        /* L1: Canvas 星辰粒子特效 */
+        #space-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* L2: 掃描線與暗角 (復古科技感) */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2;
+            background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+        }
+
+        /* --- 3. UI 元素 --- */
+
+        /* 左上角系統開機文字 */
+        .system-boot {
+            position: absolute;
+            top: 40px; left: 40px;
+            z-index: 10;
+            font-size: 14px;
+            line-height: 1.5;
+            text-shadow: 0 0 5px var(--neon-cyan);
+            pointer-events: none;
+        }
+        .boot-line { opacity: 0; animation: fadeIn 0.1s forwards; }
+
+        /* 點擊提示 */
+        .click-hint {
+            position: absolute;
+            bottom: 10%; width: 100%;
+            text-align: center;
+            z-index: 9;
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        /* --- 4. 登入主視窗 (Modal) --- */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px); /* 背景模糊效果 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #login-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .login-box {
+            position: relative;
+            width: 420px;
+            padding: 40px;
+            background: var(--hud-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.15), inset 0 0 20px rgba(0, 243, 255, 0.05);
+            border-radius: 4px;
+            transform: scale(0.95);
+            transition: transform 0.4s ease;
+        }
+
+        #login-overlay.active .login-box {
+            transform: scale(1);
+        }
+
+        /* 裝飾性邊角 (HUD Corners) */
+        .hud-corner {
+            position: absolute;
+            width: 15px; height: 15px;
+            border-color: var(--neon-cyan);
+            border-style: solid;
+            transition: all 0.3s;
+        }
+        .hc-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .hc-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+        .hc-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+        .hc-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+        .login-title {
+            text-align: center;
+            font-size: 24px;
+            margin: 0 0 30px 0;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-cyan);
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 15px;
+        }
+
+        /* 輸入欄位樣式 */
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            color: rgba(0, 243, 255, 0.8);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-left: 3px solid var(--neon-cyan);
+            color: #fff;
+            padding: 12px 15px;
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn-submit {
+            width: 100%;
+            background: transparent;
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+            padding: 15px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 25px var(--neon-cyan);
+        }
+
+        /* --- 5. 錯誤訊息 Modal --- */
+        #error-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.2s;
+        }
+        #error-modal.show { opacity: 1; visibility: visible; }
+        
+        .error-text {
+            color: var(--alert-red);
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px var(--alert-red);
+            border: 2px solid var(--alert-red);
+            padding: 20px;
+            background: rgba(50, 0, 0, 0.5);
+        }
+
+        .btn-retry {
+            border: 1px solid var(--alert-red);
+            background: transparent;
+            color: var(--alert-red);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 10px;
+        }
+        .btn-retry:hover { background: var(--alert-red); color: #000; }
+
+        /* --- 6. RWD 手機板調整 --- */
+        @media screen and (max-width: 768px) {
+            .system-boot { top: 20px; left: 20px; font-size: 12px; }
+            .login-box { width: 90%; padding: 25px; }
+            .click-hint { font-size: 1rem; }
+            
+            /* 手機版簡化粒子數量在 JS 控制，CSS 這裡調整字型大小 */
+            .login-title { font-size: 20px; }
+            .input-group input { font-size: 16px; } /* 防止 iOS 自動縮放 */
+        }
+
+        /* --- 動畫 Keyframes --- */
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; text-shadow: 0 0 20px var(--neon-cyan); }
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="bg-layer"></div>
+
+    <canvas id="space-canvas"></canvas>
+
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <div class="system-boot" id="boot-console"></div>
+
+    <div class="click-hint" id="hint-text">
+        [ SYSTEM STANDBY :: TOUCH TO LOGIN ]
+    </div>
+
+    <div id="login-overlay">
+        <div class="login-box" id="login-box-inner">
+            <div class="hud-corner hc-tl"></div><div class="hud-corner hc-tr"></div>
+            <div class="hud-corner hc-bl"></div><div class="hud-corner hc-br"></div>
+
+            <h2 class="login-title">KM SERVER ACCESS</h2>
+
+            <form action="" method="POST" id="loginForm">
+                <div class="input-group">
+                    <label for="userid">MISSION COMMANDER ID</label>
+                    <input type="text" id="userid" name="userid" autocomplete="off" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="pwd">SECURITY CLEARANCE CODE</label>
+                    <input type="password" id="pwd" name="pwd" required>
+                </div>
+
+                <button type="submit" class="btn-submit">INITIALIZE SESSION</button>
+
+                <div id="error-modal">
+                    <div class="error-text">
+                        ACCESS DENIED<br>
+                        <span style="font-size:12px; display:block; margin-top:10px;">INVALID CREDENTIALS</span>
+                    </div>
+                    <button type="button" class="btn-retry" id="btn-retry-click">RETRY</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           PART 1: 視覺特效 (Canvas Starfield)
+           ========================================= */
+        const canvas = document.getElementById('space-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let stars = [];
+        let meteors = [];
+        
+        // 根據裝置調整粒子數量 (手機版減少以優化效能)
+        const isMobile = window.innerWidth < 768;
+        const starCount = isMobile ? 200 : 800; 
+        
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Star {
+            constructor() {
+                this.init();
+            }
+            init() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.z = Math.random() * 2; // 深度
+                this.size = Math.random() * 1.5;
+                this.speed = Math.random() * 0.05 + 0.01;
+                this.opacity = Math.random();
+            }
+            update() {
+                // 緩慢向右移動模擬自轉
+                this.x -= this.speed * 2;
+                if (this.x < 0) this.x = width;
+                
+                // 閃爍
+                this.opacity += (Math.random() - 0.5) * 0.05;
+                if (this.opacity < 0) this.opacity = 0;
+                if (this.opacity > 1) this.opacity = 1;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class Meteor {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * width * 1.5;
+                this.y = -100;
+                this.speed = Math.random() * 15 + 10;
+                this.len = Math.random() * 80 + 50;
+                this.active = false;
+            }
+            activate() {
+                this.active = true;
+                this.reset();
+            }
+            update() {
+                if (!this.active) return;
+                this.x -= this.speed;
+                this.y += this.speed * 0.6; // 傾斜落下
+                if (this.x < -100 || this.y > height + 100) this.active = false;
+            }
+            draw() {
+                if (!this.active) return;
+                const tailX = this.x + this.len;
+                const tailY = this.y - this.len * 0.6;
+                const gradient = ctx.createLinearGradient(this.x, this.y, tailX, tailY);
+                gradient.addColorStop(0, 'rgba(255,255,255,1)');
+                gradient.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(tailX, tailY);
+                ctx.stroke();
+            }
+        }
+
+        // 初始化
+        for(let i=0; i<starCount; i++) stars.push(new Star());
+        for(let i=0; i<3; i++) meteors.push(new Meteor()); // 3顆流星池
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // 繪製星星
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+
+            // 隨機觸發流星
+            if(Math.random() < 0.01) {
+                const m = meteors.find(x => !x.active);
+                if(m) m.activate();
+            }
+
+            // 繪製流星
+            meteors.forEach(m => {
+                m.update();
+                m.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        /* =========================================
+           PART 2: 開機文字動畫 (Boot Sequence)
+           ========================================= */
+        const bootLines = [
+            "INITIALIZING KERNEL...",
+            "LOADING BIOS V5.12...",
+            "CONNECTING TO JPL MAIN SERVER...",
+            "SECURITY PROTOCOLS: ACTIVE",
+            "VERIFYING ENCRYPTION KEYS...",
+            "SYSTEM READY."
+        ];
+        const consoleDiv = document.getElementById('boot-console');
+        let lineIdx = 0;
+
+        function runBootSequence() {
+            if (lineIdx < bootLines.length) {
+                const div = document.createElement('div');
+                div.className = 'boot-line';
+                div.innerText = `> ${bootLines[lineIdx]}`;
+                consoleDiv.appendChild(div);
+                lineIdx++;
+                setTimeout(runBootSequence, Math.random() * 300 + 100);
+            }
+        }
+        setTimeout(runBootSequence, 500);
+
+        /* =========================================
+           PART 3: 互動與登入邏輯 (Interaction & Login)
+           ========================================= */
+        const loginOverlay = document.getElementById('login-overlay');
+        const hintText = document.getElementById('hint-text');
+        const loginBoxInner = document.getElementById('login-box-inner');
+        const useridInput = document.getElementById('userid');
+        let isOpen = false;
+
+        // 喚醒登入框
+        function wakeUpSystem() {
+            if (isOpen) return;
+            isOpen = true;
+            loginOverlay.classList.add('active');
+            hintText.style.display = 'none';
+            setTimeout(() => { useridInput.focus(); }, 100);
+        }
+
+        window.addEventListener('click', wakeUpSystem);
+        window.addEventListener('touchstart', wakeUpSystem);
+        window.addEventListener('keydown', wakeUpSystem);
+
+        // 防止點擊登入框內部觸發重置
+        loginBoxInner.addEventListener('click', (e) => { e.stopPropagation(); });
+
+        /* =========================================
+           PART 4: 驗證邏輯 (您提供的核心程式碼)
+           ========================================= */
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault(); 
+
+            // 資料庫 (AES Keys)
+            var lkd = [
+                { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
+                { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+            ];
+            
+            var jump_back_page_address = "sys_login_start_fear4ddju.php";
+            var uid_val = document.getElementById("userid").value;
+            var pwd_val = document.getElementById("pwd").value;
+            var uk = ex_md2n("aes_" + uid_val + "_" + pwd_val,100000);
+            var noany = true;
+
+            // 比對邏輯
+            for(var i = 0; i != lkd.length; i++){
+                try {
+                    if(AesDecrypt(lkd[i].ckey, uk) != ""){
+                        // 1. 寫入 Cookie
+                        document.cookie = "jobs_login_key=" + escape(AesDecrypt(lkd[i].ckey, uk));
+                        
+                        // 2. Log Cookie
+                        if (typeof ex_md2 === 'function') {
+                            document.cookie = "jobs_login_pwd=" + ex_md2(pwd_val);
+                        } else {
+                            // Fallback if MD2 js not loaded correctly
+                            document.cookie = "jobs_login_pwd=" + pwd_val; 
+                        }
+                        document.cookie = "jobs_login_name=" + uid_val;
+                        
+                        // 3. 跳轉頁面
+                        window.location.href = jump_back_page_address;
+                        noany = false;
+                        break;
+                    }
+                } catch (e) {
+                    console.log("Decryption check failed for index " + i);
+                }
+            }
+
+            // 驗證失敗處理
+            if(noany){
+                const errorModal = document.getElementById("error-modal");
+                const pwdInput = document.getElementById("pwd");
+                
+                errorModal.classList.add("show");
+                
+                // 重試按鈕邏輯
+                document.getElementById("btn-retry-click").onclick = function() {
+                    errorModal.classList.remove("show");
+                    pwdInput.value = ""; 
+                    pwdInput.focus();
+                };
+            }
+        });
+    </script>
+</body>
+</html>

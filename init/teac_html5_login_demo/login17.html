@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>系統登入 :: 墨韻</title>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* --- 0. 字體定義 --- */
+        @font-face {
+            font-family: 'BrushFont';
+            src: url('../../css/YRDZSTJF.woff2') format('woff2');
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'PenFont';
+            src: url('../../css/ChenYuluoyan-Thin.woff2') format('woff2');
+            font-display: swap;
+        }
+
+        /* --- 1. 全域設定 --- */
+        :root {
+            --cinnabar-red: #a93e3e;
+            --glass-bg: rgba(20, 20, 25, 0.55);
+            --border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'PenFont', 'Georgia', 'serif';
+        }
+
+        /* --- 2. 背景層 --- */
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background-image: url('//jplop.netlify.app/images/20251212/old.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            filter: contrast(1.1) brightness(0.9) grayscale(0.2);
+        }
+
+        .fog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+            pointer-events: none;
+        }
+
+        #snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* --- 3. 登入容器 (核心 RWD 佈局) --- */
+        .login-wrapper {
+            position: fixed;
+            z-index: 100;
+            
+            /* 電腦版預設定位：左下角 */
+            left: 8%; 
+            bottom: 8%;
+            width: 380px;
+            
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 40px 35px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.05);
+            
+            /* 進場動畫 (電腦版) */
+            opacity: 0;
+            transform: translateY(20px); 
+            animation: floatUpDesktop 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.5s;
+        }
+
+        .login-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        .login-title {
+            margin: 0 0 30px 0;
+            font-family: 'BrushFont', 'Courier New', serif;
+            font-size: 32px;
+            color: #fff;
+            text-align: center;
+            letter-spacing: 8px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding-bottom: 15px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .input-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            font-family: 'PenFont', serif;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            font-size: 18px;
+            padding: 8px 0;
+            font-family: 'PenFont', serif;
+            letter-spacing: 1px;
+            transition: all 0.4s ease;
+            box-sizing: border-box;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-bottom-color: #fff;
+            background: linear-gradient(to top, rgba(255,255,255,0.05), transparent);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            font-family: 'BrushFont', serif;
+            font-size: 20px;
+            letter-spacing: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        /* 錯誤 Modal */
+        #error-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            border-radius: 4px;
+        }
+
+        #error-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .error-content {
+            text-align: center;
+            border: 2px solid var(--cinnabar-red);
+            padding: 25px;
+            background: rgba(20, 0, 0, 0.6);
+            width: 80%;
+        }
+
+        .error-title {
+            color: var(--cinnabar-red);
+            font-family: 'BrushFont', serif;
+            font-size: 24px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .error-msg {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .btn-retry {
+            background: var(--cinnabar-red);
+            color: #fff;
+            border: none;
+            padding: 6px 20px;
+            font-family: 'PenFont', serif;
+            cursor: pointer;
+            font-size: 14px;
+            transition: opacity 0.3s;
+        }
+        .btn-retry:hover { opacity: 0.8; }
+
+        /* --- 4. 關鍵修復：RWD 手機與動畫分離 --- */
+        
+        /* 電腦版動畫：單純向上浮現 */
+        @keyframes floatUpDesktop {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 手機版動畫：必須包含 translate(-50%, -50%) 以維持居中 */
+        @keyframes floatUpMobile {
+            from { opacity: 0; transform: translate(-50%, -50%) translateY(30px); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        /* 手機/平板配置 (寬度 < 1024px) */
+        @media screen and (max-width: 1024px) {
+            .login-wrapper {
+                /* 強制居中定位 */
+                left: 50%;
+                top: 50%;
+                bottom: auto; /* 清除電腦版的 bottom 設定 */
+                
+                /* 尺寸調整 */
+                width: 80%;
+                max-width: 400px;
+                padding: 30px 25px;
+                
+                /* 使用手機專用動畫 */
+                animation: floatUpMobile 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.5s;
+            }
+            
+            .login-title { font-size: 28px; }
+            .input-group input { font-size: 16px; }
+        }
+
+        /* 超寬螢幕微調 */
+        @media screen and (min-width: 2000px) {
+            .login-wrapper {
+                left: 10%;
+                bottom: 10%;
+                transform: scale(1.2); 
+                transform-origin: bottom left;
+                /* 繼承電腦版動畫 */
+                animation: floatUpDesktop 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.5s;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-container"></div>
+    <div class="fog-overlay"></div>
+    <canvas id="snow-canvas"></canvas>
+
+    <div class="login-wrapper">
+        <h2 class="login-title">系統登入</h2>
+        
+        <form action="" method="POST" id="loginForm">
+            <div class="input-group">
+                <label for="userid">帳號 / User ID</label>
+                <input type="text" id="userid" name="userid" autocomplete="off" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="pwd">密碼 / Password</label>
+                <input type="password" id="pwd" name="pwd" required>
+            </div>
+            
+            <button type="submit" class="btn-submit">進入系統</button>
+
+            <div id="error-overlay">
+                <div class="error-content">
+                    <div class="error-title">驗證失敗</div>
+                    <div class="error-msg">帳號或密碼錯誤</div>
+                    <button type="button" class="btn-retry" id="btn-retry-click">確認</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        /* --- 飄雪效果 --- */
+        (function() {
+            const canvas = document.getElementById('snow-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+            const particleCount = 180;
+            
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            
+            class Snowflake {
+                constructor() { this.reset(true); }
+                reset(initial = false) {
+                    this.x = Math.random() * width;
+                    this.y = initial ? Math.random() * height : -10;
+                    this.vy = 0.5 + Math.random() * 1.5;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.r = 1 + Math.random() * 2;
+                    this.opacity = 0.3 + Math.random() * 0.7;
+                    this.swaySpeed = Math.random() * 0.05;
+                    this.angle = Math.random() * Math.PI * 2;
+                    this.blur = Math.random() < 0.3; 
+                }
+                update() {
+                    this.y += this.vy;
+                    this.angle += this.swaySpeed;
+                    this.x += Math.sin(this.angle) * 0.5 + this.vx;
+                    if (this.y > height || this.x > width || this.x < 0) this.reset();
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    if (this.blur) {
+                        ctx.shadowBlur = 5;
+                        ctx.shadowColor = "rgba(255,255,255,0.8)";
+                    } else { ctx.shadowBlur = 0; }
+                    ctx.fill();
+                }
+            }
+            
+            function init() {
+                resize();
+                window.addEventListener('resize', resize);
+                for(let i=0; i<particleCount; i++) particles.push(new Snowflake());
+                loop();
+            }
+            
+            function loop() {
+                ctx.clearRect(0, 0, width, height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                requestAnimationFrame(loop);
+            }
+            init();
+        })();
+
+        /* --- 登入邏輯 --- */
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            var lkd = [
+                { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
+                { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+            ];
+            var jump_back_page_address = "sys_login_start_fear4ddju.php";
+            var useridVal = document.getElementById("userid").value;
+            var pwdVal = document.getElementById("pwd").value;
+            var uk = ex_md2n("aes_" + useridVal + "_" + pwdVal,100000);
+            var noany = true;
+            
+            for (var i = 0; i < lkd.length; i++) {
+                try {
+                    var decrypted = AesDecrypt(lkd[i].ckey, uk);
+                    if (decrypted != "" && decrypted != null) {
+                        document.cookie = "jobs_login_key=" + escape(decrypted);
+                        if (typeof ex_md2 === 'function') {
+                            document.cookie = "jobs_login_pwd=" + ex_md2(pwdVal);
+                        } else {
+                            document.cookie = "jobs_login_pwd=" + pwdVal; 
+                        }
+                        document.cookie = "jobs_login_name=" + useridVal;
+                        window.location.href = jump_back_page_address;
+                        noany = false;
+                        break;
+                    }
+                } catch (e) {}
+            }
+            
+            if (noany) {
+                const errorOverlay = document.getElementById("error-overlay");
+                const pwdInput = document.getElementById("pwd");
+                const retryBtn = document.getElementById("btn-retry-click");
+                errorOverlay.classList.add("active");
+                retryBtn.onclick = function() {
+                    errorOverlay.classList.remove("active");
+                    pwdInput.value = "";
+                    pwdInput.focus();
+                };
+            }
+        });
+        
+        window.onload = function() {
+            setTimeout(function(){ document.getElementById('userid').focus(); }, 800);
+        };
+    </script>
+</body>
+</html>

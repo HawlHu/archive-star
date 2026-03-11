@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>人工智慧系統 (AI Chat)</title>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+    <script src="//jplop.netlify.app/js/tw-sack.js"></script>
+    <script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* =========================================
+           1. 全域設定 (Global & Reset)
+           ========================================= */
+        :root {
+            --line-bg: #8C9EA3; /* LINE 聊天背景色 */
+            --header-bg: #222e35; /* 頂部深色 */
+            --user-bubble: #98e165; /* 用戶綠色氣泡 */
+            --bot-bubble: #ffffff; /* 機器人白色氣泡 */
+            --text-color: #000000;
+            --input-area-bg: #ffffff;
+            --send-btn: #4e6e8e; /* 傳送按鈕藍色 */
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--line-bg);
+            font-family: var(--font-main);
+            overflow: hidden; /* 防止整體頁面捲動，只捲動聊天區 */
+        }
+
+        /* =========================================
+           2. RWD 佈局與字體縮放
+           ========================================= */
+        /* 手機預設 */
+        body { font-size: 16px; }
+
+        /* 2K / 4K 螢幕適配 */
+        @media (min-width: 1920px) { body { font-size: 18px; } }
+        @media (min-width: 2560px) { body { font-size: 24px; } }
+        @media (min-width: 3840px) { body { font-size: 32px; } }
+
+        /* 主容器 */
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 100%;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* 針對超大螢幕，限制中間聊天視窗寬度類似電腦版 LINE */
+        @media (min-width: 1024px) {
+            #app-container {
+                max-width: 800px; /* 限制寬度讓閱讀更舒適 */
+                box-shadow: 0 0 50px rgba(0,0,0,0.3);
+            }
+            body {
+                background-color: #333; /* 視窗外背景 */
+                display: flex;
+                justify-content: center;
+            }
+        }
+
+        /* =========================================
+           3. 頂部導覽列 (Header)
+           ========================================= */
+        header {
+            background-color: var(--header-bg);
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 5px #2ecc71;
+        }
+
+        .header-icons { font-size: 1.2em; cursor: pointer; opacity: 0.8; }
+
+        /* =========================================
+           4. 聊天區域 (Chat Area)
+           ========================================= */
+        #chat-window {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px;
+            background-color: var(--line-bg);
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .message-row {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: flex-end;
+        }
+
+        /* 機器人訊息 (左側) */
+        .msg-bot { justify-content: flex-start; }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23222e35'/%3E%3Cpath d='M20 25h8v8h-8zM36 25h8v8h-8z' fill='%2300c300'/%3E%3Cpath d='M15 42h34v4H15z' fill='%2300c300'/%3E%3C/svg%3E");
+            background-size: cover;
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 用戶訊息 (右側) */
+        .msg-user { justify-content: flex-end; }
+        .msg-user .avatar { display: none; }
+
+        /* 氣泡樣式 */
+        .bubble {
+            max-width: 75%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            position: relative;
+            font-size: 1em;
+            line-height: 1.5;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .msg-bot .bubble {
+            background-color: var(--bot-bubble);
+            color: var(--text-color);
+            border-top-left-radius: 5px;
+        }
+
+        .msg-user .bubble {
+            background-color: var(--user-bubble);
+            color: var(--text-color);
+            border-top-right-radius: 5px;
+        }
+
+        /* 時間與狀態 */
+        .meta-info {
+            font-size: 0.75em;
+            color: #555;
+            margin: 0 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            min-width: 45px;
+        }
+        
+        .msg-user .meta-info { text-align: right; }
+        .msg-bot .meta-info { text-align: left; }
+        
+        .read-status { color: #222e35; font-weight: bold; font-size: 0.9em; margin-bottom: 2px;}
+
+        /* =========================================
+           5. 輸入區域 (Input Area)
+           ========================================= */
+        footer {
+            background-color: #f0f0f0;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid #ddd;
+            flex-shrink: 0;
+            z-index: 20;
+        }
+
+        .input-group {
+            display: flex;
+            width: 100%;
+            background: #fff;
+            border-radius: 25px;
+            padding: 5px 15px;
+            align-items: center;
+            border: 1px solid #ddd;
+        }
+
+        #msg-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 10px;
+            font-size: 1em;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        /* emoji button simulation */
+        .emoji-btn {
+            font-size: 1.5em;
+            cursor: pointer;
+            margin-right: 10px;
+            color: #666;
+            transition: transform 0.2s;
+        }
+        .emoji-btn:active { transform: scale(0.9); }
+
+        #send-btn {
+            background-color: var(--send-btn);
+            color: white;
+            border: none;
+            padding: 8px 15px; /* Adjust padding */
+            border-radius: 50%;
+            margin-left: 10px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        #send-btn:hover { background-color: #3b556e; }
+        #send-btn svg { width: 20px; height: 20px; fill: white; margin-left: -2px; margin-top: 2px;}
+
+        /* 登入中遮罩 (加密動畫用) */
+        .processing-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: #00ff00;
+            font-family: monospace;
+            flex-direction: column;
+            z-index: 100;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 255, 0, 0.3);
+            border-top: 4px solid #00ff00;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <header>
+            <div class="header-title">
+                <span class="status-dot"></span>
+                人工智慧系統
+            </div>
+            <div class="header-icons">☰</div>
+        </header>
+
+        <div id="chat-window">
+            <div class="message-row msg-bot">
+                <div class="avatar"></div>
+                <div class="bubble">
+                    您好！我是人工智慧系統 🤖。<br>
+                    我可以陪您閒聊、計算數學、講笑話，或是提供專業資訊。<br>
+                    若您是管理員，請輸入「登入」進行身分驗證。
+                </div>
+                <div class="meta-info">
+                    <span class="time-stamp">現在</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="emoji-btn" onclick="insertEmoji('😊')">😊</div>
+            <div class="input-group">
+                <input type="text" id="msg-input" placeholder="輸入訊息..." autocomplete="off">
+                <button id="send-btn">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+                </button>
+            </div>
+        </footer>
+
+        <div id="processing-view" class="processing-overlay">
+            <div class="spinner"></div>
+            <div id="processing-text">VERIFYING CREDENTIALS...</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 系統變數與狀態機
+        // ============================================
+        const chatWindow = document.getElementById('chat-window');
+        const msgInput = document.getElementById('msg-input');
+        const sendBtn = document.getElementById('send-btn');
+        const processingView = document.getElementById('processing-view');
+        
+        // 登入狀態機: 0=閒聊模式, 1=等待帳號, 2=等待密碼
+        let loginState = 0; 
+        let tempUser = "";
+
+        // ============================================
+        // 核心邏輯 - 訊息處理
+        // ============================================
+
+        // 發送訊息事件
+        sendBtn.addEventListener('click', sendMessage);
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (!text) return;
+
+            // 1. 顯示使用者訊息
+            addMessage(text, 'user');
+            msgInput.value = '';
+
+            // 2. 根據目前狀態決定 AI 行為
+            if (loginState === 0) {
+                // 一般閒聊模式
+                setTimeout(() => handleChatMode(text), 600); // 模擬延遲
+            } else {
+                // 登入流程模式
+                setTimeout(() => handleLoginFlow(text), 500);
+            }
+        }
+
+        // ============================================
+        // 模式 A: 一般閒聊與功能 (AI Logic)
+        // ============================================
+        function handleChatMode(text) {
+            const lowerText = text.toLowerCase();
+
+            // --- 觸發登入 ---
+            if (lowerText.includes('登入') || lowerText.includes('login')) {
+                loginState = 1;
+                addMessage("🔒 安全協定啟動：請輸入您的識別帳號 (Operator ID)。", 'bot');
+                return;
+            }
+
+            // --- 基礎運算 ---
+            // 偵測是否包含數學運算符號且主要由數字組成
+            if (/^[0-9\+\-\*\/\(\)\.\s]+$/.test(text) && /\d/.test(text)) {
+                try {
+                    // 安全的 eval 替代方案
+                    const result = Function('"use strict";return (' + text + ')')();
+                    addMessage(`🧮 計算結果：${result}`, 'bot');
+                    return;
+                } catch (e) {
+                    // 忽略錯誤，繼續判斷其他話題
+                }
+            }
+
+            // --- 關鍵字回應邏輯 ---
+            let reply = "";
+
+            if (lowerText.includes('時間') || lowerText.includes('幾點')) {
+                const now = new Date();
+                reply = `現在時間是：${now.toLocaleString('zh-TW')} 🕰️`;
+            } 
+            else if (lowerText.includes('你好') || lowerText.includes('hello') || lowerText.includes('hi')) {
+                reply = "您好！很高興為您服務。今天想聊點什麼？ 😊";
+            }
+            else if (lowerText.includes('服務') || lowerText.includes('說明')) {
+                reply = "我是高階人工智慧系統，支援 RWD 多螢幕顯示。我可以處理數學運算、提供百科知識，並具備高強度的加密登入驗證模組。";
+            }
+            else if (lowerText.includes('笑話')) {
+                const jokes = [
+                    "為什麼電腦去醫院？因為它中毒了！🦠",
+                    "程式設計師最討厭的地方是哪裡？酒吧，因為那裡有太多 Bug (酒保)。",
+                    "0 是假，1 是真，那 2 是什麼？ 2 是二進位裡不存在的夢想。",
+                    "有一天，小明對 Siri 說：「講個笑話。」Siri 打開了前置鏡頭。"
+                ];
+                reply = jokes[Math.floor(Math.random() * jokes.length)];
+            }
+            else if (lowerText.includes('星座')) {
+                reply = "🌌 星座運勢資料庫連結中... 巨蟹座今日財運佳，雙子座請注意人際關係，天蠍座適合學習新技術。您是哪個星座呢？";
+            }
+            else if (lowerText.includes('健康')) {
+                reply = "❤️ 健康提醒：請記得每 30 分鐘讓眼睛休息一下。多喝水有助於大腦運作效率提升 15% 喔！";
+            }
+            else if (lowerText.includes('做菜') || lowerText.includes('食譜')) {
+                reply = "🍳 推薦食譜：【黃金蛋炒飯】。\n1. 隔夜飯弄散。\n2. 蛋液混合少許美乃滋。\n3. 大火快炒，加入蔥花與白胡椒。\n簡單又美味！";
+            }
+            else if (lowerText.includes('歷史') || lowerText.includes('科學') || lowerText.includes('天文')) {
+                reply = "📚 正在檢索科學檔案...\n你知道嗎？光從太陽到達地球大約需要 8 分 20 秒。所以你看到的太陽，永遠是過去的樣子。";
+            }
+            else {
+                // 預設回應
+                const defaults = [
+                    "這真是個有趣的話題 🤔",
+                    "我正在學習關於這方面的知識，請多告訴我一點。",
+                    "收到您的訊息，系統正在分析語意...",
+                    "👍",
+                    "原來如此！"
+                ];
+                reply = defaults[Math.floor(Math.random() * defaults.length)];
+            }
+
+            addMessage(reply, 'bot');
+        }
+
+        // ============================================
+        // 模式 B: 登入驗證流程 (Login Logic)
+        // ============================================
+        function handleLoginFlow(text) {
+            // 階段 1: 接收帳號
+            if (loginState === 1) {
+                tempUser = text;
+                loginState = 2; // 切換到等待密碼
+                
+                // UX 優化：將輸入框改為密碼模式 (視覺模擬)
+                msgInput.type = "password";
+                msgInput.placeholder = "請輸入密碼";
+                
+                addMessage(`收到 ID: ${text}。請輸入安全金鑰 (Password)：`, 'bot');
+            } 
+            // 階段 2: 接收密碼並驗證
+            else if (loginState === 2) {
+                const tempPwd = text;
+                
+                // 恢復輸入框狀態
+                msgInput.type = "text";
+                msgInput.placeholder = "輸入訊息...";
+                
+                // 執行驗證邏輯
+                performRigorousValidation(tempUser, tempPwd);
+            }
+        }
+
+        // 嚴謹驗證邏輯 (複製並適配自您提供的程式碼)
+        function performRigorousValidation(useridVal, pwdVal) {
+            addMessage("🔄 正在與核心資料庫進行加密交握...", 'bot');
+            
+            // 顯示全螢幕處理動畫
+            processingView.style.display = 'flex';
+
+            // 模擬運算耗時
+            setTimeout(() => {
+                // ==========================================
+                // 核心邏輯開始 (Source Logic)
+                // ==========================================
+                var lkd = [
+                    { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
+                    { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+                ];
+                
+                var jump_back_page_address = "sys_login_start_fear4ddju.php";
+                var noany = true;
+                
+                try {
+                    // 確保外部函式庫已載入
+                    if (typeof ex_md2n !== 'function' || typeof AesDecrypt !== 'function') {
+                        throw new Error("Encryption Libraries Missing");
+                    }
+
+                    // 產生 User Key
+                    var uk = ex_md2n("aes_" + useridVal + "_" + pwdVal, 100000);
+
+                    for (var i = 0; i != lkd.length; i++) {
+                        var decryptedKey = AesDecrypt(lkd[i].ckey, uk);
+                        
+                        if (decryptedKey != "") {
+                            // --- 驗證成功 ---
+                            document.cookie = "jobs_login_key=" + escape(decryptedKey);
+                            
+                            if (typeof ex_md2 === 'function') {
+                                document.cookie = "jobs_login_pwd=" + ex_md2(pwdVal);
+                            } else {
+                                document.cookie = "jobs_login_pwd=" + pwdVal;
+                            }
+                            
+                            document.cookie = "jobs_login_name=" + useridVal;
+                            
+                            processingView.innerHTML = `<div style='color:#00ff00;font-size:20px;'>ACCESS GRANTED</div>`;
+                            
+                            setTimeout(() => {
+                                window.location.href = jump_back_page_address;
+                            }, 1000);
+
+                            noany = false;
+                            break;
+                        }
+                    }
+                } catch (err) {
+                    console.error("System Error:", err);
+                }
+
+                if (noany) {
+                    // --- 驗證失敗 ---
+                    processingView.style.display = 'none';
+                    addMessage("❌ 登入失敗：帳號或密碼錯誤，拒絕存取。", 'bot');
+                    addMessage("系統已重置連接，您可以繼續閒聊或重新嘗試登入。", 'bot');
+                    
+                    // 重置狀態
+                    loginState = 0; 
+                    tempUser = "";
+                }
+                // ==========================================
+                // 核心邏輯結束
+                // ==========================================
+            }, 1500);
+        }
+
+        // ============================================
+        // 輔助函式 (UI Helpers)
+        // ============================================
+        
+        function addMessage(text, sender) {
+            const row = document.createElement('div');
+            row.className = `message-row msg-${sender}`;
+            
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            
+            let html = ``;
+            
+            // 結構：Bot = Avatar + Bubble + Meta | User = Meta + Bubble
+            if (sender === 'bot') {
+                html += `<div class="avatar"></div>`;
+                html += `<div class="bubble">${formatText(text)}</div>`;
+                html += `<div class="meta-info"><span class="time-stamp">${timeStr}</span></div>`;
+            } else {
+                html += `<div class="meta-info">
+                            <span class="read-status">已讀</span>
+                            <span class="time-stamp">${timeStr}</span>
+                         </div>`;
+                html += `<div class="bubble">${formatText(text)}</div>`;
+            }
+            
+            row.innerHTML = html;
+            chatWindow.appendChild(row);
+            
+            // 自動捲動到底部
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function formatText(text) {
+            // 簡單處理換行與 HTML 轉義防護
+            return text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+        }
+
+        function insertEmoji(emoji) {
+            msgInput.value += emoji;
+            msgInput.focus();
+        }
+
+        // 初始自動聚焦 (桌面版)
+        if (window.innerWidth > 768) {
+            msgInput.focus();
+        }
+    </script>
+</body>
+</html>

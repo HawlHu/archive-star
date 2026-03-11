@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux OS Session Manager</title>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* --- 系統級重置與變數定義 --- */
+        :root {
+            /* 使用更高解析度的背景圖策略，或保持原連結由 CSS Cover 處理 */
+            --bg-image: url('//jplop.netlify.app/images/20251212/windows_xp_bliss-wide-1920x1080.jpg');
+            --glass-bg: rgba(30, 30, 30, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --input-focus: rgba(0, 0, 0, 0.5);
+            --accent-color: #e95420; /* Ubuntu Orange */
+            --error-color: #e74c3c;
+            --text-color: #ffffff;
+            --font-stack: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent; /* 移除手機點擊藍框 */
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 禁止滾動 */
+            font-family: var(--font-stack);
+            color: var(--text-color);
+            background-color: #2c001e; /* Fallback color */
+        }
+
+        /* --- 背景層 (支援 4K/2K/FHD) --- */
+        .wallpaper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: var(--bg-image);
+            background-size: cover; /* 關鍵：保證填滿任何解析度 */
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -2;
+        }
+
+        /* 遮罩層 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); /* Safari 支援 */
+            z-index: -1;
+        }
+
+        /* --- 頂部狀態列 (RWD 適配) --- */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 32px;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 10;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            cursor: default;
+        }
+
+        .top-bar-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 16px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        
+        .top-bar-center:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .top-bar-right {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .status-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+        
+        .status-icon:hover { opacity: 1; }
+
+        /* --- 登入卡片 (核心 RWD 區塊) --- */
+        .login-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* [RWD 修改] 使用 min() 確保手機版不會溢出，但在桌面版保持原寬度 */
+            width: min(320px, 85vw);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 5;
+            transition: opacity 0.3s;
+        }
+
+        /* 使用者頭像 */
+        .avatar {
+            width: 96px;
+            height: 96px;
+            background: #444;
+            border-radius: 50%;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ccc;
+            background-image: linear-gradient(135deg, #444 0%, #222 100%);
+            border: 2px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease; /* 增加過渡效果以便 RWD 縮放 */
+        }
+
+        .login-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        /* 輸入框群組 */
+        .input-group {
+            width: 100%;
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: white;
+            font-size: 14px; /* 桌面預設 */
+            outline: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            /* 解決 iOS 預設圓角與陰影問題 */
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .input-field::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .input-field:focus {
+            background: var(--input-focus);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(233, 84, 32, 0.3);
+        }
+
+        .input-field.error {
+            border-color: var(--error-color);
+            background: rgba(231, 76, 60, 0.2);
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .btn-hidden {
+            position: absolute; 
+            visibility: hidden;
+            height: 0;
+            width: 0;
+        }
+
+        .error-message {
+            height: 20px;
+            color: var(--error-color);
+            font-size: 13px;
+            margin-top: 5px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        /* --- 底部功能區 --- */
+        .bottom-actions {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 20px;
+            z-index: 10;
+            transition: opacity 0.3s;
+        }
+
+        .action-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .action-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        .action-icon {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        /* --- Toast 通知 --- */
+        .toast-container {
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #333;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            width: max-content;
+            max-width: 80vw;
+        }
+
+        .toast-container.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon { color: #f39c12; }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* --- RWD Media Queries --- */
+
+        /* 1. 平板與手機 (小於 768px) */
+        @media (max-width: 768px) {
+            .top-bar-left {
+                display: none; /* 手機版隱藏左側文字，保留空間 */
+            }
+            
+            .input-field {
+                font-size: 16px; /* [重要] 防止 iOS 在輸入時自動放大畫面 */
+            }
+        }
+
+        /* 2. 極小螢幕 (小於 400px) */
+        @media (max-width: 400px) {
+            .top-bar { padding: 0 10px; }
+            .top-bar-right { gap: 10px; }
+            .login-container { width: 90vw; }
+            .action-btn { width: 40px; height: 40px; }
+            .bottom-actions { bottom: 20px; right: 20px; }
+        }
+
+        /* 3. 橫向手機模式 (高度不足 500px) - 這是關鍵，防止鍵盤遮擋 */
+        @media (max-height: 500px) {
+            .avatar {
+                display: none; /* 高度不足時隱藏大頭貼 */
+            }
+            .login-container {
+                top: 45%; /* 稍微往上移 */
+            }
+            .bottom-actions {
+                display: none; /* 鍵盤彈出時隱藏底部按鈕，避免遮擋輸入框 */
+            }
+            .login-title {
+                margin-bottom: 10px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wallpaper"></div>
+    <div class="overlay"></div>
+
+    <div class="top-bar">
+        <div class="top-bar-left unimpl-trigger">Activities</div>
+        
+        <div class="top-bar-center unimpl-trigger">
+            <span id="clock-date">Dec 12</span>&nbsp;
+            <span id="clock-time">21:30</span>
+        </div>
+
+        <div class="top-bar-right">
+            <div class="status-icon unimpl-trigger" title="Network">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            </div>
+            <div class="status-icon unimpl-trigger" title="Volume">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            </div>
+            <div class="status-icon unimpl-trigger" title="Power">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+            </div>
+            <div class="status-icon unimpl-trigger">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-container">
+        <div class="avatar">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </div>
+
+        <div class="login-title">Authentication Required</div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <input type="text" id="userid" class="input-field" placeholder="Username" required autofocus autocomplete="username">
+            </div>
+            <div class="input-group">
+                <input type="password" id="pwd" class="input-field" placeholder="Password" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn-hidden" aria-label="Login">Login</button>
+        </form>
+
+        <div id="error-msg" class="error-message">Authentication Failed</div>
+    </div>
+
+    <div class="bottom-actions">
+        <div class="action-btn unimpl-trigger" title="Accessibility" role="button">
+            <svg class="action-icon" viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/></svg>
+        </div>
+        <div class="action-btn unimpl-trigger" title="Power Options" role="button">
+            <svg class="action-icon" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+        </div>
+    </div>
+
+    <div id="toast" class="toast-container">
+        <span class="toast-icon">⚠</span>
+        <span>尚未登入 (System Not Logged In)</span>
+    </div>
+
+    <script>
+        /* --- JS 邏輯區 (完全保留核心功能與驗證邏輯) --- */
+
+        // 1. 時間日期更新
+        function updateClock() {
+            const now = new Date();
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            const dateStr = `${months[now.getMonth()]} ${now.getDate()}`;
+            const min = now.getMinutes().toString().padStart(2, '0');
+            const hour = now.getHours().toString().padStart(2, '0');
+            const timeStr = `${hour}:${min}`;
+
+            document.getElementById('clock-date').innerText = dateStr;
+            document.getElementById('clock-time').innerText = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. 未實作功能提示 (Toast)
+        const unimplTriggers = document.querySelectorAll('.unimpl-trigger');
+        const toast = document.getElementById('toast');
+        let toastTimeout;
+
+        function showToast() {
+            toast.classList.add('show');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        unimplTriggers.forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showToast();
+            });
+        });
+
+        // 3. 登入邏輯 (原始代碼保留)
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault(); 
+
+            const useridInput = document.getElementById("userid");
+            const pwdInput = document.getElementById("pwd");
+            const errorMsg = document.getElementById("error-msg");
+
+            const userid = useridInput.value;
+            const pwd = pwdInput.value;
+
+            // --- 核心驗證邏輯開始 ---
+            var lkd = [
+                { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
+                { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+            ];
+            
+            var jump_back_page_address = "sys_login_start_fear4ddju.php";
+            var uk = ex_md2n("aes_" + userid + "_" + pwd,100000);
+            var noany = true;
+        
+            try {
+                // 安全檢查：確保加密函式庫已載入
+                if (typeof AesDecrypt === 'function' && typeof ex_md2 === 'function') {
+                    for (var i = 0; i != lkd.length; i++) {
+                        if (AesDecrypt(lkd[i].ckey, uk) != "") {
+                            // 登入成功處理
+                            document.cookie = "jobs_login_key=" + escape(AesDecrypt(lkd[i].ckey, uk));
+                            document.cookie = "jobs_login_pwd=" + ex_md2(pwd);
+                            document.cookie = "jobs_login_name=" + userid;
+                            
+                            window.location.href = jump_back_page_address;
+                            noany = false;
+                            break;
+                        }
+                    }
+                } else {
+                    console.error("Encryption libraries (aes.js / ex_md2.js) failed to load.");
+                    alert("System Error: Security libraries not loaded. Please check internet connection.");
+                }
+            } catch (err) {
+                console.error("Auth Exception:", err);
+            }
+            // --- 核心驗證邏輯結束 ---
+
+            if (noany) {
+                // 失敗 UI 效果
+                errorMsg.style.opacity = '1';
+                pwdInput.classList.add('error');
+                useridInput.classList.add('error');
+                pwdInput.value = "";
+                
+                setTimeout(() => {
+                    pwdInput.classList.remove('error');
+                    useridInput.classList.remove('error');
+                    pwdInput.focus();
+                }, 500);
+
+                setTimeout(() => {
+                    errorMsg.style.opacity = '0';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

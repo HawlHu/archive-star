@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#252320">
+    <title>YoRHa :: SYSTEM INTERFACE // 11945 AD</title>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* * [0] 核心變數與重置 
+         * 優化：引入 Clamp 計算字體大小，實現無段式響應
+         */
+        :root {
+            /* Nier Automata 色票 */
+            --nier-bg: #4e4b42;
+            --nier-light: #dad4bb;
+            --nier-dark: #3e3b34;
+            --nier-black: #252320;
+            --nier-alert: #b53a3a;
+            --tech-cyan: #00f3ff;
+            
+            /* 基礎單位，隨視窗寬度縮放，解決 4K 螢幕過小的問題 */
+            --base-size: clamp(14px, 1vw + 10px, 24px); 
+        }
+
+        @font-face {
+            font-family: 'YoRHa';
+            src: local('Rodin'), local('Helvetica Neue'), local('Arial'), sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            cursor: crosshair;
+            -webkit-tap-highlight-color: transparent; /* 移除手機點擊藍框 */
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            /* 使用 dvh 解決手機瀏覽器網址列伸縮問題，不支援則回退 vh */
+            height: 100vh; 
+            height: 100dvh; 
+            overflow: hidden;
+            background-color: #111;
+            font-family: 'YoRHa', 'Consolas', monospace;
+            color: var(--nier-light);
+            user-select: none;
+            -webkit-text-size-adjust: 100%;
+            font-size: var(--base-size);
+            line-height: 1.5;
+            transition: background-color 3s ease; /* 整體色調緩慢過渡 */
+        }
+
+        /* * [1] 背景與視差層 
+         */
+        #viewport-layer {
+            position: fixed;
+            top: -5%;
+            left: -5%;
+            width: 110%;
+            height: 110%;
+            z-index: 0;
+            background-color: #000;
+            will-change: transform; /* 效能優化 */
+        }
+
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 使用 image-set 或高解析圖源會更好，這裡優化顯示方式 */
+            background-image: url('//jplop.netlify.app/images/20251212/nier_login_bg_maps_20251212-1920x1080.jpg');
+            background-size: cover;
+            background-position: center bottom;
+            
+            /* [修改] 移除固定的 filter，改由 JS 動態控制以配合時間 */
+            /* 初始值 (Day) */
+            filter: sepia(30%) contrast(110%) brightness(80%);
+            transition: filter 5s ease-in-out; /* 濾鏡切換時的平滑過渡 */
+            
+            animation: droneHover 12s ease-in-out infinite alternate;
+        }
+
+        /* [新增] 時間環境遮罩層 */
+        #time-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* 在背景之上，粒子之下 */
+            pointer-events: none;
+            mix-blend-mode: soft-light; /* 讓顏色自然融合進背景 */
+            background-color: transparent;
+            transition: background-color 5s ease-in-out;
+        }
+
+        #atmosphere-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2; /* 提升層級 */
+            pointer-events: none;
+        }
+
+        /* * [2] VFX 特效層 
+         */
+        .vfx-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .scanlines {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            opacity: 0.6;
+        }
+
+        .vignette {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 60%, #000 150%);
+        }
+
+        .noise {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.08"/%3E%3C/svg%3E');
+            opacity: 0.15;
+            animation: noiseAnim 0.5s steps(5) infinite;
+        }
+
+        /* * [3] HUD 介面層 (Grid 系統重構)
+         */
+        #hud-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            
+            /* 針對 iPhone X+ 瀏海的安全距離 */
+            padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+
+            display: grid;
+            /* 兩側固定寬度，中間自適應 */
+            grid-template-columns: 320px 1fr 320px; 
+            grid-template-rows: 60px 1fr 80px;
+            gap: 10px;
+            
+            pointer-events: none; 
+            transition: all 0.3s ease;
+        }
+
+        /* 通用面板樣式 */
+        .hud-panel {
+            background: linear-gradient(90deg, rgba(78, 75, 66, 0.4), transparent);
+            border-left: 2px solid var(--nier-light);
+            padding: 15px;
+            color: var(--nier-light);
+            font-size: 0.8rem;
+            text-shadow: 0 0 2px rgba(218, 212, 187, 0.5);
+            position: relative;
+        }
+        .hud-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 10px; height: 10px;
+            border-top: 2px solid var(--nier-light);
+            border-left: 2px solid var(--nier-light);
+        }
+
+        /* 頂部列 */
+        .top-bar {
+            grid-column: 1 / -1;
+            grid-row: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(218, 212, 187, 0.3);
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 0 10px;
+        }
+        .time-display { font-size: 1.2rem; letter-spacing: 2px; font-weight: bold; }
+        .world-time { font-size: 0.7rem; color: #aaa; margin-top: 2px;}
+
+        /* 左側與右側面板 */
+        .left-panel { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; gap: 20px; justify-content: center;}
+        .right-panel { grid-column: 3; grid-row: 2; text-align: right; display: flex; flex-direction: column; justify-content: center;}
+        
+        /* 數據條組件 */
+        .data-block { margin-bottom: 15px; }
+        .data-label { font-size: 0.6rem; opacity: 0.7; margin-bottom: 4px; letter-spacing: 1px; }
+        .data-bar { height: 6px; background: rgba(255,255,255,0.1); position: relative; overflow: hidden; }
+        
+        /* [修正] 移除 CSS 動畫，改用 transition 以配合 JS 模擬 */
+        .data-fill { height: 100%; background: var(--nier-light); width: 50%; transition: width 0.1s linear; }
+        
+        .mission-item {
+            margin-bottom: 15px;
+            border-right: 2px solid var(--nier-light);
+            padding-right: 10px;
+            background: linear-gradient(-90deg, rgba(78, 75, 66, 0.4), transparent);
+        }
+
+        /* 底部列 */
+        .bottom-bar {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        .drone-status {
+            text-align: center;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            animation: blink 2s infinite;
+        }
+
+        /* * [4] 登入框核心 (RWD 強化版 + 互動隱藏邏輯)
+         */
+        #login-container {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+
+            /* --- 核心修改：初始隱藏狀態 --- */
+            opacity: 0;
+            pointer-events: none; /* 隱藏時無法點擊 */
+            transform: scale(0.95);
+            transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* 當 JS 添加 .active 類名時顯示 */
+        #login-container.active {
+            opacity: 1;
+            pointer-events: auto; /* 顯示後恢復點擊 */
+            transform: scale(1);
+        }
+
+        /* [新增] 初始提示畫面 */
+        #start-prompt {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            z-index: 40;
+            pointer-events: none; /* 讓點擊事件穿透到背景觸發器 */
+            transition: opacity 0.3s ease;
+        }
+        .prompt-text {
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 20px;
+            border-top: 1px solid var(--nier-light);
+            border-bottom: 1px solid var(--nier-light);
+            animation: blink 1.5s infinite alternate;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            background: rgba(30, 28, 25, 0.9); /* 略微加深以提高對比 */
+            border: 1px solid var(--nier-light);
+            box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
+            
+            /* 相容性毛玻璃特效 */
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px, 20px 0);
+        }
+
+        /* [新增] 關閉登入框按鈕 */
+        .btn-close-login {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: var(--nier-light);
+            font-family: inherit;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: all 0.2s;
+            padding: 5px 10px;
+            z-index: 60;
+        }
+        .btn-close-login:hover {
+            opacity: 1;
+            text-shadow: 0 0 8px var(--nier-light);
+            transform: scale(1.1);
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 0 0 30px 0;
+            letter-spacing: 6px;
+            border-bottom: 2px solid var(--nier-light);
+            padding-bottom: 10px;
+            color: var(--nier-light);
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            color: var(--nier-light);
+            text-transform: uppercase;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #666;
+            padding: 15px; /* 增加觸控區域 */
+            color: #fff;
+            font-family: 'Consolas', monospace;
+            font-size: 16px; /* 嚴格設定 16px 防止 iOS Safari 自動放大 */
+            outline: none;
+            transition: 0.3s;
+            border-radius: 0;
+            -webkit-appearance: none; /* 移除 iOS 預設樣式 */
+            box-shadow: none;
+        }
+
+        .input-group input:focus {
+            background: rgba(0, 0, 0, 0.6);
+            border-color: var(--tech-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+        }
+
+        /* 登入按鈕 */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: rgba(78, 75, 66, 0.2);
+            border: 2px solid var(--nier-light);
+            color: var(--nier-light);
+            font-weight: bold;
+            font-size: 1rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+        }
+
+        /* 按鈕 Hover 特效 (僅限非觸控裝置) */
+        @media (hover: hover) {
+            .btn-submit:hover {
+                background: var(--nier-light);
+                color: #000;
+                box-shadow: 0 0 20px var(--nier-light);
+            }
+        }
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        /* 錯誤訊息遮罩 */
+        #error-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.3s;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        #error-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .error-content {
+            text-align: center;
+            border: 2px solid var(--nier-alert);
+            padding: 25px;
+            background: rgba(50, 0, 0, 0.8);
+            color: var(--nier-alert);
+            animation: errorShake 0.4s;
+            width: 85%;
+        }
+        .btn-retry {
+            margin-top: 20px;
+            background: transparent;
+            border: 1px solid var(--nier-alert);
+            color: var(--nier-alert);
+            padding: 8px 30px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn-retry:hover, .btn-retry:active {
+            background: var(--nier-alert);
+            color: #fff;
+        }
+
+        /* 裝飾線條 */
+        .deco-line {
+            position: absolute;
+            background: var(--nier-light);
+            opacity: 0.5;
+        }
+
+        /* * [5] 響應式斷點 (Media Queries) 
+         */
+
+        /* 平板與小型筆電 (寬度小於 1200px) */
+        @media (max-width: 1200px) {
+            #hud-layer {
+                grid-template-columns: 1fr; /* 單欄 */
+                grid-template-rows: 60px 1fr 60px; /* 上中下 */
+            }
+            /* 隱藏兩側裝飾，聚焦登入 */
+            .left-panel, .right-panel { display: none; }
+            #login-container, #start-prompt { grid-column: 1; grid-row: 2; }
+        }
+
+        /* 手機直向 (寬度小於 768px) */
+        @media (max-width: 768px) {
+            :root { --base-size: 16px; }
+            
+            #hud-layer {
+                padding: 10px; /* 減少邊距 */
+                grid-template-rows: 50px 1fr 40px;
+            }
+            .top-bar { font-size: 0.8em; }
+            .world-time { display: none; } /* 隱藏次要資訊 */
+            
+            .login-box {
+                padding: 25px 20px;
+                max-width: 90%;
+                /* 確保在小螢幕手機上也不會太寬 */
+                width: 90%; 
+            }
+            .login-title { font-size: 1.2rem; margin-bottom: 20px; }
+            .btn-submit { padding: 12px; }
+            
+            .prompt-text { font-size: 1rem; }
+        }
+
+        /* 手機橫向 / 鍵盤彈出模式 (高度小於 600px) */
+        @media (max-height: 600px) {
+            #hud-layer {
+                grid-template-rows: 30px 1fr 20px;
+                padding: 5px;
+            }
+            .top-bar, .bottom-bar { opacity: 0.3; font-size: 0.7em; }
+            
+            /* 關鍵：當高度不夠時，整體縮小登入框以確保按鈕可見 */
+            .login-box {
+                transform: scale(0.8); 
+                padding: 15px 30px;
+                margin-top: -10px;
+            }
+            .login-title { font-size: 1.1rem; margin-bottom: 15px; }
+            .input-group { margin-bottom: 10px; }
+            .input-group input { padding: 8px; }
+        }
+        
+        /* 超高解析度螢幕 (2K/4K) 優化 */
+        @media (min-width: 2000px) {
+            /* 字體已隨 vw 自動放大，此處微調容器最大寬度 */
+            .login-box { max-width: 600px; padding: 60px; }
+            .scanlines { background-size: 100% 6px; } /* 掃描線加粗 */
+        }
+
+        /* * [6] 動畫 Keyframes 
+         */
+        @keyframes droneHover {
+            0% { transform: scale(1.05) translate(0, 0) rotate(0deg); }
+            25% { transform: scale(1.05) translate(10px, -10px) rotate(0.5deg); }
+            50% { transform: scale(1.05) translate(-5px, 5px) rotate(-0.2deg); }
+            75% { transform: scale(1.05) translate(-8px, -15px) rotate(0.3deg); }
+            100% { transform: scale(1.05) translate(0, 0) rotate(0deg); }
+        }
+        @keyframes noiseAnim {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 100px; }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="viewport-layer">
+        <div class="bg-image" id="dynamic-bg"></div>
+        <div id="time-overlay"></div>
+    </div>
+
+    <canvas id="atmosphere-canvas"></canvas>
+
+    <div class="vfx-overlay">
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+        <div class="noise"></div>
+    </div>
+
+    <div id="hud-layer">
+        <div class="top-bar">
+            <div style="font-size: 0.8em; letter-spacing: 1px;">BUNKER LINK: <span style="color:var(--tech-cyan)">ONLINE</span></div>
+            <div style="text-align: center;">
+                <div class="time-display" id="real-time">00:00:00</div>
+                <div class="world-time">AD 11945 // REGION: 42°35'N 141°20'E</div>
+            </div>
+            <div style="font-size: 0.8em;">UNIT: 2B // IDLE</div>
+        </div>
+
+        <div class="left-panel hud-panel">
+            <div class="deco-line" style="top:-2px; right:0; width:50px; height:2px;"></div>
+            <h3 style="margin:0 0 20px 0;">FLIGHT UNIT</h3>
+            
+            <div class="data-block">
+                <div class="data-label">ALTITUDE</div>
+                <div class="data-bar"><div id="hud-alt-bar" class="data-fill" style="width: 72%;"></div></div>
+                <div id="hud-alt-val" style="text-align:right; font-size:0.7em; margin-top:2px;">1,450.0 m</div>
+            </div>
+
+            <div class="data-block">
+                <div class="data-label">WIND</div>
+                <div class="data-bar"><div id="hud-wind-bar" class="data-fill" style="width: 30%;"></div></div>
+                <div id="hud-wind-val" style="text-align:right; font-size:0.7em; margin-top:2px;">12.4 m/s</div>
+            </div>
+
+            <div class="data-block">
+                <div class="data-label">NFCS</div>
+                <div class="data-bar"><div id="hud-nfcs-bar" class="data-fill" style="width: 98%; background: var(--tech-cyan);"></div></div>
+                <div id="hud-nfcs-val" style="text-align:right; font-size:0.7em; margin-top:2px;">OPTIMAL</div>
+            </div>
+        </div>
+
+        <div id="start-prompt">
+            <div class="prompt-text">
+                SYSTEM IDLE // PRESS ANY KEY
+            </div>
+            <div style="font-size:0.7em; margin-top:10px; opacity:0.6;">
+                [ MOUSE CLICK / TOUCH SCREEN ]
+            </div>
+        </div>
+
+        <div id="login-container">
+            <div class="login-box">
+                <button type="button" class="btn-close-login" id="btn-close-trigger" aria-label="Close Login">
+                    [ X ]
+                </button>
+
+                <h2 class="login-title">ACCESS POINT</h2>
+                
+                <form action="" method="POST" id="loginForm">
+                    <div class="input-group">
+                        <label for="userid">IDENTIFICATION</label>
+                        <input type="text" id="userid" name="userid" autocomplete="off" required placeholder="User ID" inputmode="email">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="pwd">SECURITY KEY</label>
+                        <input type="password" id="pwd" name="pwd" required placeholder="Password">
+                    </div>
+                    
+                    <button type="submit" class="btn-submit">Connect</button>
+
+                    <div id="error-overlay">
+                        <div class="error-content">
+                            <h3 style="margin:0 0 10px 0;">ACCESS DENIED</h3>
+                            <div style="font-size:0.8em; margin-bottom:15px;">CREDENTIALS INVALID</div>
+                            <button type="button" class="btn-retry" id="btn-retry-click">ACKNOWLEDGE</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="hud-panel" style="border-left:none; border-right:2px solid var(--nier-light); text-align:right;">
+                <div class="deco-line" style="top:-2px; left:0; width:50px; height:2px;"></div>
+                <h3 style="margin:0 0 20px 0;">QUESTS</h3>
+                <div class="mission-item">
+                    <div style="font-weight:bold;">Reconnaissance</div>
+                    <div style="font-size:0.7em; opacity:0.8;">Ruins Sector A</div>
+                </div>
+                <div class="mission-item">
+                    <div style="font-weight:bold;">Supply Run</div>
+                    <div style="font-size:0.7em; opacity:0.8;">Transport filters</div>
+                </div>
+                <div style="margin-top:20px; font-size:0.7em;">
+                    <div>POD: <span style="color:var(--tech-cyan)">R040</span></div>
+                    <div>CD: READY</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-bar">
+            <div class="drone-status">
+                [ SYSTEM AUTO-PILOT ENGAGED ]<br>
+                <span style="font-size:0.8em; opacity:0.5;">MAINTAINING ORBITAL STABILITY</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 系統核心腳本 (Logic Preserved & Performance Optimized)
+         */
+
+        // 1. 時間顯示與環境光影即時運算
+        function updateEnvironment(hour) {
+            const overlay = document.getElementById('time-overlay');
+            const bg = document.getElementById('dynamic-bg');
+            
+            let envState = {
+                color: 'transparent',
+                filter: 'sepia(30%) contrast(110%) brightness(80%)'
+            };
+            
+            //hour=18
+
+            if (hour >= 20 || hour < 5) {
+                // [深夜 Night]
+                envState.color = 'rgba(10, 20, 40, 0.7)'; 
+                envState.filter = 'sepia(20%) contrast(130%) brightness(40%) grayscale(40%)';
+            } else if (hour >= 5 && hour < 8) {
+                // [清晨 Dawn]
+                envState.color = 'rgba(255, 150, 100, 0.4)';
+                envState.filter = 'sepia(60%) contrast(90%) brightness(90%)';
+            } else if (hour >= 8 && hour < 11) {
+                // [上午 Morning]
+                envState.color = 'rgba(255, 255, 240, 0.1)';
+                envState.filter = 'sepia(30%) contrast(100%) brightness(100%)';
+            } else if (hour >= 11 && hour < 15) {
+                // [正午 Noon]
+                envState.color = 'rgba(255, 250, 200, 0.3)';
+                envState.filter = 'sepia(10%) contrast(120%) brightness(120%)';
+            } else if (hour >= 15 && hour < 18) {
+                // [下午 Afternoon]
+                envState.color = 'rgba(255, 200, 150, 0.2)';
+                envState.filter = 'sepia(40%) contrast(100%) brightness(90%)';
+            } else if (hour >= 18 && hour < 20) {
+                // [黃昏 Dusk]
+                envState.color = 'rgba(180, 60, 20, 0.5)';
+                envState.filter = 'sepia(90%) contrast(110%) brightness(60%)';
+            }
+
+            if(overlay) overlay.style.backgroundColor = envState.color;
+            if(bg) bg.style.filter = envState.filter;
+        }
+
+        let lastHour = -1;
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-GB', { hour12: false });
+            
+            const elTime = document.getElementById('real-time');
+            if(elTime) elTime.textContent = timeString;
+
+            const currentHour = now.getHours();
+            if (currentHour !== lastHour) {
+                updateEnvironment(currentHour);
+                lastHour = currentHour;
+            }
+
+            requestAnimationFrame(updateTime);
+        }
+        updateTime();
+        
+        // 2. 儀表板數據模擬
+        const flightData = {
+            alt: 1450.0,
+            altTarget: 1450.0,
+            wind: 12.4,
+            windTarget: 12.0
+        };
+
+        function updateFlightStats() {
+            if(Math.random() < 0.02) flightData.altTarget = 1445 + Math.random() * 10;
+            flightData.alt += (flightData.altTarget - flightData.alt) * 0.05;
+            
+            const displayAlt = flightData.alt.toFixed(1);
+            const altBarWidth = (flightData.alt / 2000 * 100) + (Math.random() * 2 - 1);
+            
+            const elAltVal = document.getElementById('hud-alt-val');
+            const elAltBar = document.getElementById('hud-alt-bar');
+            if(elAltVal) elAltVal.textContent = parseFloat(displayAlt).toLocaleString('en-US') + " m";
+            if(elAltBar) elAltBar.style.width = Math.min(100, Math.max(0, altBarWidth)) + '%';
+
+            if(Math.random() < 0.05) flightData.windTarget = 5 + Math.random() * 25;
+            flightData.wind += (flightData.windTarget - flightData.wind) * 0.1;
+            
+            const displayWind = flightData.wind.toFixed(1);
+            const windBarWidth = (flightData.wind / 40 * 100);
+
+            const elWindVal = document.getElementById('hud-wind-val');
+            const elWindBar = document.getElementById('hud-wind-bar');
+            if(elWindVal) elWindVal.textContent = displayWind + " m/s";
+            if(elWindBar) elWindBar.style.width = Math.min(100, Math.max(0, windBarWidth)) + '%';
+
+            let nfcs = 99.8;
+            if(Math.random() < 0.1) nfcs -= Math.random() * 2;
+            
+            const elNfcsBar = document.getElementById('hud-nfcs-bar');
+            const elNfcsVal = document.getElementById('hud-nfcs-val');
+            if(elNfcsBar) elNfcsBar.style.width = nfcs + '%';
+            if(elNfcsVal) {
+                if(nfcs > 98) elNfcsVal.innerText = "OPTIMAL";
+                else elNfcsVal.innerText = "STABLE";
+            }
+
+            requestAnimationFrame(updateFlightStats);
+        }
+        updateFlightStats();
+
+        // 3. Canvas 粒子系統
+        const canvas = document.getElementById('atmosphere-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resize() {
+            const dpr = window.devicePixelRatio || 1;
+            width = window.innerWidth;
+            height = window.innerHeight;
+            
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            
+            ctx.scale(dpr, dpr);
+        }
+        
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(resize, 100);
+        });
+        window.addEventListener('orientationchange', () => setTimeout(resize, 200));
+        resize();
+
+        class Bird {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height * 0.6;
+                this.z = Math.random() * 0.5 + 0.2;
+                this.speed = (Math.random() * 1 + 0.5) * 0.5;
+                this.angle = Math.random() * Math.PI * 2;
+                this.vx = Math.cos(this.angle) * this.speed;
+                this.vy = Math.sin(this.angle) * this.speed * 0.2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < -50 || this.x > width + 50 || this.y < -50 || this.y > height + 50) this.reset();
+            }
+            draw() {
+                ctx.fillStyle = `rgba(40, 40, 40, ${this.z})`;
+                ctx.beginPath();
+                const size = 2 * this.z;
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x - size, this.y - size);
+                ctx.lineTo(this.x - size * 0.5, this.y);
+                ctx.lineTo(this.x - size, this.y + size);
+                ctx.fill();
+            }
+        }
+
+        const birdCount = window.innerWidth < 768 ? 15 : 40;
+        const birds = Array.from({ length: birdCount }, () => new Bird());
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            ctx.fillStyle = "rgba(200, 200, 180, 0.1)";
+            const t = Date.now();
+            for(let i=0; i<30; i++) {
+                const px = (t / 20 + i * 150) % width;
+                const py = (t / 40 + i * 230) % height;
+                ctx.fillRect(px, py, 2, 2);
+            }
+
+            birds.forEach(b => { b.update(); b.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // 4. 視差特效
+        document.addEventListener('mousemove', function(e) {
+            if (window.matchMedia("(pointer: fine)").matches) {
+                const x = (e.clientX / window.innerWidth - 0.5) * 15; 
+                const y = (e.clientY / window.innerHeight - 0.5) * 15;
+                const bg = document.querySelector('.bg-image');
+                if(bg) bg.style.transform = `translate(${-x}px, ${-y}px) scale(1.05)`;
+            }
+        });
+
+        /* * [5] 互動登入介面邏輯 (NEW)
+         * 實現任意鍵觸發顯示，以及按鈕隱藏
+         */
+        const loginContainer = document.getElementById('login-container');
+        const startPrompt = document.getElementById('start-prompt');
+        const closeBtn = document.getElementById('btn-close-trigger');
+        const useridInput = document.getElementById('userid');
+        
+        let isLoginVisible = false;
+
+        function showLogin() {
+            if (isLoginVisible) return;
+            isLoginVisible = true;
+            
+            loginContainer.classList.add('active');
+            startPrompt.style.opacity = '0'; // 隱藏提示
+            
+            // 延遲聚焦，確保動畫流暢且在手機上能喚起鍵盤
+            setTimeout(() => {
+                useridInput.focus();
+            }, 300);
+        }
+
+        function hideLogin(e) {
+            // 阻止事件冒泡，避免點擊關閉按鈕時被判定為「點擊螢幕」而立刻重新打開
+            if(e) e.stopPropagation();
+            
+            isLoginVisible = false;
+            loginContainer.classList.remove('active');
+            startPrompt.style.opacity = '1'; // 顯示提示
+            
+            // 移除焦點以關閉虛擬鍵盤
+            document.activeElement.blur();
+        }
+
+        // 監聽全域事件以顯示登入框
+        const triggerEvents = ['keydown', 'mousedown', 'touchstart'];
+        triggerEvents.forEach(evt => {
+            document.addEventListener(evt, (e) => {
+                // 如果登入框未顯示，則顯示
+                if (!isLoginVisible) {
+                    showLogin();
+                }
+            }, { passive: true }); // passive 優化觸控效能
+        });
+
+        // 綁定關閉按鈕事件
+        // 使用 click 和 touchstart 確保反應靈敏
+        closeBtn.addEventListener('click', hideLogin);
+        
+        // 防止點擊登入框內部時觸發其他的邏輯 (雖然 pointer-events 已處理，但做雙重保險)
+        loginContainer.addEventListener('mousedown', (e) => e.stopPropagation());
+        loginContainer.addEventListener('touchstart', (e) => e.stopPropagation());
+
+
+        // 6. 登入邏輯 (保留原樣)
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            var lkd = [
+                { "ckey": "U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" }, 
+                { "ckey": "U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+            ];
+
+            var jump_back_page_address = "sys_login_start_fear4ddju.php";
+            var userid = document.getElementById("userid").value;
+            var pwd = document.getElementById("pwd").value;
+            var uk = ex_md2n("aes_" + userid + "_" + pwd,100000);
+            var noany = true;
+
+            if (typeof AesDecrypt !== 'undefined') {
+                for (var i = 0; i != lkd.length; i++) {
+                    try {
+                        var decrypted = AesDecrypt(lkd[i].ckey, uk);
+                        if (decrypted != "") {
+                            document.cookie = "jobs_login_key=" + escape(decrypted);
+                            
+                            if (typeof ex_md2 !== 'undefined') {
+                                document.cookie = "jobs_login_pwd=" + ex_md2(pwd);
+                            }
+                            document.cookie = "jobs_login_name=" + userid;
+
+                            // 成功特效
+                            const loginBox = document.querySelector('.login-box');
+                            loginBox.style.transform = "scale(0.95)";
+                            loginBox.style.opacity = "0.5";
+                            document.body.style.transition = "opacity 0.8s";
+                            document.body.style.opacity = "0";
+                            
+                            setTimeout(() => {
+                                window.location.href = jump_back_page_address;
+                            }, 800);
+
+                            noany = false;
+                            break;
+                        }
+                    } catch (e) {
+                        console.error("AES Error", e);
+                    }
+                }
+            } else {
+                console.error("Error: AES library missing.");
+            }
+
+            if (noany) {
+                const errorOverlay = document.getElementById("error-overlay");
+                const retryBtn = document.getElementById("btn-retry-click");
+
+                errorOverlay.classList.add("active");
+                
+                retryBtn.onclick = function () {
+                    errorOverlay.classList.remove("active");
+                    document.getElementById("pwd").value = "";
+                    document.getElementById("pwd").focus();
+                };
+            }
+        });
+    </script>
+</body>
+</html>

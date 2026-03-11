@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STEAM_NET :: CITY_ACCESS</title>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* =========================================
+           1. 全域設定與變數 (Global Config)
+           ========================================= */
+        :root {
+            --steam-gold: #ffc107;
+            --steam-amber: #ff8f00;
+            --steam-bronze: #8d6e63;
+            --steam-dark: #1a120b;
+            --steam-rust: #d84315;
+            --steam-glow: rgba(255, 193, 7, 0.6);
+            --glass-bg: rgba(20, 15, 10, 0.85);
+            --glass-border: rgba(255, 193, 7, 0.4);
+            
+            /* 基礎縮放比例，預設為 1 (1080p) */
+            --scale-factor: 1;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 禁止捲動 */
+            background-color: #050505;
+            font-family: 'Courier New', Courier, 'Consolas', monospace; 
+            color: var(--steam-gold);
+            user-select: none; /* 禁止選取文字 */
+            -webkit-tap-highlight-color: transparent; /* 移除手機點擊藍框 */
+        }
+
+        /* =========================================
+           2. 背景與視角特效 (Background & FX)
+           ========================================= */
+        
+        /* 視差容器：改進邊界處理，確保任何解析度都不會有白邊 */
+        #viewport {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            /* 讓背景始終比視窗大，以容納呼吸動畫位移 */
+            width: 110vw;
+            height: 110vh;
+            /* 強制中心對齊 */
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        /* 用於應用呼吸動畫的內部容器 */
+        #bg-anim-wrapper {
+            width: 100%;
+            height: 100%;
+            animation: breatheCam 12s ease-in-out infinite alternate;
+        }
+
+        #bg-image {
+            width: 100%;
+            height: 100%;
+            background-image: url('//jplop.netlify.app/images/20251212/0e92fc7c-7d3b-461c-9e6b-d7f377409e06.jpg');
+            background-position: center;
+            background-size: cover; /* 關鍵：Cover 確保填滿 */
+            background-repeat: no-repeat;
+            filter: contrast(1.2) brightness(0.8) sepia(0.3);
+        }
+
+        @keyframes breatheCam {
+            0% { transform: scale(1.0) rotate(0deg); }
+            33% { transform: scale(1.02) translate(-1%, 0.5%) rotate(0.1deg); }
+            66% { transform: scale(1.03) translate(0.5%, -1%) rotate(-0.1deg); }
+            100% { transform: scale(1.01) translate(0, 0.5%) rotate(0deg); }
+        }
+
+        /* 煙霧 Canvas */
+        #smoke-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.8;
+            mix-blend-mode: screen;
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 6;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 40%, rgba(10, 5, 0, 0.8) 90%);
+        }
+
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 7;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        /* =========================================
+           3. UI 介面 (UI Elements)
+           ========================================= */
+
+        /* 系統啟動文字 */
+        .system-boot {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            z-index: 10;
+            width: 350px;
+            font-size: 14px;
+            line-height: 1.6;
+            text-shadow: 0 0 5px var(--steam-gold);
+            pointer-events: none;
+        }
+
+        .boot-line {
+            display: block;
+            opacity: 0;
+            animation: typeIn 0.1s forwards;
+            color: var(--steam-amber);
+            word-wrap: break-word;
+        }
+        
+        .status-ok { color: #4caf50; }
+
+        /* 點擊提示 */
+        .click-hint {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 9;
+            font-size: 16px;
+            letter-spacing: 4px;
+            color: var(--steam-gold);
+            text-shadow: 0 0 15px var(--steam-gold);
+            animation: pulseText 3s infinite;
+            /* 讓提示在手機上不會被誤觸 */
+            pointer-events: none; 
+        }
+
+        /* 登入視窗遮罩 */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        #login-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 登入框本體 (RWD 重點修改) */
+        .login-box {
+            width: 400px; /* 桌面預設 */
+            max-width: 90%; /* 手機防爆版 */
+            padding: 50px 40px;
+            background: var(--glass-bg);
+            border: 2px solid var(--steam-bronze);
+            box-shadow: 
+                0 0 30px rgba(0, 0, 0, 0.8),
+                inset 0 0 50px rgba(255, 143, 0, 0.1),
+                0 0 15px var(--steam-bronze);
+            position: relative;
+            transform: translateY(50px) scale(0.95);
+            transition: all 0.5s ease-out;
+            text-align: center;
+            box-sizing: border-box; /* 確保 Padding 不撐大寬度 */
+        }
+
+        #login-overlay.active .login-box {
+            transform: translateY(0) scale(1);
+        }
+
+        /* 裝飾性邊角 */
+        .ornament {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--steam-gold);
+            box-shadow: 0 0 5px var(--steam-gold);
+            transition: 0.3s;
+        }
+        .tl { top: -5px; left: -5px; border-right: none; border-bottom: none; }
+        .tr { top: -5px; right: -5px; border-left: none; border-bottom: none; }
+        .bl { bottom: -5px; left: -5px; border-right: none; border-top: none; }
+        .br { bottom: -5px; right: -5px; border-left: none; border-top: none; }
+
+        .login-title {
+            margin: 0 0 40px 0;
+            font-size: 24px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--steam-gold);
+            border-bottom: 1px solid var(--steam-bronze);
+            padding-bottom: 15px;
+            text-shadow: 0 0 10px var(--steam-amber);
+            font-weight: bold;
+        }
+
+        /* 輸入框樣式 */
+        .input-group {
+            margin-bottom: 30px;
+            text-align: left;
+            position: relative;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--steam-amber);
+            display: block;
+            margin-bottom: 8px;
+            text-shadow: 0 0 2px rgba(255, 143, 0, 0.5);
+        }
+
+        .input-group input {
+            width: 100%;
+            background: rgba(10, 5, 0, 0.6);
+            border: 1px solid var(--steam-bronze);
+            border-left: 3px solid var(--steam-gold);
+            color: #fff;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 18px;
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.3s;
+            border-radius: 0; /* iOS fix */
+            -webkit-appearance: none; /* iOS fix */
+        }
+
+        .input-group input:focus {
+            background: rgba(255, 193, 7, 0.05);
+            border-color: var(--steam-gold);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn-submit {
+            background: linear-gradient(180deg, rgba(20,20,20,0) 0%, rgba(255, 193, 7, 0.1) 100%);
+            color: var(--steam-gold);
+            border: 1px solid var(--steam-gold);
+            padding: 15px 30px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.1);
+        }
+
+        .btn-submit:hover {
+            background: var(--steam-gold);
+            color: #000;
+            box-shadow: 0 0 30px var(--steam-gold);
+        }
+
+        /* --- 錯誤訊息視窗 --- */
+        #error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+            border-radius: 2px;
+        }
+
+        #error-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .error-content {
+            color: var(--steam-rust);
+            text-align: center;
+            border: 2px solid var(--steam-rust);
+            padding: 30px;
+            background: rgba(20, 0, 0, 0.8);
+            box-shadow: 
+                0 0 40px rgba(216, 67, 21, 0.2), 
+                inset 0 0 20px rgba(216, 67, 21, 0.1);
+            animation: errorShake 0.4s ease-in-out;
+            width: 80%;
+            box-sizing: border-box;
+        }
+
+        .error-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--steam-rust);
+            border-bottom: 1px solid var(--steam-rust);
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        .error-msg {
+            font-size: 12px;
+            margin: 15px 0 25px 0;
+            color: #ffccbc;
+        }
+
+        .btn-retry {
+            background: transparent;
+            color: var(--steam-rust);
+            border: 1px solid var(--steam-rust);
+            padding: 8px 25px;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .btn-retry:hover {
+            background: var(--steam-rust);
+            color: #fff;
+            box-shadow: 0 0 15px var(--steam-rust);
+        }
+
+        /* =========================================
+           4. 動畫 Keyframes
+           ========================================= */
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.4; text-shadow: 0 0 5px var(--steam-gold); }
+            50% { opacity: 1; text-shadow: 0 0 20px var(--steam-gold), 0 0 10px #fff; }
+        }
+
+        @keyframes typeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-8px, 0); }
+            40% { transform: translate(8px, 0); }
+            60% { transform: translate(-5px, 0); }
+            80% { transform: translate(5px, 0); }
+        }
+
+        /* =========================================
+           5. RWD 媒體查詢 (Media Queries)
+           ========================================= */
+
+        /* [4K / 2K Ultra Wide] - 放大介面以保持視覺比例 */
+        @media (min-width: 2500px) {
+            :root { --scale-factor: 1.5; }
+            .login-box { transform: scale(1.5); }
+            #login-overlay.active .login-box { transform: scale(1.5); }
+            .system-boot { font-size: 20px; width: 500px; }
+            .click-hint { font-size: 24px; bottom: 120px; }
+        }
+
+        /* [Tablet / Laptop] 1024px ~ 1366px */
+        @media (max-width: 1366px) {
+            .login-box { padding: 40px 30px; }
+        }
+
+        /* [Mobile / Tablet Portrait] < 768px */
+        @media (max-width: 768px) {
+            /* 調整背景大小，避免移動端黑邊 */
+            #viewport { width: 120vh; height: 120vh; } 
+            
+            /* 登入框適配 */
+            .login-box { 
+                width: 85%; 
+                padding: 30px 20px;
+                /* 確保在手機上有足夠對比 */
+                background: rgba(20, 15, 10, 0.95);
+            }
+
+            .login-title { font-size: 20px; letter-spacing: 4px; margin-bottom: 25px;}
+
+            /* 輸入框加大，方便手指點擊 */
+            .input-group input { padding: 15px; font-size: 16px; }
+            .btn-submit { padding: 15px; font-size: 16px; }
+
+            /* 系統文字移位或縮小 */
+            .system-boot { 
+                top: 20px; 
+                left: 20px; 
+                width: calc(100% - 40px);
+                font-size: 12px;
+            }
+            
+            /* 手機版提示文字稍微往上 */
+            .click-hint { bottom: 60px; font-size: 14px; letter-spacing: 2px;}
+
+            /* 錯誤視窗調整 */
+            .error-content { width: 90%; padding: 20px; }
+            .error-title { font-size: 18px; }
+        }
+
+        /* [Small Mobile] < 380px (iPhone SE, Fold 摺疊螢幕) */
+        @media (max-width: 380px) {
+            .login-box { width: 92%; padding: 20px 15px; }
+            .input-group { margin-bottom: 20px; }
+            .ornament { display: none; } /* 螢幕太小則隱藏裝飾角 */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="viewport">
+        <div id="bg-anim-wrapper">
+            <div id="bg-image"></div>
+        </div>
+    </div>
+
+    <canvas id="smoke-canvas"></canvas>
+    <div class="vignette"></div>
+    <div class="grain"></div>
+
+    <div class="system-boot" id="boot-console"></div>
+
+    <div class="click-hint" id="hint-text">
+        [ CLICK TO ENGAGE NEURAL LINK ]
+    </div>
+
+    <div id="login-overlay">
+        <div class="login-box" id="login-box-inner">
+            <div class="ornament tl"></div><div class="ornament tr"></div>
+            <div class="ornament bl"></div><div class="ornament br"></div>
+            
+            <h2 class="login-title">Gate Access</h2>
+            
+            <form action="" method="POST" id="loginForm">
+                <div class="input-group">
+                    <label for="userid">OPERATOR ID</label>
+                    <input type="text" id="userid" name="userid" autocomplete="off" required autocapitalize="none">
+                </div>
+                
+                <div class="input-group">
+                    <label for="pwd">SECURITY KEY</label>
+                    <input type="password" id="pwd" name="pwd" required>
+                </div>
+                
+                <button type="submit" class="btn-submit">Authenticate</button>
+
+                <div id="error-overlay">
+                    <div class="error-content">
+                        <div class="error-title">UNAUTHORIZED</div>
+                        <div class="error-msg">CREDENTIALS REJECTED BY HOST</div>
+                        <button type="button" class="btn-retry" id="btn-retry-click">RESET CONNECTION</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================
+           1. 視覺特效：抽菸煙霧與夢幻光影 (Canvas)
+           ========================================= */
+        const canvas = document.getElementById('smoke-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        
+        // 判斷是否為移動裝置 (簡單判斷)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+        function resize() {
+            // 支援 High DPI (Retina) 螢幕
+            const dpr = window.devicePixelRatio || 1;
+            width = window.innerWidth;
+            height = window.innerHeight;
+            
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            // CSS 尺寸需維持
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class SmokeParticle {
+            constructor() {
+                this.reset(true);
+            }
+
+            reset(initial = false) {
+                // 發射點：螢幕中下方
+                this.x = width / 2 + (Math.random() * 200 - 100); 
+                this.y = height + (initial ? Math.random() * -height : 10);
+                
+                this.vx = (Math.random() - 0.5) * 1.5; 
+                this.vy = -(Math.random() * 1.5 + 0.5); 
+                
+                this.size = Math.random() * 30 + 10;
+                this.grow = Math.random() * 0.2 + 0.05; 
+                
+                this.alpha = Math.random() * 0.2 + 0.05; 
+                this.life = Math.random() * 500 + 200;
+                this.maxLife = this.life;
+                
+                const r = 200 + Math.floor(Math.random() * 55);
+                const g = 200 + Math.floor(Math.random() * 55);
+                const b = 200 + Math.floor(Math.random() * 55);
+                this.color = `${r},${g},${b}`;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx += (Math.random() - 0.5) * 0.02;
+                this.size += this.grow;
+                this.life--;
+                
+                if (this.life < 100) {
+                    this.alpha -= 0.001;
+                }
+            }
+
+            draw() {
+                // 如果在螢幕外則不繪製 (效能優化)
+                if (this.x < -100 || this.x > width + 100 || this.y < -100) return;
+
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                gradient.addColorStop(0, `rgba(${this.color}, 0.3)`);
+                gradient.addColorStop(0.5, `rgba(${this.color}, 0.1)`);
+                gradient.addColorStop(1, `rgba(${this.color}, 0)`);
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 火星特效 (手機版減少機率以省電)
+                let emberChance = isMobile ? 0.0005 : 0.001;
+                if (Math.random() < emberChance) {
+                    ctx.fillStyle = '#ff5722';
+                    ctx.globalAlpha = 0.8;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            }
+        }
+
+        // 初始化粒子：手機版減少數量
+        const particleCount = isMobile ? 60 : 150;
+        for(let i=0; i<particleCount; i++) {
+            particles.push(new SmokeParticle());
+        }
+
+        function animate() {
+            // 使用 CSS 像素寬高清除，適配 Retina
+            ctx.clearRect(0, 0, width, height);
+            
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+                if (p.life <= 0 || p.alpha <= 0 || p.y < -100) {
+                    p.reset();
+                }
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        /* =========================================
+           2. 系統啟動文字特效
+           ========================================= */
+        const bootConsole = document.getElementById('boot-console');
+        const lines = [
+            "ATMOSPHERE SENSORS... <span class='status-ok'>ACTIVE</span>",
+            "CONNECTING TO GRID... <span class='status-ok'>SYNCED</span>",
+            "LOADING RETINAL DISPLAY...",
+            "WARNING: LOW AIR QUALITY DETECTED",
+            "ESTABLISHING SECURE LINK..."
+        ];
+
+        let lineIndex = 0;
+        function typeWriter() {
+            if (lineIndex < lines.length) {
+                const div = document.createElement('div');
+                div.className = 'boot-line';
+                div.innerHTML = `>> ${lines[lineIndex]}`;
+                bootConsole.appendChild(div);
+                
+                // 自動刪除舊訊息以避免蓋住畫面 (手機版優化)
+                if(isMobile && bootConsole.children.length > 3) {
+                    bootConsole.removeChild(bootConsole.firstChild);
+                }
+
+                lineIndex++;
+                setTimeout(typeWriter, 600 + Math.random() * 400); 
+            }
+        }
+        setTimeout(typeWriter, 1000);
+
+        /* =========================================
+           3. 互動邏輯：開啟登入窗
+           ========================================= */
+        const loginOverlay = document.getElementById('login-overlay');
+        const hintText = document.getElementById('hint-text');
+        const loginBoxInner = document.getElementById('login-box-inner');
+        const useridInput = document.getElementById('userid');
+        let isLoginOpen = false;
+
+        function showLogin(e) {
+            if (isLoginOpen) return;
+            isLoginOpen = true;
+            loginOverlay.classList.add('active');
+            hintText.style.display = 'none';
+            
+            // 手機版避免自動聚焦導致鍵盤彈出遮擋視線，僅 Desktop 自動聚焦
+            if (!isMobile) {
+                setTimeout(() => { useridInput.focus(); }, 300);
+            }
+        }
+
+        window.addEventListener('click', showLogin);
+        window.addEventListener('touchstart', showLogin, {passive: true}); // 手機觸摸優化
+        window.addEventListener('keydown', (e) => { if (!isLoginOpen) showLogin(e); });
+        
+        loginBoxInner.addEventListener('click', (e) => { e.stopPropagation(); });
+        loginBoxInner.addEventListener('touchstart', (e) => { e.stopPropagation(); }, {passive: true});
+
+        /* =========================================
+           4. 登入驗證邏輯 (嚴謹)
+           ========================================= */
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            // 資料定義
+            var lkd = [
+                { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
+                { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+            ];
+            
+            var jump_back_page_address = "sys_login_start_fear4ddju.php";
+            var useridVal = document.getElementById("userid").value;
+            var pwdVal = document.getElementById("pwd").value;
+            
+            var uk = ex_md2n("aes_" + useridVal + "_" + pwdVal,100000);
+            var noany = true;
+
+            // 錯誤處理函式
+            function triggerError() {
+                const errorOverlay = document.getElementById("error-overlay");
+                const pwdInput = document.getElementById("pwd");
+                errorOverlay.classList.add("active");
+                
+                const retryBtn = document.getElementById("btn-retry-click");
+                retryBtn.onclick = function() {
+                    errorOverlay.classList.remove("active");
+                    pwdInput.value = "";
+                    pwdInput.focus();
+                };
+            }
+
+            // 防呆檢查：確保外部函式庫已載入
+            if (typeof AesDecrypt !== 'function') {
+                console.error("Critical Error: AES Library not loaded.");
+                alert("System Error: Encryption module missing. Please refresh.");
+                return;
+            }
+
+            try {
+                for (var i = 0; i != lkd.length; i++) {
+                    var decryptedKey = AesDecrypt(lkd[i].ckey, uk);
+                    if (decryptedKey != "") {
+                        // 登入成功
+                        document.cookie = "jobs_login_key=" + escape(decryptedKey);
+                        
+                        // MD2 檢查
+                        if (typeof ex_md2 === 'function') {
+                            document.cookie = "jobs_login_pwd=" + ex_md2(pwdVal);
+                        } else {
+                            document.cookie = "jobs_login_pwd=" + pwdVal;
+                        }
+                        
+                        document.cookie = "jobs_login_name=" + useridVal;
+                        window.location.href = jump_back_page_address;
+                        noany = false;
+                        break;
+                    }
+                }
+            } catch (err) {
+                console.error("Processing Error:", err);
+            }
+
+            if (noany) {
+                triggerError();
+            }
+        });
+    </script>
+</body>
+</html>

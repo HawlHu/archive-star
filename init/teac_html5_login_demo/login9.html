@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Windows Server 2021 - Login</title>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* =========================================
+           1. Reset & Base (基礎設定)
+           ========================================= */
+        * {
+            box-sizing: border-box;
+            user-select: none; /* 禁止選取 */
+            -webkit-tap-highlight-color: transparent; /* 移除手機點擊藍框 */
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 禁止捲動 */
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background-color: #000;
+        }
+
+        /* =========================================
+           2. Background Layer (背景層)
+           ========================================= */
+        #bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('//jplop.netlify.app/images/20251212/wserver.jpg');
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+            transition: transform 0.4s ease, filter 0.4s ease;
+            will-change: transform, filter; /* 硬體加速優化 */
+        }
+
+        body.login-mode #bg-layer {
+            filter: blur(25px);
+            transform: scale(1.02);
+        }
+
+        /* =========================================
+           3. Lock Screen Info (時間日期)
+           ========================================= */
+        #lock-screen-info {
+            position: absolute;
+            bottom: 60px;
+            left: 60px;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            z-index: 5;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* 登入模式下向上滑動並消失 */
+        body.login-mode #lock-screen-info {
+            opacity: 0;
+            transform: translateY(-50px);
+            pointer-events: none;
+        }
+
+        .time-display {
+            font-size: 96px;
+            font-weight: 300;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .date-display {
+            font-size: 28px;
+            font-weight: 400;
+        }
+
+        /* =========================================
+           4. Utility Bar (右下角功能列)
+           ========================================= */
+        .utility-bar {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            gap: 25px;
+            z-index: 10;
+        }
+
+        .util-icon {
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            transition: transform 0.2s, opacity 0.2s;
+            opacity: 0.9;
+        }
+
+        .util-icon:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .icon-svg {
+            fill: #fff;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* =========================================
+           5. Login Form Container (登入區塊)
+           ========================================= */
+        #login-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease 0.2s, transform 0.5s cubic-bezier(0.19, 1, 0.22, 1) 0.2s;
+            margin-top: 20px;
+            width: 100%; /* RWD 修正 */
+            max-width: 400px; /* 限制最大寬度 */
+        }
+
+        body.login-mode #login-container {
+            opacity: 1;
+            visibility: visible;
+            margin-top: 0;
+        }
+
+        .user-avatar {
+            width: 160px;
+            height: 160px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            flex-shrink: 0; /* 防止被擠壓 */
+        }
+
+        .user-avatar svg {
+            width: 100px;
+            height: 100px;
+            fill: #fff;
+        }
+
+        .user-name {
+            color: #fff;
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 25px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        /* Input Form */
+        #loginForm {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            position: relative;
+            width: 340px; /* 預設寬度 (1080P標準) */
+            max-width: 90%; /* 手機版保護機制 */
+            margin-bottom: 15px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 0;
+            color: #fff;
+            padding: 0 45px 0 15px;
+            font-size: 16px; /* iOS 預設不縮放大小 */
+            outline: none;
+            transition: background 0.2s, border-color 0.2s;
+            -webkit-appearance: none; /* 移除 iOS 預設樣式 */
+        }
+
+        input[type="text"]::placeholder,
+        input[type="password"]::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            background: rgba(255, 255, 255, 1);
+            border-color: #fff;
+            color: #000;
+        }
+        
+        #userid {
+            margin-bottom: 10px;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            width: 32px;
+            height: 32px;
+            background: rgba(100, 100, 100, 0.5);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.2s;
+            padding: 0;
+        }
+        
+        input:focus + .submit-btn,
+        input:focus ~ .submit-btn {
+            background: rgba(0, 120, 215, 1);
+        }
+
+        .submit-btn:hover {
+            background: rgba(0, 100, 180, 1) !important;
+        }
+
+        .arrow-icon {
+            fill: #fff;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Error Message */
+        #error-msg {
+            color: #fff;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: left;
+            width: 340px;
+            max-width: 90%;
+            display: none;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        /* Overlay */
+        #click-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            cursor: default;
+        }
+
+        body.login-mode #click-overlay {
+            display: none;
+        }
+
+        /* =========================================
+           6. RWD Media Queries (響應式核心)
+           ========================================= */
+
+        /* 筆電/平板 (小於 1366px 寬 或 小於 800px 高) */
+        @media screen and (max-width: 1366px), screen and (max-height: 800px) {
+            #lock-screen-info {
+                bottom: 40px;
+                left: 40px;
+            }
+            .time-display { font-size: 72px; }
+            .date-display { font-size: 24px; }
+            .utility-bar { bottom: 30px; right: 30px; }
+            .user-avatar { width: 140px; height: 140px; }
+            .user-avatar svg { width: 80px; height: 80px; }
+        }
+
+        /* 手機/直式平板 (小於 768px) */
+        @media screen and (max-width: 768px) {
+            /* 時間顯示改小並靠下 */
+            #lock-screen-info {
+                bottom: 80px; /* 留空間給滑動提示或視覺呼吸 */
+                left: 50%;
+                transform: translateX(-50%);
+                text-align: center;
+                width: 100%;
+            }
+            .time-display { font-size: 64px; }
+            .date-display { font-size: 20px; }
+
+            /* 登入模式下，時間移除位移效果直接隱藏，避免遮擋鍵盤 */
+            body.login-mode #lock-screen-info {
+                transform: translateX(-50%) translateY(-20px);
+            }
+
+            /* 功能列縮小 */
+            .utility-bar {
+                bottom: 20px;
+                right: 50%;
+                transform: translateX(50%);
+                gap: 20px;
+            }
+
+            /* 登入框適應 */
+            .input-wrapper {
+                width: 85vw; /* 寬度改為視窗的 85% */
+            }
+            #error-msg {
+                width: 85vw;
+                text-align: center;
+            }
+            
+            .user-avatar {
+                width: 120px;
+                height: 120px;
+                margin-bottom: 15px;
+            }
+            .user-avatar svg { width: 60px; height: 60px; }
+            .user-name { font-size: 24px; margin-bottom: 20px; }
+            
+            /* 手機鍵盤彈出時，稍微調整位置避免被遮擋 */
+            #login-container {
+                top: 45%; 
+            }
+        }
+
+        /* 超小手機 (如 iPhone SE) */
+        @media screen and (max-width: 360px) {
+            .time-display { font-size: 48px; }
+            .user-avatar { width: 100px; height: 100px; }
+        }
+
+        /* 4K/2K 高解析度優化 (維持比例但確保清晰) */
+        @media screen and (min-width: 2560px) {
+            /* 如果需要整體放大，可以開啟下行，但 Windows 風格通常保持精緻小巧 */
+            /* body { zoom: 1.5; } */ 
+            #lock-screen-info { bottom: 80px; left: 80px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="bg-layer"></div>
+
+    <div id="click-overlay" onclick="activateLogin()" ontouchend="activateLogin()"></div>
+
+    <div id="lock-screen-info">
+        <div class="time-display" id="clock">12:00</div>
+        <div class="date-display" id="date">Friday, December 12</div>
+    </div>
+
+    <div id="login-container">
+        <div class="user-avatar">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+        </div>
+
+        <div class="user-name">Administrator</div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="input-wrapper">
+                <input type="text" id="userid" name="userid" placeholder="User name" autocomplete="username" inputmode="text" required>
+            </div>
+
+            <div class="input-wrapper">
+                <input type="password" id="pwd" name="pwd" placeholder="Password" autocomplete="current-password" required>
+                <button type="submit" class="submit-btn">
+                    <svg class="arrow-icon" viewBox="0 0 24 24">
+                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="error-msg">The password is incorrect. Try again.</div>
+        </form>
+    </div>
+
+    <div class="utility-bar">
+        <div class="util-icon" onclick="notImplemented()">
+            <svg class="icon-svg" viewBox="0 0 24 24">
+                <path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/>
+            </svg>
+        </div>
+        <div class="util-icon" onclick="notImplemented()">
+            <svg class="icon-svg" viewBox="0 0 24 24">
+                <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/>
+            </svg>
+        </div>
+        <div class="util-icon" onclick="notImplemented()">
+            <svg class="icon-svg" viewBox="0 0 24 24">
+                <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/>
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        /* --- 1. 時間日期邏輯 --- */
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            // 格式化日期：例如 "Friday, December 12"
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString('en-US', options);
+
+            document.getElementById('clock').textContent = `${hours}:${minutes}`;
+            document.getElementById('date').textContent = dateStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock(); // 立即執行一次
+
+        /* --- 2. 介面互動邏輯 --- */
+        const body = document.body;
+        const useridInput = document.getElementById('userid');
+        const pwdInput = document.getElementById('pwd');
+        const errorMsg = document.getElementById('error-msg');
+        let isLoginActive = false;
+
+        function activateLogin() {
+            if (isLoginActive) return;
+            isLoginActive = true;
+            body.classList.add('login-mode');
+            
+            // 聚焦優化：延遲聚焦以避免手機鍵盤動畫卡頓
+            setTimeout(() => {
+                if(useridInput.value === "") {
+                    useridInput.focus();
+                } else {
+                    pwdInput.focus();
+                }
+            }, 400); 
+        }
+
+        // 監聽鍵盤任意鍵觸發 (除了特定功能鍵)
+        window.addEventListener('keydown', (e) => {
+            if (!isLoginActive) {
+                activateLogin();
+            }
+        });
+
+        // 監聽觸控 (針對移動設備優化)
+        window.addEventListener('touchstart', (e) => {
+             if (!isLoginActive && e.target.id === 'click-overlay') {
+                activateLogin();
+            }
+        }, {passive: true});
+
+        function notImplemented() {
+            alert("尚未登入");
+        }
+
+        /* --- 3. 核心登入驗證邏輯 (嚴格保留您的代碼) --- */
+        function handleLogin(e) {
+            e.preventDefault(); // 阻止表單預設提交
+
+            // 隱藏之前的錯誤訊息
+            errorMsg.style.display = 'none';
+
+            // --- 嵌入您的驗證代碼 Start ---
+            
+            //資料(demo admin admin/ test test)
+            //https://jplop.netlify.app/util_aes_utility
+            var lkd= [
+                {
+                    "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ=="
+                },
+                {
+                    "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w="
+                }
+            ];
+            
+            var jump_back_page_address = "sys_login_start_fear4ddju.php"; // 模擬成功跳轉頁面
+            
+            // 獲取輸入值
+            var uid_val = document.getElementById("userid").value;
+            var pwd_val = document.getElementById("pwd").value;
+
+            // 組合 Key
+            var uk = ex_md2n("aes_" + uid_val + "_" + pwd_val,100000);
+            var noany = true;
+        
+            //比對
+            if (typeof AesDecrypt !== 'undefined' && typeof ex_md2 !== 'undefined') {
+                for(var i=0; i!=lkd.length; i++){
+                    try {
+                        if(AesDecrypt(lkd[i].ckey, uk) != ""){
+                        
+                            //登入成功
+                            //由於這是純前端模擬，這裡僅做 Alert 提示成功，或模擬跳轉行為
+                            
+                            //Cookie 寫入 (模擬)
+                            document.cookie = "jobs_login_key=" + escape(AesDecrypt(lkd[i].ckey, uk));
+                            document.cookie = "jobs_login_pwd=" + ex_md2(pwd_val);
+                            document.cookie = "jobs_login_name=" + uid_val;
+                            
+                            noany = false;
+                            
+                            // 模擬系統登入轉圈效果
+                            document.getElementById('loginForm').style.opacity = '0.5';
+                            document.querySelector('.submit-btn').innerHTML = '...'; // 簡易 Loading
+                            
+                            setTimeout(function(){
+                                //alert("驗證成功！正在導向系統...");
+                                 window.location.href = jump_back_page_address; // 實際環境會跳轉
+                                // 重置介面 (Demo 用)
+                                //document.getElementById('loginForm').style.opacity = '1';
+                                //document.querySelector('.submit-btn').innerHTML = '<svg class="arrow-icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>';
+                            }, 500);
+                            
+                            break;
+                        }
+                    } catch (e) {
+                        console.error("Decryption error:", e);
+                    }
+                }
+            } else {
+                console.error("加密庫尚未加載完成，無法驗證。");
+                alert("系統錯誤：安全模組未加載 (js libraries missing)");
+                return;
+            }
+        
+            //失敗
+            if(noany){
+                // 模擬 Windows 密碼錯誤提示
+                pwdInput.value = "";
+                pwdInput.focus();
+                errorMsg.style.display = 'block';
+                // 為了視覺效果，讓錯誤訊息有點動畫
+                errorMsg.animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-5px)' },
+                    { transform: 'translateX(5px)' },
+                    { transform: 'translateX(0)' }
+                ], {
+                    duration: 200,
+                    iterations: 2
+                });
+            }
+
+            // --- 嵌入您的驗證代碼 End ---
+        }
+    </script>
+</body>
+</html>

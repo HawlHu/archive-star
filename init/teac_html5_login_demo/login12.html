@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>R.P.D. WORKSTATION :: LOGIN</title>
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+    <style>
+        /* --- 核心變數設定 --- */
+        :root {
+            --rpd-blue: #6d9eeb;
+            --rpd-dark-blue: #0b1d35;
+            --rpd-alert: #ff3333;
+            --crt-line-color: rgba(18, 16, 16, 0.2);
+            --screen-curve: radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.6) 90%, rgba(0,0,0,0.9) 100%);
+            --font-main: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        /* --- 全域設定 --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 禁止滾動，維持 OS 介面感 */
+            background-color: #000;
+            font-family: var(--font-main);
+            color: var(--rpd-blue);
+            user-select: none;
+            -webkit-font-smoothing: antialiased; /* 字體渲染優化 */
+        }
+
+        /* --- 背景層 (XP 桌布) --- */
+        #wallpaper-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 改為 cover 以適配各種長寬比，並鎖定中心點 */
+            background: url('//jplop.netlify.app/images/20251212/bio.jpg') no-repeat center center;
+            background-size: cover; 
+            z-index: 1;
+            filter: contrast(1.1) brightness(0.7) sepia(0.2) saturate(0.8);
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        /* --- CRT 視覺特效層 --- */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+            background: 
+                linear-gradient(var(--crt-line-color) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 4px 100%;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.7);
+            animation: flicker 0.15s infinite;
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1001;
+            pointer-events: none;
+            background: var(--screen-curve);
+        }
+
+        /* --- 啟動畫面 (Boot Sequence) --- */
+        #boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 900;
+            padding: 40px;
+            box-sizing: border-box;
+            color: #ccc;
+            font-size: 14px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow-y: auto; /* 防止 Boot 文字過多時溢出 */
+        }
+
+        .boot-line {
+            display: block;
+            margin-bottom: 5px;
+            word-wrap: break-word; /* 防止長字串撐開手機版面 */
+        }
+
+        /* --- 主介面 (Desktop UI) --- */
+        #desktop-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.5s;
+            display: none;
+        }
+
+        /* 頂部狀態列 */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background: rgba(0, 10, 30, 0.85);
+            border-bottom: 2px solid var(--rpd-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 2px;
+            white-space: nowrap; /* 防止文字換行 */
+        }
+
+        .rpd-logo-text {
+            font-weight: bold;
+            color: var(--rpd-blue);
+            text-shadow: 0 0 5px var(--rpd-blue);
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 左側圖示區 */
+        .icon-container {
+            position: absolute;
+            top: 60px;
+            left: 30px;
+            display: none; /* JS 控制顯示 */
+            flex-direction: column;
+            gap: 25px; /* 稍微縮小間距以容納6個 */
+            z-index: 20;
+        }
+
+        .desktop-icon {
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            opacity: 0.9;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .desktop-icon:hover, .desktop-icon:active {
+            transform: scale(1.1);
+            opacity: 1;
+            background: rgba(109, 158, 235, 0.15);
+            /* 移除虛線框，讓選擇更乾淨，或保留依個人喜好，此處保留輕微背景 */
+        }
+
+        /* Icon 圖片設定 - 已移除光暈框與邊框 */
+        .icon-img {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 5px;
+            background-color: transparent;
+            /* 移除邊框與陰影 */
+            border: none;
+            box-shadow: none;
+            /* 設定圖片填滿 */
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        /* 定義 6 個 Icon 的圖檔路徑 */
+        .icon-mypc { background-image: url('//jplop.netlify.app/images/20251212/w7_icon_mypc.ico'); }
+        .icon-dir  { background-image: url('//jplop.netlify.app/images/20251212/w7_icon_dir.ico'); }
+        .icon-search { background-image: url('//jplop.netlify.app/images/20251212/w7_icon_search.ico'); }
+        .icon-mail { background-image: url('//jplop.netlify.app/images/20251212/w7_icon_mail.ico'); }
+        .icon-task { background-image: url('//jplop.netlify.app/images/20251212/w7_icon_task.ico'); }
+        .icon-bin  { background-image: url('//jplop.netlify.app/images/20251212/w7_icon_delete.ico'); }
+
+        .icon-label {
+            color: #fff;
+            font-size: 11px; /* 稍微縮小字體以適配 */
+            text-shadow: 1px 1px 2px #000;
+            background: rgba(0,0,0,0.3); /* 輕微背景增加文字可讀性 */
+            padding: 2px 4px;
+            border-radius: 2px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        /* --- 登入視窗 (Login Box) --- */
+        .login-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* RWD 核心修改：寬度改為彈性，但最大不超過原始設計 */
+            width: 90%; 
+            max-width: 450px;
+            background: rgba(5, 15, 30, 0.85);
+            border: 2px solid var(--rpd-blue);
+            box-shadow: 0 0 20px rgba(109, 158, 235, 0.2), inset 0 0 30px rgba(0,0,0,0.8);
+            padding: 4px;
+            z-index: 50;
+            transition: all 0.3s ease; /* 讓轉向時的變化平滑 */
+        }
+
+        .login-inner-border {
+            border: 1px solid rgba(109, 158, 235, 0.5);
+            padding: 30px;
+            position: relative;
+        }
+
+        .corner-deco {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--rpd-blue);
+            box-shadow: 0 0 8px var(--rpd-blue);
+        }
+        .cd-tl { top: 0; left: 0; }
+        .cd-tr { top: 0; right: 0; }
+        .cd-bl { bottom: 0; left: 0; }
+        .cd-br { bottom: 0; right: 0; }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--rpd-blue);
+            padding-bottom: 10px;
+        }
+
+        .login-header h2 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--rpd-blue);
+        }
+
+        .login-header p {
+            margin: 5px 0 0 0;
+            font-size: 10px;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+
+        .input-row {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-row label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        .input-row input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #444;
+            color: var(--rpd-blue);
+            padding: 10px;
+            font-family: var(--font-main);
+            font-size: 18px; /* 18px 可以防止 iOS Safari 自動放大輸入框 */
+            outline: none;
+            box-sizing: border-box;
+            transition: 0.3s;
+            border-radius: 0; /* 移除手機預設圓角 */
+            -webkit-appearance: none;
+        }
+
+        .input-row input:focus {
+            border-color: var(--rpd-blue);
+            background: rgba(0, 20, 40, 0.8);
+            box-shadow: 0 0 10px rgba(109, 158, 235, 0.3);
+        }
+
+        .btn-action {
+            width: 100%;
+            background: transparent;
+            color: var(--rpd-blue);
+            border: 2px solid var(--rpd-blue);
+            padding: 12px;
+            font-family: var(--font-main);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            -webkit-appearance: none;
+        }
+
+        .btn-action:hover {
+            background: var(--rpd-blue);
+            color: #000;
+            box-shadow: 0 0 15px var(--rpd-blue);
+        }
+
+        .btn-action:active {
+            transform: scale(0.98);
+        }
+
+        /* --- 系統提示框 --- */
+        #system-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 90%;
+            max-width: 350px;
+            background: rgba(30, 0, 0, 0.9);
+            border: 2px solid var(--rpd-alert);
+            color: var(--rpd-alert);
+            z-index: 2000;
+            padding: 2px;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.3);
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+        }
+
+        #system-alert.active {
+            visibility: visible;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .alert-inner {
+            border: 1px solid rgba(255, 50, 50, 0.5);
+            padding: 20px;
+        }
+
+        .alert-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--rpd-alert);
+            padding-bottom: 5px;
+            text-shadow: 0 0 5px var(--rpd-alert);
+        }
+
+        .alert-msg {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: #fff;
+            word-wrap: break-word;
+        }
+
+        .btn-alert {
+            background: transparent;
+            border: 1px solid var(--rpd-alert);
+            color: var(--rpd-alert);
+            padding: 5px 15px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .btn-alert:hover {
+            background: var(--rpd-alert);
+            color: #000;
+        }
+
+        /* --- 動畫 Keyframes --- */
+        @keyframes flicker {
+            0% { opacity: 0.95; }
+            50% { opacity: 0.85; }
+            100% { opacity: 0.95; }
+        }
+
+        /* =========================================
+           RWD 響應式規則 (核心修改區)
+           ========================================= */
+
+        /* 1. 針對平板與手機 (寬度小於 768px) */
+        /* 嚴格執行：手機版面強制隱藏所有桌面 Icon */
+        @media screen and (max-width: 768px) {
+            .top-bar {
+                padding: 0 10px;
+                font-size: 10px;
+            }
+            
+            /* 使用 !important 覆蓋 JS 的 inline style */
+            .icon-container {
+                display: none !important; 
+            }
+        }
+
+        /* 2. 針對超小手機 (寬度小於 480px) */
+        @media screen and (max-width: 480px) {
+            .login-inner-border {
+                padding: 20px;
+            }
+            
+            .login-header h2 {
+                font-size: 20px;
+            }
+        }
+
+        /* 3. 針對高度不足的螢幕 (手機橫放、舊款筆電 1366x768) */
+        /* 當高度小於 600px 時，縮小登入框以確保不被切掉，並隱藏 Icon */
+        @media screen and (max-height: 600px) {
+            .login-wrapper {
+                /* 使用 scale 縮放，保持比例但減少佔用空間 */
+                transform: translate(-50%, -50%) scale(0.85);
+            }
+            
+            .icon-container {
+                display: none !important;
+            }
+            
+            .login-header {
+                margin-bottom: 15px;
+            }
+            
+            .input-row {
+                margin-bottom: 10px;
+            }
+        }
+
+        /* 4. 針對極矮螢幕 (手機橫放打字時) */
+        @media screen and (max-height: 400px) {
+            .login-wrapper {
+                transform: translate(-50%, -50%) scale(0.7);
+            }
+            .top-bar {
+                display: none; /* 極矮時隱藏頂部列 */
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="crt-overlay"></div>
+    <div class="vignette"></div>
+
+    <div id="boot-screen"></div>
+
+    <div id="wallpaper-layer"></div>
+
+    <div id="desktop-ui">
+        <div class="top-bar">
+            <span class="rpd-logo-text">R.P.D. OS v3.1</span>
+            <span id="clock">00:00:00</span>
+        </div>
+
+        <div class="icon-container">
+            <div class="desktop-icon" onclick="showSystemAlert()">
+                <div class="icon-img icon-mypc"></div>
+                <div class="icon-label">MY COMPUTER</div>
+            </div>
+            <div class="desktop-icon" onclick="showSystemAlert()">
+                <div class="icon-img icon-dir"></div>
+                <div class="icon-label">CASE FILES</div>
+            </div>
+            <div class="desktop-icon" onclick="showSystemAlert()">
+                <div class="icon-img icon-search"></div>
+                <div class="icon-label">SEARCH</div>
+            </div>
+            <div class="desktop-icon" onclick="showSystemAlert()">
+                <div class="icon-img icon-mail"></div>
+                <div class="icon-label">MAIL</div>
+            </div>
+             <div class="desktop-icon" onclick="showSystemAlert()">
+                <div class="icon-img icon-task"></div>
+                <div class="icon-label">TASK MGR</div>
+            </div>
+            <div class="desktop-icon" onclick="showSystemAlert()">
+                <div class="icon-img icon-bin"></div>
+                <div class="icon-label">RECYCLE BIN</div>
+            </div>
+        </div>
+
+        <div class="login-wrapper">
+            <div class="corner-deco cd-tl"></div><div class="corner-deco cd-tr"></div>
+            <div class="corner-deco cd-bl"></div><div class="corner-deco cd-br"></div>
+            
+            <div class="login-inner-border">
+                <div class="login-header">
+                    <h2>USER LOGIN</h2>
+                    <p>RACCOON POLICE DEPARTMENT</p>
+                </div>
+
+                <form id="loginForm">
+                    <div class="input-row">
+                        <label for="userid">IDENTIFICATION (ID)</label>
+                        <input type="text" id="userid" name="userid" autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <div class="input-row">
+                        <label for="pwd">ACCESS KEY (PASSWORD)</label>
+                        <input type="password" id="pwd" name="pwd">
+                    </div>
+
+                    <button type="submit" class="btn-action">AUTHENTICATE</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="system-alert">
+        <div class="alert-inner">
+            <div class="alert-title">ACCESS DENIED</div>
+            <div class="alert-msg">USER NOT AUTHENTICATED.<br>PLEASE LOGIN FIRST.</div>
+            <button class="btn-alert" onclick="closeSystemAlert()">CONFIRM</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- 1. Boot Sequence (啟動模擬) --- */
+        const bootScreen = document.getElementById('boot-screen');
+        const bootLines = [
+            "BIOS DATE 09/22/1998 14:22:51 VER 1.02",
+            "CPU: INTEL(R) PENTIUM(R) PRO CPU 200MHz",
+            "64MB RAM SYSTEM ... OK",
+            "INITIALIZING VIDEO ADAPTER ... OK",
+            "LOADING R.P.D. SECURITY KERNEL ...",
+            "MOUNTING VOLUME C: [XP_BLISS] ... OK",
+            "CHECKING NETWORK PROTOCOLS ...",
+            "ESTABLISHING SECURE CONNECTION ... DONE",
+            "STARTING GUI INTERFACE ..."
+        ];
+
+        let lineIdx = 0;
+        function runBoot() {
+            if (lineIdx < bootLines.length) {
+                const p = document.createElement('div');
+                p.className = 'boot-line';
+                p.textContent = bootLines[lineIdx];
+                bootScreen.appendChild(p);
+                // 自動捲動到底部
+                bootScreen.scrollTop = bootScreen.scrollHeight;
+                lineIdx++;
+                // 模擬不規則的讀取時間
+                setTimeout(runBoot, Math.random() * 400 + 100);
+            } else {
+                // Boot 完成，切換介面
+                setTimeout(() => {
+                    bootScreen.style.display = 'none';
+                    document.getElementById('wallpaper-layer').style.opacity = '1';
+                    const desktop = document.getElementById('desktop-ui');
+                    desktop.style.display = 'block';
+                    // 為了 icon 的 flex 動畫正常，將 icon container 的 display 設為 flex
+                    // 注意：CSS 的 media query 有設定 !important 來在手機上強制隱藏
+                    document.querySelector('.icon-container').style.display = 'flex';
+                    
+                    setTimeout(() => desktop.style.opacity = '1', 50);
+                    document.getElementById('userid').focus();
+                }, 800);
+            }
+        }
+        
+        window.onload = runBoot;
+
+        /* --- 2. 時鐘功能 --- */
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('clock').innerText = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        /* --- 3. 系統提示與 UI 邏輯 --- */
+        const alertBox = document.getElementById('system-alert');
+        const alertMsgDiv = alertBox.querySelector('.alert-msg');
+        const alertTitleDiv = alertBox.querySelector('.alert-title');
+
+        function showSystemAlert(customTitle, customMsg) {
+            alertTitleDiv.textContent = customTitle || "SYSTEM ALERT";
+            alertMsgDiv.innerHTML = customMsg || "ACCESS RESTRICTED.<br>SYSTEM STATUS: <span style='color:red'>NOT LOGGED IN</span>";
+            
+            document.body.style.textShadow = "0 0 5px red";
+            setTimeout(() => document.body.style.textShadow = "none", 100);
+
+            alertBox.classList.add('active');
+        }
+
+        function closeSystemAlert() {
+            alertBox.classList.remove('active');
+            const pwdInput = document.getElementById('pwd');
+            if(pwdInput.value !== "") {
+                pwdInput.value = "";
+                pwdInput.focus();
+            }
+        }
+
+        // 背景點擊不做動作，避免在手機上誤觸煩人
+        document.getElementById('wallpaper-layer').addEventListener('click', () => {
+             // Optional: showSystemAlert("DESKTOP", "FUNCTIONS LOCKED UNTIL LOGIN");
+        });
+
+        /* --- 4. 登入核心邏輯 (原始邏輯保留) --- */
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            var lkd= [
+                { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
+                { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+            ];
+            
+            var jump_back_page_address="sys_login_start_fear4ddju.php";
+            
+            var uid = document.getElementById("userid").value;
+            var pwd = document.getElementById("pwd").value;
+
+            if(uid.trim() === "" || pwd.trim() === "") {
+                showSystemAlert("INPUT ERROR", "USER ID AND PASSWORD REQUIRED.");
+                return;
+            }
+
+            var uk=ex_md2n("aes_" + uid + "_" + pwd,100000);
+            var noany=true;
+        
+            if (typeof AesDecrypt === 'undefined' || typeof ex_md2 === 'undefined') {
+                showSystemAlert("SYSTEM ERROR", "ENCRYPTION MODULE NOT LOADED.<br>PLEASE CHECK NETWORK.");
+                return;
+            }
+
+            for(var i=0; i!=lkd.length; i++){
+                try {
+                    if(AesDecrypt(lkd[i].ckey, uk) != "") {
+                    
+                        document.cookie = "jobs_login_key=" + escape(AesDecrypt(lkd[i].ckey, uk));
+                        document.cookie = "jobs_login_pwd=" + ex_md2(pwd);
+                        document.cookie = "jobs_login_name=" + uid;
+                        
+                        const loginBox = document.querySelector('.login-wrapper');
+                        loginBox.innerHTML = '<div style="text-align:center; padding:40px; color:#0f0; text-shadow:0 0 10px #0f0;"><h3>ACCESS GRANTED</h3><p>LOADING PROFILE...</p></div>';
+                        
+                        setTimeout(() => {
+                            window.location.href = jump_back_page_address;
+                        }, 1500);
+
+                        noany = false;
+                        break;
+                    }
+                } catch (e) {
+                    console.error("Decryption error", e);
+                }
+            }
+        
+            if(noany){
+                showSystemAlert("AUTH FAILED", "INVALID CREDENTIALS.<br>ATTEMPT LOGGED.");
+            }
+        });
+    </script>
+</body>
+</html>

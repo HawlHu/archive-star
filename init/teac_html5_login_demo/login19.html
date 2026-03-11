@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Web System - Login</title>
+    
+    <script src="https://jplop.netlify.app/js/aes.js"></script>
+    <script src="https://jplop.netlify.app/js/ex_md2.js"></script>
+    <script src="https://jplop.netlify.app/js/tw-sack.js"></script>
+    <script src="https://jplop.netlify.app/js/database.js"></script>
+  	<script src="https://jplop.netlify.app/js/esheep.min.js"></script>
+    
+    <style>
+        /* =========================================
+           1. 基礎 CSS 重設 (Reset & IE Compatibility)
+           ========================================= */
+        * {
+            box-sizing: border-box; /* IE8+ */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background-color: #000;
+        }
+
+        .ie8 body, .ie8 html { font-family: SimSun, sans-serif; }
+
+        /* =========================================
+           2. 類 XP 草原背景層 (硬體加速 & Filter)
+           ========================================= */
+        #bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://jplop.netlify.app/images/20260301/esheep_bgimg_4k.jpg');
+            background-size: cover;          
+            filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='https://jplop.netlify.app/images/20260301/esheep_bgimg_4k.jpg', sizingMethod='scale'); 
+            background-position: center bottom;
+            background-repeat: no-repeat;
+            z-index: 1;
+            
+            transition: transform 0.4s ease, filter 0.4s ease;
+            -webkit-transition: transform 0.4s ease, -webkit-filter 0.4s ease;
+        }
+
+        body.login-mode #bg-layer {
+            -webkit-filter: blur(25px);
+            filter: blur(25px);
+            -webkit-transform: scale(1.02);
+            transform: scale(1.02);
+        }
+
+        /* =========================================
+           3. 鎖定畫面層 (按任意鍵登入)
+           ========================================= */
+        #lock-screen-prompt {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 👇 已經降為 50，讓綿羊可以擋在它前面被抓 👇 */
+            z-index: 50;
+            background-color: transparent;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            display: block;
+        }
+
+        body.login-mode #lock-screen-prompt {
+            display: none !important;
+            opacity: 0;
+        }
+
+        /* 1. 左下角時間與日期 */
+        #lock-info {
+            position: absolute;
+            bottom: 60px;
+            left: 60px;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Color=#80000000, Direction=135, Strength=5)";
+            
+            /* 隱形地板 */
+            border-top: 1px solid transparent; 
+        }
+
+        .time-display {
+            font-size: 96px;
+            font-weight: 300;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .date-display {
+            font-size: 28px;
+            font-weight: 400;
+        }
+
+        /* 2. 中間提示文字 */
+        #press-key-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            white-space: nowrap; 
+            
+            /* 隱形地板 */
+            border-top: 1px solid transparent; 
+            
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            
+            margin-top: -12px;
+            margin-left: -130px; 
+            
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            margin: 0; 
+        }
+
+        /* =========================================
+           4. 功能列 (右下角)
+           ========================================= */
+        /* 3. 右下角功能列 */
+        .utility-bar {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            /* 👇 修改為 60 👇 */
+            z-index: 60;
+            
+            /* 隱形地板 */
+            border-top: 1px solid transparent; 
+        }
+        
+        .util-icon {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            margin-left: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            opacity: 0.9;
+        }
+
+        .util-icon:hover {
+            opacity: 1;
+            -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+        }
+
+        .icon-svg { fill: #fff; width: 100%; height: 100%; }
+
+        /* =========================================
+           5. 登入框容器 (Login Form)
+           ========================================= */
+        #login-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            z-index: 300;
+            width: 85%;
+            max-width: 400px;
+            display: none;
+            
+            transition: opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s;
+            -webkit-transition: opacity 0.5s ease 0.2s, -webkit-transform 0.5s ease 0.2s;
+        }
+
+        body.login-mode #login-container {
+            display: block !important;
+            opacity: 1;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .user-avatar {
+            width: 140px; height: 140px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+            display: block;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+        
+        .ie8 .user-avatar { border-radius: 0; background-color: #333; }
+
+        .user-avatar svg { width: 90px; height: 90px; fill: #fff; margin-top: 25px; }
+
+        .user-name {
+            color: #fff;
+            font-size: 32px;
+            font-weight: 300;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        #loginForm { width: 100%; text-align: center; }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 340px;
+            margin: 0 auto 10px auto;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            padding: 0 45px 0 15px;
+            font-size: 16px;
+            outline: none;
+            
+            border-radius: 0;
+            -webkit-appearance: none;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        
+        .ie8 input[type="text"],
+        .ie8 input[type="password"] { background-color: #000; border-color: #999; }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            background: rgba(255, 255, 255, 1);
+            border-color: #fff;
+            color: #000;
+        }
+        
+        .ie8 input[type="text"]:focus,
+        .ie8 input[type="password"]:focus { background-color: #fff; border-color: #fff; color: #000; }
+
+        #userid { margin-bottom: 10px; }
+
+        .submit-btn {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            width: 32px;
+            height: 32px;
+            background: rgba(100, 100, 100, 0.5);
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: background 0.2s;
+        }
+        
+        .ie8 .submit-btn { background-color: #333; color: #fff; }
+
+        input:focus + .submit-btn,
+        input:focus ~ .submit-btn { background: rgba(0, 120, 215, 1); }
+
+        .submit-btn:hover { background: rgba(0, 100, 180, 1) !important; }
+
+        .arrow-icon { fill: #fff; width: 16px; height: 16px; }
+
+        #error-msg {
+            color: #fff;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            width: 100%;
+            display: none;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        /* =========================================
+           6. RWD Media Queries
+           ========================================= */
+        @media screen and (max-width: 1366px), screen and (max-height: 800px) {
+            #lock-info { bottom: 40px; left: 40px; }
+            .time-display { font-size: 72px; }
+            .date-display { font-size: 24px; }
+            #press-key-text { font-size: 20px; }
+            .user-avatar { width: 120px; height: 120px; }
+            .user-avatar svg { width: 70px; height: 70px; margin-top: 25px; }
+        }
+
+        @media screen and (max-width: 768px) {
+            #lock-info { bottom: 80px; left: 0; width: 100%; text-align: center; }
+            .time-display { font-size: 64px; }
+            .date-display { font-size: 20px; }
+            
+            #press-key-text { 
+                top: 50%; 
+                bottom: auto; 
+                -webkit-transform: translate(-50%, -50%);
+                transform: translate(-50%, -50%); 
+                font-size: 18px; 
+            }
+            
+            body.login-mode #lock-info { opacity: 0; }
+            .utility-bar { bottom: 20px; width: 100%; text-align: center; left: 0; right: 0; }
+            .util-icon { margin: 0 10px; }
+            @media screen and (max-height: 570px) {
+                #login-container { top: 40%; }
+                .user-avatar { width: 100px; height: 100px; margin-bottom: 10px; }
+                .user-avatar svg { width: 50px; height: 50px; margin-top: 25px; }
+                .user-name { font-size: 24px; }
+            }
+        }
+    </style>
+    
+</head>
+<body>
+    <div id="bg-layer"></div>
+    
+    <div id="lock-screen-prompt">
+        <div id="press-key-text">按下滑鼠或任意鍵登入</div>
+        <div id="lock-info">
+            <div class="time-display" id="clock">12:00</div>
+            <div class="date-display" id="date">Friday, December 12</div>
+        </div>
+    </div>
+    
+    <div id="login-container">
+        <div class="login-header">
+            <div class="user-avatar">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+            </div>
+            <div class="user-name">Administrator</div>
+        </div>
+        
+        <form id="loginForm">
+            <div class="input-wrapper">
+                <input type="text" id="userid" name="userid" placeholder="User name" autocomplete="username" inputmode="text" required>
+            </div>
+            <div class="input-wrapper">
+                <input type="password" id="pwd" name="pwd" placeholder="Password" autocomplete="current-password" required>
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <svg class="arrow-icon" viewBox="0 0 24 24">
+                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="error-msg">The password is incorrect. Try again.</div>
+        </form>
+    </div>
+
+    <div class="utility-bar">
+        <div class="util-icon" id="utilIcon1">
+            <svg class="icon-svg" viewBox="0 0 24 24">
+                <path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/>
+            </svg>
+        </div>
+        <div class="util-icon" id="utilIcon2">
+            <svg class="icon-svg" viewBox="0 0 24 24">
+                <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/>
+            </svg>
+        </div>
+        <div class="util-icon" id="utilIcon3">
+            <svg class="icon-svg" viewBox="0 0 24 24">
+                <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/>
+            </svg>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        /* --- 0. 基礎相容性輔助函式 --- */
+        function uiBindEvent(element, eventName, handler) {
+            if (element.addEventListener) {
+                element.addEventListener(eventName, handler, false);
+            } else if (element.attachEvent) {
+                element.attachEvent("on" + eventName, handler);
+            } else {
+                element["on" + eventName] = handler;
+            }
+        }
+        function preventAction(event) {
+            var e = event || window.event;
+            if (e.preventDefault) e.preventDefault();
+            else e.returnValue = false;
+            return false;
+        }
+
+        /* --- 1. 時間日期邏輯 --- */
+        function updateClock() {
+            var now = new Date();
+            var hours = String(now.getHours());
+            var minutes = String(now.getMinutes());
+            
+            if (hours.length === 1) hours = '0' + hours;
+            if (minutes.length === 1) minutes = '0' + minutes;
+            
+            var weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            var month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            var dateStr = weekday[now.getDay()] + ', ' + month[now.getMonth()] + ' ' + now.getDate();
+
+            document.getElementById('clock').innerHTML = hours + ':' + minutes;
+            document.getElementById('date').innerHTML = dateStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        /* --- 2. 介面互動邏輯 --- */
+        var isLoginActive = false;
+        var mySheep = null;
+        var docEl = document.documentElement;
+
+        function activateLogin(e) {
+            if (isLoginActive) return;
+            isLoginActive = true;
+            
+            if (document.body.classList) {
+                document.body.classList.add('login-mode');
+            } else {
+                document.body.className += ' login-mode';
+            }
+            
+            if (mySheep) mySheep.remove();
+
+            setTimeout(function() {
+                var userid = document.getElementById('userid');
+                var pwd = document.getElementById('pwd');
+                
+                if (userid && (userid.value === "" || userid.value === undefined)) {
+                    userid.focus();
+                } else if (pwd) {
+                    pwd.focus();
+                }
+                
+                if (docEl.className.indexOf('ie8') !== -1) {
+                    var container = document.getElementById('login-container');
+                    if (container) {
+                        container.style.marginTop = -(container.offsetHeight / 2) + "px";
+                        container.style.marginLeft = -(container.offsetWidth / 2) + "px";
+                    }
+                }
+            }, 400); 
+        }
+
+        // 👇 新增判斷：確認使用者是不是正在「抓綿羊」或點擊「功能按鈕」
+        function isClickOnSheepOrButton(target) {
+            var current = target;
+            while (current && current !== document) {
+                // 若點擊目標包含 esheep_ 開頭的 ID，代表抓到羊了
+                if (current.id && current.id.indexOf('esheep_') === 0) return true;
+                // 若點擊目標為右下角功能列
+                if (current.className && current.className.indexOf('util-icon') !== -1) return true;
+                current = current.parentNode;
+            }
+            return false;
+        }
+
+        uiBindEvent(document, 'mousedown', function(e) {
+            if (!isLoginActive) {
+                var target = e.target || e.srcElement;
+                // 👇 只有當滑鼠不是點在羊身上時，才觸發登入解鎖
+                if (!isClickOnSheepOrButton(target)) {
+                    activateLogin(e);
+                }
+            }
+        });
+        
+        function notImplemented() { alert("尚未登入"); }
+        uiBindEvent(document.getElementById('utilIcon1'), 'click', notImplemented);
+        uiBindEvent(document.getElementById('utilIcon2'), 'click', notImplemented);
+        uiBindEvent(document.getElementById('utilIcon3'), 'click', notImplemented);
+
+        if (!navigator.userAgent.match(/MSIE [89]/)) {
+            uiBindEvent(document, 'touchstart', function(e) {
+                 if (!isLoginActive) {
+                    var target = e.target || e.srcElement;
+                    // 👇 同樣過濾觸控行為，摸羊不會解鎖
+                    if (!isClickOnSheepOrButton(target)) {
+                        preventAction(e); 
+                        activateLogin(e);
+                    }
+                }
+            });
+        }
+
+        uiBindEvent(document, 'keydown', function(e) {
+            if (!isLoginActive) {
+                var key = e.keyCode || e.which;
+                if (key !== 16 && key !== 17 && key !== 18 && key !== 20) activateLogin(e);
+            }
+        });
+
+        /* --- 3. 核心登入驗證邏輯 --- */
+        var loginForm = document.getElementById('loginForm');
+        
+        uiBindEvent(loginForm, 'submit', function(e) {
+            preventAction(e);
+
+            var useridInput = document.getElementById('userid');
+            var pwdInput = document.getElementById('pwd');
+            var errorMsg = document.getElementById('error-msg');
+            
+            var lkd = [
+                {"ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ=="},
+                {"ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w="}
+            ];
+            var jump_back_page_address = "sys_login_start_fear4ddju.php"; 
+            var uid_val = useridInput.value;
+            var pwd_val = pwdInput.value;
+            var uk = ex_md2n("aes_" + uid_val + "_" + pwd_val, 100000);
+            var noany = true;
+
+            if (typeof AesDecrypt !== 'undefined' && typeof ex_md2 !== 'undefined') {
+                for(var i = 0; i !== lkd.length; i++){
+                    try {
+                        var decrypted = AesDecrypt(lkd[i].ckey, uk);
+                        if(decrypted != ""){
+                            document.cookie = "jobs_login_key=" + escape(decrypted);
+                            document.cookie = "jobs_login_pwd=" + ex_md2(pwd_val);
+                            document.cookie = "jobs_login_name=" + uid_val;
+                            noany = false;
+                            
+                            loginForm.style.opacity = '0.5';
+                            var btnSvg = document.getElementById('submitBtn');
+                            if (btnSvg) btnSvg.innerHTML = '...'; 
+                            
+                            setTimeout(function(){
+                                window.location.href = jump_back_page_address;
+                            }, 500);
+                            break;
+                        }
+                    } catch (e) {
+                        if (typeof console !== 'undefined') console.error("Decryption error:", e);
+                    }
+                }
+            } else {
+                if (typeof console !== 'undefined') console.error("加密庫尚未加載完成，無法驗證。");
+                alert("系統錯誤：安全模組未加載 (js libraries missing)");
+                return;
+            }
+
+            if(noany){
+                pwdInput.value = "";
+                pwdInput.focus();
+                errorMsg.style.display = 'block';
+                if (errorMsg.animate) {
+                    errorMsg.animate([
+                        { transform: 'translateX(0)' },
+                        { transform: 'translateX(-5px)' },
+                        { transform: 'translateX(5px)' },
+                        { transform: 'translateX(0)' }
+                    ], { duration: 200, iterations: 2 });
+                }
+            }
+        });
+
+        /* --- 4. 初始化小綿羊 --- */
+		mySheep1 = new WebESheep();
+		mySheep2 = new WebESheep();
+		mySheep3 = new WebESheep();
+		mySheep4 = new WebESheep();
+        window.onload = function() {
+            updateClock();
+            if (typeof WebESheep !== 'undefined') {
+				setTimeout("mySheep1.start();", 100);
+				setTimeout("mySheep2.start();", 2100);
+				setTimeout("mySheep3.start();", 10100);
+				setTimeout("mySheep4.start();", 100100);
+            }
+        };
+    </script>
+</body>
+</html>

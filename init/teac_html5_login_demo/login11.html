@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BALAMB GARDEN NETWORK :: LOGIN</title>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* =========================================
+           1. 核心變數與字體 (Core & Fonts)
+           ========================================= */
+        @font-face {
+            font-family: 'FF8Font';
+            src: local('Consolas'), local('Courier New'), monospace;
+        }
+
+        :root {
+            --ff8-bg-start: #0a0a1a;
+            --ff8-bg-end: #000000;
+            --ff8-border-light: #888899;
+            --ff8-border-dark: #333344;
+            --ff8-text: #e0e0e0;
+            --ff8-highlight: #ffff00;
+            --ff8-cyan: #00ffff;
+            --ff8-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+            --ff8-window-bg: rgba(16, 16, 24, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+            /* 針對手機停用長按選取，保持 App 質感，但在輸入框允許 */
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'FF8Font', 'Consolas', monospace;
+            color: var(--ff8-text);
+            background-color: #000;
+        }
+
+        /* 桌面版預設不滾動，保持沉浸感 */
+        body {
+            overflow: hidden;
+        }
+
+        /* =========================================
+           2. 背景與視覺特效 (Background & VFX)
+           ========================================= */
+        .wallpaper {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: url('//jplop.netlify.app/images/20251212/ff8.jpg') no-repeat center center;
+            background-size: cover;
+            z-index: 0;
+        }
+
+        .overlay-scanlines {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        /* =========================================
+           3. 通用元件樣式 (Components)
+           ========================================= */
+        .ff8-window {
+            background: var(--ff8-window-bg);
+            border: 2px solid var(--ff8-border-light);
+            border-radius: 2px;
+            box-shadow: 
+                inset 0 0 20px rgba(0,0,0,0.8),
+                0 0 0 1px #000,
+                5px 5px 15px rgba(0,0,0,0.5);
+            padding: 15px;
+            position: relative;
+        }
+
+        .ff8-window::after {
+            content: '';
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+        }
+
+        /* 輸入框樣式 */
+        .ff8-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: none;
+            border-bottom: 2px solid var(--ff8-border-light);
+            color: #fff;
+            font-family: inherit;
+            font-size: 18px;
+            padding: 8px 10px; /* 稍微增加高度以利觸控 */
+            outline: none;
+            transition: border-color 0.3s, background 0.3s;
+            border-radius: 0; /* iOS 修正 */
+        }
+
+        .ff8-input:focus {
+            border-bottom-color: var(--ff8-highlight);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 按鈕樣式 */
+        .btn-submit {
+            margin-top: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--ff8-border-light);
+            color: #fff;
+            font-size: 16px;
+            padding: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: inherit;
+            transition: all 0.2s;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            width: 100%; /* 手機版預設滿寬，桌面版會被容器限制 */
+        }
+
+        .btn-submit:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--ff8-highlight);
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.2);
+        }
+
+        /* =========================================
+           4. 佈局容器 (Layout Container)
+           ========================================= */
+        .desktop-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            min-height: 100vh; /* 確保內容多時可延伸 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        /* =========================================
+           5. 桌面版特定樣式 (Desktop / Default)
+           這裡保留您原本 1080P/4K 的嚴格設計
+           ========================================= */
+        
+        /* Header & Status: 預設為絕對定位 (For Desktop) */
+        .header-bar {
+            position: absolute;
+            top: 40px;
+            left: 50px;
+            width: 400px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .system-status {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            text-align: right;
+            font-size: 12px;
+            color: #ccc;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .header-text {
+            font-size: 24px;
+            letter-spacing: 2px;
+            text-shadow: var(--ff8-shadow);
+            color: var(--ff8-cyan);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        /* 登入區塊主結構 */
+        .login-frame {
+            width: 500px;
+            height: 350px;
+            display: grid;
+            grid-template-columns: 150px 1fr; /* 左側選單 + 右側內容 */
+            grid-gap: 15px;
+            transition: all 0.3s ease; /* 用於解析度切換時的平滑過渡 */
+        }
+
+        /* 左側選單 (Sidebar) */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+        }
+
+        .menu-item {
+            background: linear-gradient(90deg, rgba(0,0,0,0.5), rgba(50,50,60,0.5));
+            border: 1px solid var(--ff8-border-dark);
+            color: #aaa;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .menu-item:hover {
+            color: var(--ff8-highlight);
+            background: linear-gradient(90deg, rgba(20,20,30,0.8), rgba(80,80,90,0.8));
+            border-color: var(--ff8-border-light);
+            padding-left: 15px;
+        }
+
+        .menu-item::before {
+            content: '>';
+            margin-right: 5px;
+            opacity: 0;
+            color: var(--ff8-highlight);
+        }
+        .menu-item:hover::before { opacity: 1; }
+
+        /* 右側輸入區 */
+        .login-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .input-group { margin-bottom: 5px; }
+        .input-label {
+            display: block;
+            font-size: 14px;
+            color: var(--ff8-cyan);
+            margin-bottom: 5px;
+            text-shadow: var(--ff8-shadow);
+        }
+
+        /* =========================================
+           6. RWD 媒體查詢 (Media Queries)
+           針對 1024px 以下及手機裝置進行覆寫
+           ========================================= */
+        
+        /* 針對平板直向、小型筆電或手機 (寬度小於 1024px) */
+        @media screen and (max-width: 1024px) {
+            /* 讓 Body 可以捲動，防止鍵盤遮擋 */
+            body { overflow-y: auto; }
+
+            /* 容器改為流式堆疊，增加上下留白 */
+            .desktop-container {
+                justify-content: flex-start; /* 從頂部開始排列 */
+                padding: 20px;
+                padding-top: 40px;
+            }
+
+            /* 取消絕對定位，改為標準流動，並置中 */
+            .header-bar {
+                position: static; /* 取消 absolute */
+                width: 100%;
+                max-width: 500px;
+                margin-bottom: 20px;
+                top: auto; left: auto;
+            }
+
+            .system-status {
+                position: static; /* 取消 absolute */
+                width: 100%;
+                max-width: 500px;
+                margin-top: 20px;
+                text-align: center;
+                bottom: auto; right: auto;
+                padding: 10px;
+            }
+
+            /* 修正狀態文字排列 */
+            .system-status div { display: inline-block; margin: 0 5px; }
+        }
+
+        /* 針對手機 (寬度小於 768px) */
+        @media screen and (max-width: 768px) {
+            /* 調整標題大小 */
+            .header-text { font-size: 20px; }
+            .header-bar { height: 50px; }
+
+            /* 登入框：佔滿寬度，高度改為自動 */
+            .login-frame {
+                width: 100%;
+                max-width: 450px; /* 限制最大寬度 */
+                height: auto; /* 高度自動適應內容 */
+                display: flex; /* 改用 Flexbox 垂直排列 */
+                flex-direction: column;
+                grid-gap: 0;
+            }
+
+            /* 隱藏裝飾用的側邊欄，簡化介面 */
+            .sidebar {
+                display: none; 
+            }
+
+            .login-area {
+                padding: 25px 20px;
+                gap: 15px;
+            }
+
+            /* 調整按鈕與輸入框 */
+            .btn-submit { margin-top: 10px; padding: 15px; }
+            
+            /* 避免 iOS 輸入時字體過小導致放大 */
+            .ff8-input { font-size: 16px; }
+        }
+
+        /* =========================================
+           7. 彈出視窗 (Modal)
+           ========================================= */
+        #modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s;
+            backdrop-filter: blur(2px); /* 增加模糊效果 */
+        }
+
+        #modal-overlay.active { visibility: visible; opacity: 1; }
+
+        .alert-box {
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .alert-title {
+            color: #ff3333;
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ff3333;
+            padding-bottom: 5px;
+            text-shadow: 0 0 5px #ff0000;
+        }
+
+        .alert-msg { font-size: 16px; margin-bottom: 20px; line-height: 1.5; }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="wallpaper"></div>
+    <div class="overlay-scanlines"></div>
+
+    <div class="desktop-container">
+        
+        <div class="ff8-window header-bar">
+            <div class="header-text">Garden Network</div>
+        </div>
+
+        <div class="login-frame">
+            <div class="sidebar">
+                <div class="ff8-window" style="height: 100%; padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div class="menu-item" onclick="triggerLocked()">TUTORIAL</div>
+                        <div class="menu-item" onclick="triggerLocked()">DORMITORY</div>
+                        <div class="menu-item" onclick="triggerLocked()">CAFETERIA</div>
+                        <div class="menu-item" onclick="triggerLocked()">INFIRMARY</div>
+                    </div>
+                    <div>
+                        <div class="menu-item" onclick="triggerLocked()">CONFIG</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ff8-window login-area">
+                <div style="border-bottom: 1px solid #555; margin-bottom: 10px; padding-bottom: 5px; color: var(--ff8-highlight); font-size: 14px;">
+                    :: AUTHENTICATION
+                </div>
+
+                <form id="loginForm" autocomplete="off">
+                    <div class="input-group">
+                        <label class="input-label" for="userid">USER ID</label>
+                        <input type="text" id="userid" name="userid" class="ff8-input" required placeholder="Enter ID">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" for="pwd">PASSWORD</label>
+                        <input type="password" id="pwd" name="pwd" class="ff8-input" required placeholder="Enter Password">
+                    </div>
+
+                    <button type="submit" class="btn-submit">Execute Login</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="system-status ff8-window">
+            <div>SYSTEM: ONLINE</div>
+            <div>OS v8.0</div>
+            <div id="clock">00:00:00</div>
+        </div>
+
+    </div>
+
+    <div id="modal-overlay">
+        <div class="ff8-window alert-box">
+            <div class="alert-title">ACCESS DENIED</div>
+            <div class="alert-msg" id="modal-msg">
+                ERROR: NOT LOGGED IN<br>
+                Please authenticate first.
+            </div>
+            <button class="btn-submit" onclick="closeModal()" style="width: 100px; margin: 0 auto; display: block;">OK</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- 時間顯示 --- */
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            const clockEl = document.getElementById('clock');
+            if(clockEl) clockEl.innerText = `${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        /* --- 視窗控制邏輯 --- */
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalMsg = document.getElementById('modal-msg');
+        const modalTitle = document.querySelector('.alert-title');
+
+        // 點擊未實作功能
+        function triggerLocked() {
+            modalTitle.innerText = "WARNING";
+            modalTitle.style.color = "#ff3333";
+            modalTitle.style.borderColor = "#ff3333";
+            modalTitle.style.textShadow = "0 0 5px #ff0000";
+            
+            modalMsg.innerHTML = "SYSTEM ERROR:<br>USER NOT LOGGED IN.<br>[ ACCESS RESTRICTED ]";
+            
+            // 重置動畫
+            const alertBox = document.querySelector('.alert-box');
+            alertBox.style.animation = 'none';
+            alertBox.offsetHeight; /* trigger reflow */
+            alertBox.style.animation = 'popIn 0.3s';
+            
+            modalOverlay.classList.add('active');
+        }
+
+        // 登入失敗顯示
+        function showLoginError() {
+            modalTitle.innerText = "LOGIN FAILED";
+            modalTitle.style.color = "#ff3333";
+            modalTitle.style.borderColor = "#ff3333";
+            modalTitle.style.textShadow = "0 0 5px #ff0000";
+            modalMsg.innerHTML = "INVALID CREDENTIALS.<br>CHECK ID AND PASSWORD.";
+            modalOverlay.classList.add('active');
+        }
+
+        // 登入成功顯示 (可選)
+        function showLoginSuccess() {
+            modalTitle.innerText = "ACCESS GRANTED";
+            modalTitle.style.color = "#00ff00";
+            modalTitle.style.borderColor = "#00ff00";
+            modalTitle.style.textShadow = "0 0 5px #00ff00";
+            modalMsg.innerHTML = "AUTHENTICATION VERIFIED.<br>WELCOME BACK.";
+            modalOverlay.classList.add('active');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            // 如果是登入失敗，清空密碼並聚焦
+            if(document.getElementById('userid').value !== "" && modalTitle.innerText === "LOGIN FAILED") {
+                document.getElementById('pwd').value = "";
+                document.getElementById('pwd').focus();
+            }
+        }
+
+        // 點擊遮罩關閉視窗 (增加 UX)
+        modalOverlay.addEventListener('click', function(e){
+            if(e.target === modalOverlay) closeModal();
+        });
+
+        /* --- 核心登入邏輯 --- */
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault(); 
+
+            // 資料定義 (demo admin admin/ test test)
+            var lkd = [
+                { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
+                { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+            ];
+            
+            var jump_back_page_address = "sys_login_start_fear4ddju.php"; 
+            
+            var userid_val = document.getElementById("userid").value;
+            var pwd_val = document.getElementById("pwd").value;
+            var uk = ex_md2n("aes_" + userid_val + "_" + pwd_val,100000);
+            var noany = true;
+
+            // 檢查 external scripts 是否載入
+            if (typeof AesDecrypt === 'undefined' || typeof ex_md2 === 'undefined') {
+                modalTitle.innerText = "NETWORK ERROR";
+                modalMsg.innerHTML = "Encryption modules failed to load.<br>Please check your internet connection.";
+                modalOverlay.classList.add('active');
+                return;
+            }
+        
+            // 比對邏輯
+            for(var i=0; i!=lkd.length; i++) {
+                try {
+                    if(AesDecrypt(lkd[i].ckey, uk) != "") {
+                    
+                        // 1. 寫入 Cookie
+                        document.cookie = "jobs_login_key=" + escape(AesDecrypt(lkd[i].ckey, uk));
+                        
+                        // 2. Log Cookie
+                        document.cookie = "jobs_login_pwd=" + ex_md2(pwd_val);
+                        document.cookie = "jobs_login_name=" + userid_val;
+                        
+                        noany = false;
+
+                        // 成功動畫與跳轉
+                        showLoginSuccess();
+                        
+                        // 延遲跳轉以顯示成功訊息
+                        setTimeout(function() {
+                             window.location.href = jump_back_page_address;
+                        }, 1000);
+
+                        break;
+                    }
+                } catch (e) {
+                    console.error("Decryption error:", e);
+                }
+            }
+        
+            // 失敗處理
+            if(noany){
+                showLoginError();
+            }
+        });
+    </script>
+</body>
+</html>

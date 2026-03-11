@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEURAL LINK :: GATEWAY</title>
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+
+    <style>
+        /* --- [1. 核心基礎設定] --- */
+        :root {
+            --primary-color: #00f3ff;       /* 駭客霓虹青 */
+            --secondary-color: #0066ff;     /* 深邃藍 */
+            --alert-color: #ff0055;         /* 錯誤警報紅 */
+            --bg-color: #050510;            /* 虛空深紫黑 */
+            --glass-bg: rgba(5, 10, 20, 0.75);
+            --glass-border: rgba(0, 243, 255, 0.2);
+            --font-tech: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 禁止捲動 */
+            background-color: var(--bg-color);
+            font-family: var(--font-tech);
+            color: var(--primary-color);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- [2. 背景特效層] --- */
+        #neural-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            /* 輕微的濾鏡讓粒子更發光 */
+            filter: blur(0.5px) contrast(1.2);
+        }
+
+        /* 網格掃描線特效 (CRT Scanline) */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            opacity: 0.3;
+        }
+
+        /* 暈影特效 (Vignette) - 聚焦中央 */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.9) 100%);
+        }
+
+        /* --- [3. UI 互動層] --- */
+        
+        /* 啟動提示文字 */
+        .start-prompt {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+            width: 100%;
+            transition: opacity 0.5s ease;
+        }
+
+        .start-prompt h1 {
+            font-size: 2rem;
+            letter-spacing: 0.5em;
+            text-shadow: 0 0 20px var(--primary-color);
+            margin-bottom: 20px;
+            animation: glitch 3s infinite;
+        }
+
+        .blink-text {
+            font-size: 1rem;
+            opacity: 0.8;
+            animation: blink 1.5s infinite ease-in-out;
+        }
+
+        /* 系統載入 Log (左上角) */
+        .sys-log {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 5;
+            font-size: 12px;
+            line-height: 1.5;
+            color: rgba(0, 243, 255, 0.7);
+            pointer-events: none;
+        }
+        .log-line {
+            opacity: 0;
+            animation: slideIn 0.3s forwards;
+        }
+
+        /* --- [4. 登入視窗 (Glassmorphism)] --- */
+        #login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px); /* 背景模糊 */
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        #login-container.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .login-box {
+            position: relative;
+            width: 420px;
+            padding: 50px 40px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.15), inset 0 0 30px rgba(0, 243, 255, 0.05);
+            border-radius: 2px;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.5s ease;
+        }
+
+        #login-container.active .login-box {
+            transform: scale(1) translateY(0);
+        }
+
+        /* 裝飾性邊角 */
+        .deco-corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+        .dc-tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+        .dc-tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+        .dc-bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+        .dc-br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+            padding-bottom: 15px;
+        }
+
+        .login-header h2 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #333;
+            color: #fff;
+            padding: 10px 0;
+            font-family: inherit;
+            font-size: 18px;
+            letter-spacing: 1px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-bottom-color: var(--primary-color);
+            box-shadow: 0 10px 20px -10px rgba(0, 243, 255, 0.2);
+        }
+
+        /* 按鈕特效 */
+        .btn-auth {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .btn-auth::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-color);
+            transition: 0.4s;
+            z-index: -1;
+        }
+
+        .btn-auth:hover {
+            color: #000;
+            box-shadow: 0 0 30px var(--primary-color);
+        }
+
+        .btn-auth:hover::before {
+            left: 0;
+        }
+
+        /* --- [5. 錯誤訊息 Modal] --- */
+        #error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 0, 0, 0.95);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s;
+        }
+
+        #error-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .error-content {
+            border: 2px solid var(--alert-color);
+            padding: 30px;
+            text-align: center;
+            background: rgba(50, 0, 0, 0.5);
+            box-shadow: 0 0 50px rgba(255, 0, 85, 0.2);
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .error-title {
+            color: var(--alert-color);
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--alert-color);
+        }
+
+        .btn-retry {
+            margin-top: 20px;
+            background: transparent;
+            border: 1px solid var(--alert-color);
+            color: var(--alert-color);
+            padding: 8px 25px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+
+        .btn-retry:hover {
+            background: var(--alert-color);
+            color: #fff;
+        }
+
+        /* --- [6. 動畫 Keyframes] --- */
+        @keyframes blink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* --- [7. RWD 調整] --- */
+        @media (max-width: 768px) {
+            .login-box {
+                width: 90%;
+                padding: 30px 20px;
+            }
+            .start-prompt h1 { font-size: 1.5rem; }
+            .sys-log { display: none; } /* 手機版隱藏 Log 以免遮擋 */
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="neural-canvas"></canvas>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <div class="sys-log" id="sys-log-container"></div>
+
+    <div class="start-prompt" id="start-prompt">
+        <h1>NEURAL LINK</h1>
+        <div class="blink-text">[ CLICK TO CONNECT ]</div>
+    </div>
+
+    <div id="login-container">
+        <div class="login-box" id="login-box-inner">
+            <div class="deco-corner dc-tl"></div>
+            <div class="deco-corner dc-tr"></div>
+            <div class="deco-corner dc-bl"></div>
+            <div class="deco-corner dc-br"></div>
+
+            <div class="login-header">
+                <h2>Identity Verify</h2>
+            </div>
+
+            <form action="" method="POST" id="loginForm">
+                <div class="input-group">
+                    <label for="userid">NEURAL ID</label>
+                    <input type="text" id="userid" name="userid" autocomplete="off" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="pwd">ACCESS KEY</label>
+                    <input type="password" id="pwd" name="pwd" required>
+                </div>
+                
+                <button type="submit" class="btn-auth">INITIALIZE DIVE</button>
+
+                <div id="error-overlay">
+                    <div class="error-content">
+                        <div class="error-title">ACCESS DENIED</div>
+                        <div style="color: #fff; margin-bottom: 10px;">INVALID SIGNATURE</div>
+                        <button type="button" class="btn-retry" id="btn-retry-click">RETRY CONNECTION</button>
+                    </div>
+                </div>
+
+                <script>
+                    document.getElementById("loginForm").addEventListener("submit", function (e) {
+                        e.preventDefault(); // 阻止表單預設送出
+
+                        //資料(demo admin admin/ test test)
+                        //https://jplop.netlify.app/util_aes_utility
+                        var lkd= [
+                            {
+                                "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ=="
+                            },
+                            {
+                                "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w="
+                            }
+                        ];
+                        
+                        var jump_back_page_address="sys_login_start_fear4ddju.php";
+                        
+                        var uk=ex_md2n("aes_"+document.getElementById("userid").value+"_"+document.getElementById("pwd").value,100000);
+                        var noany=true;
+                    
+                        //比對
+                        for(var i=0;i!=lkd.length;i++){try {if(AesDecrypt(lkd[i].ckey,uk)!=""){
+                        
+                            //登入
+                                document.cookie = "jobs_login_key=" + escape(AesDecrypt(lkd[i].ckey,uk));
+                                
+                            //Log
+                                document.cookie = "jobs_login_pwd=" + ex_md2(document.getElementById("pwd").value);
+                                document.cookie = "jobs_login_name=" + document.getElementById("userid").value;
+                                
+                            //跳轉頁面 (這裡為了展示效果，改為 console log，實際使用請解開註解)
+                                 window.location.href=jump_back_page_address;
+                                //console.log("Login Success! Redirecting...");
+                                //alert("驗證成功 (模擬跳轉)"); 
+                                noany=false;
+                                break;
+                        }}catch (e) {}}
+                    
+                        //失敗
+                        if(noany){
+                            // 模擬驗證失敗邏輯
+                            const errorOverlay = document.getElementById("error-overlay");
+                            const pwdInput = document.getElementById("pwd");
+                            
+                            // 顯示錯誤視窗
+                            errorOverlay.classList.add("active");
+                            
+                            // 處理 "ACKNOWLEDGE" 按鈕點擊
+                            document.getElementById("btn-retry-click").onclick = function() {
+                                errorOverlay.classList.remove("active");
+                                pwdInput.value = ""; // 清空密碼
+                                pwdInput.focus(); // 重新聚焦
+                            };
+                        }
+                    });
+                </script>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * NEURAL TUNNEL VISUALIZER
+         * 500% Dreamy Edition
+         * High Performance & Bug-Free
+         */
+        const canvas = document.getElementById('neural-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // 狀態管理
+        let width, height;
+        let points = [];
+        const config = {
+            pointCount: 600,       // 粒子數量 (手機會自動減少)
+            speed: 3,              // 飛行速度
+            rotationSpeed: 0.002,  // 旋轉速度
+            depth: 1000,           // 視野深度
+            fov: 250,              // 視野焦距
+            connDist: 90           // 連線距離閾值
+        };
+
+        // RWD 偵測與初始化
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            
+            // 手機版效能優化：減少粒子與連線計算
+            if (width < 768) {
+                config.pointCount = 300;
+                config.connDist = 60;
+            } else {
+                config.pointCount = 600;
+                config.connDist = 90;
+            }
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // 3D 點類別
+        class Point3D {
+            constructor(reset = false) {
+                this.init(reset);
+            }
+
+            init(reset) {
+                // 產生環狀分佈 (Tunnel Effect)
+                const angle = Math.random() * Math.PI * 2;
+                // 半徑範圍：中間空心，四周分佈
+                const radius = 100 + Math.random() * 400; 
+                
+                this.x = Math.cos(angle) * radius;
+                this.y = Math.sin(angle) * radius;
+                // 如果是重置，從最遠處出現；如果是初始，隨機分佈在 Z 軸
+                this.z = reset ? config.depth : Math.random() * config.depth;
+                
+                // 顏色屬性 (Cyan to Blue to Purple)
+                this.r = 0;
+                this.g = Math.floor(150 + Math.random() * 105);
+                this.b = 255;
+            }
+
+            update(speed) {
+                this.z -= speed;
+                // 當粒子跑到攝影機後面 (z <= 0)，重置到遠方
+                if (this.z <= 1) {
+                    this.init(true);
+                }
+            }
+
+            // 投影 3D -> 2D
+            project(viewAngle) {
+                // 旋轉公式 (Z軸旋轉)
+                const cos = Math.cos(viewAngle);
+                const sin = Math.sin(viewAngle);
+                const rx = this.x * cos - this.y * sin;
+                const ry = this.x * sin + this.y * cos;
+
+                const scale = config.fov / (config.fov + this.z);
+                const x2d = rx * scale + width / 2;
+                const y2d = ry * scale + height / 2;
+
+                return { x: x2d, y: y2d, scale: scale, z: this.z };
+            }
+        }
+
+        // 初始化粒子池
+        for (let i = 0; i < config.pointCount; i++) {
+            points.push(new Point3D());
+        }
+
+        // 互動：滑鼠/視角偏移
+        let mouseX = 0;
+        let mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - width / 2) * 0.05;
+            mouseY = (e.clientY - height / 2) * 0.05;
+        });
+
+        // 動畫主迴圈
+        let frame = 0;
+        function animate() {
+            // 1. 清除畫布 (保留殘影以製造夢幻拖尾感)
+            ctx.fillStyle = 'rgba(5, 5, 16, 0.2)'; 
+            ctx.fillRect(0, 0, width, height);
+
+            // 2. 更新狀態
+            frame++;
+            const currentRotation = frame * config.rotationSpeed;
+            
+            // 粒子投影計算
+            const projectedPoints = points.map(p => {
+                p.update(config.speed);
+                return p.project(currentRotation);
+            });
+
+            // 3. 繪製連線 (Network Lines)
+            // 僅連接靠近的粒子，製造網狀結構
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < projectedPoints.length; i++) {
+                const p1 = projectedPoints[i];
+                // 優化：只畫靠近螢幕的粒子連線，且略過太遠的
+                if (p1.z > config.depth * 0.9) continue; 
+
+                for (let j = i + 1; j < projectedPoints.length; j++) {
+                    const p2 = projectedPoints[j];
+                    
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    // 距離檢查 (根據 scale 動態調整閾值)
+                    if (dist < config.connDist * p1.scale) {
+                        // 透明度隨 Z 軸深度變化 (越近越亮)
+                        const alpha = (1 - p1.z / config.depth) * 0.5;
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${alpha})`;
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x + mouseX * p1.scale, p1.y + mouseY * p1.scale);
+                        ctx.lineTo(p2.x + mouseX * p2.scale, p2.y + mouseY * p2.scale);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // 4. 繪製粒子點
+            projectedPoints.forEach(p => {
+                const size = 2 * p.scale;
+                const alpha = (1 - p.z / config.depth);
+                
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x + mouseX * p.scale, p.y + mouseY * p.scale, size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 光暈效果
+                if (size > 1.5) {
+                    ctx.fillStyle = `rgba(0, 243, 255, ${alpha * 0.5})`;
+                    ctx.beginPath();
+                    ctx.arc(p.x + mouseX * p.scale, p.y + mouseY * p.scale, size * 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        /* --- [UX 流程控制] --- */
+        
+        // 模擬系統 Boot Log
+        const logContainer = document.getElementById('sys-log-container');
+        const logs = [
+            "KERNEL: INITIALIZING NEURAL BRIDGE...",
+            "HANDSHAKE: ENCRYPTED (AES-256)",
+            "SYNC: BRAINWAVE PATTERN MATCHED",
+            "PROXY: ROUTING THROUGH SECTOR 7",
+            "STATUS: WAITING FOR USER INPUT..."
+        ];
+        
+        let logIndex = 0;
+        function printLog() {
+            if(logIndex < logs.length) {
+                const div = document.createElement('div');
+                div.className = 'log-line';
+                div.textContent = "> " + logs[logIndex];
+                logContainer.appendChild(div);
+                logIndex++;
+                setTimeout(printLog, 200 + Math.random() * 300);
+            }
+        }
+        setTimeout(printLog, 500);
+
+        // 點擊/按鍵顯示登入框
+        const startPrompt = document.getElementById('start-prompt');
+        const loginContainer = document.getElementById('login-container');
+        const loginBoxInner = document.getElementById('login-box-inner');
+        const useridInput = document.getElementById('userid');
+        let isLoginActive = false;
+
+        function activateLogin() {
+            if (isLoginActive) return;
+            isLoginActive = true;
+            
+            // 隱藏提示
+            startPrompt.style.opacity = '0';
+            setTimeout(() => { startPrompt.style.display = 'none'; }, 500);
+
+            // 顯示登入框
+            loginContainer.classList.add('active');
+            
+            // 聚焦輸入框
+            setTimeout(() => { useridInput.focus(); }, 600);
+        }
+
+        // 綁定全域事件
+        document.body.addEventListener('click', activateLogin);
+        document.body.addEventListener('keydown', activateLogin);
+        document.body.addEventListener('touchstart', activateLogin);
+
+        // 避免點擊登入框內部觸發重置 (雖然這裡邏輯是單向開啟)
+        loginBoxInner.addEventListener('click', (e) => { e.stopPropagation(); });
+
+    </script>
+</body>
+</html>

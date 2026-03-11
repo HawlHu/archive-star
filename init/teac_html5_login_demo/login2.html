@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DEEP SEA :: SYSTEM ACCESS [TIME-SYNCED v2]</title>
+    <style>
+        /* --- 0. 核心設定 --- */
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Noto+Sans+TC:wght@300;500&display=swap');
+
+        :root {
+            --glass-bg: rgba(10, 25, 40, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-highlight: rgba(255, 255, 255, 0.25);
+            --accent-cyan: #00f2ff;
+            --accent-glow: #00f2ff;
+            --accent-error: #ff2a2a;
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000205;
+            font-family: 'Rajdhani', 'Noto Sans TC', sans-serif;
+            color: var(--text-main);
+        }
+
+        /* --- 1. Canvas 背景 --- */
+        #ocean-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: #000;
+        }
+
+        /* --- 2. 佈局容器 --- */
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto; 
+        }
+
+        /* --- 3. 登入卡片 --- */
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 60px 45px;
+            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-highlight);
+            border-left: 1px solid var(--glass-highlight);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                inset 0 0 30px rgba(0, 242, 255, 0.05);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardEntrance 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.3s;
+            position: relative;
+            overflow: hidden;
+            margin: auto;
+        }
+
+        .login-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.08), 
+                transparent
+            );
+            transform: skewX(-20deg);
+            animation: lightSweep 6s infinite ease-in-out 3s;
+            pointer-events: none;
+        }
+
+        .system-title {
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .system-title h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #fff 30%, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        .system-title span {
+            display: block;
+            font-size: 11px;
+            letter-spacing: 6px;
+            color: var(--accent-cyan);
+            margin-top: 8px;
+            opacity: 0.8;
+            font-weight: 500;
+            text-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        /* --- 4. 輸入區域 --- */
+        .input-group {
+            position: relative;
+            margin-bottom: 35px;
+            text-align: left;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 0;
+            font-size: 16px;
+            color: #fff;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0;
+            font-family: inherit;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group label {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            font-size: 14px;
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: 0.3s ease all;
+            letter-spacing: 1px;
+        }
+
+        .input-group input:focus,
+        .input-group input:valid {
+            border-bottom-color: var(--accent-cyan);
+            box-shadow: 0 10px 20px -15px rgba(0, 242, 255, 0.3);
+        }
+
+        .input-group input:focus ~ label,
+        .input-group input:valid ~ label {
+            top: -18px;
+            font-size: 11px;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        .bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-cyan);
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        .input-group input:focus ~ .bar {
+            width: 100%;
+        }
+
+        /* --- 5. 按鈕 --- */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: rgba(0, 242, 255, 0.05);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 242, 255, 0.4);
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: var(--accent-cyan);
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn-submit:hover {
+            color: #000;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
+        }
+        .btn-submit:hover::before {
+            width: 100%;
+        }
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        /* --- 6. 錯誤彈窗 --- */
+        #error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 5, 10, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 16px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            transform: scale(1.05);
+        }
+
+        #error-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .error-content {
+            text-align: center;
+            width: 80%;
+            animation: hudShake 0.4s ease-in-out;
+        }
+
+        .error-icon {
+            font-size: 48px;
+            color: var(--accent-error);
+            margin-bottom: 15px;
+            text-shadow: 0 0 25px var(--accent-error);
+        }
+
+        .error-title {
+            color: var(--accent-error);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+
+        .error-msg {
+            color: #ccc;
+            font-size: 13px;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .btn-retry {
+            background: transparent;
+            border: 1px solid var(--accent-error);
+            color: var(--accent-error);
+            padding: 10px 30px;
+            font-family: inherit;
+            cursor: pointer;
+            font-size: 12px;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .btn-retry:hover {
+            background: var(--accent-error);
+            color: #fff;
+            box-shadow: 0 0 20px var(--accent-error);
+        }
+
+        @keyframes cardEntrance {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes lightSweep {
+            0% { left: -150%; opacity: 0; }
+            40% { opacity: 0.5; }
+            100% { left: 250%; opacity: 0; }
+        }
+
+        @keyframes hudShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        @media screen and (max-width: 767px) {
+            .login-card { max-width: 90%; padding: 40px 30px; }
+            .system-title h1 { font-size: 28px; }
+        }
+
+        @media screen and (max-height: 600px) {
+            .container { align-items: flex-start; padding-top: 20px; }
+            .login-card { margin-bottom: 20px; }
+        }
+
+    </style>
+    
+    <script src="//jplop.netlify.app/js/aes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
+	<script src="//jplop.netlify.app/js/database.js"></script>
+</head>
+<body>
+
+    <canvas id="ocean-canvas"></canvas>
+
+    <div class="container">
+        <div class="login-card">
+            <div class="system-title">
+                <h1>DEEP LINK</h1>
+                <span>SECURE ACCESS TERMINAL</span>
+            </div>
+
+            <form action="" method="POST" id="loginForm">
+                <div class="input-group">
+                    <input type="text" id="userid" name="userid" autocomplete="off" required>
+                    <span class="bar"></span>
+                    <label for="userid">IDENTITY CODE</label>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="pwd" name="pwd" required>
+                    <span class="bar"></span>
+                    <label for="pwd">ACCESS KEY</label>
+                </div>
+                
+                <button type="submit" class="btn-submit">Initialize Connection</button>
+
+                <div id="error-overlay">
+                    <div class="error-content">
+                        <div class="error-icon">!</div>
+                        <div class="error-title">ACCESS DENIED</div>
+                        <div class="error-msg">Invalid Credentials Detected</div>
+                        <button type="button" class="btn-retry" id="btn-retry-click">RETRY</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ============================================================
+         * PART 1: 實時深海氣候系統 (FIXED & ENHANCED)
+         * ============================================================
+         */
+        (function() {
+            const canvas = document.getElementById('ocean-canvas');
+            const ctx = canvas.getContext('2d', { alpha: false });
+            let width, height, dpr;
+
+            // --- 圖片載入系統 (增強版) ---
+            const fishImg = new Image();
+            //fishImg.crossOrigin = "Anonymous"; // 嘗試解決跨域問題
+            fishImg.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAAA4CAMAAAAGjNDcAAAB+1BMVEUfUXUfUXQfUXMfUXIgUXMhUnQiU3QjVHQjVXQjVXUiVXUjVnQhVHUgVHUfUnUfUHEfT28fTm8fUG4fUW8iU3AkVHIlVnImV3MnWHQnWXUnWnUnW3QoWnMmWnIjWHIhVnQfU3QfUnQeUXUfUHAfT24eTmwdTGsdTGkeTmkfUWogUmshU2wjVG0mV28pWnEqW3IrXXMrXnQsYHQrX3MqXnIoXHElWnEiV3IgVXIfUnMeUXQeUHUfUXAfT20fT2wfTmwfTmseTWkfTmkhUWkiU2okVGsmV2woWm4pXG8rXnAsX3EuYXIuYXMtYXIrX3EoXHAlWXAjVnAhVHEgU3IeUHQfUHQfUW0fT2keTWYeTGUfTmgeTWghUGkjUmolVGwmV20nWW4pW24qXW8sXnAtYHItX3IqXXEnW3AlWG8iVW8hVG8gU3AgU3EfUHIfT3EfT3MfTmofTmcfT2gfT2ceTWcgT2giUWslU24mVm8nV24oWW8qW3ArXHEqXHMoWnImWHAjVm4iVG0gU2wfU2wfU20gU28gUW8fT3AfUHMfUW4fUXEfUGseTmofT2shUXAiU3EjVG8kVG8mVnAnWHEnWnMnWXMlWHEjVm8jVW4hVGwgU2sgVGwgVG0fUm4gUG8gUXEhU3EiVHEjVnEjVXAiVXAfU24fU3AfUnH///991JbBAAAAqXRSTlP///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8A+297FgAAAAlwSFlzAAAOwwAADsMBx2+oZAAAAkdJREFUeJxjWDHggGGgHTDqhFEnjDph1AmjThh1AtWcwIAO6OcEDKup6BDCugnYTrkzCOgk1n4S3IGhCI8mUq0nyhVY1ODUQaYD8LsCqwLsyimxH48zsEtiUUoF+7G6ApcMhhOwGsYIBGCKfEfgdhwDAQcwMjKBADMLKxsrGzsHJxc3Dy8fiQ7B5zIMJ6DZDrSfmV9AUEhYWFhEVExcQlJKWkZWTl5BUQkIaO4EkPVA+5VVVNXUNTS1tHV09fQNDI2MTUzNzC0srZSsra2R1VLgAlQnoDjARsjWzt7ewVFd3cnZxdXN3cPTy9vH188/IDAomMkqJCQUBBhhAMXxJLkAuxPAURAWHhEZEeWkER0dFRMbF5+QmJSckpKalp6RmZWdw5yblx8Kc0QoKMQYGRitYHrxO4JoJzAyC9sVFBYVFReWRJeWlVdUVlXXGBjU1tU3NDY1t7S2CQi0d0BDILQjV1korNOmi4kRS6iQ5wSoVxg7+IU7w7p7NHrD+vonTJw0uW7K1GnTZ8xsmjV7ztxOYRuYnUz8yvM6O4W7mKngBNTkCAFMzF1dzMxMzMzzFyxcuHDR4iVZc1uWLl22HCQItxKUbxFWU5IWMDMlCgDZY8nEzISwEAPgt5wYJ6AXTTgsIt96bG4gqoDGZSGJVhPrBPzVFKlWYjWTsBOoVlfiMpQYJ1DDEXgMJc4JFLoCv5lEO4FsV+AzcQUWeYJtXurZjtMGohTRyHISnIDTNRRYTL4TaABGnTDqhFEnjDph1AmjThjETgAAt56boKb3w7gAAAAASUVORK5CYII=";
+            
+            let fishLoaded = false;
+            fishImg.onload = () => { fishLoaded = true; };
+            // 如果載入失敗，我們會在 draw() 裡使用幾何圖形代替，不需特別處理 error
+
+            // --- A. 時間與氣候配置 ---
+            const timeStates = [
+                {   // 00:00 - 深夜
+                    hour: 0,
+                    topColor: [2, 10, 20], bottomColor: [0, 0, 0],
+                    rayColor: [0, 50, 100], rayOpacity: 0.05,
+                    fishCountTarget: 30, planktonAlpha: 0.9, ambientLight: 0.2
+                },
+                {   // 05:00 - 黎明
+                    hour: 5,
+                    topColor: [20, 40, 70], bottomColor: [0, 15, 30],
+                    rayColor: [100, 200, 255], rayOpacity: 0.15,
+                    fishCountTarget: 80, planktonAlpha: 0.5, ambientLight: 0.4
+                },
+                {   // 12:00 - 正午
+                    hour: 12,
+                    topColor: [0, 105, 148], bottomColor: [0, 25, 50],
+                    rayColor: [200, 255, 255], rayOpacity: 0.3,
+                    fishCountTarget: 180, planktonAlpha: 0.2, ambientLight: 1.0
+                },
+                {   // 17:00 - 黃昏
+                    hour: 17,
+                    topColor: [60, 40, 80], bottomColor: [10, 5, 20],
+                    rayColor: [255, 150, 100], rayOpacity: 0.2,
+                    fishCountTarget: 120, planktonAlpha: 0.4, ambientLight: 0.6
+                },
+                {   // 20:00 - 晚上
+                    hour: 20,
+                    topColor: [5, 15, 35], bottomColor: [0, 2, 5],
+                    rayColor: [50, 100, 150], rayOpacity: 0.1,
+                    fishCountTarget: 60, planktonAlpha: 0.7, ambientLight: 0.3
+                },
+                {   // 24:00 - 循環
+                    hour: 24,
+                    topColor: [2, 10, 20], bottomColor: [0, 0, 0],
+                    rayColor: [0, 50, 100], rayOpacity: 0.05,
+                    fishCountTarget: 30, planktonAlpha: 0.9, ambientLight: 0.2
+                }
+            ];
+
+            // 當前狀態
+            let currentState = {
+                topColor: [0,0,0], bottomColor: [0,0,0],
+                rayColor: [0,0,0], rayOpacity: 0,
+                fishCountTarget: 100, planktonAlpha: 0.5, ambientLight: 0.5
+            };
+
+            const lerp = (s, e, t) => s * (1 - t) + e * t;
+            const lerpColor = (c1, c2, t) => [
+                Math.round(lerp(c1[0], c2[0], t)),
+                Math.round(lerp(c1[1], c2[1], t)),
+                Math.round(lerp(c1[2], c2[2], t))
+            ];
+
+            // --- B. 物件類別定義 ---
+
+            // 1. 光束
+            class GodRay {
+                constructor() { this.init(); }
+                init() {
+                    this.x = Math.random() * width;
+                    this.width = Math.random() * 50 + 20;
+                    this.angle = Math.PI / 2 + (Math.random() - 0.5) * 0.4;
+                    this.speed = Math.random() * 0.005 + 0.002;
+                    this.offset = Math.random() * 100;
+                }
+                update() { this.offset += this.speed; }
+                draw() {
+                    const sway = Math.sin(this.offset) * 30;
+                    const endX = this.x + Math.cos(this.angle) * height + sway;
+                    const c = currentState.rayColor;
+                    const op = currentState.rayOpacity;
+
+                    const grad = ctx.createLinearGradient(this.x, 0, endX, height);
+                    grad.addColorStop(0, `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${op})`);
+                    grad.addColorStop(0.5, `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${op * 0.5})`);
+                    grad.addColorStop(1, `rgba(0, 0, 0, 0)`);
+
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x - this.width/2, -50);
+                    ctx.lineTo(this.x + this.width/2, -50);
+                    ctx.lineTo(endX + this.width * 2, height);
+                    ctx.lineTo(endX - this.width * 2, height);
+                    ctx.fill();
+                }
+            }
+
+            // 2. 魚群 (修正：若無圖片則繪製幾何圖形)
+            class Fish {
+                constructor() { this.init(true); }
+                init(randomStart = false) {
+                    this.direction = Math.random() > 0.5 ? 1 : -1;
+                    this.scale = Math.random() * 0.3 + 0.1; 
+                    this.speed = (Math.random() * 1 + 0.5) * this.scale; 
+                    this.y = Math.random() * (height * 0.8) + height * 0.1;
+                    
+                    if (randomStart) this.x = Math.random() * width;
+                    else this.x = this.direction === 1 ? -150 : width + 150;
+
+                    this.alpha = this.scale * 0.2;
+                    this.dead = false;
+                    // 為幾何魚隨機分配顏色
+                    this.color = `hsl(${180 + Math.random() * 40}, 70%, 60%)`;
+                }
+                update() {
+                    this.x += this.speed * this.direction;
+                    if ((this.direction === 1 && this.x > width + 150) || 
+                        (this.direction === -1 && this.x < -150)) {
+                        if (fishes.length > currentState.fishCountTarget) this.dead = true;
+                        else this.init();
+                    }
+                }
+                draw() {
+                    if (this.dead) return;
+                    ctx.save();
+                    ctx.globalAlpha = this.alpha * currentState.ambientLight; 
+                    ctx.translate(this.x, this.y);
+                    let sX = this.direction === 1 ? -this.scale : this.scale;
+                    ctx.scale(sX, this.scale);
+
+                    if (fishLoaded) {
+                        // 圖片繪製模式
+                        ctx.drawImage(fishImg, -65, -28, 130, 56);
+                    } else {
+                        // 幾何繪製模式 (Fallback)
+                        ctx.fillStyle = this.color;
+                        ctx.beginPath();
+                        // 簡單的魚身
+                        ctx.ellipse(0, 0, 50, 20, 0, 0, Math.PI * 2);
+                        // 尾巴
+                        ctx.moveTo(35, 0);
+                        ctx.lineTo(60, -15);
+                        ctx.lineTo(60, 15);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                }
+            }
+
+            // 3. 浮游生物 (Plankton)
+            class Plankton {
+                constructor() { this.init(); }
+                init() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.size = Math.random() * 1.5;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.life = Math.random() * Math.PI * 2;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.life += 0.03;
+                    if (this.x < 0) this.x = width; else if (this.x > width) this.x = 0;
+                    if (this.y < 0) this.y = height; else if (this.y > height) this.y = 0;
+                }
+                draw() {
+                    const blink = (Math.sin(this.life) + 1) / 2; 
+                    const finalAlpha = (blink * 0.5 + 0.1) * currentState.planktonAlpha;
+                    ctx.fillStyle = `rgba(200, 242, 255, ${finalAlpha})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // 4. 氣泡 (Bubble) - 補回並加入時間亮度
+            class Bubble {
+                constructor() { this.init(true); }
+                init(randomY = false) {
+                    this.x = Math.random() * width;
+                    this.y = randomY ? Math.random() * height : height + 20;
+                    this.size = Math.random() * 2 + 0.5; // 0.5 ~ 2.5
+                    this.speed = Math.random() * 1 + 0.5;
+                    this.sway = Math.random() * 100;
+                    this.alpha = Math.random() * 0.3 + 0.1;
+                }
+                update() {
+                    this.y -= this.speed;
+                    this.sway += 0.05;
+                    this.currX = this.x + Math.sin(this.sway) * 20;
+                    if (this.y < -10) this.init();
+                }
+                draw() {
+                    // 氣泡亮度也受環境光影響，但保留最低可見度
+                    const light = Math.max(0.3, currentState.ambientLight);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha * light})`;
+                    ctx.beginPath();
+                    ctx.arc(this.currX, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // 物件容器
+            let rays = [], fishes = [], planktons = [], bubbles = [];
+            
+            function resize() {
+                dpr = window.devicePixelRatio || 1;
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.scale(dpr, dpr);
+                
+                if (rays.length === 0) {
+                    for(let i=0; i<3; i++) rays.push(new GodRay());
+                    for(let i=0; i<100; i++) planktons.push(new Plankton());
+                    for(let i=0; i<40; i++) bubbles.push(new Bubble());
+                    for(let i=0; i<50; i++) fishes.push(new Fish()); 
+                }
+            }
+
+            function updateTimeEnvironment() {
+                const now = new Date();
+                const currentHour = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+                //const currentHour =11;
+                let startState = timeStates[0];
+                let endState = timeStates[timeStates.length - 1];
+
+                for (let i = 0; i < timeStates.length - 1; i++) {
+                    if (currentHour >= timeStates[i].hour && currentHour < timeStates[i+1].hour) {
+                        startState = timeStates[i];
+                        endState = timeStates[i+1];
+                        break;
+                    }
+                }
+
+                const duration = endState.hour - startState.hour;
+                const elapsed = currentHour - startState.hour;
+                const t = elapsed / duration;
+
+                currentState.topColor = lerpColor(startState.topColor, endState.topColor, t);
+                currentState.bottomColor = lerpColor(startState.bottomColor, endState.bottomColor, t);
+                currentState.rayColor = lerpColor(startState.rayColor, endState.rayColor, t);
+                
+                currentState.rayOpacity = lerp(startState.rayOpacity, endState.rayOpacity, t);
+                currentState.fishCountTarget = Math.round(lerp(startState.fishCountTarget, endState.fishCountTarget, t));
+                currentState.planktonAlpha = lerp(startState.planktonAlpha, endState.planktonAlpha, t);
+                currentState.ambientLight = lerp(startState.ambientLight, endState.ambientLight, t);
+            }
+
+            function animate() {
+                updateTimeEnvironment();
+
+                if (fishes.length < currentState.fishCountTarget) {
+                    if (Math.random() < 0.05) fishes.push(new Fish());
+                }
+                fishes = fishes.filter(f => !f.dead);
+
+                const tc = currentState.topColor;
+                const bc = currentState.bottomColor;
+                const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+                bgGrad.addColorStop(0, `rgb(${tc[0]}, ${tc[1]}, ${tc[2]})`);
+                bgGrad.addColorStop(1, `rgb(${bc[0]}, ${bc[1]}, ${bc[2]})`);
+                
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, width, height);
+
+                ctx.globalCompositeOperation = 'screen'; 
+                planktons.forEach(p => { p.update(); p.draw(); });
+
+                ctx.globalCompositeOperation = 'source-over';
+                fishes.forEach(f => { f.update(); f.draw(); });
+
+                // 修正：氣泡繪製 (確保在魚之上，光束之下，或者最上層)
+                bubbles.forEach(b => { b.update(); b.draw(); });
+
+                ctx.globalCompositeOperation = 'lighter';
+                rays.forEach(r => { r.update(); r.draw(); });
+
+                // 環境色調遮罩
+                ctx.globalCompositeOperation = 'overlay'; 
+                ctx.fillStyle = `rgba(${currentState.rayColor[0]}, ${currentState.rayColor[1]}, ${currentState.rayColor[2]}, 0.15)`;
+                ctx.fillRect(0, 0, width, height);
+
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', () => {
+                clearTimeout(window.resizeTimer);
+                window.resizeTimer = setTimeout(resize, 100);
+            });
+
+            resize();
+            animate();
+        })();
+
+        // --- PART 2: 系統邏輯 (不變) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById("loginForm");
+            const useridInput = document.getElementById("userid");
+            const pwdInput = document.getElementById("pwd");
+            const errorOverlay = document.getElementById("error-overlay");
+            const btnRetry = document.getElementById("btn-retry-click");
+
+            loginForm.addEventListener("submit", function (e) {
+                e.preventDefault(); 
+                var lkd = [
+                    { "ckey": "U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
+                    { "ckey": "U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+                ];
+                var jump_back_page_address = "sys_login_start_fear4ddju.php";
+                var uk = ex_md2n("aes_" + useridInput.value + "_" + pwdInput.value,100000);
+                var noany = true;
+                for(var i = 0; i != lkd.length; i++){
+                    try {
+                        if(typeof AesDecrypt === 'function') {
+                            if(AesDecrypt(lkd[i].ckey, uk) != "") {
+                                document.cookie = "jobs_login_key=" + escape(AesDecrypt(lkd[i].ckey, uk));
+                                if(typeof ex_md2 === 'function') {
+                                    document.cookie = "jobs_login_pwd=" + ex_md2(pwdInput.value);
+                                } else {
+                                    document.cookie = "jobs_login_pwd=" + pwdInput.value;
+                                }
+                                document.cookie = "jobs_login_name=" + useridInput.value;
+                                window.location.href = jump_back_page_address;
+                                noany = false;
+                                break;
+                            }
+                        }
+                    } catch (e) { console.error(e); }
+                }
+                if(noany){
+                    errorOverlay.classList.add("active");
+                    btnRetry.onclick = function() {
+                        errorOverlay.classList.remove("active");
+                        pwdInput.value = ""; 
+                        setTimeout(() => pwdInput.focus(), 300); 
+                    };
+                }
+            });
+        });
+    </script>
+</body>
+</html>
