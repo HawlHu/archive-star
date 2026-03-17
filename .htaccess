@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+
+RewriteEngine On
+
+RewriteRule ^([a-f0-9]{1,6})$ https://www.jplopsoft.idv.tw/$1 [R=301,L]
+ErrorDocument 404 "<meta http-equiv='refresh' content='0;url=https://www.jplopsoft.idv.tw/discuz2024/' /><script>document.location.href='https://www.jplopsoft.idv.tw/discuz2024/';</script>"
+
+# 阻擋外界讀取 .git 目錄，直接回傳找不到網頁
+RedirectMatch 404 /\.git
+
+</IfModule>
