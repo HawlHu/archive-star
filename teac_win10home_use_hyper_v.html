@@ -174,8 +174,51 @@
               <blockquote>
                 <p>在確定你的 Windows 10 系統已具備 Hyper-V 環境後，接下來我們來看看如何手動安裝 Hyper-V。</p>
               <p>首先，在桌面上按下滑鼠右鍵，然後選擇「新增」→「文字文件」。這樣會在桌面上新增一個文字文件。</p>
-                <p>現在，重新命名這個文字文件，主檔名你可以自訂，但副檔名一定要是「.cmd」，這樣才能執行該<a href="data:@file/octet-stream;base64,cHVzaGQgIiV+ZHAwIg0KZGlyIC9iICVTeXN0ZW1Sb290JVxzZXJ2aWNpbmdcUGFja2FnZXNcKkh5cGVyLVYqLm11bSA+aHlwZXItdi50eHQNCmZvciAvZiAlJWkgaW4gKCdmaW5kc3RyIC9pIC4gaHlwZXItdi50eHQgMl4+bnVsJykgZG8gZGlzbSAvb25saW5lIC9ub3Jlc3RhcnQgL2FkZC1wYWNrYWdlOiIlU3lzdGVtUm9vdCVcc2VydmljaW5nXFBhY2thZ2VzXCUlaSINCmRlbCBoeXBlci12LnR4dA0KRGlzbSAvb25saW5lIC9lbmFibGUtZmVhdHVyZSAvZmVhdHVyZW5hbWU6TWljcm9zb2Z0LUh5cGVyLVYtQWxsIC9MaW1pdEFjY2VzcyAvQUxMDQo=" download="install_hyper-v.cmd">文件</a>。</p>
-                <p>接著，將下列文字複製到剛剛建立的 <a href="data:@file/octet-stream;base64,cHVzaGQgIiV+ZHAwIg0KZGlyIC9iICVTeXN0ZW1Sb290JVxzZXJ2aWNpbmdcUGFja2FnZXNcKkh5cGVyLVYqLm11bSA+aHlwZXItdi50eHQNCmZvciAvZiAlJWkgaW4gKCdmaW5kc3RyIC9pIC4gaHlwZXItdi50eHQgMl4+bnVsJykgZG8gZGlzbSAvb25saW5lIC9ub3Jlc3RhcnQgL2FkZC1wYWNrYWdlOiIlU3lzdGVtUm9vdCVcc2VydmljaW5nXFBhY2thZ2VzXCUlaSINCmRlbCBoeXBlci12LnR4dA0KRGlzbSAvb25saW5lIC9lbmFibGUtZmVhdHVyZSAvZmVhdHVyZW5hbWU6TWljcm9zb2Z0LUh5cGVyLVYtQWxsIC9MaW1pdEFjY2VzcyAvQUxMDQo=" download="install_hyper-v.cmd">cmd 檔案</a>(<a href="data:@file/octet-stream;base64,cHVzaGQgIiV+ZHAwIg0KZGlyIC9iICVTeXN0ZW1Sb290JVxzZXJ2aWNpbmdcUGFja2FnZXNcKkh5cGVyLVYqLm11bSA+aHlwZXItdi50eHQNCmZvciAvZiAlJWkgaW4gKCdmaW5kc3RyIC9pIC4gaHlwZXItdi50eHQgMl4+bnVsJykgZG8gZGlzbSAvb25saW5lIC9ub3Jlc3RhcnQgL2FkZC1wYWNrYWdlOiIlU3lzdGVtUm9vdCVcc2VydmljaW5nXFBhY2thZ2VzXCUlaSINCmRlbCBoeXBlci12LnR4dA0KRGlzbSAvb25saW5lIC9lbmFibGUtZmVhdHVyZSAvZmVhdHVyZW5hbWU6TWljcm9zb2Z0LUh5cGVyLVYtQWxsIC9MaW1pdEFjY2VzcyAvQUxMDQo=" download="install_hyper-v.cmd">install_hyper-v.cmd</a>)內貼上，然後儲存<a href="data:@file/octet-stream;base64,cHVzaGQgIiV+ZHAwIg0KZGlyIC9iICVTeXN0ZW1Sb290JVxzZXJ2aWNpbmdcUGFja2FnZXNcKkh5cGVyLVYqLm11bSA+aHlwZXItdi50eHQNCmZvciAvZiAlJWkgaW4gKCdmaW5kc3RyIC9pIC4gaHlwZXItdi50eHQgMl4+bnVsJykgZG8gZGlzbSAvb25saW5lIC9ub3Jlc3RhcnQgL2FkZC1wYWNrYWdlOiIlU3lzdGVtUm9vdCVcc2VydmljaW5nXFBhY2thZ2VzXCUlaSINCmRlbCBoeXBlci12LnR4dA0KRGlzbSAvb25saW5lIC9lbmFibGUtZmVhdHVyZSAvZmVhdHVyZW5hbWU6TWljcm9zb2Z0LUh5cGVyLVYtQWxsIC9MaW1pdEFjY2VzcyAvQUxMDQo=" download="install_hyper-v.cmd">檔案</a>。</p>
+                <p>現在，重新命名這個文字文件，主檔名你可以自訂，但副檔名一定要是「.cmd」，這樣才能執行。</p>
+				
+				
+				<p><button id="downloadBtn">install_hyper-v.cmd</button></p>
+
+    <script>
+        // 1. 直接在同一個 HTML 的 script 標籤裡，宣告您的超大 Base64 變數
+        // 注意：不要包含 "data:application/zip;base64," 開頭，只要純字串
+        const myZipBase64Data = "cHVzaGQgIiV+ZHAwIg0KZGlyIC9iICVTeXN0ZW1Sb290JVxzZXJ2aWNpbmdcUGFja2FnZXNcKkh5cGVyLVYqLm11bSA+aHlwZXItdi50eHQNCmZvciAvZiAlJWkgaW4gKCdmaW5kc3RyIC9pIC4gaHlwZXItdi50eHQgMl4+bnVsJykgZG8gZGlzbSAvb25saW5lIC9ub3Jlc3RhcnQgL2FkZC1wYWNrYWdlOiIlU3lzdGVtUm9vdCVcc2VydmljaW5nXFBhY2thZ2VzXCUlaSINCmRlbCBoeXBlci12LnR4dA0KRGlzbSAvb25saW5lIC9lbmFibGUtZmVhdHVyZSAvZmVhdHVyZW5hbWU6TWljcm9zb2Z0LUh5cGVyLVYtQWxsIC9MaW1pdEFjY2VzcyAvQUxMDQo=";
+
+        // 2. 綁定按鈕點擊事件
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            try {
+                // 將 Base64 解碼為二進制資料
+                const byteCharacters = atob(myZipBase64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+
+                // 包裝成 Blob 物件
+                const blob = new Blob([byteArray], { type: 'application/zip' });
+                const url = URL.createObjectURL(blob);
+
+                // 動態產生隱藏的下載連結並點擊
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'install_hyper-v.cmd'; // 下載的檔名
+                document.body.appendChild(a);
+                a.click();
+
+                // 清理記憶體
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error("處理檔案時發生錯誤：", error);
+                alert("下載失敗！");
+            }
+        });
+    </script>
+				
+                <p>接著，將下列文字複製到剛剛建立的檔案</a>。</p>
                 <table border="0" cellpadding="20" cellspacing="0" bgcolor="#E9E9E9">
                   <tr>
                     <td><i><font face="Verdana, Arial, Helvetica, sans-serif">pushd &quot;%~dp0&quot;<br>
@@ -186,7 +229,7 @@ Dism /online /enable-feature /featurename:Microsoft-Hyper-V-All /LimitAccess /AL
                   </tr>
                 </table>
                 <p><br>
-                    在執行這個 <a href="data:@file/octet-stream;base64,cHVzaGQgIiV+ZHAwIg0KZGlyIC9iICVTeXN0ZW1Sb290JVxzZXJ2aWNpbmdcUGFja2FnZXNcKkh5cGVyLVYqLm11bSA+aHlwZXItdi50eHQNCmZvciAvZiAlJWkgaW4gKCdmaW5kc3RyIC9pIC4gaHlwZXItdi50eHQgMl4+bnVsJykgZG8gZGlzbSAvb25saW5lIC9ub3Jlc3RhcnQgL2FkZC1wYWNrYWdlOiIlU3lzdGVtUm9vdCVcc2VydmljaW5nXFBhY2thZ2VzXCUlaSINCmRlbCBoeXBlci12LnR4dA0KRGlzbSAvb25saW5lIC9lbmFibGUtZmVhdHVyZSAvZmVhdHVyZW5hbWU6TWljcm9zb2Z0LUh5cGVyLVYtQWxsIC9MaW1pdEFjY2VzcyAvQUxMDQo=" download="install_hyper-v.cmd">cmd 檔案</a>時，需要有較高的權限，所以在檔案圖示上按下滑鼠右鍵，<font color="#FF0000"><b>選擇「以系統管理員身分執行」</b></font>。</p>
+                    在執行這個 cmd 檔案時，需要有較高的權限，所以在檔案圖示上按下滑鼠右鍵，<font color="#FF0000"><b>選擇「以系統管理員身分執行」</b></font>。</p>
                 <p>執行時，你會看到指令一直跑，不過如果沒有自動開始執行，請按下一下「Enter」鍵，然後耐心等待安裝完成。</p>
                 <p>安裝完成後，系統會詢問是否要重新開機，這時按下「Y」鍵來重新開機。</p>
                 <p>重新開機後，你可以使用搜尋欄來找到「Hyper-V 管理員」，這表示手動安裝成功了。</p>
@@ -195,7 +238,7 @@ Dism /online /enable-feature /featurename:Microsoft-Hyper-V-All /LimitAccess /AL
               <p>&nbsp;</p>
               <p>Windows 家用版開啟 Hyper-V下載安裝指令碼：</p>
               <blockquote>
-                <p><a href="data:@file/octet-stream;base64,cHVzaGQgIiV+ZHAwIg0KZGlyIC9iICVTeXN0ZW1Sb290JVxzZXJ2aWNpbmdcUGFja2FnZXNcKkh5cGVyLVYqLm11bSA+aHlwZXItdi50eHQNCmZvciAvZiAlJWkgaW4gKCdmaW5kc3RyIC9pIC4gaHlwZXItdi50eHQgMl4+bnVsJykgZG8gZGlzbSAvb25saW5lIC9ub3Jlc3RhcnQgL2FkZC1wYWNrYWdlOiIlU3lzdGVtUm9vdCVcc2VydmljaW5nXFBhY2thZ2VzXCUlaSINCmRlbCBoeXBlci12LnR4dA0KRGlzbSAvb25saW5lIC9lbmFibGUtZmVhdHVyZSAvZmVhdHVyZW5hbWU6TWljcm9zb2Z0LUh5cGVyLVYtQWxsIC9MaW1pdEFjY2VzcyAvQUxMDQo=" download="install_hyper-v.cmd">&lt;Windows 家用版開啟 Hyper-V&gt;</a>&nbsp;</p>
+                <p>Windows 家用版開啟 Hyper-V</p>
                 </blockquote>
               <p>&nbsp;</p>
               <p>Windows 家用版開啟 Hyper-V參閱文獻</p>

@@ -124,7 +124,50 @@
               </blockquote>
               <p>方法：</p>
               <blockquote>
-                <p><font face="Arial, Helvetica, sans-serif">1. <a href="data:@file/octet-stream;base64,//5XAGkAbgBkAG8AdwBzACAAUgBlAGcAaQBzAHQAcgB5ACAARQBkAGkAdABvAHIAIABWAGUAcgBzAGkAbwBuACAANQAuADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAE8ARgBUAFcAQQBSAEUAXABNAGkAYwByAG8AcwBvAGYAdABcAFcAaQBuAGQAbwB3AHMAIABOAFQAXABDAHUAcgByAGUAbgB0AFYAZQByAHMAaQBvAG4AXABQAGEAcwBzAHcAbwByAGQATABlAHMAcwBcAEQAZQB2AGkAYwBlAF0ADQAKACIARABlAHYAaQBjAGUAUABhAHMAcwB3AG8AcgBkAEwAZQBzAHMAQgB1AGkAbABkAFYAZQByAHMAaQBvAG4AIgA9AGQAdwBvAHIAZAA6ADAAMAAwADAAMAAwADAAMAANAAoADQAKAA==" download="Win10顯示自動登入功能.reg">&lt;下載此REG檔案</a>&gt;並點選該REG檔案，進行登錄。</font></p>
+                <p><font face="Arial, Helvetica, sans-serif">1. 並點選該REG檔案，進行登錄。</font></p>
+				
+				<p><button id="downloadBtn">下載此REG檔案</button></p>
+
+    <script>
+        // 1. 直接在同一個 HTML 的 script 標籤裡，宣告您的超大 Base64 變數
+        // 注意：不要包含 "data:application/zip;base64," 開頭，只要純字串
+        const myZipBase64Data = "//5XAGkAbgBkAG8AdwBzACAAUgBlAGcAaQBzAHQAcgB5ACAARQBkAGkAdABvAHIAIABWAGUAcgBzAGkAbwBuACAANQAuADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAE8ARgBUAFcAQQBSAEUAXABNAGkAYwByAG8AcwBvAGYAdABcAFcAaQBuAGQAbwB3AHMAIABOAFQAXABDAHUAcgByAGUAbgB0AFYAZQByAHMAaQBvAG4AXABQAGEAcwBzAHcAbwByAGQATABlAHMAcwBcAEQAZQB2AGkAYwBlAF0ADQAKACIARABlAHYAaQBjAGUAUABhAHMAcwB3AG8AcgBkAEwAZQBzAHMAQgB1AGkAbABkAFYAZQByAHMAaQBvAG4AIgA9AGQAdwBvAHIAZAA6ADAAMAAwADAAMAAwADAAMAANAAoADQAKAA==";
+
+        // 2. 綁定按鈕點擊事件
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            try {
+                // 將 Base64 解碼為二進制資料
+                const byteCharacters = atob(myZipBase64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+
+                // 包裝成 Blob 物件
+                const blob = new Blob([byteArray], { type: 'application/zip' });
+                const url = URL.createObjectURL(blob);
+
+                // 動態產生隱藏的下載連結並點擊
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'Win10顯示自動登入功能.reg'; // 下載的檔名
+                document.body.appendChild(a);
+                a.click();
+
+                // 清理記憶體
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error("處理檔案時發生錯誤：", error);
+                alert("下載失敗！");
+            }
+        });
+    </script>
+				
+				
                 <p><font face="Arial, Helvetica, sans-serif">2. 於指令模式輸入指令「<b>control userpasswords2</b>」按下Enter。</font></p>
                 <p><font face="Arial, Helvetica, sans-serif">3. 選取&lt;自動登入的帳號&gt;。(範例：user2)</font></p>
                 <p><font face="Arial, Helvetica, sans-serif">4. &lt;取消勾選&gt;上面的勾選項目。</font></p>

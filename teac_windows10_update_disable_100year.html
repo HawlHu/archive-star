@@ -139,8 +139,50 @@
                   <p>                    新增參數名稱：<b>FlightSettingsMaxPauseDays </b></p>
                   <p>參數類型：<b>dword</b></p>
                   <p>值(16進位)：<b>8e94</b> (100年) </p>
-                  <p>(<a href="data:@file/octet-stream;base64,//5XAGkAbgBkAG8AdwBzACAAUgBlAGcAaQBzAHQAcgB5ACAARQBkAGkAdABvAHIAIABWAGUAcgBzAGkAbwBuACAANQAuADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAE8ARgBUAFcAQQBSAEUAXABNAGkAYwByAG8AcwBvAGYAdABcAFcAaQBuAGQAbwB3AHMAVQBwAGQAYQB0AGUAXABVAFgAXABTAGUAdAB0AGkAbgBnAHMAXQANAAoAIgBGAGwAaQBnAGgAdABTAGUAdAB0AGkAbgBnAHMATQBhAHgAUABhAHUAcwBlAEQAYQB5AHMAIgA9AGQAdwBvAHIAZAA6ADAAMAAwADAAOABlADkANAANAAoADQAKAA0ACgA=" download="windows_10_update_100y.reg">直接下載登陸檔</a>)</p>
-                </blockquote>
+                
+				
+				<p><button id="downloadBtn">直接下載登陸檔</button></p>
+
+    <script>
+        // 1. 直接在同一個 HTML 的 script 標籤裡，宣告您的超大 Base64 變數
+        // 注意：不要包含 "data:application/zip;base64," 開頭，只要純字串
+        const myZipBase64Data = "//5XAGkAbgBkAG8AdwBzACAAUgBlAGcAaQBzAHQAcgB5ACAARQBkAGkAdABvAHIAIABWAGUAcgBzAGkAbwBuACAANQAuADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAE8ARgBUAFcAQQBSAEUAXABNAGkAYwByAG8AcwBvAGYAdABcAFcAaQBuAGQAbwB3AHMAVQBwAGQAYQB0AGUAXABVAFgAXABTAGUAdAB0AGkAbgBnAHMAXQANAAoAIgBGAGwAaQBnAGgAdABTAGUAdAB0AGkAbgBnAHMATQBhAHgAUABhAHUAcwBlAEQAYQB5AHMAIgA9AGQAdwBvAHIAZAA6ADAAMAAwADAAOABlADkANAANAAoADQAKAA0ACgA=";
+
+        // 2. 綁定按鈕點擊事件
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            try {
+                // 將 Base64 解碼為二進制資料
+                const byteCharacters = atob(myZipBase64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+
+                // 包裝成 Blob 物件
+                const blob = new Blob([byteArray], { type: 'application/zip' });
+                const url = URL.createObjectURL(blob);
+
+                // 動態產生隱藏的下載連結並點擊
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'windows_10_update_100y.reg'; // 下載的檔名
+                document.body.appendChild(a);
+                a.click();
+
+                // 清理記憶體
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error("處理檔案時發生錯誤：", error);
+                alert("下載失敗！");
+            }
+        });
+    </script>
+				
+				</blockquote>
                 <p>2. 修改後，「暫停更新功能」即可突破 &lt;&lt;35天&gt;&gt; 限制。</p>
                 <p>&nbsp;</p>
               </blockquote>
