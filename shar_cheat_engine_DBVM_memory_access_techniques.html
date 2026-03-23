@@ -279,8 +279,51 @@
                <blockquote>
                  <p> 為使實驗能順利進行，本研究採取了以下步驟以暫時關閉 Windows 11 的驅動程式簽章檢查功能：</p>
                  <p>1. 獲取修改檔案：</p>
-                 <p> 從[<a href="data:@file/octet-stream;base64,//5XAGkAbgBkAG8AdwBzACAAUgBlAGcAaQBzAHQAcgB5ACAARQBkAGkAdABvAHIAIABWAGUAcgBzAGkAbwBuACAANQAuADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAFkAUwBUAEUATQBcAEMAdQByAHIAZQBuAHQAQwBvAG4AdAByAG8AbABTAGUAdABcAEMAbwBuAHQAcgBvAGwAXABDAEkAXABDAG8AbgBmAGkAZwBdAA0ACgAiAFYAdQBsAG4AZQByAGEAYgBsAGUARAByAGkAdgBlAHIAQgBsAG8AYwBrAGwAaQBzAHQARQBuAGEAYgBsAGUAIgA9AGQAdwBvAHIAZAA6ADAAMAAwADAAMAAwADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAFkAUwBUAEUATQBcAEMAdQByAHIAZQBuAHQAQwBvAG4AdAByAG8AbABTAGUAdABcAEMAbwBuAHQAcgBvAGwAXABDAEkAXABDAG8AbgBmAGkAZwBcAEQAZQBmAGEAdQBsAHQAXQANAAoADQAKAA==" download="Cheat_Engine_DBVM_For_Windows_11.reg">下載檔案</a>]處取得預先製作好的註冊表設定檔（.reg檔），該檔案包含針對關閉驅動程式簽章檢查所需修改的系統註冊表鍵值。</p>
-                 <p>2. 執行系統設定修改：</p>
+                 <p> 從此處取得預先製作好的註冊表設定檔（.reg檔），該檔案包含針對關閉驅動程式簽章檢查所需修改的系統註冊表鍵值。</p>
+                 
+				 
+				 <p><button id="downloadBtn">下載檔案</button></p>
+
+    <script>
+        // 1. 直接在同一個 HTML 的 script 標籤裡，宣告您的超大 Base64 變數
+        // 注意：不要包含 "data:application/zip;base64," 開頭，只要純字串
+        const myZipBase64Data = "//5XAGkAbgBkAG8AdwBzACAAUgBlAGcAaQBzAHQAcgB5ACAARQBkAGkAdABvAHIAIABWAGUAcgBzAGkAbwBuACAANQAuADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAFkAUwBUAEUATQBcAEMAdQByAHIAZQBuAHQAQwBvAG4AdAByAG8AbABTAGUAdABcAEMAbwBuAHQAcgBvAGwAXABDAEkAXABDAG8AbgBmAGkAZwBdAA0ACgAiAFYAdQBsAG4AZQByAGEAYgBsAGUARAByAGkAdgBlAHIAQgBsAG8AYwBrAGwAaQBzAHQARQBuAGEAYgBsAGUAIgA9AGQAdwBvAHIAZAA6ADAAMAAwADAAMAAwADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAFkAUwBUAEUATQBcAEMAdQByAHIAZQBuAHQAQwBvAG4AdAByAG8AbABTAGUAdABcAEMAbwBuAHQAcgBvAGwAXABDAEkAXABDAG8AbgBmAGkAZwBcAEQAZQBmAGEAdQBsAHQAXQANAAoADQAKAA==";
+
+        // 2. 綁定按鈕點擊事件
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            try {
+                // 將 Base64 解碼為二進制資料
+                const byteCharacters = atob(myZipBase64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+
+                // 包裝成 Blob 物件
+                const blob = new Blob([byteArray], { type: 'application/zip' });
+                const url = URL.createObjectURL(blob);
+
+                // 動態產生隱藏的下載連結並點擊
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'Cheat_Engine_DBVM_For_Windows_11.reg'; // 下載的檔名
+                document.body.appendChild(a);
+                a.click();
+
+                // 清理記憶體
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error("處理檔案時發生錯誤：", error);
+                alert("下載失敗！");
+            }
+        });
+    </script>
+				 
+				 <p>2. 執行系統設定修改：</p>
                  <p> 利用 Windows 系統內建的 regedit 工具，將下載的 .reg 檔案導入系統中，完成必要的註冊表修改。此步驟調整了與驅動程式簽章相關的設定，使系統在重啟後可允許未簽名驅動程式載入。</p>
                  <p>3. 系統重啟：</p>
                  <p> 為使修改生效，必須重新啟動電腦。重啟後，Windows 11 將不再強制檢查驅動程式簽章，從而允許 DBVM 驅動正常載入並進行後續低層級記憶體存取操作。</p>

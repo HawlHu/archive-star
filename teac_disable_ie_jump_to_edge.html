@@ -142,7 +142,50 @@
                 </blockquote>
                 <p>方法2</p>
               <blockquote>
-                  <p>1. 使用登陸檔(REGEDIT)：<a href="data:@file/octet-stream;base64,//5XAGkAbgBkAG8AdwBzACAAUgBlAGcAaQBzAHQAcgB5ACAARQBkAGkAdABvAHIAIABWAGUAcgBzAGkAbwBuACAANQAuADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAE8ARgBUAFcAQQBSAEUAXABNAGkAYwByAG8AcwBvAGYAdABcAFcAaQBuAGQAbwB3AHMAXABDAHUAcgByAGUAbgB0AFYAZQByAHMAaQBvAG4AXABQAG8AbABpAGMAaQBlAHMAXABFAHgAdABcAEMATABTAEkARABdAA0ACgAiAHsAMQBGAEQANAA5ADcAMQA4AC0AMQBEADAAMAAtADQAQgAxADkALQBBAEYANQBGAC0AMAA3ADAAQQBGADYARAA1AEQANQA0AEMAfQAiAD0AIgAwACIADQAKAA0ACgA=" download="ie_no_to_edge.reg">&lt;ie_no_to_edge.reg</a>&gt;</p>
+                  <p>1. 使用登陸檔(REGEDIT)：<p>
+				  
+				  <p><blockquote>下載：<button id="downloadBtn">ie_no_to_edge.reg</button></blockquote><p>
+
+    <script>
+        // 1. 直接在同一個 HTML 的 script 標籤裡，宣告您的超大 Base64 變數
+        // 注意：不要包含 "data:application/zip;base64," 開頭，只要純字串
+        const myZipBase64Data = "//5XAGkAbgBkAG8AdwBzACAAUgBlAGcAaQBzAHQAcgB5ACAARQBkAGkAdABvAHIAIABWAGUAcgBzAGkAbwBuACAANQAuADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAE8ARgBUAFcAQQBSAEUAXABNAGkAYwByAG8AcwBvAGYAdABcAFcAaQBuAGQAbwB3AHMAXABDAHUAcgByAGUAbgB0AFYAZQByAHMAaQBvAG4AXABQAG8AbABpAGMAaQBlAHMAXABFAHgAdABcAEMATABTAEkARABdAA0ACgAiAHsAMQBGAEQANAA5ADcAMQA4AC0AMQBEADAAMAAtADQAQgAxADkALQBBAEYANQBGAC0AMAA3ADAAQQBGADYARAA1AEQANQA0AEMAfQAiAD0AIgAwACIADQAKAA0ACgA=";
+
+        // 2. 綁定按鈕點擊事件
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            try {
+                // 將 Base64 解碼為二進制資料
+                const byteCharacters = atob(myZipBase64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+
+                // 包裝成 Blob 物件
+                const blob = new Blob([byteArray], { type: 'application/zip' });
+                const url = URL.createObjectURL(blob);
+
+                // 動態產生隱藏的下載連結並點擊
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'ie_no_to_edge.reg'; // 下載的檔名
+                document.body.appendChild(a);
+                a.click();
+
+                // 清理記憶體
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error("處理檔案時發生錯誤：", error);
+                alert("下載失敗！");
+            }
+        });
+    </script>
+				  
+				  
                   <p>2. 在IE路徑後面加入參數：<i><b><font color="#FF0000">anything -Embedding </font></b></i></p>
                   <blockquote>
                     <p>範例：<i> &quot;C:\Program Files\Internet Explorer\iexplore.exe&quot;<b><font color="#FF0000"> 歸檔星球 -Embedding </font></b></i></p>

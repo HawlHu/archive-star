@@ -133,11 +133,57 @@
                 <p>4. 重啟電腦。</p>
                 <p>&nbsp;</p>
               </blockquote>
-              <p>登陸檔案範例[<a href="https://www.computermobile.info/2019/10/how-to-fix-system-restore-encountered-an-error-code-0x81000203.html">1</a>][<a href="data:@file/octet-stream;base64,//5XAGkAbgBkAG8AdwBzACAAUgBlAGcAaQBzAHQAcgB5ACAARQBkAGkAdABvAHIAIABWAGUAcgBzAGkAbwBuACAANQAuADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAFkAUwBUAEUATQBcAEMAbwBuAHQAcgBvAGwAUwBlAHQAMAAwADEAXABDAG8AbgB0AHIAbwBsAFwAQwBsAGEAcwBzAFwAewA3ADEAYQAyADcAYwBkAGQALQA4ADEAMgBhAC0AMQAxAGQAMAAtAGIAZQBjADcALQAwADgAMAAwADIAYgBlADIAMAA5ADIAZgB9AF0ADQAKACIAVQBwAHAAZQByAEYAaQBsAHQAZQByAHMAIgA9AGgAZQB4ACgANwApADoANwA2ACwAMAAwACwANgBmACwAMAAwACwANgBjACwAMAAwACwANwAzACwAMAAwACwANgBlACwAMAAwACwANgAxACwAMAAwACwANwAwACwAMAAwACwAMAAwACwAMAAwACwAMAAwACwAMAAwAA0ACgA=" download="fix.reg">下載</a>]：</p>
+              <p>登陸檔案範例[<a href="https://www.computermobile.info/2019/10/how-to-fix-system-restore-encountered-an-error-code-0x81000203.html">1</a>]：</p>
               <blockquote>
                 <p><font size="2" face="Arial, Helvetica, sans-serif"><i>Windows Registry Editor Version 5.00</i></font></p>
               <p><font size="2" face="Arial, Helvetica, sans-serif"><i>[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Class\{71a27cdd-812a-11d0-bec7-08002be2092f}]<br>
                     <font color="#FF0000">UpperFilters&quot;=hex(7):76,00,6f,00,6c,00,73,00,6e,00,61,00,70,00,00,00,00,00</font></i></font></p>
+					
+					
+					
+<button id="downloadBtn">下載</button>
+
+    <script>
+        // 1. 直接在同一個 HTML 的 script 標籤裡，宣告您的超大 Base64 變數
+        // 注意：不要包含 "data:application/zip;base64," 開頭，只要純字串
+        const myZipBase64Data = "//5XAGkAbgBkAG8AdwBzACAAUgBlAGcAaQBzAHQAcgB5ACAARQBkAGkAdABvAHIAIABWAGUAcgBzAGkAbwBuACAANQAuADAAMAANAAoADQAKAFsASABLAEUAWQBfAEwATwBDAEEATABfAE0AQQBDAEgASQBOAEUAXABTAFkAUwBUAEUATQBcAEMAbwBuAHQAcgBvAGwAUwBlAHQAMAAwADEAXABDAG8AbgB0AHIAbwBsAFwAQwBsAGEAcwBzAFwAewA3ADEAYQAyADcAYwBkAGQALQA4ADEAMgBhAC0AMQAxAGQAMAAtAGIAZQBjADcALQAwADgAMAAwADIAYgBlADIAMAA5ADIAZgB9AF0ADQAKACIAVQBwAHAAZQByAEYAaQBsAHQAZQByAHMAIgA9AGgAZQB4ACgANwApADoANwA2ACwAMAAwACwANgBmACwAMAAwACwANgBjACwAMAAwACwANwAzACwAMAAwACwANgBlACwAMAAwACwANgAxACwAMAAwACwANwAwACwAMAAwACwAMAAwACwAMAAwACwAMAAwACwAMAAwAA0ACgA=";
+
+        // 2. 綁定按鈕點擊事件
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            try {
+                // 將 Base64 解碼為二進制資料
+                const byteCharacters = atob(myZipBase64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+
+                // 包裝成 Blob 物件
+                const blob = new Blob([byteArray], { type: 'application/zip' });
+                const url = URL.createObjectURL(blob);
+
+                // 動態產生隱藏的下載連結並點擊
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'fix.reg'; // 下載的檔名
+                document.body.appendChild(a);
+                a.click();
+
+                // 清理記憶體
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error("處理檔案時發生錯誤：", error);
+                alert("下載失敗！");
+            }
+        });
+    </script>
+
+					
+					
               <p>&nbsp;
                               </p>
               </blockquote>

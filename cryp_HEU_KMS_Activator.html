@@ -180,38 +180,64 @@
 					</p>
 					
 					<div style="display:none" id="down_heu">
-			 	 <script>
-			  
-			  		//Images Data / Func
-						function alf(i){
-							var ajax_load_files = new sack();
-							ajax_load_files.requestFile = "init/"+dw_file_max_path+i+".html"; 
-							ajax_load_files.method = "GET";
-							ajax_load_files.onCompletion = function(){
-																	document.getElementById("dcu"+i).innerHTML="<a href=\"data:@file/x-7z-compressed;base64," + 
-																																	ajax_load_files.response
-																																+ "\" download=\"HEU_KMS_Activator_v19.6.0(jplop.neocities.org).7z.00"+ i +"\">HEU_KMS_Activator_v19.6.0(jplop.neocities.org).7z.00"+i+"</a>";
-														   };
-							ajax_load_files.runAJAX('');
-						}
-						
-						//Images Decode
-							var dw_file_max_index=6;
-							var dw_file_max_path="heu_kms_file/heu_kms_file_";
-							for(var i=1;i!=dw_file_max_index+1;i++){
-								document.write("<div id=\"dcu"+i+"\"></div><br>");
-							}
-							
-							for(var i=1;i!=dw_file_max_index+1;i++){
-								setTimeout(
-													"alf("+i+");"
-												, 
-													((i-1)*1000)+1
-											);
-							}
+	<script>
+		//Images Data / Func
+		function alf(i){
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/"+dw_file_max_path+i+".html"; 
+			ajax_load_files.method = "GET";
+			ajax_load_files.onCompletion = function(){
+				try {
+					// 1. 取得 AJAX 回傳的 Base64 字串
+					var base64Data = ajax_load_files.response.trim();
+					
+					// 預防性處理：如果字串裡面不小心包含了 data: URI 標頭，就把它切除
+					if (base64Data.includes(',')) {
+						base64Data = base64Data.split(',')[1];
+					}
 
-			   </script>
-               </div> </blockquote>
+					// 2. 將 Base64 解碼為二進制字串，再轉成 Uint8Array
+					var byteCharacters = atob(base64Data);
+					var byteNumbers = new Array(byteCharacters.length);
+					for (var j = 0; j < byteCharacters.length; j++) {
+						byteNumbers[j] = byteCharacters.charCodeAt(j);
+					}
+					var byteArray = new Uint8Array(byteNumbers);
+
+					// 3. 封裝成 Blob，並指定 MIME type 為 7z 壓縮檔 (x-7z-compressed)
+					var blob = new Blob([byteArray], { type: 'application/x-7z-compressed' });
+
+					// 4. 產生瀏覽器認可的安全內部短網址 (Object URL)
+					var blobUrl = URL.createObjectURL(blob);
+
+					// 5. 建立下載連結，替換原本的 div 內容
+					var fileName = "HEU_KMS_Activator_v19.6.0(jplop.neocities.org).7z.00" + i;
+					document.getElementById("dcu"+i).innerHTML = 
+						"<a href=\"" + blobUrl + "\" download=\"" + fileName + "\">" + fileName + "</a>";
+						
+				} catch (error) {
+					console.error("檔案 " + i + " 轉換失敗:", error);
+					document.getElementById("dcu"+i).innerHTML = "<font color='red'>檔案 " + i + " 載入或轉換失敗，請重新整理網頁</font>";
+				}
+			};
+			ajax_load_files.runAJAX('');
+		}
+		
+		//Images Decode
+		var dw_file_max_index=6;
+		var dw_file_max_path="heu_kms_file/heu_kms_file_";
+		
+		// 預先印出 div 容器，加上「處理中」的提示
+		for(var i=1;i!=dw_file_max_index+1;i++){
+			document.write("<div id=\"dcu"+i+"\">檔案 00" + i + " 載入與解碼中...</div><br>");
+		}
+		
+		// 依序發送 AJAX 請求 (保持您原本的 1 秒延遲設計，避免瞬間發出太多請求卡死瀏覽器)
+		for(var i=1;i!=dw_file_max_index+1;i++){
+			setTimeout("alf("+i+");", ((i-1)*1000)+1);
+		}
+	</script>
+</div> </blockquote>
 			  <p> HEU KMS Activator 參閱文獻：</p>
 			  <blockquote>
 			    <p><a href="https://www.modb.pro/db/159172">https://www.modb.pro/db/159172</a></p>
