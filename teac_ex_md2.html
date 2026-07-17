@@ -750,192 +750,198 @@ document.write(result);
 <p><a href="https://zh.wikipedia.org/zh-tw/Visual_Basic">Visual Basic 6.0 語言</a></p>
                   <table border="0" cellpadding="10" cellspacing="0" bgcolor="#CCCCCC">
                     <tr>
-                      <td><pre>Option Explicit
+                      <td><pre>Attribute VB_Name = "ModExMD2"
+Option Explicit
 
-' ==========================================================================================
-' Windows API 宣告：用於精確模擬 encodeURI (將 Unicode 轉為 UTF-8)
-' ==========================================================================================
-Private Declare Function WideCharToMultiByte Lib "kernel32" ( _
-    ByVal CodePage As Long, _
-    ByVal dwFlags As Long, _
-    ByVal lpWideCharStr As Long, _
-    ByVal cchWideChar As Long, _
-    ByRef lpMultiByteStr As Byte, _
-    ByVal cbMultiByte As Long, _
-    ByVal lpDefaultChar As String, _
-    ByVal lpUsedDefaultChar As Long) As Long
-
-Private Const CP_UTF8 As Long = 65001
-
-' ==========================================================================================
-' 主函數：Ex_Md2
-' ==========================================================================================
-Public Function Ex_Md2(ByVal a As String) As String
-    Dim b As String
-    Dim M As Double
-    Dim s(0 To 3) As Double
-    Dim i As Long
-    Dim c As Long
-    Dim res As String
-    Dim idx As Double ' 使用 Double 避免計算過程溢出
-    Dim encodedA As String
-    Dim finalStr As String
-    
-    ' 1. 初始化常數
-    b = "rt478aGHLTdbADEFyu3MeRfhi6mnQj"
-    M = 2147483629# ' 使用 # 強制宣告為 Double
-    
-    ' 初始化 s 陣列
-    s(0) = 19850721
-    s(1) = 98765432
-    s(2) = 12345678
-    s(3) = 55119733
-    
-    ' 2. 模擬 a = encodeURI(a) + b
-    ' 注意：這裡必須精確模擬 JS 的 encodeURI (UTF-8 based)
-    encodedA = JSEncodeURI(a) & b
-    
-    ' 3. 第一個迴圈：混淆 (Mixing)
-    Dim lenStr As Long
-    lenStr = Len(encodedA)
-    
-    For i = 1 To lenStr
-        c = UnsignedW(AscW(Mid$(encodedA, i, 1)))
-        
-        ' s[0] = (s[0] * 16807 + c) % M
-        ' 使用 CDec 防止乘法溢出 Double 的精確度 (雖然 Double 夠大，但 CDec 更保險)
-        s(0) = JSMod(s(0) * 16807# + c, M)
-        
-        ' s[1] = (s[1] * 48271 + s[0]) % M
-        s(1) = JSMod(s(1) * 48271# + s(0), M)
-        
-        ' s[2] = (s[2] ^ s[0]) % M
-        ' JS 的 Bitwise 會轉成 32bit Int。
-        ' 因為 M (2147483629) &lt; MaxLong (2147483647)，所以轉 Long 是安全的
-        Dim xorRes As Long
-        xorRes = CLng(s(2)) Xor CLng(s(0))
-        s(2) = JSMod(CDbl(xorRes), M)
-        
-        ' 修正 JS 負數模運算特性
-        If s(2) &lt; 0 Then s(2) = s(2) + M
-        
-        ' s[3] = (s[3] + s[1] + c * 13) % M
-        s(3) = JSMod(s(3) + s(1) + c * 13#, M)
-    Next i
-    
-    ' 4. 第二個迴圈：生成結果 (Generating Output)
-    ' JS: for (var i = 0; i &lt; 41; i++) -> VB: 0 To 40
-    For i = 0 To 40
-        ' s[0] = (s[0] * 16807) % M
-        s(0) = JSMod(s(0) * 16807#, M)
-        
-        ' s[1] = (s[1] * 37 + s[0]) % M
-        s(1) = JSMod(s(1) * 37# + s(0), M)
-        
-        ' s[2] = (s[2] + s[3] + i) % M
-        s(2) = JSMod(s(2) + s(3) + CDbl(i), M)
-        
-        ' s[3] = (s[3] * 48271) % M
-        s(3) = JSMod(s(3) * 48271#, M)
-        
-        ' var idx = (s[0] + s[1] + s[2] + s[3]) % 30
-        idx = JSMod(s(0) + s(1) + s(2) + s(3), 30#)
-        
-        ' if (idx &lt; 0) idx += 30
-        If idx &lt; 0 Then idx = idx + 30
-        
-        ' res += b.charAt(idx)
-        ' VB String index starts at 1, so idx + 1
-        res = res & Mid$(b, CLng(idx) + 1, 1)
-    Next i
-    
-    Ex_Md2 = res
+' ====================================================================
+' JavaScript % Modulo Emulation for VB6 (精確對齊 JS 取餘數邏輯)
+' ====================================================================
+Private Function fMod(ByVal num As Double, ByVal divisor As Double) As Double
+    Dim res As Double
+    ' 使用 Fix 函數確保精確模擬 JavaScript 中 % 運算子的行為
+    res = num - Fix(num / divisor) * divisor
+    fMod = res
 End Function
 
-' ==========================================================================================
-' 輔助函數：JSMod
-' 原理：JS 的 % 是 Truncated Modulo (截斷餘數)，不同於數學上的 Floored Modulo
-' VB6 的 Mod 運算子會先把參數四捨五入成整數，這絕對不能用，必須手寫浮點運算。
-' ==========================================================================================
-Private Function JSMod(ByVal Dividend As Double, ByVal Divisor As Double) As Double
-    ' 公式： a % n = a - (fix(a / n) * n)
-    ' Fix() 函數在 VB6 等同於 JS 的 Math.trunc() (向零取整)
-    JSMod = Dividend - (Fix(Dividend / Divisor) * Divisor)
-End Function
-
-' ==========================================================================================
-' 輔助函數：UnsignedW
-' 功能：處理 VB6 AscW 返回負數的情況 (VB6 Integer 是 Signed 16-bit)
-' 說明：AscW("中") 可能返回負數，需轉回 0-65535 範圍
-' ==========================================================================================
-Private Function UnsignedW(ByVal val As Integer) As Long
-    If val &lt; 0 Then
-        UnsignedW = CLng(val) + 65536
-    Else
-        UnsignedW = CLng(val)
+' ====================================================================
+' Helper: URI Percent Encoding (百分比編碼)
+' ====================================================================
+Private Function percentEncode(ByVal byteVal As Long) As String
+    Dim hexStr As String
+    
+    ' 將數值轉為 Hex，並確保只有 8-bit 有效位元
+    hexStr = Hex$(byteVal And &HFF&)
+    
+    ' 補零確保為雙字元
+    If Len(hexStr) = 1 Then
+        hexStr = "0" & hexStr
     End If
+    
+    percentEncode = "%" & UCase$(hexStr)
 End Function
 
-' ==========================================================================================
-' 輔助函數：JSEncodeURI
-' 邏輯：
-' 1. 不編碼：A-Z a-z 0-9 ; , / ? : @ & = + $ - _ . ! ~ * ' ( ) #
-' 2. 其他字元：轉換為 UTF-8 Byte 序列，並轉為 %XX 格式
-' ==========================================================================================
-Private Function JSEncodeURI(ByVal txt As String) As String
+' ====================================================================
+' es1_safe_encodeURI (工業級優化：靜態雜湊表 + 陣列字串合併，O(N) 效能)
+' ====================================================================
+Public Function es1_safe_encodeURI(ByVal str As String) As String
+    If Len(str) = 0 Then
+        es1_safe_encodeURI = ""
+        Exit Function
+    End If
+    
+    ' 使用 Static 變數建立 Lookup Table，只需初始化一次，極大提高長期運作效能
+    Static isInit As Boolean
+    Static safeMap(0 To 127) As Boolean
+    
+    Dim safeStr As String
+    Dim k As Long
+    
+    ' 嚴格換行，絕不使用冒號
+    If Not isInit Then
+        safeStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!~*'();,/?@&=+$#"
+        For k = 1 To Len(safeStr)
+            safeMap(AscW(Mid$(safeStr, k, 1))) = True
+        Next k
+        isInit = True
+    End If
+    
+    ' 宣告變數
+    Dim outArr() As String
+    ReDim outArr(1 To Len(str))
+    
     Dim i As Long
-    Dim c As Long
-    Dim charStr As String
-    Dim utf8Bytes() As Byte
-    Dim result As String
-    Dim bufferLen As Long
-    Dim j As Long
+    Dim c_char As String
+    Dim c_code As Long
+    Dim isSafe As Boolean
+    Dim charOut As String
+    Dim byte1 As Long
+    Dim byte2 As Long
+    Dim byte3 As Long
     
-    result = ""
-    
-    For i = 1 To Len(txt)
-        charStr = Mid$(txt, i, 1)
-        c = UnsignedW(AscW(charStr))
+    For i = 1 To Len(str)
+        c_char = Mid$(str, i, 1)
+        ' AscW 搭配 And &HFFFF& 保證取得 0-65535 的無號整數
+        ' 完美對應 JavaScript 的 charCodeAt，防止中文字元產生負數
+        c_code = AscW(c_char) And &HFFFF&
         
-        ' 檢查是否為安全字元 (不需要編碼)
-        ' 參考 JS 規範: URIUnescaped + reserved + number (hash mark included in reserved)
-        Dim isSafe As Boolean
         isSafe = False
         
-        ' 0-9 (48-57), A-Z (65-90), a-z (97-122)
-        If (c >= 48 And c &lt;= 57) Or (c >= 65 And c &lt;= 90) Or (c >= 97 And c &lt;= 122) Then isSafe = True
-        
-        ' Special chars allowed in encodeURI: - _ . ! ~ * ' ( ) ; / ? : @ & = + $ , #
-        If Not isSafe Then
-            Select Case c
-                Case 45, 95, 46, 33, 126, 42, 39, 40, 41, 59, 47, 63, 58, 64, 38, 61, 43, 36, 44, 35
-                    isSafe = True
-            End Select
+        ' 陣列越界保護
+        If c_code >= 0 And c_code <= 127 Then
+            isSafe = safeMap(c_code)
         End If
         
         If isSafe Then
-            result = result & charStr
+            charOut = c_char
         Else
-            ' 需要編碼：轉為 UTF-8 Bytes
-            ' 計算所需的 buffer 大小
-            bufferLen = WideCharToMultiByte(CP_UTF8, 0, StrPtr(charStr), 1, ByVal 0&, 0, vbNullString, 0)
-            
-            If bufferLen > 0 Then
-                ReDim utf8Bytes(0 To bufferLen - 1)
-                Call WideCharToMultiByte(CP_UTF8, 0, StrPtr(charStr), 1, utf8Bytes(0), bufferLen, vbNullString, 0)
+            If c_code >= 0 And c_code <= 127 Then
+                charOut = percentEncode(c_code)
                 
-                ' 將每個 Byte 轉為 %XX
-                For j = 0 To UBound(utf8Bytes)
-                    Dim hexVal As String
-                    hexVal = Hex(utf8Bytes(j))
-                    If Len(hexVal) = 1 Then hexVal = "0" & hexVal
-                    result = result & "%" & hexVal
-                Next j
+            ElseIf c_code >= 128 And c_code <= 2047 Then
+                byte1 = 192 Or (c_code \ 64)
+                byte2 = 128 Or (c_code And 63)
+                charOut = percentEncode(byte1) & percentEncode(byte2)
+                
+            ElseIf c_code >= 2048 And c_code <= 65535 Then
+                byte1 = 224 Or (c_code \ 4096)
+                byte2 = 128 Or ((c_code \ 64) And 63)
+                byte3 = 128 Or (c_code And 63)
+                charOut = percentEncode(byte1) & percentEncode(byte2) & percentEncode(byte3)
+                
+            Else
+                charOut = ""
             End If
         End If
+        
+        ' 使用陣列存放以避免字串頻繁拼接導致的記憶體破碎化
+        outArr(i) = charOut
     Next i
     
-    JSEncodeURI = result
+    ' 最終透過 Join 一次性組合，具備商用最高效能
+    es1_safe_encodeURI = Join(outArr, "")
+End Function
+
+' ====================================================================
+' ex_md2 Hash Function (核心加密邏輯)
+' ====================================================================
+Public Function ex_md2(ByVal a As String) As String
+    Dim b As String
+    Dim M As Double
+    Dim s(0 To 3) As Double ' 使用 Double 存放，保證 100% 避免大數乘法 Overflow
+    
+    b = "rt478aGHLTdbADEFyu3MeRfhi6mnQj"
+    M = 2147483629#
+    
+    s(0) = 19850721#
+    s(1) = 98765432#
+    s(2) = 12345678#
+    s(3) = 55119733#
+    
+    Dim a_encoded As String
+    a_encoded = es1_safe_encodeURI(a) & b
+    
+    Dim i As Long
+    Dim c As Long
+    Dim xorRes As Long
+    
+    For i = 1 To Len(a_encoded)
+        c = AscW(Mid$(a_encoded, i, 1)) And &HFFFF&
+        
+        s(0) = fMod(s(0) * 16807# + CDbl(c), M)
+        s(1) = fMod(s(1) * 48271# + s(0), M)
+        
+        ' JS Bitwise XOR 模擬：在 32-bit 界線內進行
+        ' 因 s(0) 與 s(2) 均小於 2147483629，CLng 保證安全，絕不溢位且為正數
+        xorRes = CLng(s(2)) Xor CLng(s(0))
+        s(2) = fMod(CDbl(xorRes), M)
+        
+        ' 確保非負數 (精確對應 JS 邏輯)
+        If s(2) < 0 Then
+            s(2) = s(2) + M
+        End If
+        
+        s(3) = fMod(s(3) + s(1) + CDbl(c) * 13#, M)
+    Next i
+    
+    Dim res As String
+    Dim idx As Double
+    
+    res = ""
+    
+    For i = 0 To 40
+        s(0) = fMod(s(0) * 16807#, M)
+        s(1) = fMod(s(1) * 37# + s(0), M)
+        s(2) = fMod(s(2) + s(3) + CDbl(i), M)
+        s(3) = fMod(s(3) * 48271#, M)
+        
+        idx = fMod(s(0) + s(1) + s(2) + s(3), 30#)
+        
+        If idx < 0 Then
+            idx = idx + 30#
+        End If
+        
+        ' VB6 的 Mid 索引從 1 開始，故需將 JS 的 idx + 1
+        ' 使用 Fix 確保去除任何浮點數誤差，安全取得字元
+        res = res & Mid$(b, CLng(Fix(idx)) + 1, 1)
+    Next i
+    
+    ex_md2 = res
+End Function
+
+' ====================================================================
+' ex_md2n - Run Hash N Times (連續執行 n 次加密)
+' ====================================================================
+Public Function ex_md2n(ByVal a As String, ByVal n As Long) As String
+    Dim i As Long
+    Dim result As String
+    
+    result = a
+    
+    For i = 1 To n
+        result = ex_md2(result)
+    Next i
+    
+    ex_md2n = result
 End Function</pre></td>
                     </tr>
                           </table>
