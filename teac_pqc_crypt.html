@@ -1,0 +1,448 @@
+<HTML><!-- InstanceBegin template="/Templates/default.dwt" codeOutsideHTMLIsLocked="false" -->
+<HEAD>
+<!-- InstanceBeginEditable name="doctitle" -->
+<TITLE>歸檔星球 Archive Star - PQC 技術研究與示範 - 下一代加密技術如何反量子電腦探討</TITLE>
+<!-- InstanceEndEditable -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta property="og:title" content="歸檔星球 Archive Star">
+<meta property="og:type" content="article">
+<meta property="og:description" content="歸檔星球 Archive Star">
+<meta property="og:site_name" content="歸檔星球 Archive Star">
+<!-- InstanceBeginEditable name="head" -->
+
+	<meta name="keywords" content="PQC 技術研究與示範 - 下一代加密技術如何反量子電腦探討">
+	<meta name="pagetype" content="教學">
+	<meta name="description" content="PQC 技術研究與示範 - 下一代加密技術如何反量子電腦探討">
+	
+	 <style>
+        /* 防論壇跑版：使用基礎且安全的 CSS 樣式隔離 */
+        .pqc-paper-container {
+            font-family: 'Helvetica Neue', Helvetica, Arial, 'Microsoft JhengHei', sans-serif;
+            line-height: 1.6;
+        }
+        .pqc-paper-container h1 {
+            text-align: left;
+            color: #2c3e50;
+            font-size: 1.8em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+        .pqc-paper-container .subtitle {
+            text-align: left;
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+        .pqc-paper-container h2 {
+            color: #2980b9;
+            font-size: 1.4em;
+            margin-top: 30px;
+            border-left: 4px solid #2980b9;
+            padding-left: 10px;
+        }
+        .pqc-paper-container p, .pqc-paper-container li {
+            text-align: justify;
+            font-size: 1em;
+        }
+        .pqc-paper-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .pqc-paper-container th, .pqc-paper-container td {
+            border: 1px solid #bdc3c7;
+            padding: 10px;
+            text-align: left;
+        }
+        .pqc-paper-container th {
+            background-color: #ecf0f1;
+        }
+        /* Demo 區塊樣式 */
+        .pqc-demo-box {
+            background-color: #f9f9f9;
+            border: 1px dashed #7f8c8d;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .pqc-demo-box textarea {
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+            font-family: monospace;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        .pqc-demo-box button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1em;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .pqc-demo-box button:hover {
+            background-color: #2980b9;
+        }
+        .pqc-demo-box button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .log-panel {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+    </style>
+	
+	<script type="application/ld+json">
+		{
+		  "@context": "https://schema.org",
+		  "@type": "WebPage",
+		  "url": "https://jplop.netlify.app/teac_post_about.html",
+		  "name": "PQC 技術研究",
+		  "description": "PQC 技術研究與示範 - 下一代加密技術如何反量子電腦探討。"
+		}
+	</script>	
+	<script src="js/aes.js"></script>
+<!-- InstanceEndEditable -->
+		<script data-cfasync="false"></script>
+		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="mm_menu.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/default.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/database.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/aes.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/sha1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/rc4.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/qrcode.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/message.js"></script>		
+		<style>
+			a:link {color: #0000FF;text-decoration: none;} 
+			a:visited {color: #3366FF;text-decoration: none;}
+			a:hover {}
+			a:active {color: #FF0000;text-decoration: none;}
+			font ,input , select ,p , a, td ,tr ,table ,b ,u {font-family: Verdana, Arial, Helvetica, sans-serif;}
+			input ,button , select{font-size:12px;}
+			.spoiler, .spoiler2{color: black; background-color:black;}
+			.spoiler:hover{color: white;}
+			.spoiler2:hover { background-color:white; }
+		</style>
+		
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-SVGMPW8LR4"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		
+		  gtag('config', 'G-SVGMPW8LR4');
+		</script>
+		
+</HEAD>
+
+<BODY leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<table width="100%" height="100%" border="0" style="padding:20px;" cellspacing="0" background="images/archive_star_ban_bg_1997.jpg" id="table_top1">
+  <tr>
+    <td height="715" valign="top"><table width="100%" height="100%" border="0" cellspacing="0" bgcolor="#FFFFFF" style="padding:20px;border:1px #ccc solid;border-radius:10px;box-shadow:1px 1px 20px #ffffff;margin-right:8px;" id="table_top2">
+      <tr>
+        <td valign="top">
+		
+		<span id="j_space_top_data"></span>
+		<script>
+			var ajax_load_top = new sack();
+			ajax_load_top.requestFile = "init/top.html";
+			ajax_load_top.method  = 'GET'; 
+			ajax_load_top.element = 'j_space_top_data'; 
+	   </script>
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+
+            <td width="200" valign="top" id="mmenu"></td>
+			  <!-- InstanceBeginEditable name="EditRegion4" --> <!-- InstanceEndEditable -->
+            <td valign="top">
+			
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				  <tr>
+				    <td id="top_left_menu_td_m" align="center" bgcolor="#40588C" width="40" onClick="window.location='#d_menu_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">M</font></td>
+					<td id="top_left_menu_td_f" align="center" bgcolor="#336600" width="40" onClick="window.location='#d_file_a'" style="display:none;cursor:pointer;border-width:1px;border-style:solid;border-color:#999999;"><font color="#FFFFFF">F</font></td>
+					<td id="top_left_menu_td" style="text-align:right;background-color:#FFFFFF">
+							<span id="LoginBox_PC">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">About</a> | 
+								<a href="https://jplop.netlify.app/">NetLify</a> | 
+								<a href="https://jplop.neocities.org/">NeoCities</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">Project</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_M" style="display:none">
+							 	<a href="javascript:if(document.readyState==='complete'){if(document.getElementById('j_space_top_data').innerHTML==''){ajax_load_top.runAJAX('')}else{document.getElementById('j_space_top_data').innerHTML=''}};void(0);">AB</a> | 
+								<a href="https://jplop.netlify.app/">NL</a> | 
+								<a href="https://jplop.neocities.org/">NC</a> | 
+								<a href="https://project.jplopsoft.idv.tw/">PJ</a> | 
+								<a href="https://www.jplopsoft.idv.tw/neocities/">TEST</a>
+							</span>
+							<span id="LoginBox_status"> | 
+								<a href="javascript:main_login_in_start();void(0);">管理</a> 
+							</span>
+					  </td>
+				  </tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="10" cellspacing="0">
+				  <tr>
+					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
+              <div class="pqc-paper-container">
+    <h1><b>&lt;&lt;PQC 技術研究與示範 - 下一代加密技術如何反量子電腦探討&gt;&gt;</b></h1>
+    <div class="subtitle">PQC Technical Research and Demonstration - Exploring How Next-Generation Encryption Counteracts Quantum Computers</div>
+
+    <h2>一、摘要 (Abstract)</h2>
+    <p>隨著量子運算技術的突破，傳統基於質數分解（如 RSA）與橢圓曲線（如 ECC）的公鑰加密系統面臨被 Shor 演算法破解的重大威脅。為因應此危機，後量子密碼學（Post-Quantum Cryptography, PQC）成為全球資訊安全的新標準。本研究探討並實作了基於 NIST 標準的 Kyber1024 演算法，結合傳統高強度 AES 對稱加密，建構出一套混合式（Hybrid）抗量子加密模型，並透過 WebAssembly (WASM) 在瀏覽器端進行效能與可行性驗證。</p>
+    
+    <p><strong>Keywords:</strong> Post-Quantum Cryptography (PQC), Kyber1024, AES, Hybrid Encryption, WebAssembly (WASM).</p>
+
+    <h2>二、英文摘要 (English Abstract)</h2>
+    <p>With the rapid advancement of quantum computing, traditional public-key cryptosystems like RSA and ECC are severely threatened by Shor's algorithm. To mitigate this, Post-Quantum Cryptography (PQC) has emerged as the new global security standard. This study explores and implements a hybrid encryption model combining the NIST-standardized Kyber1024 algorithm with high-strength AES symmetric encryption. Furthermore, it demonstrates the performance and feasibility of this model in a browser environment using WebAssembly (WASM).</p>
+
+    <h2>三、背景 (Background)</h2>
+    <p>現代網際網路的安全基石依賴於公鑰密碼學的數學難題。然而，具備足夠邏輯量子位元（Logical Qubits）的通用量子電腦，能夠在多項式時間內解開這些難題。美國國家標準暨技術研究院（NIST）自 2016 年起啟動 PQC 標準化流程，並已將基於晶格（Lattice-based）的 CRYSTALS-Kyber 列為金鑰封裝機制（Key Encapsulation Mechanism, KEM）的首選標準。</p>
+
+    <h2>四、動機 (Motivation)</h2>
+    <p>面對「現在竊取，未來解密」（Store Now, Decrypt Later, SNDL）的攻擊策略，惡意攻擊者正大量攔截並儲存當前的加密通訊封包，等待量子電腦成熟後進行解密。因此，即使量子電腦尚未完全普及，將現有系統升級至具備反量子能力的加密技術已是刻不容緩的資安議題。</p>
+
+    <h2>五、目的 (Purpose)</h2>
+    <p>本文件旨在：</p>
+    <ul>
+        <li>解析 PQC KEM（Kyber1024）與對稱式加密（AES）的混合架構理論。</li>
+        <li>利用 WASM 技術，展示在無後端伺服器依賴的純前端環境中執行複雜晶格運算的可行性[cite: 2, 3]。</li>
+        <li>提供一份具備完整加密、解密步驟的互動式操作示範與程式碼。</li>
+    </ul>
+
+    <h2>六、研究方法 (Research Methodology)</h2>
+    <p>本研究採用混合加密（Hybrid Encryption）機制，結合非對稱的 PQC 演算法與對稱的 AES 演算法：</p>
+    <ul>
+        <li><strong>模組初始化：</strong> 載入 PQC KEM (Kyber1024) 的 WebAssembly 二進位檔與 JavaScript 綁定模組[cite: 2, 3]。</li>
+        <li><strong>金鑰生成：</strong> 透過 KEM 模組的 `keypair()` 方法生成一組抗量子的公私鑰對[cite: 1]。</li>
+        <li><strong>金鑰封裝與共享金鑰：</strong> 發送方使用接收方的公鑰進行 `encapsulate()`，產生一組密文（Ciphertext）與一組共享金鑰（Shared Secret）[cite: 1]。</li>
+        <li><strong>格式轉換：</strong> 將還原出的 Shared Secret（Uint8Array 格式）轉換為 Hex 16進位字串[cite: 1]。</li>
+        <li><strong>對稱加密：</strong> 使用轉換後的 Hex 字串作為 CryptoJS 的通行密碼，對實際的明文資料進行 AES 加密[cite: 1, 4]。</li>
+        <li><strong>資料封裝：</strong> 將 PQC KEM 產生的密文與 AES 加密後的資料打包，並進行 Base64 編碼以便傳輸[cite: 1]。</li>
+    </ul>
+
+    <h2>七、研究結果與發現 (Results and Findings)</h2>
+    <p>實作結果表明，結合 `pqc-kem-kyber1024.wasm` 與 `aes.js`，開發者能輕易在前端完成高強度的混合加密。研究發現以下特點：</p>
+    <table>
+        <tr>
+            <th>特性</th>
+            <th>說明</th>
+        </tr>
+        <tr>
+            <td><strong>效能優異</strong></td>
+            <td>藉由 WASM 編譯，Kyber1024 的晶格矩陣運算在瀏覽器中能達到近乎原生的執行速度[cite: 2, 3]。</td>
+        </tr>
+        <tr>
+            <td><strong>混合架構優勢</strong></td>
+            <td>純 KEM 僅能用於金鑰交換，無法直接加密大量文本。透過 PQC 交換 AES 金鑰，既保證了金鑰傳輸的抗量子性，又維持了 AES 加密大容量資料的極高效率[cite: 1, 4]。</td>
+        </tr>
+    </table>
+
+    <h2>八、未來可延伸研究 (Future Extensions)</h2>
+    <p>未來的研究可進一步探討：</p>
+    <ul>
+        <li><strong>數位簽章 (Digital Signatures)：</strong> 引入 CRYSTALS-Dilithium 或 SPHINCS+ 等 PQC 簽章演算法，確保資料來源不可否認性。</li>
+        <li><strong>網路協定升級：</strong> 探討將此混合加密機制整合入 TLS 1.3 協定的實務架構與效能衝擊。</li>
+    </ul>
+
+    <h2>九、參考文獻 (References)</h2>
+    <ul>
+        <li>NIST Post-Quantum Cryptography Standardization.</li>
+        <li>CryptoJS AES Implementation.[cite: 4]</li>
+        <li>WebAssembly (WASM) KEM Bindings.[cite: 2, 3]</li>
+    </ul>
+
+    <hr>
+
+    <h2>十、相關附件與操作教學 (Demo & Tutorial)</h2>
+    <p>以下為引用本研究四個核心檔案的實際運作範例。請依序點擊「產生抗量子金鑰對」、「加密」與「解密」來體驗 PQC 技術。</p>
+    <ul>
+        <li><code>pqc.js</code>: 混合加密邏輯主程式[cite: 1]</li>
+        <li><code>pqc-kem-kyber1024.js</code> / <code>.wasm</code>: Kyber1024 演算法核心[cite: 2, 3]</li>
+        <li><code>aes.js</code>: CryptoJS 對稱加密套件[cite: 4]</li>
+    </ul>
+
+    <div class="pqc-demo-box">
+        <h3>互動式 PQC 混合加密示範</h3>
+        
+        <label><b>1. 請輸入要加密的機密訊息：</b></label>
+        <textarea id="plainText">這是一段高度機密的文字，將受到 Kyber1024 KEM 與 AES 的雙重混合加密保護，足以抵抗未來量子電腦的破解威脅。</textarea>
+        
+        <div>
+            <button id="btnGenKey" onclick="generateKeys()">產生抗量子金鑰對</button>
+            <button id="btnEncrypt" onclick="doEncrypt()" disabled>進行 PQC 混合加密</button>
+            <button id="btnDecrypt" onclick="doDecrypt()" disabled>進行還原解密</button>
+        </div>
+
+        <label><b>系統狀態與日誌輸出：</b></label>
+        <div id="demoLog" class="log-panel">等待操作...</div>
+    </div>
+
+
+</div>
+
+<!-- ES6 Module 載入與 Demo 邏輯 -->
+<script type="module">
+    // 直接引用指定的 pqc.js 模組
+    import { PQCCrypto } from 'https://hawlhu.github.io/archive-star/js/pqc.js';
+
+    // 全域變數供 Demo 使用
+    let currentPublicKey = null;
+    let currentPrivateKey = null;
+    let encryptedData = null;
+
+    const logPanel = document.getElementById('demoLog');
+    const btnEncrypt = document.getElementById('btnEncrypt');
+    const btnDecrypt = document.getElementById('btnDecrypt');
+
+    function log(msg) {
+        const time = new Date().toLocaleTimeString();
+        logPanel.innerHTML += `\n[${time}] ${msg}`;
+        logPanel.scrollTop = logPanel.scrollHeight;
+    }
+
+    // 綁定到 window 供 onclick 呼叫
+    window.generateKeys = async function() {
+        try {
+            log("正在初始化 WASM 與生成 Kyber1024 金鑰對...");
+            const keypair = await PQCCrypto.generateKeys();
+            currentPublicKey = keypair.publicKey;
+            currentPrivateKey = keypair.privateKey;
+            
+            log(`✅ 金鑰生成成功！\n公鑰長度: ${currentPublicKey.byteLength} bytes\n私鑰長度: ${currentPrivateKey.byteLength} bytes`);
+            btnEncrypt.disabled = false;
+        } catch (error) {
+            log(`❌ 金鑰生成失敗: ${error.message}`);
+        }
+    };
+
+    window.doEncrypt = async function() {
+        const text = document.getElementById('plainText').value;
+        if (!text) {
+            alert("請輸入要加密的訊息");
+            return;
+        }
+        try {
+            log("正在使用 Kyber1024 封裝金鑰，並利用 AES 進行加密...");
+            // 執行混合加密
+            encryptedData = await PQCCrypto.encrypt(text, currentPublicKey);
+            log(`✅ 加密成功！\n混合加密封包 (Base64): \n${encryptedData.substring(0, 80)}... (省略)`);
+            btnDecrypt.disabled = false;
+        } catch (error) {
+            log(`❌ 加密失敗: ${error.message}`);
+        }
+    };
+
+    window.doDecrypt = async function() {
+        if (!encryptedData) return;
+        try {
+            log("正在使用 Kyber1024 私鑰解封裝 Shared Secret，並解密 AES 內容...");
+            // 執行混合解密
+            const decryptedText = await PQCCrypto.decrypt(encryptedData, currentPrivateKey);
+            log(`✅ 解密成功！\n解密後的明文: \n=================\n${decryptedText}\n=================`);
+        } catch (error) {
+            log(`❌ 解密失敗: ${error.message}`);
+        }
+    };
+</script>
+					<!-- InstanceEndEditable --></td>
+				  </tr>
+				</table>
+			
+			
+			</td>
+          </tr>
+        </table></td>
+      </tr>
+     
+      <tr>
+        <td align="left" valign="top" style="display:none" id="mmenu_down">
+		
+			<table width="100%" border="0" cellpadding="10" cellspacing="0">
+			  <tr>
+				<td align="left" valign="top" bgcolor="#DEECF1"><b>其他資料</b><a name="d_menu_a" id="d_menu_a"></a></td>
+			  </tr>
+			  <tr>
+				<td align="left" valign="top" id="mmenu_down_data"></td>
+			  </tr>
+			</table>
+
+		</td>
+      </tr>
+      <tr>
+       <td height="80" valign="middle" bgcolor="#DEECF1" id="m_files" style="padding:20px;"></td>
+		
+		<script>
+			var ajax_load_files = new sack();
+			ajax_load_files.requestFile = "init/files.htm"; 
+			ajax_load_files.method  = 'GET'; 
+			ajax_load_files.element = 'm_files'; 
+			function start_ajax_load_files(){
+				ajax_load_files.runAJAX('');
+			}
+			setTimeout("start_ajax_load_files();",1000);
+	   </script>
+		
+      </tr>
+      <tr>
+        <td height="60" align="center" valign="middle">
+		
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="https://www.jplopsoft.idv.tw/">Jplopsoft</a> | 
+				<a href="https://twhkinc.jplopsoft.idv.tw/">THI</a> | 
+				<a href="https://app.netlify.com/sites/jplop/deploys">Netlify</a> | 
+				<a href="https://neocities.org/dashboard">NeoCities</a> | 
+				<a href="https://lionfree.net/">LionFree</a>
+			</font></p>
+			
+			<p><font face="Verdana, Arial, Helvetica, sans-serif">
+				<a href="util_aes_utility.html">加密工具</a> | 
+				<a href="teac_post_about.html">提交歸檔</a> | 
+				<a href="util_qrcode_online_gen_tool.html">QRCODE產生器</a> | 
+				<a href="util_gen_pass.html">密碼產生器</a>
+			</font></p>
+			
+			<!--カウンター画像からは配布サイトへリンクが設定されています。また、誤作動、誤表示の原因となりますのでコードの改変、改行は行わないで下さい。
+			このコメント部分は削除して頂いても結構です。-->
+			<a href="https://www.stylemap.co.jp/"><img src="https://www.f-counter.net/j/65/1736390070/" alt="アクセスカウンター"></a>
+			
+			<!-- 
+				<p><a_disable href="https://www.mfwzjsq.com/" target="_blank"><img_disable src="https://www.mfwzjsq.com/hit.php?id=zemaqpd&nd=6&style=1" border="0" alt="網頁計數器"></a_disable></p> 
+			-->
+			
+		</td>
+      </tr>
+    </table>
+	</td>
+  </tr>
+</table>
+</BODY>
+<script>
+	
+</script>
+<!-- InstanceEnd --></HTML>

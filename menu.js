@@ -2,6 +2,7 @@ var 								j_db_menu=[
 												[
 													"2026-02-06",
 													[
+														["teac_pqc_crypt","教學","PQC 技術研究"],
 														["teac_softether_apache_rproxy","教學","基於 Apach"]														
 													]
 												],												
@@ -128,8 +129,8 @@ var 								j_db_menu=[
 												[
 													"2015-08-12",
 													[
-														["teac_w11_right_menu_to_w10","技術","將 Win11 "],
 														["teac_ex_md2","教學","EXpansio"],
+														["teac_w11_right_menu_to_w10","技術","將 Win11 "],
 														["teac_easy_net_disable","教學","簡易禁止電腦上網"],
 														["shar_rec_cam_or_screen_for_potplayer","分享","錄製網路攝影機畫"],
 														["info_gpu_2021_top","資訊","顯示卡天梯202"],
