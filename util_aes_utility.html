@@ -162,11 +162,19 @@
 					<script>
 						function auto_btn_check(data){
 							if(document.getElementById('key').value!="" && data!=""){
-								if(data.substr(0,10)=="U2FsdGVkX1"){
-									document.getElementById('btn_start_2').click();
-								}else{
-									document.getElementById('btn_start_1').click();
-								}
+								
+								//AES
+									if(data.substr(0,9)=="U2FsdGVkX"){
+										document.getElementById('btn_start_2').click();
+									}else{
+										try {
+											//EXES
+												if(exesDecrypt(document.getElementById('data').value,document.getElementById('key').value).length >= 2){
+													document.getElementById('btn_start_4').click();
+												}
+										} catch (error) {
+										}
+									}
 							}
 						}
 					</script>
@@ -218,11 +226,11 @@
                     </font></b></td>
 					
 					 <td id="btn_table_bg_color_3"><b><font face="Verdana, Arial, Helvetica, sans-serif">
-                      <input id="btn_start_3" type="button" value="EXES加密" onClick="change_btn_bg_color(3);if(document.getElementById('encode_use_url_encode').checked){document.getElementById('data_ok').value=exesEncrypt(document.getElementById('data').value,document.getElementById('key').value).replace(/\//gi,'\_');}else{document.getElementById('data_ok').value=exesEncrypt(document.getElementById('data').value,document.getElementById('key').value);}document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
+                      <input id="btn_start_3" type="button" value="EXES加密" onClick="change_btn_bg_color(3);document.getElementById('data_ok').value=exesEncrypt(document.getElementById('data').value,document.getElementById('key').value);document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
                     </font></b></td>
                     
                     <td id="btn_table_bg_color_4"><b><font face="Verdana, Arial, Helvetica, sans-serif">
-                      <input id="btn_start_4" type="button" value="EXES解密" onClick="change_btn_bg_color(4);document.getElementById('data_ok').value=exesDecrypt(document.getElementById('data').value.replace(/_/gi,'/'),document.getElementById('key').value);document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
+                      <input id="btn_start_4" type="button" value="EXES解密" onClick="change_btn_bg_color(4);document.getElementById('data_ok').value=exesDecrypt(document.getElementById('data').value,document.getElementById('key').value);document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
                     </font></b></td>
 					<td id="btn_table_bg_color_4"><input type="checkbox" name="checkbox" value="checkbox" id="encode_use_url_encode">
 					  URL編碼(相容檔名)</td>
