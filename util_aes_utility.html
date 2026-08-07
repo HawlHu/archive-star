@@ -328,17 +328,21 @@
 											document.getElementById('asg_out1').innerHTML="<p>組合："+document.getElementById('as_user_name').value + 
 																							web_system_main_json_datas.user_login_center_key +
 																							document.getElementById('as_password').value+"</p>";
-											document.getElementById('asg_out2').innerHTML="<p>EX_MD1："+ex_md1(
+											document.getElementById('asg_out2').innerHTML="<p>EX_MD2n(100000)："+ex_md2n(
 																							document.getElementById('as_user_name').value + 
 																							web_system_main_json_datas.user_login_center_key +
 																							document.getElementById('as_password').value
+																							,
+																							100000
 																					)+"</p>";
 											document.getElementById('asg_out4').innerHTML="<p>檔名：/db/user_"+document.getElementById('as_user_name').value+".js</p>";
 											document.getElementById('asg_out3').value="loginstart_callback(\n"+
-"	\""+AesEncrypt(document.getElementById('as_group_key').value ,ex_md1(
+"	\""+exesEncrypt(document.getElementById('as_group_key').value ,ex_md2n(
 			document.getElementById('as_user_name').value + 
 			web_system_main_json_datas.user_login_center_key +
 			document.getElementById('as_password').value
+			,
+			100000
 	))+"\",\n"+
 "	\""+document.getElementById('as_cname').value+"\",\n"+
 "	\""+document.getElementById('as_group').value+"\"\n"+

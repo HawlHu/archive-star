@@ -223,15 +223,17 @@
 								if(readCookie("j_aeskey")==""){
 								
 									//基本 AES資料防呆
-										if(aes_data_law.replace("U2FsdGVkX1","")!=aes_data_law){
+										if(aes_data_law.length>=800){
 												try { 
 													writeCookie("j_aeskey", 
-																	AesDecrypt(
+																	exesDecrypt(
 																		aes_data_law,
-																		ex_md1( 
+																		ex_md2n( 
 																					web_system_main_json_datas.user_key_in_user + 
 																					web_system_main_json_datas.user_login_center_key + 
 																					web_system_main_json_datas.user_key_in_pass
+																					,
+																					100000
 																				)
 																	), 
 																	web_system_main_json_datas.user_login_cookie_max_sec
