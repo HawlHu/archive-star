@@ -118,7 +118,7 @@
 				  <tr>
 					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
               <h2><img id="one_page_number_1" src="images/archive_star_ban_2022.jpg?nf_resize=fit&w=532&h=332" alt="AES Javascript加解密工具"  style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
-              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;AES JS加解密工具&gt;&gt;</font></h2>
+              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;AES/EXES JS加解密工具&gt;&gt;</font></h2>
               <p><b><font face="Verdana, Arial, Helvetica, sans-serif">
                 密鑰：<font color=blue><b>[<span id="source_key_check_type_display">No AESXKEY</span> | <a href="javascript:document.getElementById('key').value=SPG_GenPassword(getRandomInt(64)+64,false,'AeSXkEYrNdX1');source_key_check_type_display_func(document.getElementById('key').value);void(0)">隨機產生一組</a>]</b></font>
 				  
@@ -183,22 +183,48 @@
 						if(id==1){
 							document.getElementById('btn_table_bg_color_1').style.backgroundColor="#FFD5D6";
 							document.getElementById('btn_table_bg_color_2').style.backgroundColor="";
-						}else{
+							document.getElementById('btn_table_bg_color_3').style.backgroundColor="";
+							document.getElementById('btn_table_bg_color_4').style.backgroundColor="";
+						}
+						if(id==2){
 							document.getElementById('btn_table_bg_color_1').style.backgroundColor="";
 							document.getElementById('btn_table_bg_color_2').style.backgroundColor="#00FFFF";
+							document.getElementById('btn_table_bg_color_3').style.backgroundColor="";
+							document.getElementById('btn_table_bg_color_4').style.backgroundColor="";
 						}
+						if(id==3){
+							document.getElementById('btn_table_bg_color_1').style.backgroundColor="";
+							document.getElementById('btn_table_bg_color_2').style.backgroundColor="";
+							document.getElementById('btn_table_bg_color_3').style.backgroundColor="#FFD5D6";
+							document.getElementById('btn_table_bg_color_4').style.backgroundColor="";
+						}
+						if(id==4){
+							document.getElementById('btn_table_bg_color_1').style.backgroundColor="";
+							document.getElementById('btn_table_bg_color_2').style.backgroundColor="";
+							document.getElementById('btn_table_bg_color_3').style.backgroundColor="";
+							document.getElementById('btn_table_bg_color_4').style.backgroundColor="#00FFFF";
+						}
+						
 					}				
 				</script>
               <table border="0" cellpadding="5" cellspacing="0">
                   <tr>
                     <td id="btn_table_bg_color_1"><b><font face="Verdana, Arial, Helvetica, sans-serif">
-                      <input id="btn_start_1" type="button" value="加密" onClick="change_btn_bg_color(1);if(document.getElementById('encode_use_url_encode').checked){document.getElementById('data_ok').value=AesEncrypt(document.getElementById('data').value,document.getElementById('key').value).replace(/\//gi,'\_');}else{document.getElementById('data_ok').value=AesEncrypt(document.getElementById('data').value,document.getElementById('key').value);}document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
+                      <input id="btn_start_1" type="button" value="AES加密" onClick="change_btn_bg_color(1);if(document.getElementById('encode_use_url_encode').checked){document.getElementById('data_ok').value=AesEncrypt(document.getElementById('data').value,document.getElementById('key').value).replace(/\//gi,'\_');}else{document.getElementById('data_ok').value=AesEncrypt(document.getElementById('data').value,document.getElementById('key').value);}document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
                     </font></b></td>
                     
                     <td id="btn_table_bg_color_2"><b><font face="Verdana, Arial, Helvetica, sans-serif">
-                      <input id="btn_start_2" type="button" value="解密" onClick="change_btn_bg_color(2);document.getElementById('data_ok').value=AesDecrypt(document.getElementById('data').value.replace(/_/gi,'/'),document.getElementById('key').value);document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
+                      <input id="btn_start_2" type="button" value="AES解密" onClick="change_btn_bg_color(2);document.getElementById('data_ok').value=AesDecrypt(document.getElementById('data').value.replace(/_/gi,'/'),document.getElementById('key').value);document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
                     </font></b></td>
-					<td id="btn_table_bg_color_3"><input type="checkbox" name="checkbox" value="checkbox" id="encode_use_url_encode">
+					
+					 <td id="btn_table_bg_color_3"><b><font face="Verdana, Arial, Helvetica, sans-serif">
+                      <input id="btn_start_3" type="button" value="EXES加密" onClick="change_btn_bg_color(3);if(document.getElementById('encode_use_url_encode').checked){document.getElementById('data_ok').value=exesEncrypt(document.getElementById('data').value,document.getElementById('key').value).replace(/\//gi,'\_');}else{document.getElementById('data_ok').value=exesEncrypt(document.getElementById('data').value,document.getElementById('key').value);}document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
+                    </font></b></td>
+                    
+                    <td id="btn_table_bg_color_4"><b><font face="Verdana, Arial, Helvetica, sans-serif">
+                      <input id="btn_start_4" type="button" value="EXES解密" onClick="change_btn_bg_color(4);document.getElementById('data_ok').value=exesDecrypt(document.getElementById('data').value.replace(/_/gi,'/'),document.getElementById('key').value);document.getElementById('btn_copy_ok').innerHTML='';" style="width:100px">
+                    </font></b></td>
+					<td id="btn_table_bg_color_4"><input type="checkbox" name="checkbox" value="checkbox" id="encode_use_url_encode">
 					  URL編碼(相容檔名)</td>
                   </tr>
                 </table>
@@ -210,8 +236,16 @@
 					<script>
 						document.getElementById('data_ok').style.height=(document.body.clientHeight-data_data_ok_top_high)/2;
 					</script>
-</font></b></p>
-                <p><b><font face="Verdana, Arial, Helvetica, sans-serif">[<a href="https://www.base64-image.de/">圖片轉BASE64</a> | <a href="https://base64.guru/converter/encode/file">BIN轉BASE64</a> | <a href="teac_ex_md1.html">EX_MD1加密</a> |<a href="info_aesxkey_application.html"> AESXKEY申請 </a>]</font></b></p>
+				</font></b></p>
+                <p><b><font face="Verdana, Arial, Helvetica, sans-serif">
+				[
+					<a href="https://www.base64-image.de/">圖片轉BASE64</a> | 
+					<a href="https://base64.guru/converter/encode/file">BIN轉BASE64</a> | 
+					<a href="teac_ex_md1.html">EX_MD1加密</a> |
+					<a href="teac_ex_md2.html">EX_MD2加密</a> |
+					<a href="info_aesxkey_application.html"> AESXKEY申請 </a>
+				]
+				</font></b></p>
                 </blockquote>
               <p>&nbsp;</p>
 			  
