@@ -129,8 +129,8 @@
 								if(data!=""){
 									document.getElementById('source_key_check_type_display').innerHTML="No AESXKEY";
 									for(var i=0;i!=web_system_main_json_datas.user_group.length;i++){
-										if(ex_md1_rand_check(data,web_system_main_json_datas.user_group[i].ex_md1)){
-											document.getElementById('source_key_check_type_display').innerHTML=web_system_main_json_datas.user_group[i].group+" EX_MD1";
+										if(exesDecrypt(web_system_main_json_datas.user_group[i].display,data).length >= 5){
+											document.getElementById('source_key_check_type_display').innerHTML=exesDecrypt(web_system_main_json_datas.user_group[i].display,data);
 										}
 									}
 								}else{
@@ -406,7 +406,7 @@
 						for(var i=0;i!=web_system_main_json_datas.user_group.length;i++){
 				  			document.write(
 								" [<a href=\"javascript:document.getElementById('as_group_key').value='"+ 
-										AesDecrypt(web_system_main_json_datas.user_group[i].key,readCookie("j_aeskey")) +
+										exesDecrypt(web_system_main_json_datas.user_group[i].key,readCookie("j_aeskey")) +
 								"';document.getElementById('as_group').value='"+web_system_main_json_datas.user_group[i].group+"';void(0);\">"+
 										web_system_main_json_datas.user_group[i].group+
 								"</a>] "
