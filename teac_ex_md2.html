@@ -303,6 +303,15 @@
                     <td><input name="aes_out_decode" type="text" id="aes_out_decode" size="90" readonly></td>
                   </tr>
 				  
+				  <tr>
+                    <td bgcolor="#FF3300"><font color="#FFFFFF">EXES 編碼結果(密鑰 "TEST" )</font></td>
+                    <td><input name="exes_out" type="text" id="exes_out" size="90" readonly></td>
+                  </tr>
+				  <tr>
+                    <td bgcolor="#FF3300"><font color="#FFFFFF">EXES 反解結果(密鑰 "TEST" )</font></td>
+                    <td><input name="exes_out_decode" type="text" id="exes_out_decode" size="90" readonly></td>
+                  </tr>
+				  
 				    <td bgcolor="#003333"><font color="#FFFFFF">BASE64 編碼結果</font></td>
 				    <td><input name="base64_out" type="text" id="base64_out" size="50" readonly></td>
 				    </tr>
@@ -318,6 +327,8 @@
 						form1.md5_out.value=CryptoJS.MD5(o.value);
 						form1.aes_out.value=AesEncrypt(o.value,'TEST');
 							form1.aes_out_decode.value=AesDecrypt(form1.aes_out.value,'TEST');
+						form1.exes_out.value=exesEncrypt(o.value,'TEST');
+							form1.exes_out_decode.value=exesDecrypt(form1.exes_out.value,'TEST');	
 						form1.sha1_out.value=sha1.sha1(o.value);
 						form1.rc4_out.value=rc4("TEST",o.value);
 						form1.base64_out.value=base64.encode(o.value);
