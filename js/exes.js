@@ -187,7 +187,7 @@ var _EXES_CORE = (function() {
 
         permute512(state, 0x22);
         
-        var MEM_COST = 16384; 
+        var MEM_COST = 8; 
         var pool = new Array(MEM_COST * 16);
         for (var i = 0; i < MEM_COST; i++) {
             permute512(state, 0x33); 
