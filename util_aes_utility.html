@@ -129,7 +129,7 @@
 								if(data!=""){
 									document.getElementById('source_key_check_type_display').innerHTML="No AESXKEY";
 									for(var i=0;i!=web_system_main_json_datas.user_group.length;i++){
-										if(exesDecrypt(web_system_main_json_datas.user_group[i].display,data).length >= 5){
+										if(exesDecrypt(web_system_main_json_datas.user_group[i].display,data).length >= 10){
 											document.getElementById('source_key_check_type_display').innerHTML=exesDecrypt(web_system_main_json_datas.user_group[i].display,data);
 										}
 									}
