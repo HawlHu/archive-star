@@ -91,7 +91,7 @@ var _EXES_CORE = (function() {
 
             state[1] = (state[1] + state[5]) | 0; state[13] ^= state[1]; state[13] = rotl(state[13], 16);
             state[9] = (state[9] + state[13])| 0; state[5]  ^= state[9]; state[5]  = rotl(state[5], 12);
-            state[1] = (state[1] + state[5]) | 0; state[13] ^= state[13]^state[1]; state[13] = rotl(state[13], 8);
+            state[1] = (state[1] + state[5]) | 0; state[13] ^= state[1]; state[13] = rotl(state[13], 8);
             state[9] = (state[9] + state[13])| 0; state[5]  ^= state[9]; state[5]  = rotl(state[5], 7);
 
             state[2] = (state[2] + state[6]) | 0; state[14] ^= state[2]; state[14] = rotl(state[14], 16);
