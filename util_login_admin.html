@@ -167,11 +167,9 @@
                       </tr>
                       <tr>
                         <td align="center"><p id="mc_input"><script>
-										// 取得驗證碼字串
-										var captcha_code = easy_man_check_gen_a_num(4, 600, 1000);
-										// 呼叫新函數，將驗證碼以圖形方式繪製到 mc_input 容器中
-										render_captcha_to_canvas(captcha_code, "mc_input");
-									</script></p></td>
+                          // 直接生成並繪製到指定容器，不接收明文回傳，確保無外洩風險
+                          easy_man_check_gen_a_num(4, "mc_input");
+                        </script></p></td>
                       </tr>
                       <tr>
                         <td align="right"><input type="text" id="man_check" style="border-radius: 10px;border:1px #555555 dotted;font-size:24px;width:100%;padding:15px" placeholder="輸入驗證碼" onKeyUp="easy_man_check_gen_a_num_in_key_num+=1;"></td>
