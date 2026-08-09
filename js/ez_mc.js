@@ -1,6 +1,6 @@
 /*
 	ez_mc is a simple human-machine recognition package implemented in pure JavaScript, 
-	which utilizes the ex_md1 package.
+	which utilizes the ex_md2 package.
 */
 
 // Create start timer backup
@@ -13,7 +13,7 @@ var easy_man_check_gen_a_num_in_key_num = 0;
 // The simple human-machine interface is a module - Create Function.
 function easy_man_check_gen_a_num(out_length, switching_time, decoding_random_difficulty){
     easy_man_check_gen_a_num_in_timer = new Date().getTime();
-    return ex_md1(
+    return ex_md2n(
         navigator.language + "-spacing_string-" +
         document.referrer + "-spacing_string-" +
         document.location.protocol + "-spacing_string-" +
@@ -21,7 +21,7 @@ function easy_man_check_gen_a_num(out_length, switching_time, decoding_random_di
         navigator.userAgent + "-spacing_string-" + 
         Math.round(((new Date().getTime())/((1000)*switching_time))) + "-spacing_string-" + 
         Math.round(Math.random() * decoding_random_difficulty)
-    ).substring(0, out_length);
+    ,10).substring(0, out_length);
 }
 
 // 新增：將驗證碼繪製為 Canvas 圖片的函數，提升防機器人辨識難度
@@ -87,7 +87,7 @@ function easy_man_check_gen_a_num_check(user_input_code, out_length, switching_t
             if((new Date().getTime() - easy_man_check_gen_a_num_in_timer) >= ((2500 / 4) * out_length)){
                 for(var i = 0; i != decoding_random_difficulty; i++){
                     if( user_input_code.toLowerCase() ==
-                        ex_md1(
+                        ex_md2n(
                             navigator.language + "-spacing_string-" +	
                             document.referrer + "-spacing_string-" +
                             document.location.protocol + "-spacing_string-" +
@@ -95,7 +95,7 @@ function easy_man_check_gen_a_num_check(user_input_code, out_length, switching_t
                             navigator.userAgent + "-spacing_string-" + 
                             Math.round(((new Date().getTime())/((1000)*switching_time))) + "-spacing_string-" + 
                             i
-                        ).substring(0, out_length).toLowerCase() ) {
+                        ,10).substring(0, out_length).toLowerCase() ) {
                         return true;
                     }
                 }				
