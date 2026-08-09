@@ -1,106 +1,138 @@
 /*
-	ez_mc is a simple human-machine recognition package implemented in pure JavaScript, 
-	which utilizes the ex_md2 package.
+    ez_mc (Secure Static Edition)
+    利用 exes.js 與 Web Crypto API 進行靜態環境下的高強度防護。
+    驗證碼明文與繪圖邏輯完全封裝在閉包內，杜絕外洩風險。
 */
 
-// Create start timer backup
-var easy_man_check_gen_a_num_in_timer = 0;
+// 保留全域變數以維持外部按鍵計數相容性
 var easy_man_check_gen_a_num_in_key_num = 0;
 
-// 移除舊版的 InputBox Sample Style，因為改用 Canvas 繪製，無需透過 CSS 防選取
-// var easy_man_check_gen_a_num_in_input_style="user-select:none;-webkit-user-select:none;-moz-user-select:none;";
+const EZ_MC_CORE = (function() {
+    "use strict";
+    
+    // 私有變數：無法從外部 Console 讀取與竄改
+    let _encryptedCaptcha = "";
+    let _sessionKey = "";
+    let _initTime = 0;
 
-// The simple human-machine interface is a module - Create Function.
-function easy_man_check_gen_a_num(out_length, switching_time, decoding_random_difficulty){
-    easy_man_check_gen_a_num_in_timer = new Date().getTime();
-    return ex_md2n(
-        navigator.language + "-spacing_string-" +
-        document.referrer + "-spacing_string-" +
-        document.location.protocol + "-spacing_string-" +
-        location.hostname + "-spacing_string-" +
-        navigator.userAgent + "-spacing_string-" + 
-        Math.round(((new Date().getTime())/((1000)*switching_time))) + "-spacing_string-" + 
-        Math.round(Math.random() * decoding_random_difficulty)
-    ,10).substring(0, out_length);
-}
-
-// 新增：將驗證碼繪製為 Canvas 圖片的函數，提升防機器人辨識難度
-function render_captcha_to_canvas(text, target_element_id) {
-    var canvas = document.createElement('canvas');
-    canvas.width = 150;
-    canvas.height = 50;
-    var ctx = canvas.getContext('2d');
-
-    // 設定背景色
-    ctx.fillStyle = '#333333';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 加入干擾線 (隨機顏色與位置)
-    for (var i = 0; i < 7; i++) {
-        ctx.strokeStyle = '#' + Math.floor(Math.random() * 16777215).toString(16);
-        ctx.beginPath();
-        ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
-        ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+    // 1. 密碼學安全的隨機整數產生器
+    function getSecureRandomInt(min, max) {
+        const randomBuffer = new Uint32Array(1);
+        window.crypto.getRandomValues(randomBuffer);
+        const randomNumber = randomBuffer[0] / (0xffffffff + 1);
+        return Math.floor(randomNumber * (max - min + 1)) + min;
     }
 
-    // 加入干擾雜訊點
-    for (var i = 0; i < 40; i++) {
-        ctx.fillStyle = '#' + Math.floor(Math.random() * 16777215).toString(16);
-        ctx.beginPath();
-        ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 1, 0, 2 * Math.PI);
-        ctx.fill();
+    // 2. 產生安全的驗證碼字串
+    function generateSecureString(length) {
+        const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        let result = "";
+        for (let i = 0; i < length; i++) {
+            result += chars[getSecureRandomInt(0, chars.length - 1)];
+        }
+        return result;
     }
 
-    // 繪製文字 (加入隨機旋轉與偏移)
-    ctx.font = 'bold 30px Geneva, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    // 3. 私有繪圖函數 (取代原本外露的 render_captcha_to_canvas)
+    function _renderToCanvas(text, target_element_id) {
+        var canvas = document.createElement('canvas');
+        canvas.width = 150;
+        canvas.height = 50;
+        var ctx = canvas.getContext('2d');
 
-    for (var i = 0; i < text.length; i++) {
-        var x = 30 + i * 30; // 每個字的 X 軸間距
-        var y = 25;          // Y 軸置中
-        var angle = (Math.random() - 0.5) * 0.8; // 隨機旋轉角度
-        var color = '#' + (Math.random() * 0x888888 + 0x777777 | 0).toString(16); // 偏亮的隨機色
-        
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(angle);
-        ctx.fillStyle = color;
-        ctx.fillText(text[i], 0, 0);
-        ctx.restore();
-    }
+        ctx.fillStyle = '#333333';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 將產生的 Canvas 塞入指定的 DOM 容器中
-    var target = document.getElementById(target_element_id);
-    if (target) {
-        target.innerHTML = ''; // 清空原有內容
-        target.appendChild(canvas);
-    }
-}
+        // 使用 Crypto 隨機數繪製干擾線
+        for (var i = 0; i < 7; i++) {
+            ctx.strokeStyle = '#' + getSecureRandomInt(0, 16777215).toString(16);
+            ctx.beginPath();
+            ctx.moveTo(getSecureRandomInt(0, canvas.width), getSecureRandomInt(0, canvas.height));
+            ctx.lineTo(getSecureRandomInt(0, canvas.width), getSecureRandomInt(0, canvas.height));
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
 
-// The simple human-machine interface is a module - Check Function.
-function easy_man_check_gen_a_num_check(user_input_code, out_length, switching_time, decoding_random_difficulty, user_presses_key){
-    if(user_presses_key >= out_length){
-        if(easy_man_check_gen_a_num_in_timer >= 1){
-            if((new Date().getTime() - easy_man_check_gen_a_num_in_timer) >= ((2500 / 4) * out_length)){
-                for(var i = 0; i != decoding_random_difficulty; i++){
-                    if( user_input_code.toLowerCase() ==
-                        ex_md2n(
-                            navigator.language + "-spacing_string-" +	
-                            document.referrer + "-spacing_string-" +
-                            document.location.protocol + "-spacing_string-" +
-                            location.hostname + "-spacing_string-" +
-                            navigator.userAgent + "-spacing_string-" + 
-                            Math.round(((new Date().getTime())/((1000)*switching_time))) + "-spacing_string-" + 
-                            i
-                        ,10).substring(0, out_length).toLowerCase() ) {
-                        return true;
-                    }
-                }				
-            }
+        // 使用 Crypto 隨機數繪製雜訊點
+        for (var i = 0; i < 40; i++) {
+            ctx.fillStyle = '#' + getSecureRandomInt(0, 16777215).toString(16);
+            ctx.beginPath();
+            ctx.arc(getSecureRandomInt(0, canvas.width), getSecureRandomInt(0, canvas.height), 1, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        ctx.font = 'bold 30px Geneva, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // 繪製文字 (加入隨機旋轉與偏移)
+        for (var i = 0; i < text.length; i++) {
+            var x = 30 + i * 30; 
+            var y = 25;          
+            var random_angle = (getSecureRandomInt(0, 100) / 100);
+            var angle = (random_angle - 0.5) * 0.8; 
+            var color = '#' + getSecureRandomInt(0x777777, 0xFFFFFF).toString(16); 
+            
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.fillStyle = color;
+            ctx.fillText(text[i], 0, 0);
+            ctx.restore();
+        }
+
+        var target = document.getElementById(target_element_id);
+        if (target) {
+            target.innerHTML = ''; 
+            target.appendChild(canvas);
         }
     }
-    return false;		
+
+    return {
+        // 封裝生成與繪圖，不回傳明文
+        generateAndRender: function(out_length, target_element_id) {
+            _initTime = new Date().getTime();
+            _sessionKey = navigator.userAgent + "-secret-" + _initTime;
+            
+            const plainText = generateSecureString(out_length);
+            
+            if (typeof exesEncrypt === 'function') {
+                _encryptedCaptcha = exesEncrypt(plainText, _sessionKey);
+            }
+            
+            if (target_element_id) {
+                _renderToCanvas(plainText, target_element_id);
+            }
+            // 結束執行，plainText 從記憶體中釋放，僅保留密文
+        },
+        
+        check: function(userInput, out_length, user_presses_key) {
+            if (user_presses_key < out_length) return false;
+            
+            const timeDiff = new Date().getTime() - _initTime;
+            if (timeDiff < ((2500 / 4) * out_length)) return false;
+
+            if (typeof exesDecrypt !== 'function') return false;
+            
+            const decryptedAnswer = exesDecrypt(_encryptedCaptcha, _sessionKey);
+            
+            if (decryptedAnswer && userInput.toLowerCase() === decryptedAnswer.toLowerCase()) {
+                return true;
+            }
+            return false;
+        }
+    };
+})();
+
+// ==========================================
+// 外部相容介面 (提供 HTML 呼叫)
+// ==========================================
+
+// 將原本的參數簽名簡化，傳入字元長度與目標 DOM ID 即可
+function easy_man_check_gen_a_num(out_length, target_element_id) {
+    EZ_MC_CORE.generateAndRender(out_length, target_element_id);
+}
+
+function easy_man_check_gen_a_num_check(user_input_code, out_length, switching_time, decoding_random_difficulty, user_presses_key) {
+    return EZ_MC_CORE.check(user_input_code, out_length, user_presses_key);
 }
