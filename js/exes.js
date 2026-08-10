@@ -1,35 +1,47 @@
 /**
- * EXES V5.9.1 LTS — IE11 to Modern Chrome
- * exes.js (EXtended Encryption Standard)
+ * EXES V6.0 LTS — IE11 to Modern Chrome
+ * EXES-ChaCha512 — 512-bit Key Architecture / 1024-bit Internal State
  *
  * Browser compatibility profile:
- * - ECMAScript 5 syntax baseline: no let/const, arrow functions, classes, Promise, BigInt,
- *   TextEncoder/TextDecoder, Map/Set, or other ES2015+ runtime dependencies.
+ * - ECMAScript 5 syntax baseline: no let/const, arrow functions, classes, Promise,
+ *   BigInt, TextEncoder/TextDecoder, Map/Set, or other ES2015+ runtime dependencies.
  * - Internet Explorer 11 uses window.msCrypto.getRandomValues().
  * - Modern Chrome/Edge/Firefox/Safari use window.crypto.getRandomValues().
  * - Node.js uses crypto.randomBytes() only when no browser window object exists.
  * - No Math.random() fallback and no crypto.subtle dependency.
  *
- * V5.9.1 security profile:
- * - Standard ChaCha20 stream block (20 rounds + feed-forward); raw internal state is never emitted.
- * - HMAC-SHA-512 authentication with an independent 512-bit HKDF-SHA-512-derived MAC key.
- * - HKDF-SHA-512 domain separation for the 256-bit ChaCha20 key and 512-bit MAC key.
- * - SHA-512-based deterministic nonce derivation from the full 144-bit IV.
- * - Strict UTF-16 password validation; unpaired surrogates are rejected.
- * - CSPRNG is mandatory for encryption; there is no Math.random() fallback.
- * - Ciphertext prefix: X5A.
- * - V5.8 compatibility code has been completely removed.
+ * V6.0 cryptographic construction:
+ * - EXES-ChaCha512 custom 20-round stream core:
+ *     * 1024-bit state = 32 x 32-bit words.
+ *     * 512-bit encryption key = 16 x 32-bit words.
+ *     * 64-bit block counter.
+ *     * 192-bit nonce.
+ *     * 128-byte output block with feed-forward.
+ * - HKDF-SHA-512 derives independent 512-bit ENC and 512-bit MAC keys.
+ * - SHA-512 derives the 192-bit stream nonce from the full 192-bit IV.
+ * - HMAC-SHA-512 provides a full 512-bit authentication tag.
+ * - Encrypt-then-MAC style composition: metadata and padded ciphertext are authenticated
+ *   before plaintext is released.
+ * - Strict UTF-16/UTF-8 handling; unpaired surrogates are rejected.
+ * - CSPRNG is mandatory; encryption fails closed if no secure RNG is available.
+ * - Ciphertext prefix: X60.
+ * - V5.x ciphertexts are intentionally NOT accepted.
  *
- * IMPORTANT: Earlier X59 drafts are intentionally not accepted by this profile.
+ * IMPORTANT SECURITY NOTICE:
+ * EXES-ChaCha512 is a CUSTOM cipher construction inspired by the ChaCha quarter-round.
+ * It is NOT RFC 8439 ChaCha20 and has not received the same public cryptanalysis.
+ * A 512-bit key and 1024-bit state are design parameters; they do NOT by themselves
+ * prove 512-bit security strength. Use this as an experimental/research protocol unless
+ * and until it receives independent cryptanalysis.
  */
 
 // =============================================================================
-// EXES V5.9 hardened core
+// EXES V6.0 custom ChaCha512 core
 // =============================================================================
-var _EXES_CORE_V59 = (function() {
+var _EXES_CORE_V60 = (function() {
     "use strict";
 
-    var VERSION_PREFIX = "X5A";
+    var VERSION_PREFIX = "X60";
     var CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     var C_MAP = CHARSET.split('');
     var DECODE_MAP = new Array(128);
@@ -45,9 +57,9 @@ var _EXES_CORE_V59 = (function() {
         for (var z = 0; z < arr.length; z++) arr[z] = 0;
     }
 
-    // Strict UTF-16 -> UTF-8. V5.8 mapped every unpaired surrogate to U+FFFD,
+    // Strict UTF-16 -> UTF-8. Earlier EXES JavaScript versions mapped every unpaired surrogate to U+FFFD,
     // which allowed distinct JavaScript strings to become equivalent passwords.
-    // V5.9 rejects such strings instead.
+    // V6.0 rejects such strings instead.
     function strToUTF8Strict(value) {
         var s = String(value), out = [], j = 0, c, c2, u;
         for (j = 0; j < s.length; j++) {
@@ -122,7 +134,7 @@ var _EXES_CORE_V59 = (function() {
         return out;
     }
 
-    // V5.9.1 LTS never falls back to Math.random().
+    // V6.0 LTS never falls back to Math.random().
     // IE11 path: window.msCrypto.getRandomValues().
     // Modern browser path: window.crypto.getRandomValues().
     // If a browser window exists but neither source is usable, encryption fails closed;
@@ -210,14 +222,14 @@ var _EXES_CORE_V59 = (function() {
 
         primitive = selfTest();
         if (randomOK && primitive.ok) {
-            cipher = enc("EXES-LTS-IE11-ROUNDTRIP", "LTS-Test-Key-1234567890");
+            cipher = enc("EXES-V6-LTS-IE11-ROUNDTRIP", "LTS-Test-Key-1234567890");
             plain = dec(cipher, "LTS-Test-Key-1234567890");
-            roundTrip = (plain === "EXES-LTS-IE11-ROUNDTRIP");
+            roundTrip = (plain === "EXES-V6-LTS-IE11-ROUNDTRIP");
         }
 
         return {
-            version: "5.9.1",
-            build: "LTS-IE11-MODERN",
+            version: "6.0",
+            build: "LTS-IE11-MODERN-CHACHA512-1024",
             target: "IE11 to Modern Chrome",
             es5SyntaxBaseline: true,
             browser: isBrowser,
@@ -414,14 +426,14 @@ var _EXES_CORE_V59 = (function() {
     }
 
     // Domain-separated keys derived exclusively with HKDF-SHA-512.
-    // encKey = 256 bits for ChaCha20; macKey = 512 bits for HMAC-SHA-512.
+    // V6.0: encKey = 512 bits for EXES-ChaCha512; macKey = 512 bits for HMAC-SHA-512.
     function hkdfKeys(passwordBytes,saltBytes){
         var prk=null,encInfo=null,macInfo=null,encKey=null,macKey=null,all=null;
         try {
             prk=hkdfExtractSha512(saltBytes,passwordBytes);
-            encInfo=asciiBytes("EXES-V5.9-ENC");
-            macInfo=asciiBytes("EXES-V5.9-MAC");
-            encKey=hkdfExpandSha512(prk,encInfo,32);
+            encInfo=asciiBytes("EXES-V6.0-ENC-CHACHA512");
+            macInfo=asciiBytes("EXES-V6.0-MAC-HMAC512");
+            encKey=hkdfExpandSha512(prk,encInfo,64);
             macKey=hkdfExpandSha512(prk,macInfo,64);
             if(!encKey||!macKey)return null;
             all=encKey.concat(macKey);
@@ -432,8 +444,25 @@ var _EXES_CORE_V59 = (function() {
     }
 
     // -------------------------------------------------------------------------
-    // Standard ChaCha20 IETF stream block: 20 rounds + feed-forward.
-    // The raw internal state is never copied directly to ciphertext keystream.
+    // EXES-ChaCha512 custom stream core.
+    //
+    // This is NOT RFC 8439 ChaCha20.  It retains the ChaCha quarter-round
+    // operation but expands the state from 4x4 to 4x8 words:
+    //
+    //   row 0:  8 domain-constant words                       = 256 bits
+    //   row 1:  key words  0..7                               = 256 bits
+    //   row 2:  key words  8..15                              = 256 bits
+    //   row 3:  64-bit counter + 192-bit nonce                = 256 bits
+    //                                                         -----------
+    //   total internal state                                  = 1024 bits
+    //
+    // Ten double-rounds are used.  A double-round performs:
+    //   1) 8 column quarter-rounds
+    //   2) 8 diagonal quarter-rounds with row offsets +1,+2,+3 mod 8
+    //
+    // The final 32-word state is feed-forward-added to the initial state and
+    // serialized as a 128-byte keystream block.  Raw permutation state is
+    // never emitted without feed-forward.
     // -------------------------------------------------------------------------
     function rotl32(x,n) { return ((x << n) | (x >>> (32 - n))) | 0; }
     function load32le(b,o) { return ((b[o]&255) | ((b[o+1]&255)<<8) | ((b[o+2]&255)<<16) | ((b[o+3]&255)<<24)) | 0; }
@@ -446,53 +475,101 @@ var _EXES_CORE_V59 = (function() {
         x[c]=(x[c]+x[d])|0; x[b]^=x[c]; x[b]=rotl32(x[b],7);
     }
 
-    function chacha20Block(key, counter, nonce) {
-        var s = new Array(16), x, r, j2, out = new Array(64);
-        s[0]=0x61707865; s[1]=0x3320646e; s[2]=0x79622d32; s[3]=0x6b206574;
-        for (j2=0;j2<8;j2++) s[4+j2]=load32le(key,j2*4);
-        s[12]=counter|0; s[13]=load32le(nonce,0); s[14]=load32le(nonce,4); s[15]=load32le(nonce,8);
-        x=s.slice(0);
-        for (r=0;r<10;r++) {
-            chachaQuarter(x,0,4,8,12); chachaQuarter(x,1,5,9,13); chachaQuarter(x,2,6,10,14); chachaQuarter(x,3,7,11,15);
-            chachaQuarter(x,0,5,10,15); chachaQuarter(x,1,6,11,12); chachaQuarter(x,2,7,8,13); chachaQuarter(x,3,4,9,14);
+    var EXES_CHACHA512_CONSTANT = asciiBytes("EXES-V6.0-ChaCha512-1024-state!!");
+
+    function exesChaCha512Block(key, counterLo, counterHi, nonce) {
+        var s = new Array(32), x, r, col, j2, out = new Array(128);
+
+        if (!key || key.length !== 64 || !nonce || nonce.length !== 24) {
+            throw new Error("EXES-ChaCha512 invalid key/nonce size");
         }
-        for (j2=0;j2<16;j2++) { x[j2]=(x[j2]+s[j2])|0; store32le(x[j2],out,j2*4); }
+
+        for (j2=0;j2<8;j2++) s[j2]=load32le(EXES_CHACHA512_CONSTANT,j2*4);
+        for (j2=0;j2<16;j2++) s[8+j2]=load32le(key,j2*4);
+        s[24]=counterLo|0;
+        s[25]=counterHi|0;
+        for (j2=0;j2<6;j2++) s[26+j2]=load32le(nonce,j2*4);
+
+        x=s.slice(0);
+
+        for (r=0;r<10;r++) {
+            // Column round over an 8-column x 4-row matrix.
+            for (col=0;col<8;col++) {
+                chachaQuarter(x,col,8+col,16+col,24+col);
+            }
+
+            // Diagonal round.  Rows 1/2/3 are shifted by 1/2/3 columns.
+            for (col=0;col<8;col++) {
+                chachaQuarter(
+                    x,
+                    col,
+                    8+((col+1)&7),
+                    16+((col+2)&7),
+                    24+((col+3)&7)
+                );
+            }
+        }
+
+        for (j2=0;j2<32;j2++) {
+            x[j2]=(x[j2]+s[j2])|0;
+            store32le(x[j2],out,j2*4);
+        }
+
         zeroize(s); zeroize(x);
         return out;
     }
 
-    function createChaCha20Stream(key, nonce) {
-        var counter = 1, block = [], idx = 64;
+    function createExesChaCha512Stream(key, nonce) {
+        var counterLo = 1, counterHi = 0, block = [], idx = 128;
         return {
             nextByte: function() {
-                if (idx >= 64) {
+                if (idx >= 128) {
                     zeroize(block);
-                    if ((counter >>> 0) === 0) throw new Error("ChaCha20 counter exhausted");
-                    block = chacha20Block(key, counter >>> 0, nonce);
-                    counter = (counter + 1) >>> 0;
+
+                    // Counter value 0 is reserved; wrapping the full 64-bit counter
+                    // is treated as exhaustion rather than silently reusing blocks.
+                    if ((counterLo >>> 0) === 0 && (counterHi >>> 0) === 0) {
+                        throw new Error("EXES-ChaCha512 counter exhausted");
+                    }
+
+                    block = exesChaCha512Block(
+                        key,
+                        counterLo >>> 0,
+                        counterHi >>> 0,
+                        nonce
+                    );
+
+                    counterLo = (counterLo + 1) >>> 0;
+                    if ((counterLo >>> 0) === 0) {
+                        counterHi = (counterHi + 1) >>> 0;
+                    }
                     idx = 0;
                 }
                 return block[idx++];
             },
-            scrub: function() { zeroize(block); counter = 0; idx = 64; }
+            scrub: function() {
+                zeroize(block);
+                counterLo = 0;
+                counterHi = 0;
+                idx = 128;
+            }
         };
     }
 
-    // Use every bit of the 144-bit IV while feeding ChaCha20 a 96-bit nonce.
-    // Nonce = first 96 bits of SHA-512(IV || "EXES-V5.9-NONCE").
-    // SHA-512 is used here so the entire V5.9 hash/KDF/MAC family is unified.
+    // V6.0 nonce = first 192 bits of:
+    // SHA-512( IV[192 bits] || "EXES-V6.0-NONCE-192" )
     function deriveNonce(ivBytes) {
-        var material = ivBytes.slice(0), label = asciiBytes("EXES-V5.9-NONCE"), n;
+        var material = ivBytes.slice(0), label = asciiBytes("EXES-V6.0-NONCE-192"), n;
         for (n = 0; n < label.length; n++) material.push(label[n]);
         var digest = sha512Bytes(material);
-        var nonce = digest.slice(0,12);
+        var nonce = digest.slice(0,24);
         zeroize(material); zeroize(label); zeroize(digest);
         return nonce;
     }
 
     // -------------------------------------------------------------------------
-    // Base62 topology codec retained only as the wire representation.
-    // Integrity is now provided by HMAC-SHA-512, not by this modulo relation.
+    // Base62 topology codec retained as the X60 wire representation.
+    // Integrity is provided by HMAC-SHA-512, not by this modulo relation.
     // -------------------------------------------------------------------------
     function enc24to62(val, outArr, outIdx) {
         var expandedVal = val * 54 + (val % 54);
@@ -515,15 +592,23 @@ var _EXES_CORE_V59 = (function() {
         return val;
     }
 
-    function bytes18ToWords24(bytes, off) {
-        var a = new Array(6), j3, p;
-        for (j3=0;j3<6;j3++) { p=off+j3*3; a[j3]=((bytes[p]&255)<<16)|((bytes[p+1]&255)<<8)|(bytes[p+2]&255); }
+    function bytesToWords24(bytes, off, count) {
+        var a = new Array(count), j3, p;
+        for (j3=0;j3<count;j3++) {
+            p=off+j3*3;
+            a[j3]=((bytes[p]&255)<<16)|((bytes[p+1]&255)<<8)|(bytes[p+2]&255);
+        }
         return a;
     }
 
     function words24ToBytes(words) {
-        var out=new Array(18), j4, v;
-        for (j4=0;j4<6;j4++) { v=words[j4]>>>0; out[j4*3]=(v>>>16)&255; out[j4*3+1]=(v>>>8)&255; out[j4*3+2]=v&255; }
+        var out=new Array(words.length*3), j4, v;
+        for (j4=0;j4<words.length;j4++) {
+            v=words[j4]>>>0;
+            out[j4*3]=(v>>>16)&255;
+            out[j4*3+1]=(v>>>8)&255;
+            out[j4*3+2]=v&255;
+        }
         return out;
     }
 
@@ -569,7 +654,17 @@ var _EXES_CORE_V59 = (function() {
         return h.digest();
     }
 
-    function enc(word,pwd) {
+    // V6.0 wire layout:
+    //
+    //   X60                                  3 chars
+    //   Salt 192-bit (8 x 24-bit groups)    40 chars
+    //   IV   192-bit (8 x 24-bit groups)    40 chars
+    //   encrypted plaintext length           10 chars
+    //   padded ciphertext                     5 chars per 3 bytes
+    //   HMAC-SHA-512 tag                     110 chars (64 bytes + 2 zero pad bytes)
+    //
+    // Fixed overhead excluding ciphertext = 203 characters.
+    function encInternal(word,pwd,providedRandom48) {
         var plainBytes=null,passwordBytes=null,rnd=null,saltWords=null,ivWords=null,saltBytes=null,ivBytes=null;
         var keys=null,nonce=null,stream=null,cipherBytes=null,tag=null,tagPadded=null,out=null;
         try {
@@ -579,127 +674,242 @@ var _EXES_CORE_V59 = (function() {
             if (!plainBytes||!passwordBytes||plainBytes.length===0||passwordBytes.length===0) return "";
             if (plainBytes.length>MAX_PAYLOAD_SIZE||passwordBytes.length>MAX_PASSWORD_SIZE) return "";
 
-            rnd=secureRandomBytes(36); if(!rnd) return "";
-            saltWords=bytes18ToWords24(rnd,0); ivWords=bytes18ToWords24(rnd,18);
-            saltBytes=words24ToBytes(saltWords); ivBytes=words24ToBytes(ivWords);
-            keys=hkdfKeys(passwordBytes,saltBytes); nonce=deriveNonce(ivBytes); stream=createChaCha20Stream(keys.encKey,nonce);
+            if (providedRandom48) {
+                if (providedRandom48.length !== 48) return "";
+                rnd=providedRandom48.slice(0);
+            } else {
+                rnd=secureRandomBytes(48);
+                if(!rnd) return "";
+            }
+
+            saltWords=bytesToWords24(rnd,0,8);
+            ivWords=bytesToWords24(rnd,24,8);
+            saltBytes=words24ToBytes(saltWords);
+            ivBytes=words24ToBytes(ivWords);
+
+            keys=hkdfKeys(passwordBytes,saltBytes);
+            if(!keys)return "";
+            nonce=deriveNonce(ivBytes);
+            stream=createExesChaCha512Stream(keys.encKey,nonce);
 
             var len=plainBytes.length, lenHi=Math.floor(len/16777216), lenLo=len%16777216;
             var hiMix=(stream.nextByte()<<16)|(stream.nextByte()<<8)|stream.nextByte();
             var loMix=(stream.nextByte()<<16)|(stream.nextByte()<<8)|stream.nextByte();
             var ctLenHi=(lenHi^hiMix)&0xFFFFFF, ctLenLo=(lenLo^loMix)&0xFFFFFF;
+
             var paddedLen=Math.ceil(len/3)*3, j;
             cipherBytes=new Array(paddedLen);
-            for(j=0;j<paddedLen;j++) cipherBytes[j]=((j<len?plainBytes[j]:0)^stream.nextByte())&255;
+            for(j=0;j<paddedLen;j++) {
+                cipherBytes[j]=((j<len?plainBytes[j]:0)^stream.nextByte())&255;
+            }
 
             tag=hmacForCipher(keys.macKey,saltBytes,ivBytes,ctLenHi,ctLenLo,cipherBytes);
-            tagPadded=tag.slice(0); tagPadded.push(0); tagPadded.push(0); // 64-byte tag + two zero pads = 22 groups.
+            tagPadded=tag.slice(0);
+            tagPadded.push(0);
+            tagPadded.push(0);
 
-            out=new Array(3+70+(paddedLen/3)*5+110);
-            out[0]=VERSION_PREFIX.charAt(0);out[1]=VERSION_PREFIX.charAt(1);out[2]=VERSION_PREFIX.charAt(2);
+            out=new Array(3+90+(paddedLen/3)*5+110);
+            out[0]=VERSION_PREFIX.charAt(0);
+            out[1]=VERSION_PREFIX.charAt(1);
+            out[2]=VERSION_PREFIX.charAt(2);
+
             var outIdx=3;
-            outIdx=packWords24(saltWords,out,outIdx); outIdx=packWords24(ivWords,out,outIdx);
-            enc24to62(ctLenHi,out,outIdx); outIdx+=5; enc24to62(ctLenLo,out,outIdx); outIdx+=5;
+            outIdx=packWords24(saltWords,out,outIdx);
+            outIdx=packWords24(ivWords,out,outIdx);
+            enc24to62(ctLenHi,out,outIdx); outIdx+=5;
+            enc24to62(ctLenLo,out,outIdx); outIdx+=5;
             outIdx=packBytesAs24(cipherBytes,out,outIdx);
             packBytesAs24(tagPadded,out,outIdx);
+
             return out.join('');
-        } catch(e) { return ""; }
-        finally {
-            zeroize(plainBytes);zeroize(passwordBytes);zeroize(rnd);zeroize(saltWords);zeroize(ivWords);zeroize(saltBytes);zeroize(ivBytes);
-            if(keys){zeroize(keys.encKey);zeroize(keys.macKey);zeroize(keys.all);} zeroize(nonce); if(stream)stream.scrub();
+        } catch(e) {
+            return "";
+        } finally {
+            zeroize(plainBytes);zeroize(passwordBytes);zeroize(rnd);
+            zeroize(saltWords);zeroize(ivWords);zeroize(saltBytes);zeroize(ivBytes);
+            if(keys){zeroize(keys.encKey);zeroize(keys.macKey);zeroize(keys.all);}
+            zeroize(nonce);
+            if(stream)stream.scrub();
             zeroize(cipherBytes);zeroize(tag);zeroize(tagPadded);
         }
+    }
+
+    function enc(word,pwd) {
+        return encInternal(word,pwd,null);
     }
 
     function dec(cipher,pwd) {
         var body,passwordBytes=null,saltWords=null,ivWords=null,saltBytes=null,ivBytes=null,keys=null,nonce=null,stream=null;
         var cipherBytes=null,tagEncoded=null,tag64=null,expectedTag=null,plainPadded=null,plainBytes=null;
         try {
-            if(typeof cipher!=="string"||cipher.substr(0,3)!==VERSION_PREFIX||cipher.length<183||pwd===null||pwd===undefined||pwd==="") return "";
+            if(typeof cipher!=="string"||cipher.substr(0,3)!==VERSION_PREFIX||cipher.length<203||pwd===null||pwd===undefined||pwd==="") return "";
             body=cipher.substr(3);
-            if(body.length<180||((body.length-180)%5)!==0) return "";
+
+            // body = salt40 + iv40 + len10 + ciphertext(variable) + tag110.
+            if(body.length<200||((body.length-200)%5)!==0) return "";
+
             passwordBytes=strToUTF8Strict(typeof pwd==='string'?pwd:String(pwd));
             if(!passwordBytes||passwordBytes.length===0||passwordBytes.length>MAX_PASSWORD_SIZE) return "";
 
-            saltWords=unpackWords24(body,0,6); if(!saltWords)return "";
-            ivWords=unpackWords24(body,30,6); if(!ivWords)return "";
-            var ctLenHi=dec62to24(body,60),ctLenLo=dec62to24(body,65); if(ctLenHi<0||ctLenLo<0)return "";
-            var cipherGroups=(body.length-180)/5;
+            saltWords=unpackWords24(body,0,8); if(!saltWords)return "";
+            ivWords=unpackWords24(body,40,8); if(!ivWords)return "";
+
+            var ctLenHi=dec62to24(body,80);
+            var ctLenLo=dec62to24(body,85);
+            if(ctLenHi<0||ctLenLo<0)return "";
+
+            var cipherGroups=(body.length-200)/5;
             if(cipherGroups<0)return "";
-            cipherBytes=unpackBytes24(body,70,cipherGroups); if(!cipherBytes)return "";
-            tagEncoded=unpackBytes24(body,70+cipherGroups*5,22); if(!tagEncoded||tagEncoded.length!==66||tagEncoded[64]!==0||tagEncoded[65]!==0)return "";
+
+            cipherBytes=unpackBytes24(body,90,cipherGroups);
+            if(!cipherBytes)return "";
+
+            tagEncoded=unpackBytes24(body,90+cipherGroups*5,22);
+            if(!tagEncoded||tagEncoded.length!==66||tagEncoded[64]!==0||tagEncoded[65]!==0)return "";
             tag64=tagEncoded.slice(0,64);
 
-            saltBytes=words24ToBytes(saltWords);ivBytes=words24ToBytes(ivWords);
+            saltBytes=words24ToBytes(saltWords);
+            ivBytes=words24ToBytes(ivWords);
+
             keys=hkdfKeys(passwordBytes,saltBytes);
+            if(!keys)return "";
+
             expectedTag=hmacForCipher(keys.macKey,saltBytes,ivBytes,ctLenHi,ctLenLo,cipherBytes);
             if(!constantTimeEqual(expectedTag,tag64))return "";
 
-            nonce=deriveNonce(ivBytes);stream=createChaCha20Stream(keys.encKey,nonce);
+            nonce=deriveNonce(ivBytes);
+            stream=createExesChaCha512Stream(keys.encKey,nonce);
+
             var hiMix=(stream.nextByte()<<16)|(stream.nextByte()<<8)|stream.nextByte();
             var loMix=(stream.nextByte()<<16)|(stream.nextByte()<<8)|stream.nextByte();
-            var lenHi=(ctLenHi^hiMix)&0xFFFFFF,lenLo=(ctLenLo^loMix)&0xFFFFFF;
+            var lenHi=(ctLenHi^hiMix)&0xFFFFFF;
+            var lenLo=(ctLenLo^loMix)&0xFFFFFF;
             var exactLen=lenHi*16777216+lenLo;
+
             if(exactLen<0||exactLen>MAX_PAYLOAD_SIZE||Math.ceil(exactLen/3)*3!==cipherBytes.length)return "";
 
             plainPadded=new Array(cipherBytes.length);
-            for(var j=0;j<cipherBytes.length;j++)plainPadded[j]=(cipherBytes[j]^stream.nextByte())&255;
-            for(j=exactLen;j<plainPadded.length;j++)if(plainPadded[j]!==0)return "";
+            for(var j=0;j<cipherBytes.length;j++) {
+                plainPadded[j]=(cipherBytes[j]^stream.nextByte())&255;
+            }
+
+            for(j=exactLen;j<plainPadded.length;j++) {
+                if(plainPadded[j]!==0)return "";
+            }
+
             plainBytes=plainPadded.slice(0,exactLen);
             var result=utf8ToStrStrict(plainBytes);
             return result===null?"":result;
-        } catch(e) { return ""; }
-        finally {
-            zeroize(passwordBytes);zeroize(saltWords);zeroize(ivWords);zeroize(saltBytes);zeroize(ivBytes);
-            if(keys){zeroize(keys.encKey);zeroize(keys.macKey);zeroize(keys.all);} zeroize(nonce);if(stream)stream.scrub();
-            zeroize(cipherBytes);zeroize(tagEncoded);zeroize(tag64);zeroize(expectedTag);zeroize(plainPadded);zeroize(plainBytes);
+        } catch(e) {
+            return "";
+        } finally {
+            zeroize(passwordBytes);zeroize(saltWords);zeroize(ivWords);
+            zeroize(saltBytes);zeroize(ivBytes);
+            if(keys){zeroize(keys.encKey);zeroize(keys.macKey);zeroize(keys.all);}
+            zeroize(nonce);
+            if(stream)stream.scrub();
+            zeroize(cipherBytes);zeroize(tagEncoded);zeroize(tag64);
+            zeroize(expectedTag);zeroize(plainPadded);zeroize(plainBytes);
         }
     }
 
-    // Primitive known-answer tests for deployment diagnostics.
+    // Primitive and protocol known-answer tests for deployment diagnostics.
     function selfTest() {
-        function hex(bytes){var s='',h='0123456789abcdef';for(var k=0;k<bytes.length;k++)s+=h[(bytes[k]>>>4)&15]+h[bytes[k]&15];return s;}
+        function hex(bytes){
+            var s='',h='0123456789abcdef';
+            for(var k=0;k<bytes.length;k++)s+=h[(bytes[k]>>>4)&15]+h[bytes[k]&15];
+            return s;
+        }
+
         var abc=asciiBytes('abc');
         var sha512=sha512Bytes(abc);
         var sha512OK=hex(sha512)==='ddaf35a193617abacc417349ae204131' +
             '12e6fa4e89a97ea20a9eeee64b55d39a' +
             '2192992a274fc1a836ba3c23a3feebbd' +
             '454d4423643ce80e2a9ac94fa54ca49f';
+
         var hm=hmacSha512(asciiBytes('key'),asciiBytes('The quick brown fox jumps over the lazy dog'));
         var hmacOK=hex(hm)==='b42af09057bac1e2d41708e48a902e09' +
             'b5ff7f12ab428a4fe86653c73dd248fb' +
             '82f948a549f7b791a5b41915ee4d1ec3' +
             '935357e4e2317250d0372afa2ebeeb3a';
+
         var hkdfIkm=[],hkdfSalt=[],hkdfInfo=[],hx;
         for(hx=0;hx<22;hx++)hkdfIkm.push(0x0b);
         for(hx=0;hx<13;hx++)hkdfSalt.push(hx);
         for(hx=0;hx<10;hx++)hkdfInfo.push(0xf0+hx);
+
         var hkdfPrk=hkdfExtractSha512(hkdfSalt,hkdfIkm);
         var hkdfOkm=hkdfExpandSha512(hkdfPrk,hkdfInfo,42);
         var hkdfOK=hex(hkdfOkm)==='832390086cda71fb47625bb5ceb168e4c8e26a1a16ed34d9fc7fe92c1481579338da362cb8d9f925d7cb';
-        var key=new Array(32);for(var x=0;x<32;x++)key[x]=x;
-        var nonce=[0,0,0,9,0,0,0,0x4a,0,0,0,0];
-        var block=chacha20Block(key,1,nonce);
-        var chachaOK=hex(block)==='10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4e' +
-            'd2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e';
-        var nonceIv=new Array(18);for(var ni=0;ni<18;ni++)nonceIv[ni]=ni;
+
+        // EXES-ChaCha512 custom core KAT.
+        var key=new Array(64),nonce=new Array(24),x;
+        for(x=0;x<64;x++)key[x]=x;
+        for(x=0;x<24;x++)nonce[x]=x;
+
+        var block=exesChaCha512Block(key,1,0,nonce);
+        var chacha512OK=hex(block)==='161f5b07855fe01c9ba7e91c8846e45fd139a9984da363142a3a8760708173fa' +
+            '9da7f94c90f52fbf05c966cad125b59287a7e45799ca77759de6657e518fd6a4' +
+            '56742e33c6f21d104a7c08aabdb9f5dae6e8dabb9810ca63802887e37d93ecf4' +
+            '9acf29709283b3d96b393277d19dbf096073184079f4fbf8b66a53e24aad43cd';
+
+        var nonceIv=new Array(24);
+        for(x=0;x<24;x++)nonceIv[x]=x;
         var derivedNonce=deriveNonce(nonceIv);
-        var nonceSha512OK=hex(derivedNonce)==='e6827d473e5852e96916d98b';
-        zeroize(abc);zeroize(sha512);zeroize(hm);zeroize(hkdfIkm);zeroize(hkdfSalt);zeroize(hkdfInfo);zeroize(hkdfPrk);zeroize(hkdfOkm);zeroize(key);zeroize(nonce);zeroize(block);zeroize(nonceIv);zeroize(derivedNonce);
-        return {sha512:sha512OK,hmacSha512:hmacOK,hkdfSha512:hkdfOK,nonceSha512:nonceSha512OK,chacha20:chachaOK,ok:sha512OK&&hmacOK&&hkdfOK&&nonceSha512OK&&chachaOK};
+        var nonceSha512OK=hex(derivedNonce)==='7b5ec9b3fd691f916832aa672263bb14ececaef2344e1bf3';
+
+        // Full deterministic X60 protocol vector:
+        // salt = 00..17, IV = 18..2f.
+        var fixedRnd=new Array(48);
+        for(x=0;x<48;x++)fixedRnd[x]=x;
+
+        var vectorKey='iE7nFjdGFhbhDh77HnrQLaRGfjuRL6RaHH3DeMT6L';
+        var vector=encInternal('TEST',vectorKey,fixedRnd);
+        var expectedVector='X60003dO0imOH1RV8I2ADtB2swe43bfOx4KO9q536uj5lpek6UYPd7DHAW7vzvP8eigI9NRRBA6ABCAosw5TBls10ywzqen3D7bphCZp3nPSg2hkRImK6RvymWWqkuzxxcypDqCqISjR6zIPONiOS3ICupbDjbPyRRzcf2hDJx284lEXeHDmkjYmOadiNLNeDmEUanfOcGZ7oONzS1L0O';
+        var protocolVectorOK=(vector===expectedVector && dec(vector,vectorKey)==='TEST');
+
+        zeroize(abc);zeroize(sha512);zeroize(hm);
+        zeroize(hkdfIkm);zeroize(hkdfSalt);zeroize(hkdfInfo);zeroize(hkdfPrk);zeroize(hkdfOkm);
+        zeroize(key);zeroize(nonce);zeroize(block);zeroize(nonceIv);zeroize(derivedNonce);zeroize(fixedRnd);
+
+        return {
+            sha512:sha512OK,
+            hmacSha512:hmacOK,
+            hkdfSha512:hkdfOK,
+            nonceSha512_192:nonceSha512OK,
+            exesChaCha512:chacha512OK,
+            protocolVectorX60:protocolVectorOK,
+            ok:sha512OK&&hmacOK&&hkdfOK&&nonceSha512OK&&chacha512OK&&protocolVectorOK
+        };
     }
 
-    return { enc:enc, dec:dec, selfTest:selfTest, environmentTest:environmentTest, version:"5.9.1", build:"LTS-IE11-MODERN" };
+    return {
+        enc:enc,
+        dec:dec,
+        selfTest:selfTest,
+        environmentTest:environmentTest,
+        version:"6.0",
+        build:"LTS-IE11-MODERN-CHACHA512-1024"
+    };
 })();
 
 (function(global) {
-    global.exesEncrypt = function(word, pwd) { return _EXES_CORE_V59.enc(word, pwd); };
-    global.exesDecrypt = function(cipher, pwd) { return _EXES_CORE_V59.dec(cipher, pwd); };
-    global.exesSelfTest = function() { return _EXES_CORE_V59.selfTest(); };
-    global.exesEnvironmentTest = function() { return _EXES_CORE_V59.environmentTest(); };
-    global.EXES_VERSION = "5.9.1";
-    global.EXES_BUILD = "LTS-IE11-MODERN";
+    global.exesEncrypt = function(word, pwd) { return _EXES_CORE_V60.enc(word, pwd); };
+    global.exesDecrypt = function(cipher, pwd) { return _EXES_CORE_V60.dec(cipher, pwd); };
+    global.exesSelfTest = function() { return _EXES_CORE_V60.selfTest(); };
+    global.exesEnvironmentTest = function() { return _EXES_CORE_V60.environmentTest(); };
+
+    global.EXES_VERSION = "6.0";
+    global.EXES_BUILD = "LTS-IE11-MODERN-CHACHA512-1024";
     global.EXES_COMPATIBILITY = "IE11 to Modern Chrome";
+    global.EXES_WIRE_PREFIX = "X60";
+    global.EXES_CIPHER = "EXES-ChaCha512";
+    global.EXES_STATE_BITS = 1024;
+    global.EXES_ENCRYPTION_KEY_BITS = 512;
+    global.EXES_MAC_KEY_BITS = 512;
+    global.EXES_TAG_BITS = 512;
+    global.EXES_NONCE_BITS = 192;
 
     if (typeof module !== "undefined" && module.exports) {
         module.exports = {
@@ -707,9 +917,16 @@ var _EXES_CORE_V59 = (function() {
             decrypt: global.exesDecrypt,
             selfTest: global.exesSelfTest,
             environmentTest: global.exesEnvironmentTest,
-            version: "5.9.1",
-            build: "LTS-IE11-MODERN",
-            compatibility: "IE11 to Modern Chrome"
+            version: "6.0",
+            build: "LTS-IE11-MODERN-CHACHA512-1024",
+            compatibility: "IE11 to Modern Chrome",
+            wirePrefix: "X60",
+            cipher: "EXES-ChaCha512",
+            stateBits: 1024,
+            encryptionKeyBits: 512,
+            macKeyBits: 512,
+            tagBits: 512,
+            nonceBits: 192
         };
     }
 })(typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : this));
