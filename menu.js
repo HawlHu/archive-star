@@ -2,6 +2,7 @@ var 								j_db_menu=[
 												[
 													"2026-02-06",
 													[
+														["teac_ex_md3","教學","EXpansio"],
 														["teac_exes","教學","加密標準(EXE"],
 														["teac_pqc_crypt","教學","PQC 技術研究"],
 														["teac_softether_apache_rproxy","教學","基於 Apach"]														
@@ -59,10 +60,10 @@ var 								j_db_menu=[
 														["cryp_mizuki","教學","林襄暗網流出私密"],
 														["shar_like_youtube","分享","Youtube連"],
 														["shar_number_555","資訊","詭異的電話號碼"],
-														["shar_password","教學","禁用密碼清單"],
 														["shar_win11_excel_tw_year","分享","OFFICE 2"],
 														["teac_win11_no_login_microsoft_access","教學","跳過 Windo"],
-														["teac_windows10_debloater","技術","Windows1"]														
+														["teac_windows10_debloater","技術","Windows1"],
+														["shar_password","教學","禁用密碼清單"]														
 													]
 												],												
 												[
@@ -92,13 +93,13 @@ var 								j_db_menu=[
 													"2018-07-18",
 													[
 														["info_joyful_melody_devotion_group","資訊","專情團"],
-														["shar_m3u8_download","教學","副檔名M3U8影"],
 														["shar_pics_20210914","分享","網友分享作品"],
 														["shar_python","分享","Python常用"],
 														["shar_store_65","分享","工研院的老闆許友"],
 														["teac_fat32_in_win10","教學","Windows "],
 														["teac_html5_login_demo","分享","HTML5登入頁"],
-														["teac_program_auto_install","技術","自動安裝常用應用"]														
+														["teac_program_auto_install","技術","自動安裝常用應用"],
+														["shar_m3u8_download","教學","副檔名M3U8影"]														
 													]
 												],												
 												[
@@ -120,8 +121,8 @@ var 								j_db_menu=[
 													[
 														["cryp_left_tree_2021","教學","長生草"],
 														["shar_constellation_traits","分享","12星座永不會變"],
-														["shar_php","分享","PHP常用函式大"],
 														["cryp_eternal_life","機密","人類壽命長度的真"],
+														["shar_php","分享","PHP常用函式大"],
 														["teac_game_pubg","教學","PUBG 閃退("],
 														["teac_office201x_jump_365","教學","OFFICE 2"],
 														["teac_troubleshooting_windows_security_center_not_opening","教學","解決 Windo"]														
@@ -130,12 +131,12 @@ var 								j_db_menu=[
 												[
 													"2015-08-12",
 													[
-														["teac_ex_md2","教學","EXpansio"],
 														["info_gpu_2021_top","資訊","顯示卡天梯202"],
 														["cryp_japan_20220708","分享","安倍晉三槍擊真相"],
 														["shar_rec_cam_or_screen_for_potplayer","分享","錄製網路攝影機畫"],
-														["teac_easy_net_disable","教學","簡易禁止電腦上網"],
 														["cryp_dream_20220808","機密","機密檔案88(紅"],
+														["teac_easy_net_disable","教學","簡易禁止電腦上網"],
+														["teac_ex_md2","教學","EXpansio"],
 														["teac_w11_right_menu_to_w10","技術","將 Win11 "]														
 													]
 												],												
@@ -178,10 +179,10 @@ var 								j_db_menu=[
 													"2011-01-29",
 													[
 														["info_alls_me_alls_full","資訊","阿彌陀佛"],
+														["shar_ipz_video_list","教學","IPZ影片來源連"],
 														["shar_taiwan_sin_100","分享","台灣百家姓"],
 														["teac_chrome_profile_redelete","技術","Chrome 書"],
 														["teac_exe_sign","教學","執行檔簽名方式"],
-														["shar_ipz_video_list","教學","IPZ影片來源連"],
 														["teac_free_microsoft_office_download","教學","Microsof"],
 														["teac_windows_use_cmd_add_admin","教學","使用DOS指令建"]														
 													]
@@ -260,10 +261,10 @@ var 								j_db_menu=[
 													[
 														["cryp_tools_ipsec","教學","IPScan"],
 														["cryp_lift_20_year","教學","讓生命強制延長2"],
+														["shar_lowering_blood_cholesterol","教學","降血脂之生活對策"],
 														["shar_pua","分享","PUA五步陷阱"],
 														["teac_nb_bootup","技術","筆電加速開機，L"],
-														["teac_rdpwrap","教學","開啟window"],
-														["shar_lowering_blood_cholesterol","教學","降血脂之生活對策"]														
+														["teac_rdpwrap","教學","開啟window"]														
 													]
 												],												
 												[
@@ -282,8 +283,8 @@ var 								j_db_menu=[
 													"2002-03-21",
 													[
 														["info_rdp_vs","資訊","遠端桌面技術比較"],
-														["shar_esg","教學","何謂ESG"],
 														["cryp_god_athena_2019","機密","2020事故報告"],
+														["shar_esg","教學","何謂ESG"],
 														["teac_disable_windows_update","教學","停用WINDOW"],
 														["teac_phishing_attack_detection","分享","利用機器學習檢測"],
 														["teac_windows_antivirus_exclusion","教學","WINDOWS內"]														
@@ -292,9 +293,9 @@ var 								j_db_menu=[
 												[
 													"2001-05-22",
 													[
+														["info_tcp_port_docs","教學","TCP Port"],
 														["info_windows_icons","資料","Win圖示庫"],
 														["shar_abbreviation_of_week_and_month","教學","星期、月份英文縮"],
-														["info_tcp_port_docs","教學","TCP Port"],
 														["teac_chat_gpt_for_chrome","教學","Chat GPT"],
 														["teac_javascript","教學","JavaScri"],
 														["teac_rj45_color","教學","RJ45線接法教"]														
@@ -303,8 +304,8 @@ var 								j_db_menu=[
 												[
 													"2000-05-21",
 													[
-														["teac_ex_md1","教學","EXpansio"],
 														["util_text_sub_end","教學","字串去除尾巴工具"],
+														["teac_ex_md1","教學","EXpansio"],
 														["util_rdp_for_taiwan","教學","限制遠端桌面(R"],
 														["teac_mail_spf","教學","寄件者政策框架S"],
 														["teac_windows_mouse_right_error","教學","Windows桌"],
@@ -315,11 +316,11 @@ var 								j_db_menu=[
 													"1999-07-18",
 													[
 														["cryp_personnel_china_and_taiwan_2010","機密","2010~201"],
+														["shar_old_waz_teac","教學","從「慈不掌兵，義"],
 														["shar_sql_statements_indexes_cannot_take","分享","資料庫 Inde"],
 														["teac_voip_error_code_info","教學","VOIP錯誤代碼"],
 														["teac_web_sambar_server","技術","Sambar綜合"],
-														["util_calculator","教學","JS工程計算機"],
-														["shar_old_waz_teac","教學","從「慈不掌兵，義"]														
+														["util_calculator","教學","JS工程計算機"]														
 													]
 												],												
 												[

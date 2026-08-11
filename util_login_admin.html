@@ -61,6 +61,7 @@
 		<script language="JavaScript" type="text/JavaScript" src="js/base64.js"></script>
 		<script language="JavaScript" type="text/JavaScript" src="js/ex_md1.js"></script>
 		<script language="JavaScript" type="text/JavaScript" src="js/ex_md2.js"></script>
+		<script language="JavaScript" type="text/JavaScript" src="js/ex_md3.js"></script>
 		<script language="JavaScript" type="text/JavaScript" src="js/ez_mc.js"></script>
 		<script language="JavaScript" type="text/JavaScript" src="js/tw-sack.js"></script>
 		<script language="JavaScript" type="text/JavaScript" src="js/jquery.min.js"></script>
@@ -228,12 +229,12 @@
 													writeCookie("j_aeskey", 
 																	exesDecrypt(
 																		aes_data_law,
-																		ex_md2n( 
+																		ex_md3n( 
 																					web_system_main_json_datas.user_key_in_user + 
 																					web_system_main_json_datas.user_login_center_key + 
 																					web_system_main_json_datas.user_key_in_pass
 																					,
-																					100000
+																					1000
 																				)
 																	), 
 																	web_system_main_json_datas.user_login_cookie_max_sec
