@@ -363,8 +363,8 @@
 			   if (window.mm_menu_0701213252_0) return;
 			   window.mm_menu_0701213252_0 = new Menu("root",web_system_main_json_datas.ex_data.main_menu_wi_size,50,"Verdana",16,"#000000","#FFFFFF","#EEEEEE","#B6B6B6","left","middle",20,0,1000,-5,7,true,true,true,0,true,true);
 			   mm_menu_0701213252_0.addMenuItem("加密工具","location='util_aes_utility.html';void(0);");
-			   mm_menu_0701213252_0.addMenuItem("選單日期","location=AesDecrypt('U2FsdGVkX1/woyw+lVwunickvZREawHs/0xY6QVyx973zOD4QCv2SAEBEH0QtnYE',readCookie('j_aeskey'));void(0);");
-			   mm_menu_0701213252_0.addMenuItem("選單整理","location=AesDecrypt('U2FsdGVkX19SxXNNmt+ij3mB5NTYoqoQuex751HaigzKBQ8hx+95Nk1jOADeJzyF',readCookie('j_aeskey'));void(0);");
+			   mm_menu_0701213252_0.addMenuItem("選單日期","location=exesDecrypt('X60ZC6wAbeCfyy7xydtdYNbG5xNkqldM1HI9udBsyVhEUawYqRa6aPi7j9c1aW9A71DuVtttom9Mm3dtd0W0jD74rC9eR9jsi8PYBXe9pKFhrZyeuEKdyEEIdRqrdVhgKXxck5GZqO8aD9MrnCIoW8GI8vDBs8eKF6KXYQL4FzfehdCSTdjMspf6H1jTQnyRDYES36U34GXwjqVsbgt4t8dmCNLUpwrDJOsGI0mJWk6SWAiqGzNWKcXA',readCookie('j_aeskey'));void(0);");
+			   mm_menu_0701213252_0.addMenuItem("選單整理","location=exesDecrypt('X60vE975WwqEpFedKjLbyicL2eb977AqjmxmWu36DzoPp8y8PgZXoNLg2W0HGtLgXRSLyJfcyKS0dXhmPYWq6MFMszXONyXotZTksCu0CaIRGxDKVk3dc75pmQB4j79pAlh7Jb9SLuKdIyyTBFDrDdD8b0ny94gE2gTnEe5ZLyjSPMJondCZLpi3EtOBOvusHRDs8IfglBrgP6Je52OW1xdd9u7jH7qKrACXzD2TuXO4JoaACn6',readCookie('j_aeskey'));void(0);");
 			   mm_menu_0701213252_0.addMenuItem("登出","main_login_out_start();");
 			   mm_menu_0701213252_0.hideOnMouseOut=true;
 			   mm_menu_0701213252_0.bgColor='#555555';
