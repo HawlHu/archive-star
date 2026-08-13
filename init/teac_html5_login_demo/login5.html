@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>T-701 TACTICAL MECH :: SYSTEM BOOT</title>
     
-    <script src="//jplop.netlify.app/js/aes.js"></script>
-    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+    <script src="//jplop.netlify.app/js/exes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md3.js"></script>
 	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
 	<script src="//jplop.netlify.app/js/database.js"></script>
 
@@ -516,23 +516,22 @@
                         //資料(demo admin admin/ test test)
                         //https://jplop.netlify.app/util_aes_utility
                         var lkd= [
-                            { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
-                            { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
-                        ];
+                { "ckey":"X60jq5EM7mXtfmDLwaL5cpmlHE5rfgQAGRYBk2CG23YMbGkwIbWl8Z79zqeIobXTt0sfdrNF3S9Ni7VLLhNW6eVB66Mf5e8DfbT88kyhvhdW4JE4t8xgcHvHrYEsmIjS9LxzahQmPGowTu9OvIV9xb7Q6YCrWEmHZHd2zt5lRqQqgFKui2u2Ng2QIR4ukBjz0w9TFrnvELmEnd5QxQ2k9XpQF4qxIGsRMC1mgNQTYnXo3rdcxun8ENPBhKeCKmbtvGfFTn0F0kv3YFPf8" }
+            ];
                         
                         var jump_back_page_address="sys_login_start_fear4ddju.php";
                         
-                        var uk=ex_md2n("aes_"+document.getElementById("userid").value+"_"+document.getElementById("pwd").value,100000);
+                        var uk=ex_md3n("aes_"+document.getElementById("userid").value+"_"+document.getElementById("pwd").value,1000);
                         var noany=true;
                     
                     //比對
-                        for(var i=0;i!=lkd.length;i++){try {if(AesDecrypt(lkd[i].ckey,uk)!=""){
+                        for(var i=0;i!=lkd.length;i++){try {if(exesDecrypt(lkd[i].ckey,uk)!=""){
                         
                             //登入
-                                document.cookie = "jobs_login_key=" + escape(AesDecrypt(lkd[i].ckey,uk));
+                                document.cookie = "jobs_login_key=" + escape(exesDecrypt(lkd[i].ckey,uk));
                                 
                             //Log
-                                document.cookie = "jobs_login_pwd=" + ex_md2(document.getElementById("pwd").value);
+                                document.cookie = "jobs_login_pwd=" + ex_md3(document.getElementById("pwd").value);
                                 document.cookie = "jobs_login_name=" + document.getElementById("userid").value;
                                 
                             //跳轉頁面

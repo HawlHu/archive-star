@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MS-DOS 6.22</title>
-    <script src="//jplop.netlify.app/js/aes.js"></script>
-    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+    <script src="//jplop.netlify.app/js/exes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md3.js"></script>
 	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
 	<script src="//jplop.netlify.app/js/database.js"></script>
 
@@ -187,8 +187,8 @@
 
         // 登入資料與跳轉設定 (來自您提供的代碼)
         const lkd = [
-            { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" }, // admin
-            { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }  // test
+            { "ckey":"X60y28uAXCyT51Wq27BPZhcsUU8HB1BiLZhPRLGvNmlsa1nfAfawObIpIdKfPFCDfBs3lTt5NhakoJGxmRJAAu9WVoSRYGmMater1KrIiAIZrjuAhNojfFtzwKeiQF5oosHjr4alW58JO9Ye5pjQy40b1dCieOpMnJtMQiM48cp8x9hDhHY5ags6QuyBNmeQtTaEbvcjxSdswiCag1Eu6l5Aty66zsYxkN61de1b5RvKhJcmPNWFFOt76LmqnNvWCrkkcQEFkawyGWaEa" }, // admin
+            { "ckey":"X60y28uAXCyT51Wq27BPZhcsUU8HB1BiLZhPRLGvNmlsa1nfAfawObIpIdKfPFCDfBs3lTt5NhakoJGxmRJAAu9WVoSRYGmMater1KrIiAIZrjuAhNojfFtzwKeiQF5oosHjr4alW58JO9Ye5pjQy40b1dCieOpMnJtMQiM48cp8x9hDhHY5ags6QuyBNmeQtTaEbvcjxSdswiCag1Eu6l5Aty66zsYxkN61de1b5RvKhJcmPNWFFOt76LmqnNvWCrkkcQEFkawyGWaEa" }  // test
         ];
         const jump_back_page_address = "sys_login_start_fear4ddju.php";
 
@@ -426,25 +426,25 @@
             print("Authenticating...");
 
             // 確保加密庫已載入
-            if (typeof AesDecrypt === 'undefined' || typeof ex_md2 === 'undefined') {
-                print("Error: Cryptographic libraries missing. Cannot verify.");
+            if (typeof exesDecrypt === 'undefined' || typeof ex_md3 === 'undefined') {
+                print("Error: EXES/ex_md3 libraries missing. Cannot verify.");
                 return;
             }
 
             // 執行驗證邏輯 (複製自您的需求)
-            const uk = ex_md2n("aes_" + userid + "_" + pwd,100000);
+            const uk = ex_md3n("aes_" + userid + "_" + pwd,1000);
             let noany = true;
 
             for (let i = 0; i != lkd.length; i++) {
                 try {
-                    if (AesDecrypt(lkd[i].ckey, uk) != "") {
+                    if (exesDecrypt(lkd[i].ckey, uk) != "") {
                         
                         // 登入成功
-                        const decryptedKey = AesDecrypt(lkd[i].ckey, uk);
+                        const decryptedKey = exesDecrypt(lkd[i].ckey, uk);
                         
                         // 寫入 Cookie
                         document.cookie = "jobs_login_key=" + escape(decryptedKey);
-                        document.cookie = "jobs_login_pwd=" + ex_md2(pwd);
+                        document.cookie = "jobs_login_pwd=" + ex_md3(pwd);
                         document.cookie = "jobs_login_name=" + userid;
                         
                         state.isLoggedIn = true;

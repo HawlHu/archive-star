@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Windows Server 2021 - Login</title>
     
-    <script src="//jplop.netlify.app/js/aes.js"></script>
-    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+    <script src="//jplop.netlify.app/js/exes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md3.js"></script>
 	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
 	<script src="//jplop.netlify.app/js/database.js"></script>
 
@@ -482,10 +482,10 @@
             //https://jplop.netlify.app/util_aes_utility
             var lkd= [
                 {
-                    "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ=="
+                    "ckey":"X60d0FWX7Jy83BhUN44c6uyRFF6n3PyjqMhKF1v0lfIxlO4ayuqvLcj1WRrATKAjpyacp4EvvIOJ103STWCkVfRhAUlEfdKP9k1tFApM0lSCxwffr7tpEybyCadPIYttJdgnBe9EDXnKFUZDoOQXkzhQbh0psSEPR6gjnN9cfGMqqlVaWr1A4fGZ14kcFRBmGB9wqYE6qTOnlMMIWNkVDJ8mbhGcdJozBivV6mA3iRsjgwEDHAp1MDEoeRwK3nHe6E8485Eihp3BBFu8O"
                 },
                 {
-                    "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w="
+                    "ckey":"X60d0FWX7Jy83BhUN44c6uyRFF6n3PyjqMhKF1v0lfIxlO4ayuqvLcj1WRrATKAjpyacp4EvvIOJ103STWCkVfRhAUlEfdKP9k1tFApM0lSCxwffr7tpEybyCadPIYttJdgnBe9EDXnKFUZDoOQXkzhQbh0psSEPR6gjnN9cfGMqqlVaWr1A4fGZ14kcFRBmGB9wqYE6qTOnlMMIWNkVDJ8mbhGcdJozBivV6mA3iRsjgwEDHAp1MDEoeRwK3nHe6E8485Eihp3BBFu8O"
                 }
             ];
             
@@ -496,21 +496,21 @@
             var pwd_val = document.getElementById("pwd").value;
 
             // 組合 Key
-            var uk = ex_md2n("aes_" + uid_val + "_" + pwd_val,100000);
+            var uk = ex_md3n("aes_" + uid_val + "_" + pwd_val,1000);
             var noany = true;
         
             //比對
-            if (typeof AesDecrypt !== 'undefined' && typeof ex_md2 !== 'undefined') {
+            if (typeof exesDecrypt !== 'undefined' && typeof ex_md3 !== 'undefined') {
                 for(var i=0; i!=lkd.length; i++){
                     try {
-                        if(AesDecrypt(lkd[i].ckey, uk) != ""){
+                        if(exesDecrypt(lkd[i].ckey, uk) != ""){
                         
                             //登入成功
                             //由於這是純前端模擬，這裡僅做 Alert 提示成功，或模擬跳轉行為
                             
                             //Cookie 寫入 (模擬)
-                            document.cookie = "jobs_login_key=" + escape(AesDecrypt(lkd[i].ckey, uk));
-                            document.cookie = "jobs_login_pwd=" + ex_md2(pwd_val);
+                            document.cookie = "jobs_login_key=" + escape(exesDecrypt(lkd[i].ckey, uk));
+                            document.cookie = "jobs_login_pwd=" + ex_md3(pwd_val);
                             document.cookie = "jobs_login_name=" + uid_val;
                             
                             noany = false;

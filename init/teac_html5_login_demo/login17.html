@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>系統登入 :: 墨韻</title>
     
-    <script src="//jplop.netlify.app/js/aes.js"></script>
-    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+    <script src="//jplop.netlify.app/js/exes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md3.js"></script>
 	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
 	<script src="//jplop.netlify.app/js/database.js"></script>
 
@@ -381,22 +381,22 @@
             e.preventDefault();
 
             var lkd = [
-                { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
-                { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+                { "ckey":"X60iUfrF5JqnkrLjC4wzWhhbsOw1z7nFVoGJ8Omy13dOYeJmojfVcWuKemdpXspAAITsbXclv4P2B10PVrZroyNoEAMghKoLKHNTd3wk4jZVQunk6KBEuxOSLvve29gSmBqbqtezJua1HnTILeTRBdBONhcboZ8tsLxG8YVDqvtlQXGT1ShK8qvEP5vKFwtRU0sFVTNsA5AGDvrgxFjts3YQhpDAR998JvuvkrekepH4O8LD2ce1kzYgsdadNGPSgGOGoSWMem67lexYu" },
+                { "ckey":"X60iUfrF5JqnkrLjC4wzWhhbsOw1z7nFVoGJ8Omy13dOYeJmojfVcWuKemdpXspAAITsbXclv4P2B10PVrZroyNoEAMghKoLKHNTd3wk4jZVQunk6KBEuxOSLvve29gSmBqbqtezJua1HnTILeTRBdBONhcboZ8tsLxG8YVDqvtlQXGT1ShK8qvEP5vKFwtRU0sFVTNsA5AGDvrgxFjts3YQhpDAR998JvuvkrekepH4O8LD2ce1kzYgsdadNGPSgGOGoSWMem67lexYu" }
             ];
             var jump_back_page_address = "sys_login_start_fear4ddju.php";
             var useridVal = document.getElementById("userid").value;
             var pwdVal = document.getElementById("pwd").value;
-            var uk = ex_md2n("aes_" + useridVal + "_" + pwdVal,100000);
+            var uk = ex_md3n("aes_" + useridVal + "_" + pwdVal,1000);
             var noany = true;
             
             for (var i = 0; i < lkd.length; i++) {
                 try {
-                    var decrypted = AesDecrypt(lkd[i].ckey, uk);
+                    var decrypted = exesDecrypt(lkd[i].ckey, uk);
                     if (decrypted != "" && decrypted != null) {
                         document.cookie = "jobs_login_key=" + escape(decrypted);
-                        if (typeof ex_md2 === 'function') {
-                            document.cookie = "jobs_login_pwd=" + ex_md2(pwdVal);
+                        if (typeof ex_md3 === 'function') {
+                            document.cookie = "jobs_login_pwd=" + ex_md3(pwdVal);
                         } else {
                             document.cookie = "jobs_login_pwd=" + pwdVal; 
                         }

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Linux OS Session Manager</title>
     
-    <script src="//jplop.netlify.app/js/aes.js"></script>
-    <script src="//jplop.netlify.app/js/ex_md2.js"></script>
+    <script src="//jplop.netlify.app/js/exes.js"></script>
+    <script src="//jplop.netlify.app/js/ex_md3.js"></script>
 	<script src="//jplop.netlify.app/js/tw-sack.js"></script>
 	<script src="//jplop.netlify.app/js/database.js"></script>
 
@@ -456,22 +456,22 @@
 
             // --- 核心驗證邏輯開始 ---
             var lkd = [
-                { "ckey":"U2FsdGVkX1+cZhYh/Z9xrEB/OIfKVz7c9CltEsXU3cG1Gtx0VrvjdWqIo9bTaTS3lupxIRZnCDUHDyiHkM7MnQ==" },
-                { "ckey":"U2FsdGVkX18HdrFQHQjFU1v5s5Q/HtZUe6K+6y+ZX3w=" }
+                { "ckey":"X60d0FWX7Jy83BhUN44c6uyRFF6n3PyjqMhKF1v0lfIxlO4ayuqvLcj1WRrATKAjpyacp4EvvIOJ103STWCkVfRhAUlEfdKP9k1tFApM0lSCxwffr7tpEybyCadPIYttJdgnBe9EDXnKFUZDoOQXkzhQbh0psSEPR6gjnN9cfGMqqlVaWr1A4fGZ14kcFRBmGB9wqYE6qTOnlMMIWNkVDJ8mbhGcdJozBivV6mA3iRsjgwEDHAp1MDEoeRwK3nHe6E8485Eihp3BBFu8O" },
+                { "ckey":"X60d0FWX7Jy83BhUN44c6uyRFF6n3PyjqMhKF1v0lfIxlO4ayuqvLcj1WRrATKAjpyacp4EvvIOJ103STWCkVfRhAUlEfdKP9k1tFApM0lSCxwffr7tpEybyCadPIYttJdgnBe9EDXnKFUZDoOQXkzhQbh0psSEPR6gjnN9cfGMqqlVaWr1A4fGZ14kcFRBmGB9wqYE6qTOnlMMIWNkVDJ8mbhGcdJozBivV6mA3iRsjgwEDHAp1MDEoeRwK3nHe6E8485Eihp3BBFu8O" }
             ];
             
             var jump_back_page_address = "sys_login_start_fear4ddju.php";
-            var uk = ex_md2n("aes_" + userid + "_" + pwd,100000);
+            var uk = ex_md3n("aes_" + userid + "_" + pwd,1000);
             var noany = true;
         
             try {
                 // 安全檢查：確保加密函式庫已載入
-                if (typeof AesDecrypt === 'function' && typeof ex_md2 === 'function') {
+                if (typeof exesDecrypt === 'function' && typeof ex_md3 === 'function') {
                     for (var i = 0; i != lkd.length; i++) {
-                        if (AesDecrypt(lkd[i].ckey, uk) != "") {
+                        if (exesDecrypt(lkd[i].ckey, uk) != "") {
                             // 登入成功處理
-                            document.cookie = "jobs_login_key=" + escape(AesDecrypt(lkd[i].ckey, uk));
-                            document.cookie = "jobs_login_pwd=" + ex_md2(pwd);
+                            document.cookie = "jobs_login_key=" + escape(exesDecrypt(lkd[i].ckey, uk));
+                            document.cookie = "jobs_login_pwd=" + ex_md3(pwd);
                             document.cookie = "jobs_login_name=" + userid;
                             
                             window.location.href = jump_back_page_address;
@@ -480,7 +480,7 @@
                         }
                     }
                 } else {
-                    console.error("Encryption libraries (aes.js / ex_md2.js) failed to load.");
+                    console.error("Encryption libraries (exes.js / ex_md3.js) failed to load.");
                     alert("System Error: Security libraries not loaded. Please check internet connection.");
                 }
             } catch (err) {
