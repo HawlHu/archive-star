@@ -119,132 +119,404 @@
 				<table width="100%" border="0" cellpadding="10" cellspacing="0">
 				  <tr>
 					<td valign="top" id="EditRegion3" contenteditable="false"><!-- InstanceBeginEditable name="EditRegion3" -->
-              <h2><img id="one_page_number_1" src="images/archive_star_ban_2022.jpg?nf_resize=fit&amp;w=532&amp;h=332" alt="HTML5登入頁面展示" style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
-              <h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;HTML5登入頁面展示&gt;&gt;</font></h2>
-              <p><b>說明：</b></p>
-              <blockquote>
-                <p>這是一個運用單一 HTML5 登入頁面（純前端 only），主要功能與構成如下：</p>
-                <p>視覺：使用大量 CSS（glass、neon、scanlines、vignette）、一個 canvas 畫布。</p>
-                <p>登入驗證（純前端）：在表單 submit 時攔截，程式碼內含一個 lkd 陣列（兩個 ckey 字串），會依序嘗試呼叫 AesDecrypt(ckey, uk)，其中 <font color="#FF0000"><b>uk = &quot;aes_&quot;+userid+&quot;_&quot;+pwd</b></font>。若解密回傳非空值，即視為登入成功，會把解密結果與使用者資訊寫入 cookie，並轉址到 <font color="#FF0000"><b>sys_login_start_fear4ddju.php</b></font>；否則顯示錯誤 modal（ACCESS DENIED）。</p>
-                <p>&nbsp;</p>
-              </blockquote>
-              <p><b>外部資源：</b></p>
-              <blockquote>
-                <p>載入4個外部檔案(前端驗證用、常用函式庫)，<font color="#FF0000"><b>如自行改為CGI/ AJAX 驗證，則無需引用</b></font>。</p>
-                <p>JavaScript：</p>
-                <blockquote>
-                  <p>前端驗證用<a href="https://jplop.netlify.app/js/aes.js">：https://jplop.netlify.app/js/aes.js </a></p>
-                  <p>前端驗證用：<a href="https://jplop.netlify.app/js/ex_md2.js">https://jplop.netlify.app/js/ex_md2.js</a></p>
-                  <p>弱密碼資料庫(未使用)：<a href="https://jplop.netlify.app/js/database.js">https://jplop.netlify.app/js/database.js</a></p>
-                  <p>AJAX模組(未使用)：<a href="https://jplop.netlify.app/js/tw-sack.js">https://jplop.netlify.app/js/tw-sack.js</a></p>
-                </blockquote>
-                <p>&nbsp;</p>
-                </blockquote>
-              <p><b>展示、原始碼(Demo)：</b></p>
-              <blockquote>
-                <p><a href="init/teac_html5_login_demo/login2.html">深海</a></p>
-                <p><a href="init/teac_html5_login_demo/login4.html">駭客任務</a></p>
-                <p><a href="init/teac_html5_login_demo/login13.html">DOS 6.22 </a></p>
-                <p><a href="init/teac_html5_login_demo/login16.html">LINUX</a></p>
-				<p><a href="init/teac_html5_login_demo/login18.html">聊天機器人</a></p>
-                <p><a href="init/teac_html5_login_demo/login14.html">大腦連線</a></p>
-                <p><a href="init/teac_html5_login_demo/login17.html">水墨</a>(引用 1 JPG圖、2 字型)</p>
-				<p><a href="init/teac_html5_login_demo/login19.html">桌面綿羊</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login1.html">火星</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login3.html">草原</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login5.html">攻殼機動隊</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login6.html">自動人型</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login7.html">生化奇兵</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login8.html">MAC</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login9.html">Windows Server</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login10.html">Linux</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login11.html">最終幻想</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login12.html">惡靈古堡</a>(引用 1 JPG圖)</p>
-                <p><a href="init/teac_html5_login_demo/login15.html">NASA KM </a>(引用 1 JPG圖)</p>
-                <p><b><font color="#FF0000">展示用的正確帳號、密碼均為 &quot;admin&quot;</font></b></p>
-                <p>&nbsp; </p>
-              </blockquote>
-              <p><b>使用教學：</b></p>
-              <blockquote>
-                <p>1. 複製 <b>login*.html</b> 至自己網站中。</p>
-                <blockquote>
-                  <p>只需把提供的 login*.html 複製到網站即可運作，不需要額外安裝後端模組。</p>
-                </blockquote>
-                <p>2. 純前端驗證方式，設定登入帳號密碼：</p>
-                <blockquote>
-                  <p>前端登入流程使用 AES 加密方式，需要準備兩個要素：</p>
-                  <ul>
-                    <li>後端密碼（後端實際驗證用）</li>
-                    <li>登入帳號 / 密碼（給使用者輸入的）</li>
-                  </ul>
-                    <p>A.設定後端密碼：請自行設定一組後端密碼。 </p>
-                    <blockquote>
-                              <p>(假設後端密碼為： <i><b><font color="#FF0000">udeMuHTMubLAmeHMALAHERfELmMDRm4EyLLaGG6j8</font></b></i>)</p>
-                      </blockquote>
-                    <p>B.使用私鑰來建立前端登入帳號密碼：</p>
-                    <ul>
-                      <ul>
-                        <li>假設帳號為：<b>admin</b></li>
-                        <li>假設登入密碼為：<b>ppp2025</b></li>
-                      </ul>
-                    </ul>
-                    <blockquote>
-                        <p>&nbsp;</p>
-                        <p>請前往 EX_MD2N 密碼疊代工具：<a href="https://jplop.netlify.app/teac_ex_md2">https://jplop.netlify.app/teac_ex_md2</a></p>
-                        <blockquote>
-                          <p>輸入文字 (String)，欄位輸入： <i><b>aes_<font color="#FF0000">admin</font>_<font color="#FF0000">ppp2025</font></b></i></p>
-                          <p>（格式：aes_<font color="#FF0000"><b>帳號</b></font>_<font color="#FF0000"><b>密碼</b></font>）</p>
-                          <p>運算次數 (Count)，欄位輸入： <font color="#FF0000"><b>100000 </b></font></p>
-                          <p>按下開始運算，得到：<font color="#FF0000"><b>FMAryfuL8hGahn3rantLFjAdEMEbFfQyjjtmrR6LR</b></font></p>
-                          <p>&nbsp;</p>
-                        </blockquote>
-                        <p>請前往 AES 建立工具：<a href="https://jplop.netlify.app/util_aes_utility">https://jplop.netlify.app/util_aes_utility</a></p>
-                        <blockquote>
-                                <p>密鑰欄位輸入：<i><b>FMAryfuL8hGahn3rantLFjAdEMEbFfQyjjtmrR6LR</b></i></p>
-                                <p>內容欄位輸入(輸入後端密碼)：<i><b>udeMuHTMubLAmeHMALAHERfELmMDRm4EyLLaGG6j8</b></i></p>
-                                <p>得到結果(AES結果每次都不同)：<b><font color="#FF0000">U2FsdGVkX18IxZRgFWVE...</font></b></p>
-                                <p>&nbsp;</p>
-                        </blockquote>
-                        <p>將得到的結果放到 <b>login*.html</b> 程式碼中</p>
-                        <blockquote>
-                                <table border="0" cellpadding="10" bgcolor="#CCCCCC">
-                                  <tr>
-                                    <td><pre>var lkd= [
-	{
-		&quot;ckey&quot;:&quot;<b><font color="#FF0000">U2FsdGVkX18IxZRgFWVE...</font></b>&quot;
-	},
-	{
-		&quot;ckey&quot;:&quot;<b><font color="#FF0000">[第二組帳號密碼]</font></b>&quot;
-	},
-	{
-		&quot;ckey&quot;:&quot;<b><font color="#FF0000">[第三組帳號密碼]</font></b>"
-	}
-]</pre></td>
-                                  </tr>
-                                </table>
-                                <p>&nbsp;</p>
-                              </blockquote>
-                    </blockquote>
-                    <p>C. 設定後端 Cookie 驗證：</p>
-                    <blockquote>
-                              <p>建立後端PHP程式碼(檔名：<font color="#FF0000"><b>sys_login_start_fear4ddju.php</b></font>)：</p>
-                              <table border="0" cellpadding="10" bgcolor="#CCCCCC">
-                                <tr>
-                                  <td><pre>&lt;?php
+             <h2><img id="one_page_number_1" src="images/archive_star_ban_2022.jpg?nf_resize=fit&amp;w=532&amp;h=332" alt="HTML5登入頁面展示" style="width:532px;border:0px #ccc solid;border-radius:5px;box-shadow:1px 1px 5px gray;margin-right:8px;display:none;"></h2>
+
+<h2><font face="Arial, Helvetica, sans-serif">&lt;&lt;HTML5登入頁面展示&gt;&gt;</font></h2>
+
+<p><b>說明：</b></p>
+
+<blockquote>
+  <p>這是一組運用單一 HTML5 製作的登入頁面範例（純前端 only），主要功能與構成如下：</p>
+
+  <p>視覺：使用大量 CSS 特效，例如 glass、neon、scanlines、vignette，部分範例另使用 Canvas 動畫、粒子、星空、雪花等視覺效果。</p>
+
+  <p>
+    登入驗證（純前端）：使用者送出登入資料後，JavaScript 會先將帳號與密碼組合成：
+    <font color="#FF0000"><b>aes_帳號_密碼</b></font>，
+    再透過
+    <font color="#FF0000"><b>ex_md3n("aes_"+userid+"_"+pwd, 1000)</b></font>
+    產生登入用私鑰 <b>uk</b>。
+  </p>
+
+  <p>
+    HTML 程式碼內含一個 <b>lkd</b> 陣列，裡面存放一組或多組
+    <font color="#FF0000"><b>X60</b></font> 格式的 ckey。
+    系統會依序呼叫：
+  </p>
+
+  <blockquote>
+    <p><b>exesDecrypt(ckey, uk)</b></p>
+  </blockquote>
+
+  <p>
+    如果 X60 解密成功並回傳非空字串，即視為登入成功。
+    解密結果會寫入
+    <b>jobs_login_key</b> Cookie，
+    密碼則使用 <b>ex_md3()</b> 後寫入
+    <b>jobs_login_pwd</b>，
+    帳號寫入
+    <b>jobs_login_name</b>。
+  </p>
+
+  <p>
+    登入成功後會轉址到
+    <font color="#FF0000"><b>sys_login_start_fear4ddju.php</b></font>；
+    若所有 X60 ckey 都無法正確解密，則顯示登入失敗訊息或 ACCESS DENIED 視窗。
+  </p>
+
+  <p>
+    本範例目前展示帳號為
+    <font color="#FF0000"><b>admin</b></font>，
+    密碼為
+    <font color="#FF0000"><b>admin</b></font>。
+  </p>
+
+  <p>&nbsp;</p>
+</blockquote>
+
+
+<p><b>外部資源：</b></p>
+
+<blockquote>
+  <p>
+    載入 4 個外部 JavaScript 檔案（前端登入驗證、常用函式庫），
+    <font color="#FF0000"><b>如自行改為 CGI / PHP / AJAX 等後端驗證方式，則可依實際需求移除前端驗證模組。</b></font>
+  </p>
+
+  <p>JavaScript：</p>
+
+  <blockquote>
+    <p>
+      EXES / X60 加解密：
+      <a href="https://jplop.netlify.app/js/exes.js">
+        https://jplop.netlify.app/js/exes.js
+      </a>
+    </p>
+
+    <p>
+      EX_MD3 / EX_MD3N：
+      <a href="https://jplop.netlify.app/js/ex_md3.js">
+        https://jplop.netlify.app/js/ex_md3.js
+      </a>
+    </p>
+
+    <p>
+      弱密碼資料庫（部分範例未使用）：
+      <a href="https://jplop.netlify.app/js/database.js">
+        https://jplop.netlify.app/js/database.js
+      </a>
+    </p>
+
+    <p>
+      AJAX 模組（部分範例未使用）：
+      <a href="https://jplop.netlify.app/js/tw-sack.js">
+        https://jplop.netlify.app/js/tw-sack.js
+      </a>
+    </p>
+  </blockquote>
+
+  <p>&nbsp;</p>
+</blockquote>
+
+
+<p><b>展示、原始碼(Demo)：</b></p>
+
+<blockquote>
+  <p><a href="init/teac_html5_login_demo/login2.html">深海</a></p>
+  <p><a href="init/teac_html5_login_demo/login4.html">駭客任務</a></p>
+  <p><a href="init/teac_html5_login_demo/login13.html">DOS 6.22</a></p>
+  <p><a href="init/teac_html5_login_demo/login16.html">LINUX</a></p>
+  <p><a href="init/teac_html5_login_demo/login18.html">聊天機器人</a></p>
+  <p><a href="init/teac_html5_login_demo/login14.html">大腦連線</a></p>
+  <p><a href="init/teac_html5_login_demo/login17.html">水墨</a>（引用 1 JPG 圖、2 字型）</p>
+  <p><a href="init/teac_html5_login_demo/login19.html">桌面綿羊</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login1.html">火星</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login3.html">草原</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login5.html">攻殼機動隊</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login6.html">自動人型</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login7.html">生化奇兵</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login8.html">MAC</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login9.html">Windows Server</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login10.html">Linux</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login11.html">最終幻想</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login12.html">惡靈古堡</a>（引用 1 JPG 圖）</p>
+  <p><a href="init/teac_html5_login_demo/login15.html">NASA KM</a>（引用 1 JPG 圖）</p>
+
+  <p>
+    <b><font color="#FF0000">
+      展示用的正確帳號、密碼均為 "admin"
+    </font></b>
+  </p>
+
+  <p>&nbsp;</p>
+</blockquote>
+
+
+<p><b>使用教學：</b></p>
+
+<blockquote>
+
+  <p><b>1. 複製 login*.html 至自己的網站中。</b></p>
+
+  <blockquote>
+    <p>
+      只需將提供的 <b>login*.html</b> 複製到網站即可執行。
+      登入頁面本身使用前端 JavaScript 執行 EXES / X60 驗證，
+      不需要另外安裝 JavaScript 後端模組。
+    </p>
+  </blockquote>
+
+
+  <p><b>2. 純前端驗證方式：設定登入帳號與密碼。</b></p>
+
+  <blockquote>
+
+    <p>
+      新版前端登入流程使用
+      <font color="#FF0000"><b>EX_MD3N + EXES X60</b></font>
+      方式，需要準備兩個要素：
+    </p>
+
+    <ul>
+      <li>後端驗證字串（登入成功後寫入 jobs_login_key）</li>
+      <li>前端登入帳號 / 密碼（提供使用者輸入）</li>
+    </ul>
+
+
+    <p><b>A. 設定 jobs_login_key：</b></p>
+
+    <blockquote>
+      <p>請自行準備一組只有後端程式知道用途的驗證字串。</p>
+
+      <p>目前展示範例使用：</p>
+
+      <p>
+        <i><b><font color="#FF0000">
+          AiTbFRmdaEMedbrA8dHDRr7LA8aRb4fdQLjnRRdji
+        </font></b></i>
+      </p>
+    </blockquote>
+
+
+    <p><b>B. 建立前端登入帳號密碼：</b></p>
+
+    <ul>
+      <ul>
+        <li>示範帳號：<b>admin</b></li>
+        <li>示範密碼：<b>admin</b></li>
+      </ul>
+    </ul>
+
+    <blockquote>
+
+      <p>&nbsp;</p>
+
+      <p><b>第一步：使用 EX_MD3N 建立登入私鑰。</b></p>
+
+      <!-- 如實際 EX_MD3 工具頁網址不同，請修改 href -->
+      <p>
+        請前往 EX_MD3N 密碼疊代工具：
+        <a href="https://jplop.netlify.app/teac_ex_md3">
+          https://jplop.netlify.app/teac_ex_md3
+        </a>
+      </p>
+
+      <blockquote>
+
+        <p>輸入文字（String）：</p>
+
+        <p>
+          <i><b>
+            aes_<font color="#FF0000">admin</font>_<font color="#FF0000">admin</font>
+          </b></i>
+        </p>
+
+        <p>
+          格式為：
+          <b>aes_<font color="#FF0000">帳號</font>_<font color="#FF0000">密碼</font></b>
+        </p>
+
+        <p>
+          運算次數（Count）：
+          <font color="#FF0000"><b>1000</b></font>
+        </p>
+
+        <p>也就是 JavaScript 中實際執行：</p>
+
+        <table border="0" cellpadding="10" bgcolor="#CCCCCC">
+          <tr>
+            <td>
+<pre>var uk = ex_md3n(
+    "aes_" + userid + "_" + pwd,
+    1000
+);</pre>
+            </td>
+          </tr>
+        </table>
+
+        <p>admin / admin 對應的 uk 為：</p>
+
+        <p style="word-break:break-all;">
+          <font color="#FF0000"><b>
+L7uEDb4HenR4hy8QnyjE68Q7D4M8jyRyTrDbeLL7eRjamtiLF4jLn8hhhj8RehjLMbjfrdDuQ3QH3d8G3aER8nr68bQeaT4utjMjFFGbiierEhe4nHdGHmA6fbMhH6uATf6nQer7ejf33LynMD4TuLTTy6DRGfe6DirtmaMdjMbahALy3bGH3G6MMRy44dT37druATmfyQ6Gjb6yD
+          </b></font>
+        </p>
+
+        <p>&nbsp;</p>
+      </blockquote>
+
+
+      <p><b>第二步：使用 EXES 建立 X60 ckey。</b></p>
+
+      <!-- 如實際 EXES 工具頁網址不同，請修改 href -->
+      <p>
+        請前往 EXES / X60 建立工具：
+        <a href="https://jplop.netlify.app/util_aes_utility">
+          https://jplop.netlify.app/util_aes_utility</a></p>
+
+      <blockquote>
+
+        <p>密鑰欄位輸入前一步得到的 <b>uk</b>。</p>
+
+        <p>內容欄位輸入 jobs_login_key：</p>
+
+        <p>
+          <i><b><font color="#FF0000">
+            AiTbFRmdaEMedbrA8dHDRr7LA8aRb4fdQLjnRRdji
+          </font></b></i>
+        </p>
+
+        <p>
+          加密後會得到一組以
+          <font color="#FF0000"><b>X60</b></font>
+          開頭的字串。
+        </p>
+
+        <p>例如：</p>
+
+        <p style="word-break:break-all;">
+          <b><font color="#FF0000">
+            X60iUfrF5JqnkrLjC4wzWhhbsOw1z7nFVoGJ8Omy13dOYeJmojfVcWuKemdpXspAAITsbXclv4P2B10PVrZroyNoEAMghKoLKHNTd3wk4jZVQunk6KBEuxOSLvve29gSmBqbqtezJua1HnTILeTRBdBONhcboZ8tsLxG8YVDqvtlQXGT1ShK8qvEP5vKFwtRU0sFVTNsA5AGDvrgxFjts3YQhpDAR998JvuvkrekepH4O8LD2ce1kzYgsdadNGPSgGOGoSWMem67lexYu
+          </font></b>
+        </p>
+
+        <p>
+          <b>注意：</b>EXES 加密包含隨機資料，
+          因此即使密鑰與內容完全相同，
+          每次產生的 X60 字串也可能不同，
+          這是正常現象。
+        </p>
+
+        <p>&nbsp;</p>
+      </blockquote>
+
+
+      <p><b>第三步：將 X60 放入 login*.html。</b></p>
+
+      <blockquote>
+
+        <table border="0" cellpadding="10" bgcolor="#CCCCCC">
+          <tr>
+            <td>
+<pre>var lkd = [
+    {
+        "ckey":"<b><font color="#FF0000">X60...</font></b>"
+    },
+    {
+        "ckey":"<b><font color="#FF0000">[第二組帳號密碼對應的 X60]</font></b>"
+    },
+    {
+        "ckey":"<b><font color="#FF0000">[第三組帳號密碼對應的 X60]</font></b>"
+    }
+];</pre>
+            </td>
+          </tr>
+        </table>
+
+        <p>
+          每一個 X60 ckey 都可以對應不同的登入帳號 / 密碼，
+          但解密後可指向相同或不同的 jobs_login_key。
+        </p>
+
+        <p>&nbsp;</p>
+      </blockquote>
+
+
+      <p><b>第四步：HTML 登入驗證。</b></p>
+
+      <blockquote>
+
+        <p>登入時產生 uk：</p>
+
+        <table border="0" cellpadding="10" bgcolor="#CCCCCC">
+          <tr>
+            <td>
+<pre>var uk = ex_md3n(
+    "aes_" + userid + "_" + pwd,
+    1000
+);</pre>
+            </td>
+          </tr>
+        </table>
+
+        <p>再利用 EXES 解密：</p>
+
+        <table border="0" cellpadding="10" bgcolor="#CCCCCC">
+          <tr>
+            <td>
+<pre>var decrypted = exesDecrypt(
+    lkd[i].ckey,
+    uk
+);
+
+if (decrypted != "") {
+    document.cookie =
+        "jobs_login_key=" + escape(decrypted);
+
+    document.cookie =
+        "jobs_login_pwd=" + ex_md3(pwd);
+
+    document.cookie =
+        "jobs_login_name=" + userid;
+}</pre>
+            </td>
+          </tr>
+        </table>
+
+        <p>&nbsp;</p>
+      </blockquote>
+
+    </blockquote>
+
+
+    <p><b>C. 設定後端 Cookie 驗證：</b></p>
+
+    <blockquote>
+
+      <p>
+        建立後端 PHP 程式碼，例如檔名：
+        <font color="#FF0000"><b>sys_login_start_fear4ddju.php</b></font>
+      </p>
+
+      <table border="0" cellpadding="10" bgcolor="#CCCCCC">
+        <tr>
+          <td>
+<pre>&lt;?php
+
 // 目標 Cookie 名稱
 $cookie_name = 'jobs_login_key';
 
-// 檢查是否有收到該 Cookie
+// 檢查是否有收到 Cookie
 if (!isset($_COOKIE[$cookie_name])) {
     echo "登入失敗";
     exit();
 }
 
-// 取得 Cookie 值
+// 取得登入頁解密後寫入的值
 $cookie_value = $_COOKIE[$cookie_name];
 
-// 正確值
-$correct_value = "<i><b><font color="#FF0000">udeMuHTMubLAmeHMALAHERfELmMDRm4EyLLaGG6j8</font></b></i>";
+// 正確的 jobs_login_key
+$correct_value = "<font color="#FF0000"><b>AiTbFRmdaEMedbrA8dHDRr7LA8aRb4fdQLjnRRdji</b></font>";
 
 // 比對
 if ($cookie_value === $correct_value) {
@@ -253,28 +525,141 @@ if ($cookie_value === $correct_value) {
     echo "登入失敗";
     exit();
 }
-?></pre></td>
-                                </tr>
-                              </table>
-                              <p>&nbsp;</p>
-                      </blockquote>
-                </blockquote>
-              </blockquote>
-              <p><b>相容性說明：</b></p>
-              <blockquote>
-					  <p><b>現代瀏覽器（建議）</b></p>
-					  <blockquote>
-					    <p><b><font color="#FF0000">Chrome / Firefox / Edge / Safari </font></b></p>
-					    <p>最新版本：支援 Canvas、requestAnimationFrame、CSS 變數 (--var)、backdrop-filter（Safari/Chrome 支援度不同）、ES6 class/let/const。</p>
-					    </blockquote>
-					  <p><b>可能的問題 / 限制</b></p>
-					  <blockquote>
-					    <p>Internet Explorer（尤其 IE11）不支援 CSS 變數、class、let/const、backdrop-filter 等，會造成樣式或 JS 錯誤。</p>
-					    <p>若需支援 IE，須做 ES5 轉譯與 CSS fallback。</p>
-					    </blockquote>
-					  <p>&nbsp;</p>
-					  </blockquote>
-					<p>&nbsp;                </p>
+
+?&gt;</pre>
+          </td>
+        </tr>
+      </table>
+
+      <p>&nbsp;</p>
+    </blockquote>
+
+  </blockquote>
+</blockquote>
+
+
+<p><b>新版登入流程摘要：</b></p>
+
+<blockquote>
+
+  <table border="0" cellpadding="10" bgcolor="#CCCCCC">
+    <tr>
+      <td>
+<pre>帳號 + 密碼
+     │
+     ▼
+"aes_" + userid + "_" + pwd
+     │
+     ▼
+ex_md3n(..., 1000)
+     │
+     ▼
+產生 uk
+     │
+     ▼
+exesDecrypt(X60_ckey, uk)
+     │
+     ├── 解密失敗 → 登入失敗
+     │
+     └── 解密成功
+            │
+            ▼
+       jobs_login_key
+            │
+            ├── jobs_login_pwd = ex_md3(password)
+            ├── jobs_login_name = userid
+            │
+            ▼
+ sys_login_start_fear4ddju.php</pre>
+      </td>
+    </tr>
+  </table>
+
+  <p>&nbsp;</p>
+</blockquote>
+
+
+<p><b>安全性說明：</b></p>
+
+<blockquote>
+  <p>
+    本範例屬於<b>純前端登入展示</b>。
+    JavaScript、X60 ckey 以及驗證流程都會下載至瀏覽器，
+    因此適合教學、Demo、簡易入口或非敏感內容使用。
+  </p>
+
+  <p>
+    若網站包含重要資料、會員資料、管理功能或其他敏感資訊，
+    建議將真正的帳號密碼驗證放在 PHP / CGI / API 等伺服器端執行，
+    並使用伺服器端 Session 管理登入狀態。
+  </p>
+</blockquote>
+
+
+<p><b>相容性說明：</b></p>
+
+<blockquote>
+
+  <p><b>現代瀏覽器（建議）</b></p>
+
+  <blockquote>
+    <p>
+      <b><font color="#FF0000">
+        Chrome / Firefox / Edge / Safari
+      </font></b>
+    </p>
+
+    <p>
+      建議使用最新版本。
+      各登入頁依設計不同，可能使用 Canvas、
+      requestAnimationFrame、CSS Variables (--var)、
+      backdrop-filter、class、let、const、
+      template literals 等現代瀏覽器功能。
+    </p>
+  </blockquote>
+
+
+  <p><b>EXES / EX_MD3 模組</b></p>
+
+  <blockquote>
+    <p>
+      登入驗證已由舊版
+      <b>AES + EX_MD2</b>
+      更新為
+      <font color="#FF0000"><b>EXES X60 + EX_MD3</b></font>。
+    </p>
+
+    <p>
+      ckey 已不再使用舊 OpenSSL AES 的
+      <b>U2FsdGVkX1...</b>
+      格式，而改為
+      <b>X60...</b>
+      格式。
+    </p>
+  </blockquote>
+
+
+  <p><b>可能的問題 / 限制</b></p>
+
+  <blockquote>
+    <p>
+      雖然 EXES / EX_MD3 函式庫本身著重相容性，
+      但部分 Demo 頁面大量使用 ES6 與新版 CSS，
+      因此 Internet Explorer，尤其 IE11，
+      仍可能因 CSS Variables、class、let / const、
+      backdrop-filter 等功能而出現樣式或 JavaScript 相容性問題。
+    </p>
+
+    <p>
+      如需完整支援舊版 IE，
+      必須針對各登入頁另外進行 ES5 語法轉換與 CSS fallback。
+    </p>
+  </blockquote>
+
+  <p>&nbsp;</p>
+</blockquote>
+
+<p>&nbsp;</p>
 					<!-- InstanceEndEditable --></td>
 				  </tr>
 				</table>
