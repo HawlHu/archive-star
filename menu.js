@@ -2,6 +2,7 @@ var 								j_db_menu=[
 												[
 													"2026-02-06",
 													[
+														["teac_synth_id","分享","Google S"],
 														["teac_ex_md3","教學","EXpansio"],
 														["teac_exes","教學","加密標準(EXE"],
 														["teac_pqc_crypt","教學","PQC 技術研究"],
@@ -106,9 +107,9 @@ var 								j_db_menu=[
 													"2017-03-01",
 													[
 														["info_leaked_email_account_password","資訊","已遭駭客外洩之郵"],
-														["cryp_member","機密","會員名單"],
 														["shar_as_about","分享","歡迎來到歸檔星球"],
 														["shar_chrome_and_bank","資訊","解決CHROME"],
+														["cryp_member","機密","會員名單"],
 														["shar_peple2021","教學","人類統計2021"],
 														["shar_taiwan_boy","教學","台男悲歌2022"],
 														["teac_after_inserting_many_photos_excel_becomes_very_laggy","技術","Excel插入很"],
@@ -122,8 +123,8 @@ var 								j_db_menu=[
 														["shar_constellation_traits","分享","12星座永不會變"],
 														["shar_php","分享","PHP常用函式大"],
 														["cryp_left_tree_2021","教學","長生草"],
-														["cryp_eternal_life","機密","人類壽命長度的真"],
 														["teac_game_pubg","教學","PUBG 閃退("],
+														["cryp_eternal_life","機密","人類壽命長度的真"],
 														["teac_office201x_jump_365","教學","OFFICE 2"],
 														["teac_troubleshooting_windows_security_center_not_opening","教學","解決 Windo"]														
 													]
@@ -261,8 +262,8 @@ var 								j_db_menu=[
 													[
 														["cryp_tools_ipsec","教學","IPScan"],
 														["shar_lowering_blood_cholesterol","教學","降血脂之生活對策"],
-														["cryp_lift_20_year","教學","讓生命強制延長2"],
 														["shar_pua","分享","PUA五步陷阱"],
+														["cryp_lift_20_year","教學","讓生命強制延長2"],
 														["teac_nb_bootup","技術","筆電加速開機，L"],
 														["teac_rdpwrap","教學","開啟window"]														
 													]
