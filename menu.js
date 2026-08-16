@@ -92,12 +92,12 @@ var 								j_db_menu=[
 												[
 													"2018-07-18",
 													[
+														["teac_html5_login_demo","分享","HTML5登入頁"],
 														["info_joyful_melody_devotion_group","資訊","專情團"],
 														["shar_pics_20210914","分享","網友分享作品"],
 														["shar_python","分享","Python常用"],
 														["shar_store_65","分享","工研院的老闆許友"],
 														["teac_fat32_in_win10","教學","Windows "],
-														["teac_html5_login_demo","分享","HTML5登入頁"],
 														["teac_program_auto_install","技術","自動安裝常用應用"],
 														["shar_m3u8_download","教學","副檔名M3U8影"]														
 													]
@@ -119,10 +119,10 @@ var 								j_db_menu=[
 												[
 													"2016-06-11",
 													[
-														["cryp_left_tree_2021","教學","長生草"],
 														["shar_constellation_traits","分享","12星座永不會變"],
-														["cryp_eternal_life","機密","人類壽命長度的真"],
 														["shar_php","分享","PHP常用函式大"],
+														["cryp_left_tree_2021","教學","長生草"],
+														["cryp_eternal_life","機密","人類壽命長度的真"],
 														["teac_game_pubg","教學","PUBG 閃退("],
 														["teac_office201x_jump_365","教學","OFFICE 2"],
 														["teac_troubleshooting_windows_security_center_not_opening","教學","解決 Windo"]														
@@ -131,12 +131,12 @@ var 								j_db_menu=[
 												[
 													"2015-08-12",
 													[
-														["info_gpu_2021_top","資訊","顯示卡天梯202"],
-														["cryp_japan_20220708","分享","安倍晉三槍擊真相"],
-														["shar_rec_cam_or_screen_for_potplayer","分享","錄製網路攝影機畫"],
-														["cryp_dream_20220808","機密","機密檔案88(紅"],
-														["teac_easy_net_disable","教學","簡易禁止電腦上網"],
 														["teac_ex_md2","教學","EXpansio"],
+														["info_gpu_2021_top","資訊","顯示卡天梯202"],
+														["shar_rec_cam_or_screen_for_potplayer","分享","錄製網路攝影機畫"],
+														["teac_easy_net_disable","教學","簡易禁止電腦上網"],
+														["cryp_japan_20220708","分享","安倍晉三槍擊真相"],
+														["cryp_dream_20220808","機密","機密檔案88(紅"],
 														["teac_w11_right_menu_to_w10","技術","將 Win11 "]														
 													]
 												],												
@@ -260,8 +260,8 @@ var 								j_db_menu=[
 													"2004-01-02",
 													[
 														["cryp_tools_ipsec","教學","IPScan"],
-														["cryp_lift_20_year","教學","讓生命強制延長2"],
 														["shar_lowering_blood_cholesterol","教學","降血脂之生活對策"],
+														["cryp_lift_20_year","教學","讓生命強制延長2"],
 														["shar_pua","分享","PUA五步陷阱"],
 														["teac_nb_bootup","技術","筆電加速開機，L"],
 														["teac_rdpwrap","教學","開啟window"]														
@@ -283,9 +283,9 @@ var 								j_db_menu=[
 													"2002-03-21",
 													[
 														["info_rdp_vs","資訊","遠端桌面技術比較"],
-														["cryp_god_athena_2019","機密","2020事故報告"],
 														["shar_esg","教學","何謂ESG"],
 														["teac_disable_windows_update","教學","停用WINDOW"],
+														["cryp_god_athena_2019","機密","2020事故報告"],
 														["teac_phishing_attack_detection","分享","利用機器學習檢測"],
 														["teac_windows_antivirus_exclusion","教學","WINDOWS內"]														
 													]
@@ -304,9 +304,9 @@ var 								j_db_menu=[
 												[
 													"2000-05-21",
 													[
-														["util_text_sub_end","教學","字串去除尾巴工具"],
 														["teac_ex_md1","教學","EXpansio"],
 														["util_rdp_for_taiwan","教學","限制遠端桌面(R"],
+														["util_text_sub_end","教學","字串去除尾巴工具"],
 														["teac_mail_spf","教學","寄件者政策框架S"],
 														["teac_windows_mouse_right_error","教學","Windows桌"],
 														["teac_youtubedl","教學","Youtube影"]														
