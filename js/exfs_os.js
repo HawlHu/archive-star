@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os22
+ * Version: 6.4.0-dev-os23
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -14370,7 +14370,7 @@ function jplopsoft_AdoptWindow(options){
 function jplopsoft_CreateWindowEx(exStyle,className,windowName,style,x,y,width,height,parent,menu,instance,param){
   jplopsoft_dwmNormalizeRootStacking();
   var classDef=jplopsoft_USER32.classes[String(className||'')]||null,
-      p=param||{},app=jplopsoft_el('jplopsoft_app')||document.querySelector('.jplopsoft_app'),
+      p=param||{},app=jplopsoft_dwmWindowLayer()||jplopsoft_el('jplopsoft_app')||(document.querySelector?document.querySelector('.jplopsoft_app'):null),
       task=jplopsoft_el('jplopsoft_taskbar'),hwnd,rec,win,titlebar,icon,title,controls,b,client;
 
   if(!app)return 0;
@@ -14518,7 +14518,9 @@ var jplopsoft_EXPLORER_LIFECYCLE={
   guardUntil:0,
   lastOpenAt:0,
   desiredVisible:false,
-  lastHealthReason:''
+  lastHealthReason:'',
+  watchdogTimer:0,
+  rescueCount:0
 };
 
 function jplopsoft_explorerNow(){
@@ -14528,8 +14530,9 @@ function jplopsoft_explorerNow(){
 function jplopsoft_explorerBeginOpen(){
   jplopsoft_EXPLORER_LIFECYCLE.generation++;
   jplopsoft_EXPLORER_LIFECYCLE.lastOpenAt=jplopsoft_explorerNow();
-  jplopsoft_EXPLORER_LIFECYCLE.guardUntil=jplopsoft_EXPLORER_LIFECYCLE.lastOpenAt+900;
+  jplopsoft_EXPLORER_LIFECYCLE.guardUntil=jplopsoft_EXPLORER_LIFECYCLE.lastOpenAt+1200;
   jplopsoft_EXPLORER_LIFECYCLE.desiredVisible=true;
+  jplopsoft_explorerStartWatchdog();
   return jplopsoft_EXPLORER_LIFECYCLE.generation;
 }
 
@@ -14544,6 +14547,9 @@ function jplopsoft_explorerHideGuardActive(){
 
 function jplopsoft_explorerSetDesiredVisible(on){
   jplopsoft_EXPLORER_LIFECYCLE.desiredVisible=!!on;
+
+  if(on)jplopsoft_explorerStartWatchdog();
+  else jplopsoft_explorerStopWatchdog();
 }
 
 function jplopsoft_explorerComputedVisible(w){
@@ -14566,13 +14572,148 @@ function jplopsoft_explorerComputedVisible(w){
   return true;
 }
 
+function jplopsoft_explorerContainsNode(w,n){
+  if(!w||!n)return false;
+  if(n===w)return true;
+  try{
+    if(w.contains)return w.contains(n);
+  }catch(ignoreExplorerContains){}
+  while(n){
+    if(n===w)return true;
+    n=n.parentNode;
+  }
+  return false;
+}
+
+function jplopsoft_explorerFrontmost(w){
+  var r,vw,vh,points,i,x,y,n;
+
+  if(!w||!jplopsoft_explorerComputedVisible(w))return false;
+  if(!document.elementFromPoint)return true;
+
+  r=w.getBoundingClientRect();
+  vw=document.documentElement.clientWidth||window.innerWidth||1024;
+  vh=document.documentElement.clientHeight||window.innerHeight||768;
+
+  /*
+   * Test several points. A single point could coincidentally land below a
+   * legitimate popup. The title bar + client area must belong to Explorer.
+   */
+  points=[
+    [r.left+Math.min(120,Math.max(20,(r.right-r.left)/4)),r.top+16],
+    [r.left+Math.min(220,Math.max(40,(r.right-r.left)/3)),r.top+60],
+    [r.left+Math.min(320,Math.max(60,(r.right-r.left)/2)),r.top+120]
+  ];
+
+  for(i=0;i<points.length;i++){
+    x=Math.max(1,Math.min(vw-2,Math.round(points[i][0])));
+    y=Math.max(1,Math.min(vh-42,Math.round(points[i][1])));
+
+    try{n=document.elementFromPoint(x,y);}catch(ignoreExplorerPoint){n=null;}
+
+    if(n&&jplopsoft_explorerContainsNode(w,n))return true;
+  }
+
+  return false;
+}
+
+function jplopsoft_explorerForceInlineVisible(w){
+  if(!w)return false;
+
+  /*
+   * Rescue path deliberately uses inline !important. If any stale route,
+   * legacy CSS, browser compatibility rule, or cached class tries to hide
+   * Explorer, the actual HWND visibility wins.
+   */
+  try{
+    w.style.setProperty('display','flex','important');
+    w.style.setProperty('visibility','visible','important');
+    w.style.setProperty('opacity','1','important');
+    w.style.setProperty('pointer-events','auto','important');
+    w.style.setProperty('position','absolute','important');
+    w.style.setProperty('transform','none','important');
+    w.style.setProperty('filter','none','important');
+    w.style.setProperty('clip','auto','important');
+    w.style.setProperty('clip-path','none','important');
+  }catch(ignoreExplorerImportant){
+    w.style.display='flex';
+    w.style.visibility='visible';
+    w.style.opacity='1';
+    w.style.pointerEvents='auto';
+    w.style.position='absolute';
+  }
+
+  return true;
+}
+
+function jplopsoft_explorerPromoteForeground(w){
+  if(!w)return false;
+
+  jplopsoft_dwmNormalizeRootStacking();
+  jplopsoft_dwmAttachToWindowLayer(w);
+  jplopsoft_explorerForceInlineVisible(w);
+
+  /*
+   * 350 is the top of the normal ExOS application range.
+   * Taskbar remains above it at 390.
+   */
+  w.style.zIndex='350';
+  jplopsoft_WM.z=350;
+
+  jplopsoft_wmClassAdd(w,'jplopsoft_wm-active');
+
+  return true;
+}
+
+function jplopsoft_explorerStartWatchdog(){
+  if(jplopsoft_EXPLORER_LIFECYCLE.watchdogTimer)return;
+
+  jplopsoft_EXPLORER_LIFECYCLE.watchdogTimer=window.setInterval(function(){
+    if(!jplopsoft_EXPLORER_LIFECYCLE.desiredVisible)return;
+    if(!state.samAuthenticated||!state.vaultKey)return;
+    jplopsoft_explorerHealthCheck();
+  },500);
+}
+
+function jplopsoft_explorerStopWatchdog(){
+  if(!jplopsoft_EXPLORER_LIFECYCLE.watchdogTimer)return;
+
+  try{
+    window.clearInterval(jplopsoft_EXPLORER_LIFECYCLE.watchdogTimer);
+  }catch(ignoreExplorerWatchdog){}
+
+  jplopsoft_EXPLORER_LIFECYCLE.watchdogTimer=0;
+}
+
+
+
 function jplopsoft_explorerResetGeometry(w){
   if(!w)return false;
+
   jplopsoft_wmClassRemove(w,'jplopsoft_wm-maximized');
-  w.style.position='absolute';
-  w.style.left='5vw';w.style.top='4vh';w.style.right='auto';w.style.bottom='auto';
-  w.style.width='90vw';w.style.height='calc(88vh - 40px)';
-  w.style.minWidth='640px';w.style.minHeight='400px';
+  jplopsoft_wmClassRemove(w,'jplopsoft_maximized');
+
+  try{
+    w.style.setProperty('left','40px','important');
+    w.style.setProperty('top','36px','important');
+    w.style.setProperty('right','auto','important');
+    w.style.setProperty('bottom','auto','important');
+    w.style.setProperty('width','calc(100vw - 80px)','important');
+    w.style.setProperty('height','calc(100vh - 116px)','important');
+    w.style.setProperty('min-width','520px','important');
+    w.style.setProperty('min-height','320px','important');
+    w.style.setProperty('max-width','none','important');
+    w.style.setProperty('max-height','none','important');
+    w.style.setProperty('resize','both','important');
+  }catch(ignoreExplorerGeometryImportant){
+    w.style.left='40px';
+    w.style.top='36px';
+    w.style.right='auto';
+    w.style.bottom='auto';
+    w.style.width='calc(100vw - 80px)';
+    w.style.height='calc(100vh - 116px)';
+  }
+
   return true;
 }
 
@@ -14592,19 +14733,54 @@ function jplopsoft_explorerEnsureOnScreen(){
 }
 
 function jplopsoft_explorerHealthCheck(){
-  var w=jplopsoft_el('jplopsoft_explorerWindow');
+  var w=jplopsoft_el('jplopsoft_explorerWindow'),
+      visible,front;
+
   if(!jplopsoft_EXPLORER_LIFECYCLE.desiredVisible)return false;
   if(!state.samAuthenticated||!state.vaultKey)return false;
   if(!w)return false;
-  if(!jplopsoft_explorerComputedVisible(w)){jplopsoft_wmRestoreExplorerStable();return true;}
+
+  jplopsoft_dwmAttachToWindowLayer(w);
+
+  visible=jplopsoft_explorerComputedVisible(w);
+
+  if(!visible){
+    jplopsoft_EXPLORER_LIFECYCLE.lastHealthReason='hidden';
+    jplopsoft_EXPLORER_LIFECYCLE.rescueCount++;
+    jplopsoft_wmRestoreExplorerStable();
+    return true;
+  }
+
   jplopsoft_explorerEnsureOnScreen();
+
+  front=jplopsoft_explorerFrontmost(w);
+
+  if(!front){
+    jplopsoft_EXPLORER_LIFECYCLE.lastHealthReason='occluded';
+    jplopsoft_EXPLORER_LIFECYCLE.rescueCount++;
+    jplopsoft_explorerPromoteForeground(w);
+  }else{
+    jplopsoft_EXPLORER_LIFECYCLE.lastHealthReason='';
+  }
+
   jplopsoft_wmActivate('jplopsoft_explorerWindow','explorer');
+
+  /*
+   * wmActivate() uses the shared DWM range. If another layer still covers the
+   * Explorer after activation, promote it to the normal app ceiling.
+   */
+  if(!jplopsoft_explorerFrontmost(w)){
+    jplopsoft_explorerPromoteForeground(w);
+    jplopsoft_taskbarSetAppState('explorer','active');
+  }
+
   return true;
 }
 
 
 function jplopsoft_explorerScheduleStableRestore(generation){
-  var delays=[0,50,140,320,700],i;
+  var delays=[0,40,100,220,500,1000,1800],i;
+
   for(i=0;i<delays.length;i++){
     (function(delay){
       window.setTimeout(function(){
@@ -14731,10 +14907,39 @@ function jplopsoft_wmActivateOverlay(backdropId,panelId,appId){
 }
 
 function jplopsoft_dwmNormalizeRootStacking(){
-  var app=jplopsoft_el('jplopsoft_app')||(document.querySelector?document.querySelector('.jplopsoft_app'):null);
+  var app=jplopsoft_el('jplopsoft_app')||(
+        document.querySelector?document.querySelector('.jplopsoft_app'):null
+      ),
+      layer=jplopsoft_el('jplopsoft_dwmWindowLayer');
+
   if(app)app.style.zIndex='auto';
+
+  if(layer){
+    layer.style.zIndex='auto';
+    layer.style.pointerEvents='none';
+  }
+
   return true;
 }
+
+function jplopsoft_dwmWindowLayer(){
+  return jplopsoft_el('jplopsoft_dwmWindowLayer');
+}
+
+function jplopsoft_dwmAttachToWindowLayer(w){
+  var layer=jplopsoft_dwmWindowLayer();
+
+  if(!w||!layer)return false;
+
+  if(w.parentNode!==layer){
+    try{layer.appendChild(w);}catch(ignoreDwmAttach){return false;}
+  }
+
+  w.style.pointerEvents='auto';
+  return true;
+}
+
+
 
 
 /*
@@ -14757,10 +14962,43 @@ function jplopsoft_wmPlaceWindowAboveOverlay(hwnd,backdropId){
 
 function jplopsoft_wmMinimize(windowId,appId,explicitAction){
   var w=jplopsoft_el(windowId);
-  if(windowId==='jplopsoft_explorerWindow'&&explicitAction!==true&&typeof jplopsoft_explorerHideGuardActive==='function'&&jplopsoft_explorerHideGuardActive())return false;
+
+  if(
+    windowId==='jplopsoft_explorerWindow'&&
+    explicitAction!==true&&
+    typeof jplopsoft_explorerHideGuardActive==='function'&&
+    jplopsoft_explorerHideGuardActive()
+  ){
+    return false;
+  }
+
   if(!w)return false;
-  if(windowId==='jplopsoft_explorerWindow'&&explicitAction===true){jplopsoft_explorerSetDesiredVisible(false);jplopsoft_explorerCancelPendingRestore();}
-  w.style.display='none';jplopsoft_wmClassRemove(w,'jplopsoft_wm-active');jplopsoft_taskbarSetAppState(appId,'minimized');return true;
+
+  if(
+    windowId==='jplopsoft_explorerWindow'&&
+    explicitAction===true
+  ){
+    jplopsoft_explorerSetDesiredVisible(false);
+    jplopsoft_explorerCancelPendingRestore();
+  }
+
+  try{
+    w.style.setProperty('display','none','important');
+  }catch(ignoreWmMinDisplay){
+    w.style.display='none';
+  }
+
+  jplopsoft_wmClassRemove(
+    w,
+    'jplopsoft_wm-active'
+  );
+
+  jplopsoft_taskbarSetAppState(
+    appId,
+    'minimized'
+  );
+
+  return true;
 }
 
 function jplopsoft_wmRestore(windowId,appId){
@@ -14884,42 +15122,132 @@ function jplopsoft_wmIsDisplayed(id){
 }
 
 function jplopsoft_wmRestoreExplorerStable(){
-  var w=jplopsoft_el('jplopsoft_explorerWindow'),hwnd,er;
+  var w=jplopsoft_el('jplopsoft_explorerWindow'),
+      hwnd,er;
+
   if(!w||!state.samAuthenticated||!state.vaultKey)return false;
+
   jplopsoft_explorerSetDesiredVisible(true);
+  jplopsoft_dwmNormalizeRootStacking();
+  jplopsoft_dwmAttachToWindowLayer(w);
+
   jplopsoft_wmClassRemove(w,'jplopsoft_hidden');
   jplopsoft_wmClassRemove(w,'jplopsoft_dwm-inactive');
-  w.style.display='flex';w.style.visibility='visible';w.style.opacity='1';w.style.pointerEvents='auto';
+
+  jplopsoft_explorerForceInlineVisible(w);
   jplopsoft_explorerEnsureOnScreen();
-  jplopsoft_setBodyClassToken('jplopsoft_explorer-process-stopped',false);
-  jplopsoft_taskbarEnsureApp('explorer','explorer','檔案總管');
-  hwnd=jplopsoft_user32GetHwndByElementId('jplopsoft_explorerWindow');
+
+  jplopsoft_setBodyClassToken(
+    'jplopsoft_explorer-process-stopped',
+    false
+  );
+
+  jplopsoft_taskbarEnsureApp(
+    'explorer',
+    'explorer',
+    '檔案總管'
+  );
+
+  hwnd=jplopsoft_user32GetHwndByElementId(
+    'jplopsoft_explorerWindow'
+  );
+
   if(hwnd){
     er=jplopsoft_user32GetRecord(hwnd);
+
     if(er){
-      if(er.ntTerminated){er.ntTerminated=false;er.ntPid=0;}
-      try{if(typeof jplopsoft_ntKernelOnWindowActivated==='function')jplopsoft_ntKernelOnWindowActivated(er);}catch(ignoreExplorerNtActivation){}
+      if(er.ntTerminated){
+        er.ntTerminated=false;
+        er.ntPid=0;
+      }
+
+      try{
+        if(typeof jplopsoft_ntKernelOnWindowActivated==='function'){
+          jplopsoft_ntKernelOnWindowActivated(er);
+        }
+      }catch(ignoreExplorerNtActivation){}
     }
   }
-  jplopsoft_wmActivate('jplopsoft_explorerWindow','explorer');
-  if(hwnd&&jplopsoft_user32GetRecord(hwnd)){try{jplopsoft_DwmActivateWindow(hwnd);}catch(ignoreExplorerDwm){}}
+
+  jplopsoft_wmActivate(
+    'jplopsoft_explorerWindow',
+    'explorer'
+  );
+
+  if(hwnd&&jplopsoft_user32GetRecord(hwnd)){
+    try{
+      jplopsoft_DwmActivateWindow(hwnd);
+    }catch(ignoreExplorerDwm){}
+  }
+
+  /*
+   * The final truth is the compositor hit test, not the taskbar flag.
+   */
+  if(!jplopsoft_explorerFrontmost(w)){
+    jplopsoft_explorerPromoteForeground(w);
+    jplopsoft_taskbarSetAppState('explorer','active');
+  }
+
   return jplopsoft_explorerComputedVisible(w);
 }
 
 function jplopsoft_wmOpenExplorer(folderId){
-  var generation,renderError=null;
+  var generation,renderError=null,w;
+
   if(!state.samAuthenticated||!state.vaultKey)return false;
+
   generation=jplopsoft_explorerBeginOpen();
+
+  w=jplopsoft_el('jplopsoft_explorerWindow');
+
+  if(w){
+    jplopsoft_dwmAttachToWindowLayer(w);
+    jplopsoft_explorerForceInlineVisible(w);
+  }
+
   jplopsoft_wmRestoreExplorerStable();
+
   if(typeof folderId!=='undefined'&&folderId!==null){
     jplopsoft_clearChecked();
-    state.currentFolder=parseInt(folderId,10);if(isNaN(state.currentFolder))state.currentFolder=0;
-    state.selectedId=0;state.desktopSelectedTargetId=0;state.desktopShellSelected='';state.checkedIds={};state.checkedFolder=state.currentFolder;
-    try{jplopsoft_renderAll();}catch(e){renderError=e;try{if(window.console&&console.error)console.error('ExOS explorer render failed',e);}catch(ignoreExplorerConsole){}}
+
+    state.currentFolder=parseInt(folderId,10);
+    if(isNaN(state.currentFolder))state.currentFolder=0;
+
+    state.selectedId=0;
+    state.desktopSelectedTargetId=0;
+    state.desktopShellSelected='';
+    state.checkedIds={};
+    state.checkedFolder=state.currentFolder;
+
+    try{
+      jplopsoft_renderAll();
+    }catch(e){
+      renderError=e;
+
+      try{
+        if(window.console&&console.error){
+          console.error(
+            'ExOS explorer render failed',
+            e
+          );
+        }
+      }catch(ignoreExplorerConsole){}
+    }
   }
+
   jplopsoft_wmRestoreExplorerStable();
+  jplopsoft_explorerHealthCheck();
   jplopsoft_explorerScheduleStableRestore(generation);
-  if(renderError){try{jplopsoft_setStatus('檔案總管已開啟，但部分內容重新整理失敗：'+String(renderError.message||renderError));}catch(ignoreExplorerStatus){}}
+
+  if(renderError){
+    try{
+      jplopsoft_setStatus(
+        '檔案總管已開啟，但部分內容重新整理失敗：'+
+        String(renderError.message||renderError)
+      );
+    }catch(ignoreExplorerStatus){}
+  }
+
   return true;
 }
 
@@ -14929,9 +15257,28 @@ function jplopsoft_openMyComputer(){
 
 function jplopsoft_wmCloseExplorer(explicitAction){
   var w=jplopsoft_el('jplopsoft_explorerWindow');
-  if(explicitAction!==true&&typeof jplopsoft_explorerHideGuardActive==='function'&&jplopsoft_explorerHideGuardActive())return false;
-  jplopsoft_explorerSetDesiredVisible(false);jplopsoft_explorerCancelPendingRestore();
-  if(w)w.style.display='none';jplopsoft_taskbarRemoveApp('explorer');return true;
+
+  if(
+    explicitAction!==true&&
+    typeof jplopsoft_explorerHideGuardActive==='function'&&
+    jplopsoft_explorerHideGuardActive()
+  ){
+    return false;
+  }
+
+  jplopsoft_explorerSetDesiredVisible(false);
+  jplopsoft_explorerCancelPendingRestore();
+
+  if(w){
+    try{
+      w.style.setProperty('display','none','important');
+    }catch(ignoreExplorerCloseDisplay){
+      w.style.display='none';
+    }
+  }
+
+  jplopsoft_taskbarRemoveApp('explorer');
+  return true;
 }
 
 function jplopsoft_wmOpenCmd(){
@@ -14967,19 +15314,68 @@ function jplopsoft_wmShowDesktop(){
 
 function jplopsoft_wmAfterUnlock(){
   var explorer=jplopsoft_el('jplopsoft_explorerWindow');
-  jplopsoft_setBodyClassToken('jplopsoft_exfs-desktop-ready',true);
-  jplopsoft_applyDesktopWallpaper();jplopsoft_calendarHide();
-  if(typeof jplopsoft_ntEnsureExplorerProcess==='function')jplopsoft_ntEnsureExplorerProcess();
+
+  jplopsoft_setBodyClassToken(
+    'jplopsoft_exfs-desktop-ready',
+    true
+  );
+
+  jplopsoft_dwmNormalizeRootStacking();
+
+  if(explorer){
+    jplopsoft_dwmAttachToWindowLayer(explorer);
+  }
+
+  jplopsoft_applyDesktopWallpaper();
+  jplopsoft_calendarHide();
+
+  if(typeof jplopsoft_ntEnsureExplorerProcess==='function'){
+    jplopsoft_ntEnsureExplorerProcess();
+  }
+
   jplopsoft_cmdCloseAll();
-  jplopsoft_taskbarRemoveApp('control');jplopsoft_taskbarRemoveApp('security');jplopsoft_taskbarRemoveApp('trash');jplopsoft_taskbarRemoveDocumentApp();
-  if(jplopsoft_EXPLORER_LIFECYCLE&&jplopsoft_EXPLORER_LIFECYCLE.desiredVisible)jplopsoft_wmRestoreExplorerStable();
-  else{if(explorer)explorer.style.display='none';jplopsoft_taskbarRemoveApp('explorer');}
+
+  jplopsoft_taskbarRemoveApp('control');
+  jplopsoft_taskbarRemoveApp('security');
+  jplopsoft_taskbarRemoveApp('trash');
+  jplopsoft_taskbarRemoveDocumentApp();
+
+  if(
+    jplopsoft_EXPLORER_LIFECYCLE&&
+    jplopsoft_EXPLORER_LIFECYCLE.desiredVisible
+  ){
+    jplopsoft_wmRestoreExplorerStable();
+  }else{
+    jplopsoft_explorerStopWatchdog();
+
+    if(explorer){
+      try{
+        explorer.style.setProperty(
+          'display',
+          'none',
+          'important'
+        );
+      }catch(ignoreAfterUnlockExplorer){
+        explorer.style.display='none';
+      }
+    }
+
+    jplopsoft_taskbarRemoveApp('explorer');
+  }
+
   jplopsoft_cmdRefreshGlobalMode();
-  jplopsoft_WM.active=jplopsoft_EXPLORER_LIFECYCLE.desiredVisible?'explorer':'desktop';
+
+  jplopsoft_WM.active=
+    jplopsoft_EXPLORER_LIFECYCLE.desiredVisible
+      ?'explorer'
+      :'desktop';
 }
 
 function jplopsoft_wmPrepareLock(){
   var explorer=jplopsoft_el('jplopsoft_explorerWindow');
+  jplopsoft_explorerSetDesiredVisible(false);
+  jplopsoft_explorerCancelPendingRestore();
+  jplopsoft_explorerStopWatchdog();
   jplopsoft_multiEditorCloseAll(true);
   if(jplopsoft_TASKMGR.hwnd)jplopsoft_closeTaskManager();
   if(jplopsoft_REGEDIT.hwnd)jplopsoft_closeRegedit();
@@ -15025,8 +15421,19 @@ function jplopsoft_taskbarAppClick(appId){
 
   if(String(appId||'').indexOf('editor_')===0&&jplopsoft_multiEditorTaskbarClick(appId))return;
   if(appId==='explorer'){
-    if(active&&jplopsoft_wmIsDisplayed('jplopsoft_explorerWindow'))jplopsoft_wmMinimize('jplopsoft_explorerWindow','explorer',true);
-    else jplopsoft_wmRestoreExplorerStable();
+    if(
+      active&&
+      jplopsoft_wmIsDisplayed('jplopsoft_explorerWindow')&&
+      jplopsoft_explorerFrontmost(jplopsoft_el('jplopsoft_explorerWindow'))
+    ){
+      jplopsoft_wmMinimize(
+        'jplopsoft_explorerWindow',
+        'explorer',
+        true
+      );
+    }else{
+      jplopsoft_wmOpenExplorer(state.currentFolder);
+    }
     return;
   }
   if(appId==='cmd'){
@@ -17122,6 +17529,7 @@ function jplopsoft_bindWindowManager(){
       desktopSurface=jplopsoft_el('jplopsoft_desktopSurface');
 
   jplopsoft_dwmNormalizeRootStacking();
+  if(explorer)jplopsoft_dwmAttachToWindowLayer(explorer);
   jplopsoft_applyDesktopWallpaper();
 
   if(explorer){
@@ -17469,6 +17877,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os22',
-  build:'external-os-explorer-visibility-root-dwm'
+  version:'6.4.0-dev-os23',
+  build:'external-os-dwm-window-layer-explorer-watchdog'
 };
