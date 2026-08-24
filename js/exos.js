@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os42
+ * Version: 6.4.0-dev-os45
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -14510,10 +14510,88 @@ function jplopsoft_ShowWindow(hwnd,cmd){
   }
 
   if(cmd===jplopsoft_SW_MINIMIZE||cmd===jplopsoft_SW_SHOWMINIMIZED){
-    if(typeof rec.onMinimize==='function')rec.onMinimize(rec);
-    else if(rec.overlay)jplopsoft_wmOverlayMinimize(rec.backdropId,rec.windowId,rec.appId);
-    else jplopsoft_wmMinimize(rec.windowId,rec.appId);
-    jplopsoft_SendMessage(hwnd,jplopsoft_WM_SIZE,jplopsoft_SIZE_MINIMIZED,0);
+    var minimized=false,c;
+
+    try{
+      if(typeof rec.onMinimize==='function'){
+        rec.onMinimize(rec);
+      }else if(rec.overlay){
+        jplopsoft_wmOverlayMinimize(
+          rec.backdropId,
+          rec.windowId,
+          rec.appId
+        );
+      }else{
+        jplopsoft_wmMinimize(
+          rec.windowId,
+          rec.appId,
+          true
+        );
+      }
+    }catch(ignoreUser32MinimizeCallback){}
+
+    /*
+     * USER32 owns SW_MINIMIZE semantics.  If an application-specific or
+     * legacy handler returned without actually hiding the window, enforce
+     * the DWM state here instead of leaving a dead minimize button.
+     */
+    minimized=
+      !jplopsoft_user32DisplayIsVisible(
+        rec
+      );
+
+    if(!minimized){
+      if(rec.overlay){
+        if(rec.backdropId){
+          var back=jplopsoft_el(
+            rec.backdropId
+          );
+
+          if(back){
+            back.style.display='none';
+          }
+        }
+      }else if(w){
+        w.style.display='none';
+      }
+    }
+
+    if(w){
+      jplopsoft_wmClassRemove(
+        w,
+        'jplopsoft_wm-active'
+      );
+    }
+
+    if(
+      rec.appId&&
+      rec.taskbar!==false
+    ){
+      jplopsoft_taskbarSetAppState(
+        rec.appId,
+        'minimized'
+      );
+    }
+
+    if(
+      String(rec.appId||'').indexOf(
+        'explorer'
+      )===0
+    ){
+      c=jplopsoft_explorerContextByAppId(
+        rec.appId
+      );
+
+      if(c)c.visible=false;
+    }
+
+    jplopsoft_SendMessage(
+      hwnd,
+      jplopsoft_WM_SIZE,
+      jplopsoft_SIZE_MINIMIZED,
+      0
+    );
+
     return true;
   }
 
@@ -14633,17 +14711,98 @@ function jplopsoft_SendMessage(hwnd,msg,wParam,lParam){
   return jplopsoft_DefWindowProc(hwnd,msg,wParam,lParam);
 }
 
-function jplopsoft_user32BindNcButton(hwnd,id,hitCode){
-  var b=jplopsoft_el(id);
-  if(!b)return;
-  b.setAttribute('data-exfs-hwnd',String(hwnd));
-  b.setAttribute('data-exfs-nc-hit',String(hitCode));
+function jplopsoft_user32BindNcButtonNode(hwnd,b,hitCode){
+  if(!b)return false;
+
+  hwnd=parseInt(hwnd,10)||0;
+  hitCode=parseInt(hitCode,10)||0;
+
+  if(!hwnd||!hitCode)return false;
+
+  b.setAttribute(
+    'data-exfs-hwnd',
+    String(hwnd)
+  );
+
+  b.setAttribute(
+    'data-exfs-nc-hit',
+    String(hitCode)
+  );
+
+  /*
+   * Bind the actual button node, rather than relying on titlebar/container
+   * event delegation.  Several legacy ExOS windows install their own
+   * onclick handlers later during desktop initialization; re-binding the
+   * physical Non-Client button makes USER32 the final owner again.
+   */
   b.onclick=function(e){
     e=e||window.event;
-    if(e&&e.preventDefault)e.preventDefault();
-    jplopsoft_SendMessage(hwnd,jplopsoft_WM_NCLBUTTONDOWN,hitCode,0);
+
+    if(e&&e.preventDefault){
+      e.preventDefault();
+    }
+
+    if(e&&e.stopPropagation){
+      e.stopPropagation();
+    }
+
+    jplopsoft_SendMessage(
+      hwnd,
+      jplopsoft_WM_NCLBUTTONDOWN,
+      hitCode,
+      0
+    );
+
     return false;
   };
+
+  return true;
+}
+
+function jplopsoft_user32BindNcButton(hwnd,id,hitCode){
+  return jplopsoft_user32BindNcButtonNode(
+    hwnd,
+    jplopsoft_el(id),
+    hitCode
+  );
+}
+
+function jplopsoft_user32RebindNonClientButtons(root){
+  var nodes,i,b,hwnd,hit;
+
+  root=root||document;
+
+  if(!root||!root.querySelectorAll){
+    return 0;
+  }
+
+  nodes=root.querySelectorAll(
+    '[data-exfs-hwnd][data-exfs-nc-hit]'
+  );
+
+  for(i=0;i<nodes.length;i++){
+    b=nodes[i];
+
+    hwnd=parseInt(
+      b.getAttribute('data-exfs-hwnd'),
+      10
+    )||0;
+
+    hit=parseInt(
+      b.getAttribute('data-exfs-nc-hit'),
+      10
+    )||0;
+
+    if(hwnd&&hit){
+      jplopsoft_user32BindNcButtonNode(
+        hwnd,
+        b,
+        hit
+      );
+    }
+  }
+
+  return nodes.length;
 }
 
 function jplopsoft_user32BindTitlebar(hwnd,titlebarId){
@@ -14783,17 +14942,17 @@ function jplopsoft_CreateWindowEx(exStyle,className,windowName,style,x,y,width,h
   if((rec.style&jplopsoft_WS_MINIMIZEBOX)!==0){
     b=document.createElement('button');b.type='button';b.className='jplopsoft_wm-control';
     b.title='最小化';b.setAttribute('aria-label','最小化');b.setAttribute('data-exfs-svg','minimize');b.setAttribute('data-exfs-svg-size','11');
-    b.setAttribute('data-exfs-nc-hit',String(jplopsoft_HTMINBUTTON));controls.appendChild(b);
+    jplopsoft_user32BindNcButtonNode(hwnd,b,jplopsoft_HTMINBUTTON);controls.appendChild(b);
   }
   if((rec.style&jplopsoft_WS_MAXIMIZEBOX)!==0){
     b=document.createElement('button');b.type='button';b.className='jplopsoft_wm-control';
     b.title='最大化';b.setAttribute('aria-label','最大化');b.setAttribute('data-exfs-svg','maximize');b.setAttribute('data-exfs-svg-size','11');
-    b.setAttribute('data-exfs-nc-hit',String(jplopsoft_HTMAXBUTTON));controls.appendChild(b);
+    jplopsoft_user32BindNcButtonNode(hwnd,b,jplopsoft_HTMAXBUTTON);controls.appendChild(b);
   }
   if((rec.style&jplopsoft_WS_SYSMENU)!==0){
     b=document.createElement('button');b.type='button';b.className='jplopsoft_wm-control jplopsoft_wm-close';
     b.title='關閉';b.setAttribute('aria-label','關閉');b.setAttribute('data-exfs-svg','close');b.setAttribute('data-exfs-svg-size','11');
-    b.setAttribute('data-exfs-nc-hit',String(jplopsoft_HTCLOSE));controls.appendChild(b);
+    jplopsoft_user32BindNcButtonNode(hwnd,b,jplopsoft_HTCLOSE);controls.appendChild(b);
   }
   titlebar.appendChild(controls);
   win.appendChild(titlebar);
@@ -20705,7 +20864,7 @@ function jplopsoft_xshCreateHostWindow(ctx){
   return h;
 }
 
-function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH3 API\n  kernel32: CreateFile ReadFile WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile ReadMappedView WriteMappedView CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  advapi32: ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
+function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH3 API\n  kernel32: CreateFile ReadFile WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile ReadMappedView WriteMappedView CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  advapi32: ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
 function jplopsoft_xshPrintIrpTrace(ctx){
   var a=ctx.irpTrace.slice(-20),i,j,irp,s='';
   for(i=0;i<a.length;i++){
@@ -21343,7 +21502,10 @@ async function jplopsoft_xshLaunchSystemApp(ctx,name,args){
     return{ok:true};
   }
 
-
+  if(appName==='volume3d'){
+    jplopsoft_openVolume3D();
+    return{ok:true};
+  }
 
   throw jplopsoft_xshError(
     jplopsoft_STATUS_NOT_SUPPORTED,
@@ -22381,6 +22543,21 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     );
   }
 
+  if(api==='shell32'){
+    if(typeof jplopsoft_shell32Dispatch!=='function'){
+      throw jplopsoft_xshError(
+        jplopsoft_STATUS_NOT_SUPPORTED,
+        'exos_shell32.js is not loaded.'
+      );
+    }
+
+    return await jplopsoft_shell32Dispatch(
+      ctx,
+      method,
+      args
+    );
+  }
+
   if(api==='advapi32'){
     if(method==='ConvertStringSecurityDescriptorToSecurityDescriptor')return await jplopsoft_xshSddlCompile(ctx,args[0]);
     if(method==='ConvertSecurityDescriptorToStringSecurityDescriptor')return await jplopsoft_xshSddlDecompile(ctx,args[0]);
@@ -22391,6 +22568,7 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
   if(api==='exes'){
     if(method==='GetStatus')return{engine:'ExES V6',vaultUnlocked:!!state.vaultKey,systemVdo:jplopsoft_xshSystemVdoInfo()};
     if(method==='QuerySystemVdo')return jplopsoft_xshSystemVdoInfo();
+    if(method==='QueryDiskInfo')return await jplopsoft_xshApiPromise('disk_info','GET',null);
     if(method==='QueryDosDevice'){drive=String(args[0]||'C').replace(':','').toUpperCase();return drive==='C'?jplopsoft_xshSystemVdoInfo():null;}
     if(method==='GetBackingStore')return{type:'PHP_VDO',path:'/_exfs/',entryPoint:'exos.php',hostDiskExposed:false,encryption:'ExES client-side'};
     if(method==='FlushSystemVdo')return true;
@@ -24196,26 +24374,15 @@ function jplopsoft_closeDiskManager(){
 }
 
 function jplopsoft_openDiskManager(){
-  var h,client,toolbar,b,body,status;
-  jplopsoft_dwmNormalizeRootStacking();
-  if(jplopsoft_DISKMGMT.hwnd&&jplopsoft_user32GetRecord(jplopsoft_DISKMGMT.hwnd)){
-    h=jplopsoft_DISKMGMT.hwnd;jplopsoft_ShowWindow(h,jplopsoft_SW_RESTORE);jplopsoft_wmPlaceWindowAboveOverlay(h,'jplopsoft_exconfigBackdrop');jplopsoft_diskmgmtLoad();
-    window.setTimeout(function(){if(jplopsoft_DISKMGMT.hwnd)jplopsoft_wmPlaceWindowAboveOverlay(jplopsoft_DISKMGMT.hwnd,'jplopsoft_exconfigBackdrop');},0);
-    window.setTimeout(function(){if(jplopsoft_DISKMGMT.hwnd)jplopsoft_wmPlaceWindowAboveOverlay(jplopsoft_DISKMGMT.hwnd,'jplopsoft_exconfigBackdrop');},120);
+  if(!state.samAuthenticated||!state.vaultKey){
+    alert('請先登入 ExOS。');
     return;
   }
-  h=jplopsoft_CreateWindowEx(jplopsoft_WS_EX_APPWINDOW,'ExOS.Window','磁碟管理員',jplopsoft_WS_OVERLAPPEDWINDOW|jplopsoft_WS_VISIBLE,110,70,980,640,null,null,null,{appId:'diskmgmt',icon:'disk',windowClass:'jplopsoft_diskmgmt-window',taskbar:true,wndProc:function(hwnd,msg){if(msg===jplopsoft_WM_CLOSE){jplopsoft_closeDiskManager();return 0;}return null;}});
-  if(!h)return;
-  jplopsoft_DISKMGMT.hwnd=h;client=jplopsoft_GetClientElement(h);client.className+=' jplopsoft_diskmgmt-client';
-  toolbar=document.createElement('div');toolbar.className='jplopsoft_app-toolbar';
-  b=document.createElement('button');b.type='button';b.className='jplopsoft_btn jplopsoft_small';b.textContent='重新整理';b.onclick=jplopsoft_diskmgmtLoad;toolbar.appendChild(b);
-  b=document.createElement('button');b.type='button';b.className='jplopsoft_btn jplopsoft_small';b.textContent='3D 拓樸';b.onclick=jplopsoft_openVolume3D;toolbar.appendChild(b);client.appendChild(toolbar);
-  body=document.createElement('div');body.id=jplopsoft_DISKMGMT.bodyId;body.className='jplopsoft_diskmgmt-body';client.appendChild(body);
-  status=document.createElement('div');status.id=jplopsoft_DISKMGMT.statusId;status.className='jplopsoft_app-status';client.appendChild(status);
-  jplopsoft_wmPlaceWindowAboveOverlay(h,'jplopsoft_exconfigBackdrop');jplopsoft_diskmgmtLoad();
-  window.setTimeout(function(){if(jplopsoft_DISKMGMT.hwnd)jplopsoft_wmPlaceWindowAboveOverlay(jplopsoft_DISKMGMT.hwnd,'jplopsoft_exconfigBackdrop');},0);
-  window.setTimeout(function(){if(jplopsoft_DISKMGMT.hwnd)jplopsoft_wmPlaceWindowAboveOverlay(jplopsoft_DISKMGMT.hwnd,'jplopsoft_exconfigBackdrop');},80);
-  window.setTimeout(function(){if(jplopsoft_DISKMGMT.hwnd)jplopsoft_wmPlaceWindowAboveOverlay(jplopsoft_DISKMGMT.hwnd,'jplopsoft_exconfigBackdrop');},220);
+
+  jplopsoft_launchSystemXshApp(
+    'diskmgmt',
+    []
+  );
 }
 
 
@@ -24675,6 +24842,15 @@ function jplopsoft_bindWindowManager(){
 
   jplopsoft_applySvgIcons(document);
 
+  /*
+   * Legacy desktop wiring above may replace AdoptWindow's handlers.
+   * USER32 wins last so every minimize/maximize/close button follows the
+   * same Non-Client Area message path.
+   */
+  jplopsoft_user32RebindNonClientButtons(
+    document
+  );
+
   if(jplopsoft_el('jplopsoft_explorerTitlebar'))jplopsoft_el('jplopsoft_explorerTitlebar').ondblclick=function(e){if(jplopsoft_wmCanDragTarget(e.target||e.srcElement)){jplopsoft_explorerActivateInstance('1',true);jplopsoft_wmToggleMax('jplopsoft_explorerWindow');}};
   if(jplopsoft_el('jplopsoft_cmdTitlebar'))jplopsoft_el('jplopsoft_cmdTitlebar').ondblclick=function(e){if(jplopsoft_wmCanDragTarget(e.target||e.srcElement))jplopsoft_wmToggleMax('jplopsoft_cmdWindow');};
 
@@ -24974,6 +25150,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os42',
+  version:'6.4.0-dev-os45',
   build:'external-os-comctl32-split-core-controls'
 };
