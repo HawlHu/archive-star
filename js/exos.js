@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os40
+ * Version: 6.4.0-dev-os42
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -18811,9 +18811,117 @@ function jplopsoft_xshUtf8Encode(text){return new TextEncoder().encode(String(te
 function jplopsoft_xshUtf8Decode(bytes){return new TextDecoder('utf-8').decode(bytes instanceof Uint8Array?bytes:new Uint8Array(bytes||[]));}
 function jplopsoft_xshBytesToArray(bytes){return Array.prototype.slice.call(bytes instanceof Uint8Array?bytes:new Uint8Array(bytes||[]));}
 
+function jplopsoft_xshNormalizeBytes(data){
+  var tag,bytes,i,a;
+
+  if(data===undefined||data===null){
+    return new Uint8Array(0);
+  }
+
+  tag=Object.prototype.toString.call(data);
+
+  if(
+    data instanceof Uint8Array||
+    tag==='[object Uint8Array]'
+  ){
+    return new Uint8Array(
+      data.buffer.slice(
+        data.byteOffset||0,
+        (data.byteOffset||0)+data.byteLength
+      )
+    );
+  }
+
+  if(
+    tag==='[object ArrayBuffer]'||
+    (
+      typeof ArrayBuffer!=='undefined'&&
+      data instanceof ArrayBuffer
+    )
+  ){
+    return new Uint8Array(
+      data.slice(0)
+    );
+  }
+
+  if(
+    typeof ArrayBuffer!=='undefined'&&
+    ArrayBuffer.isView&&
+    ArrayBuffer.isView(data)
+  ){
+    return new Uint8Array(
+      data.buffer.slice(
+        data.byteOffset||0,
+        (data.byteOffset||0)+data.byteLength
+      )
+    );
+  }
+
+  if(
+    data&&
+    typeof data==='object'&&
+    String(data.encoding||'').toLowerCase()==='base64'&&
+    typeof data.data==='string'
+  ){
+    if(
+      window.base64&&
+      window.base64.decode&&
+      typeof window.base64.decode.bytes==='function'
+    ){
+      bytes=window.base64.decode.bytes(data.data);
+
+      return bytes instanceof Uint8Array
+        ?bytes
+        :new Uint8Array(bytes||[]);
+    }
+
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_NOT_SUPPORTED,
+      'Base64 byte decoder is unavailable.'
+    );
+  }
+
+  if(tag==='[object Array]'){
+    return new Uint8Array(data);
+  }
+
+  if(
+    data&&
+    typeof data==='object'&&
+    typeof data.length==='number'
+  ){
+    a=[];
+
+    for(i=0;i<data.length;i++){
+      a.push(Number(data[i])&255);
+    }
+
+    return new Uint8Array(a);
+  }
+
+  throw jplopsoft_xshError(
+    jplopsoft_STATUS_INVALID_PARAMETER,
+    'WriteFile requires ArrayBuffer, TypedArray, byte array, string, or Base64 byte payload.'
+  );
+}
+
 async function jplopsoft_xshReadNodeBytes(node){
   var out=await new Promise(function(resolve,reject){
-    jplopsoft_fetchNodeContent(node.id,function(err,o){if(err)reject(err);else resolve(o);},null,'XSH_READ');
+    /*
+     * XSH normal file I/O is ordinary CreateFile/ReadFile access.
+     * access_purpose is reserved for special policy paths such as DOWNLOAD.
+     * Passing the old private value XSH_READ caused PHP open_handle to reject
+     * an otherwise valid read with "Invalid file access purpose".
+     */
+    jplopsoft_fetchNodeContent(
+      node.id,
+      function(err,o){
+        if(err)reject(err);
+        else resolve(o);
+      },
+      null,
+      ''
+    );
   }),fmt=jplopsoft_fileFormatFromName(jplopsoft_decName(node)||''),plain,fek;
   fek=jplopsoft_nodeFekById(node.id);
   if(jplopsoft_binaryFormat(fmt)){
@@ -18906,8 +19014,38 @@ async function jplopsoft_xshNtCreateFile(ctx,path,desiredAccess,creationDisposit
       if(!node&&disp!==3&&disp!==5)node=await jplopsoft_xshCreateCNode(ctx,path,'file');
       if(!node||node.type!=='file')throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'File not found.');
       if(access.write&&!jplopsoft_isWritableProfileFolder(node.parent_id))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Write access denied outside user profile.');
-      if((disp===2||disp===5)&&access.write)await jplopsoft_xshWriteNodeBytes(node,new Uint8Array(0));
-      h=jplopsoft_xshAllocateHandle(ctx,{kind:'exfs-file',nodeId:node.id,path:String(path),access:access,position:0});
+      if(
+        (disp===2||disp===5)&&
+        access.write
+      ){
+        await jplopsoft_xshWriteNodeBytes(
+          node,
+          new Uint8Array(0)
+        );
+      }
+
+      h=jplopsoft_xshAllocateHandle(
+        ctx,
+        {
+          kind:'exfs-file',
+          nodeId:node.id,
+          path:String(path),
+          access:access,
+          position:0,
+
+          /*
+           * NT semantics: after CREATE_ALWAYS/TRUNCATE_EXISTING the
+           * file object is logically zero-length. The next write can
+           * build from an empty buffer without issuing a redundant
+           * read IRP against the backing ExFS object.
+           */
+          knownEmpty:
+            !!(
+              access.write&&
+              (disp===2||disp===5)
+            )
+        }
+      );
     }
     jplopsoft_xshCompleteIrp(irp,jplopsoft_STATUS_SUCCESS);
     return{status:jplopsoft_STATUS_SUCCESS,handle:h};
@@ -18938,15 +19076,93 @@ async function jplopsoft_xshNtWriteFile(ctx,handle,data,offset,win32Api){
   var h=jplopsoft_xshHandle(ctx,handle),irp,src,old,start,total,out,node;
   if(!h)return{status:jplopsoft_STATUS_INVALID_HANDLE,bytesWritten:0};
   if(!h.access||!h.access.write)return{status:jplopsoft_STATUS_ACCESS_DENIED,bytesWritten:0};
-  src=typeof data==='string'?jplopsoft_xshUtf8Encode(data):new Uint8Array(data||[]);if(src.length>jplopsoft_XSH.maxIoBytes)return{status:jplopsoft_STATUS_INVALID_PARAMETER,bytesWritten:0,error:'WriteFile request exceeds XSH per-call limit.'};
+  src=typeof data==='string'
+    ?jplopsoft_xshUtf8Encode(data)
+    :jplopsoft_xshNormalizeBytes(data);
+  if(src.length>jplopsoft_XSH.maxIoBytes)return{status:jplopsoft_STATUS_INVALID_PARAMETER,bytesWritten:0,error:'WriteFile request exceeds XSH per-call limit.'};
   start=(offset===undefined||offset===null)?h.position:Math.max(0,parseInt(offset,10)||0);irp=jplopsoft_xshBeginIrp(ctx,win32Api||'','NtWriteFile','IRP_MJ_WRITE',h.path||'',h.kind);
   try{
     jplopsoft_xshTraceDownStack(irp,h.path||'','WRITE');
     if(h.kind!=='exfs-file')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'Handle does not support WriteFile.');
     node=jplopsoft_findNode(h.nodeId);if(!node)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'File object disappeared.');
-    old=await jplopsoft_xshReadNodeBytes(node);total=Math.max(old.length,start+src.length);out=new Uint8Array(total);out.set(old,0);out.set(src,start);await jplopsoft_xshWriteNodeBytes(node,out);
-    h.position=start+src.length;jplopsoft_xshCompleteIrp(irp,jplopsoft_STATUS_SUCCESS);return{status:jplopsoft_STATUS_SUCCESS,bytesWritten:src.length,position:h.position};
+    if(h.knownEmpty){
+      old=new Uint8Array(0);
+    }else{
+      old=await jplopsoft_xshReadNodeBytes(node);
+    }
+
+    total=Math.max(
+      old.length,
+      start+src.length
+    );
+
+    out=new Uint8Array(total);
+    out.set(old,0);
+    out.set(src,start);
+
+    await jplopsoft_xshWriteNodeBytes(
+      node,
+      out
+    );
+
+    h.knownEmpty=false;
+    h.position=start+src.length;
+
+    jplopsoft_xshCompleteIrp(
+      irp,
+      jplopsoft_STATUS_SUCCESS
+    );
+
+    return{
+      status:jplopsoft_STATUS_SUCCESS,
+      bytesWritten:src.length,
+      position:h.position
+    };
   }catch(e){jplopsoft_xshCompleteIrp(irp,e.ntstatus||jplopsoft_STATUS_INVALID_PARAMETER);return{status:e.ntstatus||jplopsoft_STATUS_INVALID_PARAMETER,bytesWritten:0,error:e.message};}
+}
+
+function jplopsoft_xshGetFileSizeByHandle(ctx,handle){
+  var h=jplopsoft_xshHandle(ctx,handle),
+      node;
+
+  if(!h||h.kind!=='exfs-file'){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_HANDLE,
+      'GetFileSize requires an ExFS file handle.'
+    );
+  }
+
+  node=jplopsoft_findNode(h.nodeId);
+
+  if(!node){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,
+      'File object disappeared.'
+    );
+  }
+
+  return parseInt(node.original_size,10)||0;
+}
+
+async function jplopsoft_xshFlushFileBuffers(ctx,handle){
+  var h=jplopsoft_xshHandle(ctx,handle);
+
+  if(!h||h.kind!=='exfs-file'){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_HANDLE,
+      'FlushFileBuffers requires an ExFS file handle.'
+    );
+  }
+
+  await jplopsoft_xshReloadNodes();
+
+  return{
+    ok:true,
+    size:jplopsoft_xshGetFileSizeByHandle(
+      ctx,
+      handle
+    )
+  };
 }
 
 async function jplopsoft_xshCreateDirectory(ctx,path){var spec=jplopsoft_xshPathSpec(ctx,path);if(spec.kind!=='exfs')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'Only C: / PHP /_exfs/ VDO is available.');await jplopsoft_xshCreateCNode(ctx,path,'folder');return true;}
@@ -19231,17 +19447,57 @@ function jplopsoft_xshConsoleByHostPid(pid){
 }
 
 
+function jplopsoft_xshConsoleScrollToCursor(session){
+  var client,row;
+
+  if(!session)return;
+
+  client=jplopsoft_GetClientElement(
+    session.hwnd
+  );
+
+  row=document.getElementById(
+    session.inputRowId
+  );
+
+  if(!client)return;
+
+  window.setTimeout(function(){
+    try{
+      client.scrollTop=
+        client.scrollHeight;
+
+      if(
+        row&&
+        row.style.display!=='none'&&
+        typeof row.scrollIntoView==='function'
+      ){
+        row.scrollIntoView({
+          block:'nearest',
+          inline:'nearest'
+        });
+      }
+    }catch(ignoreConsoleScroll){}
+  },0);
+}
+
 function jplopsoft_xshConsoleRender(session){
   var out;
 
   if(!session)return;
 
-  out=document.getElementById(session.outputId);
+  out=document.getElementById(
+    session.outputId
+  );
 
   if(out){
-    out.textContent=String(session.buffer||'');
-    out.scrollTop=out.scrollHeight;
+    out.textContent=
+      String(session.buffer||'');
   }
+
+  jplopsoft_xshConsoleScrollToCursor(
+    session
+  );
 }
 
 function jplopsoft_xshConsoleTrim(session){
@@ -19306,11 +19562,22 @@ function jplopsoft_xshConsoleActivateInput(session){
     jplopsoft_xshConsoleRender(session);
   }
 
-  prompt.textContent=session.pendingPrompt;
+  prompt.textContent=
+    session.pendingPrompt;
+
   row.style.display='flex';
 
+  jplopsoft_xshConsoleScrollToCursor(
+    session
+  );
+
   window.setTimeout(function(){
-    try{input.focus();}catch(ignoreConsoleFocus){}
+    try{
+      input.focus();
+      jplopsoft_xshConsoleScrollToCursor(
+        session
+      );
+    }catch(ignoreConsoleFocus){}
   },0);
 }
 
@@ -19332,6 +19599,23 @@ function jplopsoft_xshConsoleSubmit(session){
   }
 
   returned=line+'\r\n';
+
+  if(line.trim()){
+    if(
+      !session.history.length||
+      session.history[session.history.length-1]!==line
+    ){
+      session.history.push(line);
+
+      while(session.history.length>session.historyMax){
+        session.history.shift();
+      }
+    }
+  }
+
+  session.historyIndex=session.history.length;
+  session.historyDraft='';
+  session.completion=null;
 
   session.buffer+=
     String(session.pendingPrompt||'')+
@@ -19425,6 +19709,477 @@ function jplopsoft_xshConsoleCancelReads(ctx){
   }
 }
 
+
+function jplopsoft_xshConsoleHistoryMove(session,direction){
+  var input=document.getElementById(session.inputId),
+      next;
+
+  if(!input||!session.history.length)return false;
+
+  if(
+    session.historyIndex<0||
+    session.historyIndex>session.history.length
+  ){
+    session.historyIndex=session.history.length;
+  }
+
+  if(
+    session.historyIndex===session.history.length&&
+    direction<0
+  ){
+    session.historyDraft=String(input.value||'');
+  }
+
+  next=session.historyIndex+direction;
+  next=Math.max(
+    0,
+    Math.min(session.history.length,next)
+  );
+
+  session.historyIndex=next;
+  session.completion=null;
+
+  if(next===session.history.length){
+    input.value=String(session.historyDraft||'');
+  }else{
+    input.value=String(session.history[next]||'');
+  }
+
+  try{
+    input.selectionStart=
+      input.selectionEnd=
+        input.value.length;
+  }catch(ignoreHistoryCaret){}
+
+  return true;
+}
+
+function jplopsoft_xshConsoleCommonPrefix(values){
+  var list=Array.isArray(values)?values:[],
+      prefix,i,j,s;
+
+  if(!list.length)return'';
+
+  prefix=String(list[0]||'');
+
+  for(i=1;i<list.length;i++){
+    s=String(list[i]||'');
+
+    for(
+      j=0;
+      j<prefix.length&&
+      j<s.length&&
+      prefix.charAt(j).toLowerCase()===
+        s.charAt(j).toLowerCase();
+      j++
+    ){}
+
+    prefix=prefix.substring(0,j);
+
+    if(!prefix)break;
+  }
+
+  return prefix;
+}
+
+function jplopsoft_xshConsoleAutocomplete(session,reverse){
+  var input=document.getElementById(session.inputId),
+      waiter=session&&session.waiters.length
+        ?session.waiters[0]
+        :null,
+      ctx=waiter
+        ?jplopsoft_xshRunByPid(waiter.pid)
+        :null,
+      value,caret,before,m,tokenStart,rawToken,quoted,
+      token,slash,dirPart,leaf,folder,children,matches,
+      key,candidate,common,replacement,after;
+
+  if(!input||!ctx)return false;
+
+  value=String(input.value||'');
+  caret=
+    typeof input.selectionStart==='number'
+      ?input.selectionStart
+      :value.length;
+
+  before=value.substring(0,caret);
+
+  m=/(^|\s)("([^"]*)|([^\s"]*))$/.exec(before);
+
+  if(!m)return false;
+
+  tokenStart=
+    m.index+
+    String(m[1]||'').length;
+
+  rawToken=String(m[2]||'');
+  quoted=rawToken.charAt(0)==='"';
+
+  token=quoted
+    ?String(m[3]||'')
+    :String(m[4]||'');
+
+  slash=Math.max(
+    token.lastIndexOf('\\'),
+    token.lastIndexOf('/')
+  );
+
+  dirPart=slash>=0
+    ?token.substring(0,slash+1)
+    :'';
+
+  leaf=slash>=0
+    ?token.substring(slash+1)
+    :token;
+
+  try{
+    folder=jplopsoft_xshResolveC(
+      ctx,
+      dirPart||ctx.currentDirectory,
+      false
+    );
+  }catch(ignoreCompleteResolve){
+    folder=null;
+  }
+
+  if(!folder||folder.type!=='folder'){
+    return false;
+  }
+
+  children=jplopsoft_childrenOf(
+    folder.root
+      ?0
+      :(parseInt(folder.id,10)||0)
+  );
+
+  matches=[];
+
+  children.forEach(function(n){
+    var name=jplopsoft_decName(n);
+
+    if(name===null)return;
+
+    if(
+      String(name).toLowerCase().indexOf(
+        String(leaf).toLowerCase()
+      )===0
+    ){
+      matches.push({
+        name:String(name),
+        directory:n.type==='folder'
+      });
+    }
+  });
+
+  matches.sort(function(a,b){
+    return a.name.localeCompare(
+      b.name,
+      'en',
+      {
+        numeric:true,
+        sensitivity:'base'
+      }
+    );
+  });
+
+  if(!matches.length)return false;
+
+  key=String(ctx.currentDirectory);
+
+  if(
+    session.completion&&
+    session.completion.cwd===key&&
+    session.completion.start===tokenStart&&
+    session.completion.lastToken===token
+  ){
+    matches=session.completion.matches;
+
+    session.completion.index+=
+      reverse?-1:1;
+
+    if(session.completion.index<0){
+      session.completion.index=
+        matches.length-1;
+    }
+
+    if(
+      session.completion.index>=
+      matches.length
+    ){
+      session.completion.index=0;
+    }
+
+    candidate=
+      dirPart+
+      matches[session.completion.index].name+
+      (
+        matches[session.completion.index].directory
+          ?'\\'
+          :''
+      );
+  }else{
+    session.completion={
+      cwd:key,
+      start:tokenStart,
+      index:
+        reverse
+          ?matches.length-1
+          :0,
+      matches:matches,
+      lastToken:''
+    };
+
+    common=
+      jplopsoft_xshConsoleCommonPrefix(
+        matches.map(function(x){
+          return x.name;
+        })
+      );
+
+    if(
+      matches.length>1&&
+      common.length>leaf.length
+    ){
+      candidate=
+        dirPart+
+        common;
+    }else{
+      candidate=
+        dirPart+
+        matches[session.completion.index].name+
+        (
+          matches[session.completion.index].directory
+            ?'\\'
+            :''
+        );
+    }
+  }
+
+  session.completion.lastToken=
+    candidate;
+
+  replacement=
+    /\s/.test(candidate)
+      ?'"'+candidate+'"'
+      :candidate;
+
+  after=value.substring(caret);
+
+  input.value=
+    value.substring(0,tokenStart)+
+    replacement+
+    after;
+
+  try{
+    input.selectionStart=
+      input.selectionEnd=
+        tokenStart+
+        replacement.length;
+  }catch(ignoreCompleteCaret){}
+
+  return true;
+}
+
+function jplopsoft_xshConsoleBreakCurrentLine(session){
+  var input=document.getElementById(session.inputId),
+      row=document.getElementById(session.inputRowId),
+      prompt=document.getElementById(session.promptId),
+      waiter;
+
+  if(!session||!session.waiters.length){
+    return false;
+  }
+
+  waiter=session.waiters.shift();
+
+  session.buffer+=
+    String(session.pendingPrompt||'')+
+    '^C\r\n';
+
+  session.pendingPrompt='';
+  session.inputActive=false;
+  session.historyIndex=session.history.length;
+  session.historyDraft='';
+  session.completion=null;
+
+  if(input)input.value='';
+  if(prompt)prompt.textContent='';
+  if(row)row.style.display='none';
+
+  jplopsoft_xshConsoleTrim(session);
+  jplopsoft_xshConsoleRender(session);
+
+  try{
+    waiter.resolve('\r\n');
+  }catch(ignoreBreakResolve){}
+
+  if(session.waiters.length){
+    window.setTimeout(function(){
+      jplopsoft_xshConsoleActivateInput(
+        session
+      );
+    },0);
+  }
+
+  return true;
+}
+
+function jplopsoft_xshConsoleColorCss(attribute){
+  var table=[
+        '#000000','#000080','#008000','#008080',
+        '#800000','#800080','#808000','#c0c0c0',
+        '#808080','#0000ff','#00ff00','#00ffff',
+        '#ff0000','#ff00ff','#ffff00','#ffffff'
+      ],
+      a=Number(attribute)>>>0,
+      fg=a&15,
+      bg=(a>>>4)&15;
+
+  return{
+    foreground:table[fg]||'#c0c0c0',
+    background:table[bg]||'#000000'
+  };
+}
+
+function jplopsoft_xshConsoleApplyAttribute(session){
+  var css=jplopsoft_xshConsoleColorCss(
+        session.attributes
+      ),
+      out=document.getElementById(
+        session.outputId
+      ),
+      row=document.getElementById(
+        session.inputRowId
+      ),
+      prompt=document.getElementById(
+        session.promptId
+      ),
+      input=document.getElementById(
+        session.inputId
+      );
+
+  if(out){
+    out.style.color=css.foreground;
+    out.style.backgroundColor=css.background;
+  }
+
+  if(row){
+    row.style.color=css.foreground;
+    row.style.backgroundColor=css.background;
+  }
+
+  if(prompt){
+    prompt.style.color=css.foreground;
+  }
+
+  if(input){
+    input.style.setProperty(
+      'color',
+      css.foreground,
+      'important'
+    );
+
+    input.style.setProperty(
+      'background-color',
+      css.background,
+      'important'
+    );
+  }
+}
+
+function jplopsoft_xshConsoleSetTextAttribute(ctx,attribute){
+  var session=
+        jplopsoft_xshConsoleForProcess(ctx),
+      a=Number(attribute);
+
+  if(!session){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_HANDLE,
+      'The process is not attached to a console.'
+    );
+  }
+
+  if(isNaN(a)||a<0||a>255){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_PARAMETER,
+      'Console text attribute must be 00-FF.'
+    );
+  }
+
+  session.attributes=a&255;
+  jplopsoft_xshConsoleApplyAttribute(
+    session
+  );
+
+  return true;
+}
+
+function jplopsoft_xshConsoleHistory(ctx){
+  var session=
+    jplopsoft_xshConsoleForProcess(ctx);
+
+  if(!session){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_HANDLE,
+      'The process is not attached to a console.'
+    );
+  }
+
+  return session.history.slice();
+}
+
+function jplopsoft_xshConsoleSetHistoryMax(ctx,count){
+  var session=
+    jplopsoft_xshConsoleForProcess(ctx);
+
+  if(!session){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_HANDLE,
+      'The process is not attached to a console.'
+    );
+  }
+
+  count=Math.max(
+    1,
+    Math.min(
+      999,
+      parseInt(count,10)||50
+    )
+  );
+
+  session.historyMax=count;
+
+  while(
+    session.history.length>count
+  ){
+    session.history.shift();
+  }
+
+  session.historyIndex=
+    session.history.length;
+
+  return count;
+}
+
+function jplopsoft_xshConsoleExpungeHistory(ctx){
+  var session=
+    jplopsoft_xshConsoleForProcess(ctx);
+
+  if(!session){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_HANDLE,
+      'The process is not attached to a console.'
+    );
+  }
+
+  session.history=[];
+  session.historyIndex=0;
+  session.historyDraft='';
+  session.completion=null;
+
+  return true;
+}
+
 function jplopsoft_xshConsoleCreateSession(ctx){
   var id=++jplopsoft_XSH.consoleSeq,
       conhost,h,client,out,row,prompt,input,
@@ -19469,6 +20224,11 @@ function jplopsoft_xshConsoleCreateSession(ctx){
     inputCodePage:65001,
     outputCodePage:65001,
     attributes:7,
+    history:[],
+    historyMax:100,
+    historyIndex:-1,
+    historyDraft:'',
+    completion:null,
     outputId:'jplopsoft_conhost_output_'+String(id),
     inputRowId:'jplopsoft_conhost_inputrow_'+String(id),
     promptId:'jplopsoft_conhost_prompt_'+String(id),
@@ -19539,16 +20299,139 @@ function jplopsoft_xshConsoleCreateSession(ctx){
     input.spellcheck=false;
 
     input.onkeydown=function(e){
-      e=e||window.event;
+      var key;
 
-      if(String(e.key||'')==='Enter'){
+      e=e||window.event;
+      key=String(e.key||'');
+
+      if(key==='Enter'){
         try{e.preventDefault();}catch(ignoreConsolePrevent){}
         jplopsoft_xshConsoleSubmit(session);
+        return;
       }
+
+      if(key==='ArrowUp'){
+        try{e.preventDefault();}catch(ignoreConsoleUp){}
+        jplopsoft_xshConsoleHistoryMove(
+          session,
+          -1
+        );
+        return;
+      }
+
+      if(key==='ArrowDown'){
+        try{e.preventDefault();}catch(ignoreConsoleDown){}
+        jplopsoft_xshConsoleHistoryMove(
+          session,
+          1
+        );
+        return;
+      }
+
+      if(key==='Tab'){
+        try{e.preventDefault();}catch(ignoreConsoleTab){}
+
+        jplopsoft_xshConsoleAutocomplete(
+          session,
+          !!e.shiftKey
+        );
+        return;
+      }
+
+      if(key==='F3'){
+        try{e.preventDefault();}catch(ignoreConsoleF3){}
+
+        if(session.history.length){
+          input.value=String(
+            session.history[
+              session.history.length-1
+            ]||''
+          );
+
+          try{
+            input.selectionStart=
+              input.selectionEnd=
+                input.value.length;
+          }catch(ignoreConsoleF3Caret){}
+        }
+
+        session.completion=null;
+        return;
+      }
+
+      if(key==='F8'){
+        var prefix=
+              String(input.value||''),
+            hi,
+            candidate='';
+
+        try{e.preventDefault();}catch(ignoreConsoleF8){}
+
+        hi=
+          session.historyIndex>=0&&
+          session.historyIndex<
+            session.history.length
+            ?session.historyIndex-1
+            :session.history.length-1;
+
+        for(;hi>=0;hi--){
+          if(
+            String(
+              session.history[hi]||''
+            ).toLowerCase().indexOf(
+              prefix.toLowerCase()
+            )===0
+          ){
+            candidate=String(
+              session.history[hi]||''
+            );
+            session.historyIndex=hi;
+            break;
+          }
+        }
+
+        if(candidate){
+          input.value=candidate;
+
+          try{
+            input.selectionStart=
+              input.selectionEnd=
+                input.value.length;
+          }catch(ignoreConsoleF8Caret){}
+        }
+
+        session.completion=null;
+        return;
+      }
+
+      if(
+        key.toLowerCase()==='c'&&
+        (e.ctrlKey||e.metaKey)
+      ){
+        try{e.preventDefault();}catch(ignoreConsoleBreak){}
+
+        jplopsoft_xshConsoleBreakCurrentLine(
+          session
+        );
+        return;
+      }
+
+      if(key==='Escape'){
+        try{e.preventDefault();}catch(ignoreConsoleEsc){}
+        input.value='';
+        session.completion=null;
+        return;
+      }
+
+      session.completion=null;
     };
 
     row.appendChild(input);
     client.appendChild(row);
+
+    jplopsoft_xshConsoleApplyAttribute(
+      session
+    );
   }
 
   return session;
@@ -19822,7 +20705,7 @@ function jplopsoft_xshCreateHostWindow(ctx){
   return h;
 }
 
-function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH3 API\n  kernel32: CreateFile ReadFile WriteFile CloseHandle ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode GetConsoleScreenBufferInfo ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile ReadMappedView WriteMappedView CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  advapi32: ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
+function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH3 API\n  kernel32: CreateFile ReadFile WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile ReadMappedView WriteMappedView CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  advapi32: ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
 function jplopsoft_xshPrintIrpTrace(ctx){
   var a=ctx.irpTrace.slice(-20),i,j,irp,s='';
   for(i=0;i<a.length;i++){
@@ -20544,7 +21427,7 @@ function jplopsoft_xshPickFiles(ctx,options){
             size:parseInt(f.size,10)||0,
             type:String(f.type||''),
             error:'FILE_TOO_LARGE',
-            data:[]
+            dataBuffer:new ArrayBuffer(0)
           });
           next();
           return;
@@ -20558,20 +21441,23 @@ function jplopsoft_xshPickFiles(ctx,options){
             size:parseInt(f.size,10)||0,
             type:String(f.type||''),
             error:'READ_FAILED',
-            data:[]
+            dataBuffer:new ArrayBuffer(0)
           });
           next();
         };
 
         r.onload=function(){
-          var bytes=new Uint8Array(r.result||new ArrayBuffer(0));
+          var buffer=
+            Object.prototype.toString.call(r.result)==='[object ArrayBuffer]'
+              ?r.result
+              :new ArrayBuffer(0);
 
           out.push({
             name:String(f.name||''),
-            size:bytes.length,
+            size:buffer.byteLength,
             type:String(f.type||''),
             error:'',
-            data:jplopsoft_xshBytesToArray(bytes)
+            dataBuffer:buffer
           });
 
           next();
@@ -20585,7 +21471,7 @@ function jplopsoft_xshPickFiles(ctx,options){
             size:parseInt(f.size,10)||0,
             type:String(f.type||''),
             error:String(e&&e.message?e.message:e),
-            data:[]
+            dataBuffer:new ArrayBuffer(0)
           });
           next();
         }
@@ -21077,6 +21963,8 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
       r=await jplopsoft_xshNtWriteFile(ctx,args[0],args[1],args[2],'WriteFile');if(r.status!==jplopsoft_STATUS_SUCCESS)throw jplopsoft_xshError(r.status,r.error);return r;
     }
     if(method==='CloseHandle'){if(!jplopsoft_xshCloseHandle(ctx,args[0]))throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid handle.');return true;}
+    if(method==='GetFileSize')return jplopsoft_xshGetFileSizeByHandle(ctx,args[0]);
+    if(method==='FlushFileBuffers')return await jplopsoft_xshFlushFileBuffers(ctx,args[0]);
     if(method==='ReadTextFile')return await jplopsoft_xshReadTextFile(ctx,args[0]);
     if(method==='WriteTextFile')return await jplopsoft_xshWriteTextFile(ctx,args[0],args[1]);
     if(method==='CreateDirectory')return await jplopsoft_xshCreateDirectory(ctx,args[0]);
@@ -21223,8 +22111,43 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
 
       return true;
     }
+    if(method==='SetConsoleTextAttribute'){
+      var textAttrHandle=parseInt(args[0],10)||0;
+
+      if(
+        textAttrHandle!==-11&&
+        textAttrHandle!==-12
+      ){
+        throw jplopsoft_xshError(
+          jplopsoft_STATUS_INVALID_HANDLE,
+          'SetConsoleTextAttribute requires an output handle.'
+        );
+      }
+
+      return jplopsoft_xshConsoleSetTextAttribute(
+        ctx,
+        args[1]
+      );
+    }
     if(method==='GetConsoleScreenBufferInfo'){
       return jplopsoft_xshConsoleInfo(ctx);
+    }
+    if(method==='GetConsoleCommandHistory'){
+      return jplopsoft_xshConsoleHistory(ctx);
+    }
+    if(method==='GetConsoleCommandHistoryLength'){
+      return jplopsoft_xshConsoleHistory(ctx).join('\0').length;
+    }
+    if(method==='SetConsoleNumberOfCommands'){
+      return jplopsoft_xshConsoleSetHistoryMax(
+        ctx,
+        args[0]
+      );
+    }
+    if(method==='ExpungeConsoleCommandHistory'){
+      return jplopsoft_xshConsoleExpungeHistory(
+        ctx
+      );
     }
     if(method==='ClearConsole'){
       return jplopsoft_xshConsoleClear(ctx);
@@ -24051,6 +24974,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os40',
+  version:'6.4.0-dev-os42',
   build:'external-os-comctl32-split-core-controls'
 };
