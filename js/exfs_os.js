@@ -1,6 +1,6 @@
 /*
  * ExFS OS Frontend Module
- * Version: 6.4.0-dev-os9
+ * Version: 6.4.0-dev-os11
  *
  * Stable browser-side operating-system UI functions extracted from exfs.php:
  * - CMD shell / parser / commands
@@ -53,7 +53,13 @@ var jplopsoft_EXFS_SVG_ICONS={
   'txt':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMmgxMGw0IDR2MTZINXoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzY0NzQ4YiIvPjxwYXRoIGQ9Ik0xNSAydjVoNCIgZmlsbD0iI2RiZWFmZSIvPjxwYXRoIGQ9Ik04IDExaDhNOCAxNGg4TTggMTdoNiIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxwYXRoIGQ9Ik04IDhoNSIgc3Ryb2tlPSIjMTExODI3IiBzdHJva2Utd2lkdGg9IjEuNiIvPjwvc3ZnPg==',
   'minimize_light':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTYgMTZoMTIiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Y4ZmFmYyIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48L3N2Zz4=',
   'maximize_light':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iNi41IiB5PSI1LjUiIHdpZHRoPSIxMSIgaGVpZ2h0PSIxMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjhmYWZjIiBzdHJva2Utd2lkdGg9IjEuMzUiLz48L3N2Zz4=',
-  'close_light':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTcuNSA3LjUgMTYuNSAxNi41TTE2LjUgNy41IDcuNSAxNi41IiBmaWxsPSJub25lIiBzdHJva2U9IiNmOGZhZmMiIHN0cm9rZS13aWR0aD0iMS40NSIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIvPjwvc3ZnPg=='
+  'close_light':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTcuNSA3LjUgMTYuNSAxNi41TTE2LjUgNy41IDcuNSAxNi41IiBmaWxsPSJub25lIiBzdHJva2U9IiNmOGZhZmMiIHN0cm9rZS13aWR0aD0iMS40NSIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIvPjwvc3ZnPg==',
+  'taskmgr':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMi41IiB5PSIzIiB3aWR0aD0iMTkiIGhlaWdodD0iMTgiIHJ4PSIxLjUiIGZpbGw9IiNlYWY0ZmYiIHN0cm9rZT0iIzNiNmY5YyIvPjxwYXRoIGQ9Ik01IDE2aDIuNXYtNEg1em00IDBoMi41VjhIOXptNCAwaDIuNXYtNkgxM3ptNCAwaDJWNmgtMnoiIGZpbGw9IiMzYjgyZjYiLz48L3N2Zz4=',
+  'regedit':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGcgZmlsbD0iIzYwYTVmYSIgc3Ryb2tlPSIjMWQ0ZWQ4IiBzdHJva2Utd2lkdGg9Ii44Ij48cmVjdCB4PSIzIiB5PSIzIiB3aWR0aD0iNyIgaGVpZ2h0PSI3Ii8+PHJlY3QgeD0iMTQiIHk9IjMiIHdpZHRoPSI3IiBoZWlnaHQ9IjciLz48cmVjdCB4PSIzIiB5PSIxNCIgd2lkdGg9IjciIGhlaWdodD0iNyIvPjxyZWN0IHg9IjE0IiB5PSIxNCIgd2lkdGg9IjciIGhlaWdodD0iNyIvPjwvZz48Y2lyY2xlIGN4PSI2LjUiIGN5PSI2LjUiIHI9IjEuNCIgZmlsbD0iI2VmZjZmZiIvPjxjaXJjbGUgY3g9IjE3LjUiIGN5PSIxNy41IiByPSIxLjQiIGZpbGw9IiNlZmY2ZmYiLz48L3N2Zz4=',
+  'disk':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGVsbGlwc2UgY3g9IjEyIiBjeT0iNiIgcng9IjguNSIgcnk9IjMuMyIgZmlsbD0iI2RiZWFmZSIgc3Ryb2tlPSIjNDc1NTY5Ii8+PHBhdGggZD0iTTMuNSA2djExYzAgMS44IDMuOCAzLjMgOC41IDMuM3M4LjUtMS41IDguNS0zLjNWNiIgZmlsbD0iI2UyZThmMCIgc3Ryb2tlPSIjNDc1NTY5Ii8+PHBhdGggZD0iTTMuNSAxMWMwIDEuOCAzLjggMy4zIDguNSAzLjNzOC41LTEuNSA4LjUtMy4zTTMuNSAxNmMwIDEuOCAzLjggMy4zIDguNSAzLjNzOC41LTEuNSA4LjUtMy4zIiBmaWxsPSJub25lIiBzdHJva2U9IiM2NDc0OGIiLz48Y2lyY2xlIGN4PSIxNy4yIiBjeT0iMTciIHI9IjEiIGZpbGw9IiMyMmM1NWUiLz48L3N2Zz4=',
+  'user':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIyMSIgcj0iMTMiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNMTAgNThjMi0xNiAxMC0yNCAyMi0yNHMyMCA4IDIyIDI0IiBmaWxsPSIjZmZmIi8+PC9zdmc+',
+  'setup_user':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMjUiIGN5PSIyMCIgcj0iMTEiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNNyA1M2MyLTEzIDgtMjAgMTgtMjAgNSAwIDkgMiAxMiA1IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iNDciIGN5PSI0NSIgcj0iMTIiIGZpbGw9IiNkZmYzZmYiLz48cGF0aCBkPSJNNDcgMzh2MTRNNDAgNDVoMTQiIHN0cm9rZT0iIzAwNzhkNCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=',
+  'arrow_right':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMTJoMTNtLTUtNSA1IDUtNSA1IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMS44IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4='
 };
 
 function jplopsoft_svgIconApply(node,name,size){
@@ -797,7 +803,8 @@ function jplopsoft_cmdCompletionCommandNames(){
     'type','cat','less','head','tail','start','notepad',
     'chkdsk','scandisk','sfc','tree','clip','whoami','ex','ex_md3',
     'pause','color','vol','libs','lib','libraries','message',
-    'msgbox','selftest','compat','servertest','exconfig','msconfig'
+    'msgbox','selftest','compat','servertest','exconfig','msconfig',
+    'taskmgr','taskmgr.exe','regedit','regedit.exe','diskmgmt','diskmgmt.msc'
   ];
 }
 
@@ -5358,6 +5365,9 @@ function jplopsoft_cmdHelpCanonical(name){
   if(n==='message'||n==='msgbox')return 'message';
   if(n==='selftest'||n==='compat'||n==='servertest')return 'selftest';
   if(n==='exconfig'||n==='msconfig'||n==='exconfig.exe'||n==='msconfig.exe')return 'exconfig';
+  if(n==='taskmgr'||n==='taskmgr.exe')return 'taskmgr';
+  if(n==='regedit'||n==='regedit.exe')return 'regedit';
+  if(n==='diskmgmt'||n==='diskmgmt.msc')return 'diskmgmt';
 
   return '';
 }
@@ -5628,6 +5638,21 @@ function jplopsoft_cmdHelpForCommand(name){
       jplopsoft_cmdWrite('    顯示 OS、PHP、ExFS、Web Server、Chunk 與重要 php.ini 參數；唯讀，不修改主機設定。');
       break;
 
+    case 'taskmgr':
+      jplopsoft_cmdWrite('TASKMGR / TASKMGR.EXE','info');
+      jplopsoft_cmdWrite('    開啟 ExFS 工作管理員；列出 user32 HWND、視窗狀態、Window Class 與 Client Area。');
+      break;
+
+    case 'regedit':
+      jplopsoft_cmdWrite('REGEDIT / REGEDIT.EXE','info');
+      jplopsoft_cmdWrite('    開啟 ExFS Registry Editor，可瀏覽 HKLM\\Software / HKCU，建立機碼與編輯 Registry 值。');
+      break;
+
+    case 'diskmgmt':
+      jplopsoft_cmdWrite('DISKMGMT / DISKMGMT.MSC','info');
+      jplopsoft_cmdWrite('    開啟 ExFS 磁碟管理員，顯示虛擬 C: 容量、配額、Volume Serial 與 metadata 統計。');
+      break;
+
     default:
       return false;
   }
@@ -5647,7 +5672,6 @@ function jplopsoft_cmdIsBlockedHostCommandName(name){
     n==='at'||
     n==='fc'||
     n==='osk'||
-    n==='regedit'||
     n==='path'||
     n==='attrib'||
     n==='cals'||
@@ -7758,6 +7782,21 @@ function jplopsoft_cmdExecute(raw){
     return;
   }
 
+  if(lower==='taskmgr'||lower==='taskmgr.exe'){
+    if(arg!==''){jplopsoft_cmdWrite('Usage: TASKMGR','error');return;}
+    jplopsoft_cmdWrite('Opening Task Manager ...','info');jplopsoft_openTaskManager();return;
+  }
+
+  if(lower==='regedit'||lower==='regedit.exe'){
+    if(arg!==''){jplopsoft_cmdWrite('Usage: REGEDIT','error');return;}
+    jplopsoft_cmdWrite('Opening Registry Editor ...','info');jplopsoft_openRegedit();return;
+  }
+
+  if(lower==='diskmgmt'||lower==='diskmgmt.msc'){
+    if(arg!==''){jplopsoft_cmdWrite('Usage: DISKMGMT','error');return;}
+    jplopsoft_cmdWrite('Opening Disk Management ...','info');jplopsoft_openDiskManager();return;
+  }
+
   if(jplopsoft_cmdIsBlockedHostCommandName(lower)){
     jplopsoft_cmdBlockedCommand(cmd);
     return;
@@ -8454,6 +8493,146 @@ function jplopsoft_wmUpdateExplorerTitle(){
   t.textContent='檔案總管 - '+String(name||'我的電腦');
 }
 
+
+function jplopsoft_nodeSvgIconName(n,name){
+  var fmt;
+  if(!n)return'file';
+  if(n.type==='folder')return'folder';
+  if(n.type==='reparse_point')return'link';
+  fmt=jplopsoft_fileFormatFromName(name||'');
+  if(fmt==='txt')return'txt';
+  if(fmt==='csv')return'csv';
+  if(fmt==='html')return'html';
+  return'file';
+}
+
+function jplopsoft_desktopSystemItems(){
+  return[
+    {key:'computer',name:'我的電腦',type:'系統資料夾',icon:'computer'},
+    {key:'cmd',name:'指令模式',type:'應用程式',icon:'cmd'},
+    {key:'trash',name:'資源回收桶',type:'系統資料夾',icon:'trash'}
+  ];
+}
+
+function jplopsoft_openDesktopSystemItem(key){
+  key=String(key||'');
+  if(key==='computer'){jplopsoft_wmOpenExplorer(0);return;}
+  if(key==='cmd'){jplopsoft_wmOpenCmd();return;}
+  if(key==='trash'){jplopsoft_openTrash();return;}
+}
+
+function jplopsoft_renderPhysicalDesktopShortcuts(){
+  var host=document.querySelector?document.querySelector('.jplopsoft_desktop-icons'):null,
+      old,i,list,item,n,b,icon,label,name,targetId;
+  if(!host)return;
+
+  old=host.querySelectorAll?host.querySelectorAll('[data-desktop-dynamic="1"]'):[];
+  for(i=old.length-1;i>=0;i--)if(old[i]&&old[i].parentNode===host)host.removeChild(old[i]);
+
+  list=jplopsoft_desktopShortcutEntries();
+  for(i=0;i<list.length;i++){
+    item=list[i];n=item.target;name=item.name;targetId=parseInt(item.target_node_id,10)||0;
+    if(targetId<=0)continue;
+
+    b=document.createElement('button');
+    b.type='button';
+    b.className='jplopsoft_desktop-icon jplopsoft_desktop-dynamic-shortcut';
+    b.setAttribute('data-desktop-dynamic','1');
+    b.setAttribute('data-desktop-shortcut-target',String(targetId));
+    b.title=name;
+
+    icon=document.createElement('span');
+    icon.className='jplopsoft_desktop-icon-glyph';
+    icon.setAttribute('data-exfs-svg',jplopsoft_nodeSvgIconName(n,name));
+    icon.setAttribute('data-exfs-svg-size','46');
+    b.appendChild(icon);
+
+    label=document.createElement('span');
+    label.textContent=name;
+    b.appendChild(label);
+
+    (function(id,node){
+      node.ondblclick=function(e){
+        e=e||window.event;
+        if(e&&e.preventDefault)e.preventDefault();
+        jplopsoft_openDesktopShortcut(id);
+        return false;
+      };
+      node.oncontextmenu=function(e){
+        jplopsoft_showDesktopShortcutContextMenu(e,id);
+        return false;
+      };
+    })(targetId,b);
+
+    host.appendChild(b);
+  }
+  jplopsoft_applySvgIcons(host);
+}
+
+function jplopsoft_renderDesktopSystemRows(body){
+  var list=jplopsoft_desktopSystemItems(),i,item,tr,td,span;
+  for(i=0;i<list.length;i++){
+    item=list[i];
+    tr=document.createElement('tr');
+    tr.className='jplopsoft_item-row '+(state.desktopShellSelected===item.key?'jplopsoft_selected':'');
+    tr.setAttribute('data-desktop-system-item',item.key);
+
+    td=document.createElement('td');td.className='jplopsoft_checkcell';tr.appendChild(td);
+
+    td=document.createElement('td');td.className='jplopsoft_namecell';
+    span=document.createElement('span');
+    span.className='jplopsoft_inline-svg';
+    span.setAttribute('data-exfs-svg',item.icon);
+    span.setAttribute('data-exfs-svg-size','18');
+    td.appendChild(span);
+    td.appendChild(document.createTextNode(item.name));
+    tr.appendChild(td);
+
+    td=document.createElement('td');td.textContent=item.type;tr.appendChild(td);
+    td=document.createElement('td');td.className='jplopsoft_muted';td.textContent='—';tr.appendChild(td);
+    td=document.createElement('td');td.className='jplopsoft_muted';td.textContent='—';tr.appendChild(td);
+
+    (function(key,row){
+      row.onclick=function(){
+        state.desktopSelectedTargetId=0;
+        state.desktopShellSelected=key;
+        jplopsoft_refreshVisibleFileRowSelection();
+      };
+      row.ondblclick=function(e){
+        e=e||window.event;
+        if(e&&e.preventDefault)e.preventDefault();
+        jplopsoft_openDesktopSystemItem(key);
+        return false;
+      };
+    })(item.key,tr);
+
+    body.appendChild(tr);
+  }
+  jplopsoft_applySvgIcons(body);
+}
+
+function jplopsoft_showDesktopSystemContextMenu(ev,key){
+  var menu=jplopsoft_el('jplopsoft_exfsContextMenu');
+  if(!menu)return;
+  if(ev){
+    if(ev.preventDefault)ev.preventDefault();
+    if(ev.stopPropagation)ev.stopPropagation();
+    ev.cancelBubble=true;
+  }
+  jplopsoft_hideExfsContextMenu();
+  state.desktopSelectedTargetId=0;
+  state.desktopShellSelected=String(key||'');
+  jplopsoft_refreshVisibleFileRowSelection();
+  menu.appendChild(jplopsoft_exfsContextMenuButton(
+    '','開啟',function(){jplopsoft_openDesktopSystemItem(key);},false,false
+  ));
+  jplopsoft_exfsPositionContextMenu(
+    menu,
+    ev&&typeof ev.clientX==='number'?ev.clientX:0,
+    ev&&typeof ev.clientY==='number'?ev.clientY:0
+  );
+}
+
 function jplopsoft_renderAll(){
   jplopsoft_wmUpdateExplorerTitle();
   jplopsoft_uiStorageSave();
@@ -8469,6 +8648,7 @@ function jplopsoft_renderAll(){
   }
 
   jplopsoft_renderTree();
+  jplopsoft_renderPhysicalDesktopShortcuts();
   jplopsoft_renderBreadcrumbs();
   jplopsoft_renderFiles();
   jplopsoft_updateLocationToolbarState();
@@ -9170,6 +9350,7 @@ function jplopsoft_bindExconfig(){
   if(jplopsoft_el('jplopsoft_exconfigCloseTop'))jplopsoft_el('jplopsoft_exconfigCloseTop').onclick=jplopsoft_closeExconfig;
   if(jplopsoft_el('jplopsoft_exconfigCloseBtn'))jplopsoft_el('jplopsoft_exconfigCloseBtn').onclick=jplopsoft_closeExconfig;
   if(jplopsoft_el('jplopsoft_exconfigRefreshBtn'))jplopsoft_el('jplopsoft_exconfigRefreshBtn').onclick=jplopsoft_loadExconfig;
+  if(jplopsoft_el('jplopsoft_controlDiskMgmtBtn'))jplopsoft_el('jplopsoft_controlDiskMgmtBtn').onclick=jplopsoft_openDiskManager;
   b.onclick=function(e){if(e.target!==b)jplopsoft_wmActivateOverlay('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');};
   tabs=b.getElementsByClassName('jplopsoft_exconfig-tab');
   for(i=0;i<tabs.length;i++)(function(tab){tab.onclick=function(){jplopsoft_exconfigSetTab(tab.getAttribute('data-exconfig-tab'));};})(tabs[i]);
@@ -9966,7 +10147,8 @@ function jplopsoft_exfsContextFindItemRow(target,panel){
       typeof cur.getAttribute==='function'&&
       (
         cur.getAttribute('data-node-id')!==null||
-        cur.getAttribute('data-desktop-shortcut-target')!==null
+        cur.getAttribute('data-desktop-shortcut-target')!==null||
+        cur.getAttribute('data-desktop-system-item')!==null
       )
     ){
       return cur;
@@ -10002,7 +10184,12 @@ function jplopsoft_bindExfsContextMenu(){
     );
 
     if(row){
-      if(row.getAttribute('data-desktop-shortcut-target')!==null){
+      if(row.getAttribute('data-desktop-system-item')!==null){
+        jplopsoft_showDesktopSystemContextMenu(
+          ev,
+          String(row.getAttribute('data-desktop-system-item')||'')
+        );
+      }else if(row.getAttribute('data-desktop-shortcut-target')!==null){
         jplopsoft_showDesktopShortcutContextMenu(
           ev,
           parseInt(
@@ -10139,14 +10326,15 @@ function jplopsoft_refreshVisibleFileRowSelection(){
     selected=false;
 
     if(desktop){
-      id=parseInt(
-        row.getAttribute('data-desktop-shortcut-target'),
-        10
-      )||0;
-
-      selected=
-        id>0&&
-        id===parseInt(state.desktopSelectedTargetId,10);
+      if(row.getAttribute('data-desktop-system-item')!==null){
+        selected=String(row.getAttribute('data-desktop-system-item')||'')===String(state.desktopShellSelected||'');
+      }else{
+        id=parseInt(
+          row.getAttribute('data-desktop-shortcut-target'),
+          10
+        )||0;
+        selected=id>0&&id===parseInt(state.desktopSelectedTargetId,10);
+      }
     }else{
       id=parseInt(
         row.getAttribute('data-node-id'),
@@ -10181,14 +10369,17 @@ function jplopsoft_renderDesktopShortcuts(){
   jplopsoft_updateSortHeaders();
   body.innerHTML='';
 
-  empty.textContent='桌面目前沒有捷徑。';
-  empty.className=list.length?'jplopsoft_empty jplopsoft_hidden':'jplopsoft_empty';
+  empty.textContent='桌面目前沒有使用者捷徑。';
+  empty.className='jplopsoft_empty jplopsoft_hidden';
 
   if(jplopsoft_el('jplopsoft_selectAllRows')){
     jplopsoft_el('jplopsoft_selectAllRows').checked=false;
     jplopsoft_el('jplopsoft_selectAllRows').indeterminate=false;
     jplopsoft_el('jplopsoft_selectAllRows').disabled=true;
   }
+
+  /* Explorer's Desktop namespace and the visible Desktop share one source. */
+  jplopsoft_renderDesktopSystemRows(body);
 
   for(i=0;i<list.length;i++){
     item=list[i];
@@ -10257,6 +10448,7 @@ function jplopsoft_renderDesktopShortcuts(){
     (function(targetId,row){
       row.onclick=function(){
         state.selectedId=0;
+        state.desktopShellSelected='';
         state.desktopSelectedTargetId=targetId;
         jplopsoft_refreshVisibleFileRowSelection();
       };
@@ -12514,6 +12706,295 @@ function jplopsoft_bindRich(){var tb=jplopsoft_el('jplopsoft_richToolbar'),butto
  * Windows 10-style ExFS taskbar / Start menu
  * ---------------------------------------------------------------------- */
 
+
+/* =========================================================================
+ * NT interactive-session model
+ *
+ * Pre-logon:
+ *   Session 1 -> WinSta0 -> Winlogon Desktop
+ *   setup.exe / LogonUI.exe -> NT AUTHORITY\SYSTEM
+ *
+ * Post-logon:
+ *   Session 1 -> WinSta0 -> Default Desktop
+ *   explorer.exe -> SAM user's Access Token
+ *
+ * This models NT ownership/desktop transitions inside ExFS. Browser JS does
+ * not create a real kernel WindowStation or a protected Windows secure desktop.
+ * ========================================================================= */
+var jplopsoft_NT_INTERACTIVE={
+  sessionId:1,
+  serviceSessionId:0,
+  windowStation:'WinSta0',
+  desktop:'Winlogon',
+  principal:'NT AUTHORITY\\SYSTEM',
+  sid:'S-1-5-18',
+  integrity:'SYSTEM',
+  process:'LogonUI.exe',
+  phase:'LOGON'
+};
+
+function jplopsoft_ntPublishContext(){
+  var body=document.body,n=jplopsoft_el('jplopsoft_secureDesktopContext'),text;
+
+  if(body){
+    body.setAttribute('data-exfs-session',String(jplopsoft_NT_INTERACTIVE.sessionId));
+    body.setAttribute('data-exfs-window-station',String(jplopsoft_NT_INTERACTIVE.windowStation));
+    body.setAttribute('data-exfs-desktop',String(jplopsoft_NT_INTERACTIVE.desktop));
+    body.setAttribute('data-exfs-principal',String(jplopsoft_NT_INTERACTIVE.principal));
+    body.setAttribute('data-exfs-integrity',String(jplopsoft_NT_INTERACTIVE.integrity));
+    body.setAttribute('data-exfs-process',String(jplopsoft_NT_INTERACTIVE.process));
+  }
+
+  text='Session '+jplopsoft_NT_INTERACTIVE.sessionId+
+       ' · '+jplopsoft_NT_INTERACTIVE.windowStation+'\\'+jplopsoft_NT_INTERACTIVE.desktop+
+       ' · '+jplopsoft_NT_INTERACTIVE.principal+
+       ' · '+jplopsoft_NT_INTERACTIVE.process;
+
+  if(n)n.textContent=text;
+}
+
+function jplopsoft_ntEnterWinlogonDesktop(process,phase){
+  jplopsoft_NT_INTERACTIVE.sessionId=1;
+  jplopsoft_NT_INTERACTIVE.serviceSessionId=0;
+  jplopsoft_NT_INTERACTIVE.windowStation='WinSta0';
+  jplopsoft_NT_INTERACTIVE.desktop='Winlogon';
+  jplopsoft_NT_INTERACTIVE.principal='NT AUTHORITY\\SYSTEM';
+  jplopsoft_NT_INTERACTIVE.sid='S-1-5-18';
+  jplopsoft_NT_INTERACTIVE.integrity='SYSTEM';
+  jplopsoft_NT_INTERACTIVE.process=String(process||'LogonUI.exe');
+  jplopsoft_NT_INTERACTIVE.phase=String(phase||'LOGON');
+  jplopsoft_ntPublishContext();
+}
+
+function jplopsoft_ntEnterDefaultDesktop(username,sid){
+  username=String(username||'administrator').toLowerCase();
+  jplopsoft_NT_INTERACTIVE.sessionId=1;
+  jplopsoft_NT_INTERACTIVE.serviceSessionId=0;
+  jplopsoft_NT_INTERACTIVE.windowStation='WinSta0';
+  jplopsoft_NT_INTERACTIVE.desktop='Default';
+  jplopsoft_NT_INTERACTIVE.principal=username;
+  jplopsoft_NT_INTERACTIVE.sid=String(sid||'');
+  jplopsoft_NT_INTERACTIVE.integrity='USER';
+  jplopsoft_NT_INTERACTIVE.process='explorer.exe';
+  jplopsoft_NT_INTERACTIVE.phase='USER_DESKTOP';
+  jplopsoft_ntPublishContext();
+}
+
+function jplopsoft_ntSyncRouteSecurityContext(){
+  if(jplopsoft_routeIsSystem()){
+    if(jplopsoft_EXE_ROUTE&&jplopsoft_EXE_ROUTE.app==='os_setup'){
+      jplopsoft_ntEnterWinlogonDesktop('setup.exe','OOBE');
+    }else{
+      jplopsoft_ntEnterWinlogonDesktop('LogonUI.exe','LOGON');
+    }
+    return;
+  }
+
+  if(state&&state.samAuthenticated&&state.samSid){
+    jplopsoft_ntEnterDefaultDesktop(state.samUsername||jplopsoft_routeUsername(),state.samSid);
+  }else{
+    jplopsoft_ntEnterWinlogonDesktop('LogonUI.exe','CREDENTIAL_REQUIRED');
+  }
+}
+
+function jplopsoft_selectLogonAccount(username,focusPassword){
+  var sel=jplopsoft_el('jplopsoft_loginUserInput'),
+      input=jplopsoft_el('jplopsoft_keyInput');
+
+  username=String(username||state.defaultUsername||'administrator').toLowerCase();
+
+  if(sel)sel.value=username;
+  state.samUsername=username;
+  if(input)input.value='';
+
+  jplopsoft_renderLogonAccounts();
+
+  if(focusPassword!==false&&input){
+    window.setTimeout(function(){try{input.focus();}catch(ignoreFocus){}},20);
+  }
+}
+
+function jplopsoft_renderLogonAccounts(){
+  var host=jplopsoft_el('jplopsoft_logonAccountList'),
+      selected=jplopsoft_el('jplopsoft_logonSelectedUser'),
+      sel=jplopsoft_el('jplopsoft_loginUserInput'),
+      users=state.samUsers||[],
+      username,i,b,icon,copy,name,type,nameNode;
+
+  username=String(sel&&sel.value?sel.value:(state.samUsername||state.defaultUsername||'administrator')).toLowerCase();
+  if(selected)selected.textContent=username;
+
+  if(!host)return;
+  host.innerHTML='';
+
+  for(i=0;i<users.length;i++){
+    name=String(users[i]||'').toLowerCase();
+    if(!name)continue;
+
+    b=document.createElement('button');
+    b.type='button';
+    b.className='jplopsoft_logon-account'+(name===username?' jplopsoft_active':'');
+    b.setAttribute('data-logon-user',name);
+    b.setAttribute('aria-pressed',name===username?'true':'false');
+
+    icon=document.createElement('span');
+    icon.className='jplopsoft_logon-account-icon';
+    icon.setAttribute('data-exfs-svg','user');
+    icon.setAttribute('data-exfs-svg-size','36');
+    b.appendChild(icon);
+
+    copy=document.createElement('span');
+    copy.className='jplopsoft_logon-account-copy';
+
+    nameNode=document.createElement('span');
+    nameNode.className='jplopsoft_logon-account-name';
+    nameNode.textContent=name;
+    copy.appendChild(nameNode);
+
+    type=document.createElement('small');
+    type.className='jplopsoft_logon-account-type';
+    type.textContent=name==='administrator'?'內建系統管理員':'本機帳號';
+    copy.appendChild(type);
+    b.appendChild(copy);
+
+    (function(u,node){
+      node.onclick=function(){jplopsoft_selectLogonAccount(u,true);};
+    })(name,b);
+
+    host.appendChild(b);
+  }
+
+  jplopsoft_applySvgIcons(host);
+}
+
+function jplopsoft_oobePasswordFeedback(){
+  var p=jplopsoft_el('jplopsoft_setupPasswordInput'),
+      c=jplopsoft_el('jplopsoft_setupConfirmInput'),
+      s=jplopsoft_el('jplopsoft_oobePasswordState'),
+      raw=p?String(p.value||''):'',
+      confirm=c?String(c.value||''):'';
+
+  if(!s)return;
+
+  if(!raw){
+    s.className='jplopsoft_oobe-password-state';
+    s.textContent='請設定不容易猜測的密碼。';
+    return;
+  }
+
+  if(raw.length<8){
+    s.className='jplopsoft_oobe-password-state jplopsoft_bad';
+    s.textContent='建議至少 8 個字元。';
+    return;
+  }
+
+  if(confirm&&raw!==confirm){
+    s.className='jplopsoft_oobe-password-state jplopsoft_bad';
+    s.textContent='兩次輸入的密碼不一致。';
+    return;
+  }
+
+  if(confirm&&raw===confirm){
+    s.className='jplopsoft_oobe-password-state jplopsoft_ok';
+    s.textContent='密碼確認完成。';
+    return;
+  }
+
+  s.className='jplopsoft_oobe-password-state';
+  s.textContent='請再輸入一次密碼確認。';
+}
+
+function jplopsoft_submitCredentialUI(){
+  var username,raw,confirm,setupName;
+
+  if(state.kdfBusy)return;
+
+  if(!state.initialized){
+    setupName=jplopsoft_el('jplopsoft_setupAccountName');
+    username=String(setupName&&setupName.value?setupName.value:(state.defaultUsername||'administrator')).toLowerCase();
+    raw=String(jplopsoft_el('jplopsoft_setupPasswordInput')?jplopsoft_el('jplopsoft_setupPasswordInput').value:'');
+    confirm=String(jplopsoft_el('jplopsoft_setupConfirmInput')?jplopsoft_el('jplopsoft_setupConfirmInput').value:'');
+
+    if(!raw){
+      alert('請建立 administrator 密碼。');
+      jplopsoft_focusDecryptPassword(false);
+      return;
+    }
+
+    if(raw!==confirm){
+      alert('兩次輸入的密碼不一致。');
+      if(jplopsoft_el('jplopsoft_setupConfirmInput'))jplopsoft_el('jplopsoft_setupConfirmInput').focus();
+      return;
+    }
+
+    jplopsoft_unlockWithPassword(username,raw,false);
+    return;
+  }
+
+  username=String(jplopsoft_el('jplopsoft_loginUserInput')?jplopsoft_el('jplopsoft_loginUserInput').value:(state.defaultUsername||'administrator')).toLowerCase();
+  raw=String(jplopsoft_el('jplopsoft_keyInput')?jplopsoft_el('jplopsoft_keyInput').value:'');
+  jplopsoft_unlockWithPassword(username,raw,jplopsoft_rememberUnlockEnabled());
+}
+
+function jplopsoft_secureDesktopUpdate(){
+  var shell=jplopsoft_el('jplopsoft_secureDesktopShell'),
+      logon=jplopsoft_el('jplopsoft_logonView'),
+      status=jplopsoft_el('jplopsoft_logonStatusMirror'),
+      setupName=jplopsoft_el('jplopsoft_setupAccountName');
+
+  if(shell&&jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI){
+    shell.style.backgroundImage='url("'+jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI+'")';
+    shell.style.backgroundPosition='center center';
+    shell.style.backgroundSize='cover';
+  }
+
+  if(logon&&jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI){
+    logon.style.backgroundImage='url("'+jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI+'")';
+  }
+
+  if(setupName)setupName.value=String(state.defaultUsername||'administrator');
+
+  jplopsoft_renderLogonAccounts();
+  jplopsoft_oobePasswordFeedback();
+  jplopsoft_ntSyncRouteSecurityContext();
+
+  if(status&&state.kdfBusy)status.textContent='正在驗證認證資訊…';
+}
+
+function jplopsoft_bindSecureDesktopUI(){
+  var setupPass=jplopsoft_el('jplopsoft_setupPasswordInput'),
+      setupConfirm=jplopsoft_el('jplopsoft_setupConfirmInput'),
+      setupNext=jplopsoft_el('jplopsoft_setupNextBtn');
+
+  if(setupPass){
+    setupPass.oninput=jplopsoft_oobePasswordFeedback;
+    setupPass.onkeydown=function(e){
+      e=e||window.event;
+      if((e.keyCode||e.which)===13){
+        if(e.preventDefault)e.preventDefault();
+        try{if(setupConfirm)setupConfirm.focus();}catch(ignore){}
+        return false;
+      }
+    };
+  }
+
+  if(setupConfirm){
+    setupConfirm.oninput=jplopsoft_oobePasswordFeedback;
+    setupConfirm.onkeydown=function(e){
+      e=e||window.event;
+      if((e.keyCode||e.which)===13){
+        if(e.preventDefault)e.preventDefault();
+        jplopsoft_submitCredentialUI();
+        return false;
+      }
+    };
+  }
+
+  if(setupNext)setupNext.onclick=jplopsoft_submitCredentialUI;
+
+  jplopsoft_secureDesktopUpdate();
+}
+
 /* =========================================================================
  * ExFS user32.dll compatibility layer
  *
@@ -13387,6 +13868,9 @@ function jplopsoft_wmAfterUnlock(){
 function jplopsoft_wmPrepareLock(){
   var explorer=jplopsoft_el('jplopsoft_explorerWindow');
   jplopsoft_multiEditorCloseAll(true);
+  if(jplopsoft_TASKMGR.hwnd)jplopsoft_closeTaskManager();
+  if(jplopsoft_REGEDIT.hwnd)jplopsoft_closeRegedit();
+  if(jplopsoft_DISKMGMT.hwnd)jplopsoft_closeDiskManager();
   jplopsoft_setBodyClassToken('jplopsoft_exfs-desktop-ready',false);
   if(explorer){
     jplopsoft_wmClassRemove(explorer,'jplopsoft_hidden');
@@ -13468,6 +13952,513 @@ function jplopsoft_taskbarAppClick(appId){
   })();
 }
 
+
+
+/* =========================================================================
+ * Task Manager
+ * ========================================================================= */
+var jplopsoft_TASKMGR={hwnd:0,timer:0,bodyId:'jplopsoft_taskmgrBody'};
+
+function jplopsoft_taskmgrRecordRunning(rec){
+  var b,w;
+  if(!rec||rec.destroying)return false;
+  w=jplopsoft_el(rec.windowId);
+  if(rec.dynamic)return !!w;
+  if(rec.appId&&jplopsoft_el(jplopsoft_taskbarAppId(rec.appId)))return true;
+  if(rec.appId==='document'&&state.openId)return true;
+  if(rec.overlay&&rec.backdropId){
+    b=jplopsoft_el(rec.backdropId);
+    if(b&&b.style.display!=='none'&&b.offsetWidth>0)return true;
+  }
+  return !!(w&&w.style.display!=='none'&&!jplopsoft_wmClassHas(w,'jplopsoft_hidden'));
+}
+
+function jplopsoft_taskmgrWindowTitle(rec){
+  var n,w;
+  if(!rec)return'';
+  if(rec.titleId){
+    n=jplopsoft_el(rec.titleId);
+    if(n&&jplopsoft_trim(n.textContent||''))return jplopsoft_trim(n.textContent||'');
+  }
+  if(rec.title)return String(rec.title);
+  w=jplopsoft_el(rec.windowId);
+  if(w&&w.querySelector){
+    n=w.querySelector('.jplopsoft_wm-title,.jplopsoft_modal-title,.jplopsoft_properties-head-name');
+    if(n&&jplopsoft_trim(n.textContent||''))return jplopsoft_trim(n.textContent||'');
+  }
+  return rec.appId||rec.className||('HWND '+rec.hwnd);
+}
+
+function jplopsoft_taskmgrState(rec){
+  if(!rec)return'';
+  if(parseInt(jplopsoft_DWM.activeHwnd,10)===parseInt(rec.hwnd,10))return'執行中';
+  if(!jplopsoft_user32DisplayIsVisible(rec))return'已最小化';
+  return'背景';
+}
+
+function jplopsoft_taskmgrSwitch(hwnd){
+  var rec=jplopsoft_user32GetRecord(hwnd);
+  if(!rec)return;
+  jplopsoft_user32Display(rec,true);
+  jplopsoft_user32Activate(rec);
+  jplopsoft_taskmgrRender();
+}
+
+function jplopsoft_taskmgrEnd(hwnd){
+  var rec=jplopsoft_user32GetRecord(hwnd),title;
+  if(!rec)return;
+  title=jplopsoft_taskmgrWindowTitle(rec);
+  if(!window.confirm('要結束「'+title+'」嗎？'))return;
+  jplopsoft_SendMessage(hwnd,jplopsoft_WM_CLOSE,0,0);
+  window.setTimeout(jplopsoft_taskmgrRender,50);
+}
+
+function jplopsoft_taskmgrRender(){
+  var body=jplopsoft_el(jplopsoft_TASKMGR.bodyId),table,thead,tbody,tr,th,td,k,rec,rows=[],rect,b,summary,i;
+  if(!body)return;
+  body.innerHTML='';
+
+  for(k in jplopsoft_USER32.windows){
+    if(jplopsoft_USER32.windows.hasOwnProperty(k)){
+      rec=jplopsoft_USER32.windows[k];
+      if(jplopsoft_taskmgrRecordRunning(rec))rows.push(rec);
+    }
+  }
+  rows.sort(function(a,b){return(parseInt(a.hwnd,10)||0)-(parseInt(b.hwnd,10)||0);});
+
+  summary=document.createElement('div');
+  summary.className='jplopsoft_taskmgr-summary';
+  summary.textContent='執行中的視窗：'+rows.length+' ｜ DWM Active HWND：'+(jplopsoft_DWM.activeHwnd||'—');
+  body.appendChild(summary);
+
+  table=document.createElement('table');table.className='jplopsoft_taskmgr-table';
+  thead=document.createElement('thead');tr=document.createElement('tr');
+  ['應用程式','HWND','狀態','Window Class','Client Area','動作'].forEach(function(x){
+    th=document.createElement('th');th.textContent=x;tr.appendChild(th);
+  });
+  thead.appendChild(tr);table.appendChild(thead);
+  tbody=document.createElement('tbody');
+
+  for(i=0;i<rows.length;i++){
+    rec=rows[i];
+    tr=document.createElement('tr');
+    if(parseInt(jplopsoft_DWM.activeHwnd,10)===parseInt(rec.hwnd,10))tr.className='jplopsoft_taskmgr-active-row';
+
+    td=document.createElement('td');td.textContent=jplopsoft_taskmgrWindowTitle(rec);tr.appendChild(td);
+    td=document.createElement('td');td.textContent=String(rec.hwnd);tr.appendChild(td);
+    td=document.createElement('td');td.className='jplopsoft_taskmgr-state';td.textContent=jplopsoft_taskmgrState(rec);tr.appendChild(td);
+    td=document.createElement('td');td.textContent=String(rec.className||'');tr.appendChild(td);
+
+    rect=jplopsoft_GetClientRect(rec.hwnd);
+    td=document.createElement('td');td.textContent=rect?(Math.round(rect.width)+' × '+Math.round(rect.height)):'—';tr.appendChild(td);
+
+    td=document.createElement('td');td.className='jplopsoft_taskmgr-actions';
+    b=document.createElement('button');b.className='jplopsoft_btn jplopsoft_small';b.type='button';b.textContent='切換至';
+    (function(h){b.onclick=function(){jplopsoft_taskmgrSwitch(h);};})(rec.hwnd);td.appendChild(b);
+    b=document.createElement('button');b.className='jplopsoft_btn jplopsoft_small';b.type='button';b.textContent='結束工作';
+    (function(h){b.onclick=function(){jplopsoft_taskmgrEnd(h);};})(rec.hwnd);td.appendChild(b);
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
+
+  table.appendChild(tbody);
+  body.appendChild(table);
+}
+
+function jplopsoft_closeTaskManager(){
+  var h=jplopsoft_TASKMGR.hwnd;
+  if(jplopsoft_TASKMGR.timer){window.clearInterval(jplopsoft_TASKMGR.timer);jplopsoft_TASKMGR.timer=0;}
+  jplopsoft_TASKMGR.hwnd=0;
+  if(h)jplopsoft_DestroyWindow(h);
+}
+
+function jplopsoft_openTaskManager(){
+  var h,client,toolbar,refresh,body,status;
+  if(jplopsoft_TASKMGR.hwnd&&jplopsoft_user32GetRecord(jplopsoft_TASKMGR.hwnd)){
+    jplopsoft_ShowWindow(jplopsoft_TASKMGR.hwnd,jplopsoft_SW_RESTORE);
+    jplopsoft_taskmgrRender();
+    return;
+  }
+
+  h=jplopsoft_CreateWindowEx(
+    jplopsoft_WS_EX_APPWINDOW,
+    'ExFS.Window',
+    '工作管理員',
+    jplopsoft_WS_OVERLAPPEDWINDOW|jplopsoft_WS_VISIBLE,
+    120,80,920,650,null,null,null,
+    {
+      appId:'taskmgr',icon:'taskmgr',windowClass:'jplopsoft_taskmgr-window',taskbar:true,
+      wndProc:function(hwnd,msg){
+        if(msg===jplopsoft_WM_CLOSE){jplopsoft_closeTaskManager();return 0;}
+        return null;
+      }
+    }
+  );
+  if(!h)return;
+  jplopsoft_TASKMGR.hwnd=h;
+  client=jplopsoft_GetClientElement(h);
+  client.className+=' jplopsoft_taskmgr-client';
+
+  toolbar=document.createElement('div');toolbar.className='jplopsoft_app-toolbar';
+  refresh=document.createElement('button');refresh.type='button';refresh.className='jplopsoft_btn jplopsoft_small';refresh.textContent='重新整理';refresh.onclick=jplopsoft_taskmgrRender;toolbar.appendChild(refresh);
+  status=document.createElement('span');status.className='jplopsoft_taskmgr-summary';status.textContent='ExFS user32 / DWM 視窗工作管理員';toolbar.appendChild(status);
+  client.appendChild(toolbar);
+
+  body=document.createElement('div');body.id=jplopsoft_TASKMGR.bodyId;body.className='jplopsoft_taskmgr-table-wrap';client.appendChild(body);
+
+  jplopsoft_taskmgrRender();
+  jplopsoft_TASKMGR.timer=window.setInterval(function(){
+    if(jplopsoft_TASKMGR.hwnd&&jplopsoft_user32GetRecord(jplopsoft_TASKMGR.hwnd))jplopsoft_taskmgrRender();
+  },1000);
+}
+
+/* =========================================================================
+ * Registry Editor (regedit.exe)
+ * ========================================================================= */
+var jplopsoft_REGEDIT={
+  hwnd:0,snapshot:null,hive:'HKCU',key:'',selectedValue:null,
+  treeId:'jplopsoft_regeditTree',valuesId:'jplopsoft_regeditValues',
+  pathId:'jplopsoft_regeditPath',statusId:'jplopsoft_regeditStatus'
+};
+
+function jplopsoft_regeditFullPath(hive,key){
+  hive=String(hive||'HKCU');key=String(key||'');
+  if(hive==='HKLM')return'HKEY_LOCAL_MACHINE\\Software'+(key?'\\'+key:'');
+  return'HKEY_CURRENT_USER'+(key?'\\'+key:'');
+}
+
+function jplopsoft_regeditHiveData(hive){
+  var s=jplopsoft_REGEDIT.snapshot;
+  return s&&s.hives?s.hives[String(hive||'HKCU')]:null;
+}
+
+function jplopsoft_regeditCurrentKeyRecord(){
+  var h=jplopsoft_regeditHiveData(jplopsoft_REGEDIT.hive),key=String(jplopsoft_REGEDIT.key||'');
+  return h&&h.keys&&h.keys[key]?h.keys[key]:null;
+}
+
+function jplopsoft_regeditSetStatus(text){
+  var n=jplopsoft_el(jplopsoft_REGEDIT.statusId);
+  if(n)n.textContent=String(text||'');
+}
+
+function jplopsoft_regeditSelect(hive,key){
+  jplopsoft_REGEDIT.hive=String(hive||'HKCU');
+  jplopsoft_REGEDIT.key=String(key||'');
+  jplopsoft_REGEDIT.selectedValue=null;
+  jplopsoft_regeditRenderTree();
+  jplopsoft_regeditRenderValues();
+}
+
+function jplopsoft_regeditRenderTree(){
+  var host=jplopsoft_el(jplopsoft_REGEDIT.treeId),hives=['HKLM','HKCU'],i,hive,h,keyNames,j,key,row,label,depth;
+  if(!host)return;
+  host.innerHTML='';
+
+  for(i=0;i<hives.length;i++){
+    hive=hives[i];h=jplopsoft_regeditHiveData(hive);if(!h)continue;
+
+    row=document.createElement('button');row.type='button';
+    row.className='jplopsoft_regedit-tree-row '+(jplopsoft_REGEDIT.hive===hive&&jplopsoft_REGEDIT.key===''?'jplopsoft_active':'');
+    row.style.paddingLeft='8px';row.textContent=String(h.display||hive);
+    (function(x){row.onclick=function(){jplopsoft_regeditSelect(x,'');};})(hive);
+    host.appendChild(row);
+
+    keyNames=[];
+    for(key in h.keys)if(h.keys.hasOwnProperty(key))keyNames.push(key);
+    keyNames.sort();
+
+    for(j=0;j<keyNames.length;j++){
+      key=String(keyNames[j]||'');
+      if(key==='')continue;
+      depth=key.split('\\').length;
+      label=key.substring(key.lastIndexOf('\\')+1);
+      row=document.createElement('button');row.type='button';
+      row.className='jplopsoft_regedit-tree-row '+(jplopsoft_REGEDIT.hive===hive&&jplopsoft_REGEDIT.key===key?'jplopsoft_active':'');
+      row.style.paddingLeft=(12+depth*14)+'px';
+      row.textContent=label;
+      row.title=jplopsoft_regeditFullPath(hive,key);
+      (function(x,k){row.onclick=function(){jplopsoft_regeditSelect(x,k);};})(hive,key);
+      host.appendChild(row);
+    }
+  }
+}
+
+function jplopsoft_regeditRenderValues(){
+  var host=jplopsoft_el(jplopsoft_REGEDIT.valuesId),path=jplopsoft_el(jplopsoft_REGEDIT.pathId),
+      rec,values,names=[],name,v,table,thead,tbody,tr,th,td,i;
+  if(!host)return;
+  host.innerHTML='';
+  if(path)path.textContent=jplopsoft_regeditFullPath(jplopsoft_REGEDIT.hive,jplopsoft_REGEDIT.key);
+
+  rec=jplopsoft_regeditCurrentKeyRecord();
+  values=rec&&rec.values?rec.values:{};
+  for(name in values)if(values.hasOwnProperty(name))names.push(name);
+  names.sort();
+
+  if(!names.length){
+    var empty=document.createElement('div');empty.className='jplopsoft_regedit-empty';empty.textContent='此機碼目前沒有值。';host.appendChild(empty);
+    return;
+  }
+
+  table=document.createElement('table');table.className='jplopsoft_regedit-values-table';
+  thead=document.createElement('thead');tr=document.createElement('tr');
+  ['名稱','類型','資料','更新時間'].forEach(function(x){th=document.createElement('th');th.textContent=x;tr.appendChild(th);});
+  thead.appendChild(tr);table.appendChild(thead);tbody=document.createElement('tbody');
+
+  for(i=0;i<names.length;i++){
+    name=names[i];v=values[name]||{};
+    tr=document.createElement('tr');
+    if(jplopsoft_REGEDIT.selectedValue===name)tr.className='jplopsoft_selected';
+    tr.setAttribute('data-reg-value-name',name);
+
+    td=document.createElement('td');td.textContent=name===''?'(預設)':name;tr.appendChild(td);
+    td=document.createElement('td');td.textContent=String(v.type||'REG_SZ');tr.appendChild(td);
+    td=document.createElement('td');td.textContent=String(typeof v.data==='undefined'?'':v.data);tr.appendChild(td);
+    td=document.createElement('td');td.textContent=String(v.updated_at||'');tr.appendChild(td);
+
+    (function(n,row){
+      row.onclick=function(){jplopsoft_REGEDIT.selectedValue=n;jplopsoft_regeditRenderValues();};
+      row.ondblclick=function(){jplopsoft_REGEDIT.selectedValue=n;jplopsoft_regeditEditValue();};
+    })(name,tr);
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);host.appendChild(table);
+}
+
+function jplopsoft_regeditLoad(){
+  jplopsoft_regeditSetStatus('正在讀取 Registry...');
+  jplopsoft_api('regedit_snapshot','GET',null,true,function(err,out){
+    if(err){jplopsoft_regeditSetStatus('讀取失敗：'+err.message);return;}
+    jplopsoft_REGEDIT.snapshot=out;
+    if(!jplopsoft_regeditHiveData(jplopsoft_REGEDIT.hive)){jplopsoft_REGEDIT.hive='HKCU';jplopsoft_REGEDIT.key='';}
+    jplopsoft_regeditRenderTree();
+    jplopsoft_regeditRenderValues();
+    jplopsoft_regeditSetStatus('WINDOWS_NT_REGISTRY_V1 ｜ '+jplopsoft_regeditFullPath(jplopsoft_REGEDIT.hive,jplopsoft_REGEDIT.key));
+  });
+}
+
+function jplopsoft_regeditWriteValue(name,type,data){
+  var hive=jplopsoft_REGEDIT.hive,key=jplopsoft_REGEDIT.key;
+  jplopsoft_api('reg_open_key','POST',{hive:hive,key:key,desired_access:'KEY_WRITE'},true,function(err,out){
+    var h;
+    if(err){alert(err.message);return;}
+    h=out.handle;
+    jplopsoft_api('reg_set_value','POST',{handle:h,name:name,type:type,data:data},true,function(err2){
+      jplopsoft_api('reg_close_key','POST',{handle:h},true,function(){});
+      if(err2){alert(err2.message);return;}
+      jplopsoft_regeditLoad();
+    });
+  });
+}
+
+function jplopsoft_regeditEditValue(){
+  var rec=jplopsoft_regeditCurrentKeyRecord(),name=jplopsoft_REGEDIT.selectedValue,v,data,type;
+  if(name===null||!rec||!rec.values||!rec.values.hasOwnProperty(name))return;
+  v=rec.values[name]||{};type=String(v.type||'REG_SZ');
+  data=window.prompt('編輯 '+(name===''?'(預設)':name)+'\\n類型：'+type,String(typeof v.data==='undefined'?'':v.data));
+  if(data===null)return;
+  if(type==='REG_DWORD')data=parseInt(data,10)||0;
+  jplopsoft_regeditWriteValue(name,type,data);
+}
+
+function jplopsoft_regeditNewValue(){
+  var name=window.prompt('新增值名稱\\n留空代表 (預設)','');
+  if(name===null)return;
+  var type=window.prompt('值類型：REG_SZ / REG_DWORD / REG_BINARY','REG_SZ');
+  if(type===null)return;
+  type=String(type||'REG_SZ').toUpperCase();
+  if(type!=='REG_SZ'&&type!=='REG_DWORD'&&type!=='REG_BINARY'){alert('不支援的 Registry 類型。');return;}
+  var data=window.prompt('值資料','');
+  if(data===null)return;
+  if(type==='REG_DWORD')data=parseInt(data,10)||0;
+  jplopsoft_regeditWriteValue(String(name),type,data);
+}
+
+function jplopsoft_regeditNewKey(){
+  var name=window.prompt('新增子機碼名稱','New Key');
+  if(name===null||!jplopsoft_trim(name))return;
+  name=jplopsoft_trim(name).replace(/[\/]+/g,'\\');
+  var key=jplopsoft_REGEDIT.key?jplopsoft_REGEDIT.key+'\\'+name:name,hive=jplopsoft_REGEDIT.hive;
+  jplopsoft_api('reg_open_key','POST',{hive:hive,key:key,desired_access:'KEY_WRITE'},true,function(err,out){
+    if(err){alert(err.message);return;}
+    jplopsoft_api('reg_close_key','POST',{handle:out.handle},true,function(){});
+    jplopsoft_REGEDIT.key=String(key).toLowerCase();
+    jplopsoft_regeditLoad();
+  });
+}
+
+function jplopsoft_regeditDeleteValue(){
+  var name=jplopsoft_REGEDIT.selectedValue;
+  if(name===null)return;
+  if(!window.confirm('要刪除 Registry 值「'+(name===''?'(預設)':name)+'」嗎？'))return;
+  jplopsoft_api('reg_delete_value','POST',{hive:jplopsoft_REGEDIT.hive,key:jplopsoft_REGEDIT.key,name:name},true,function(err){
+    if(err){alert(err.message);return;}
+    jplopsoft_REGEDIT.selectedValue=null;jplopsoft_regeditLoad();
+  });
+}
+
+function jplopsoft_regeditDeleteKey(){
+  var key=jplopsoft_REGEDIT.key,parent;
+  if(!key){alert('不能刪除 Registry Hive 根節點。');return;}
+  if(!window.confirm('要刪除機碼與全部子機碼嗎？\\n\\n'+jplopsoft_regeditFullPath(jplopsoft_REGEDIT.hive,key)))return;
+  jplopsoft_api('reg_delete_key','POST',{hive:jplopsoft_REGEDIT.hive,key:key},true,function(err){
+    if(err){alert(err.message);return;}
+    parent=key.indexOf('\\')>=0?key.substring(0,key.lastIndexOf('\\')):'';
+    jplopsoft_REGEDIT.key=parent;jplopsoft_REGEDIT.selectedValue=null;jplopsoft_regeditLoad();
+  });
+}
+
+function jplopsoft_closeRegedit(){
+  var h=jplopsoft_REGEDIT.hwnd;
+  jplopsoft_REGEDIT.hwnd=0;jplopsoft_REGEDIT.snapshot=null;jplopsoft_REGEDIT.selectedValue=null;
+  if(h)jplopsoft_DestroyWindow(h);
+}
+
+function jplopsoft_openRegedit(){
+  var h,client,toolbar,b,path,main,tree,values,status;
+  if(jplopsoft_REGEDIT.hwnd&&jplopsoft_user32GetRecord(jplopsoft_REGEDIT.hwnd)){
+    jplopsoft_ShowWindow(jplopsoft_REGEDIT.hwnd,jplopsoft_SW_RESTORE);jplopsoft_regeditLoad();return;
+  }
+  h=jplopsoft_CreateWindowEx(
+    jplopsoft_WS_EX_APPWINDOW,'ExFS.Window','登錄編輯程式',
+    jplopsoft_WS_OVERLAPPEDWINDOW|jplopsoft_WS_VISIBLE,
+    90,55,1040,700,null,null,null,
+    {appId:'regedit',icon:'regedit',windowClass:'jplopsoft_regedit-window',taskbar:true,
+     wndProc:function(hwnd,msg){if(msg===jplopsoft_WM_CLOSE){jplopsoft_closeRegedit();return 0;}return null;}}
+  );
+  if(!h)return;
+  jplopsoft_REGEDIT.hwnd=h;client=jplopsoft_GetClientElement(h);client.className+=' jplopsoft_regedit-client';
+
+  toolbar=document.createElement('div');toolbar.className='jplopsoft_app-toolbar';
+  function add(text,fn){var x=document.createElement('button');x.type='button';x.className='jplopsoft_btn jplopsoft_small';x.textContent=text;x.onclick=fn;toolbar.appendChild(x);}
+  add('重新整理',jplopsoft_regeditLoad);add('新增機碼',jplopsoft_regeditNewKey);add('新增值',jplopsoft_regeditNewValue);add('刪除值',jplopsoft_regeditDeleteValue);add('刪除機碼',jplopsoft_regeditDeleteKey);
+  path=document.createElement('div');path.id=jplopsoft_REGEDIT.pathId;path.className='jplopsoft_regedit-path';toolbar.appendChild(path);client.appendChild(toolbar);
+
+  main=document.createElement('div');main.className='jplopsoft_regedit-main';
+  tree=document.createElement('div');tree.id=jplopsoft_REGEDIT.treeId;tree.className='jplopsoft_regedit-tree';main.appendChild(tree);
+  values=document.createElement('div');values.id=jplopsoft_REGEDIT.valuesId;values.className='jplopsoft_regedit-values';main.appendChild(values);
+  client.appendChild(main);
+
+  status=document.createElement('div');status.id=jplopsoft_REGEDIT.statusId;status.className='jplopsoft_app-status';client.appendChild(status);
+  jplopsoft_regeditLoad();
+}
+
+/* =========================================================================
+ * Disk Management
+ * ========================================================================= */
+var jplopsoft_DISKMGMT={hwnd:0,bodyId:'jplopsoft_diskmgmtBody',statusId:'jplopsoft_diskmgmtStatus'};
+
+function jplopsoft_diskmgmtRender(out){
+  var host=jplopsoft_el(jplopsoft_DISKMGMT.bodyId),card,head,row,icon,main,title,sub,usage,used,label,table,tbody,tr,th,td,status,pct;
+  if(!host)return;
+  host.innerHTML='';
+  pct=out.capacity_bytes>0?Math.min(100,Math.max(0,(out.used_bytes/out.capacity_bytes)*100)):0;
+
+  card=document.createElement('div');card.className='jplopsoft_disk-card';
+  head=document.createElement('div');head.className='jplopsoft_disk-card-head';head.textContent='磁碟 0 — ExFS 虛擬磁碟';card.appendChild(head);
+  row=document.createElement('div');row.className='jplopsoft_disk-volume-row';
+  icon=document.createElement('span');icon.className='jplopsoft_disk-icon';icon.setAttribute('data-exfs-svg','disk');icon.setAttribute('data-exfs-svg-size','54');row.appendChild(icon);
+  main=document.createElement('div');main.className='jplopsoft_disk-volume-main';
+  title=document.createElement('div');title.className='jplopsoft_disk-volume-title';title.textContent=out.drive+'  '+out.label;main.appendChild(title);
+  sub=document.createElement('div');sub.className='jplopsoft_disk-volume-sub';sub.textContent=out.filesystem+' ｜ 健康狀態：正常 ｜ '+jplopsoft_formatFileSize(out.free_bytes)+' 可用 / '+jplopsoft_formatFileSize(out.capacity_bytes);main.appendChild(sub);
+  usage=document.createElement('div');usage.className='jplopsoft_disk-usage';
+  used=document.createElement('div');used.className='jplopsoft_disk-used';used.style.width=pct.toFixed(2)+'%';usage.appendChild(used);
+  label=document.createElement('div');label.className='jplopsoft_disk-usage-label';label.textContent='已使用 '+pct.toFixed(1)+'%';usage.appendChild(label);main.appendChild(usage);
+  row.appendChild(main);card.appendChild(row);host.appendChild(card);
+  jplopsoft_applySvgIcons(card);
+
+  table=document.createElement('table');table.className='jplopsoft_diskmgmt-table';tbody=document.createElement('tbody');
+  [
+    ['裝置',out.device],['Volume Serial',out.serial],['檔案系統',out.filesystem],
+    ['Quota Model',out.quota_model],['容量',jplopsoft_formatFileSize(out.capacity_bytes)],
+    ['已使用',jplopsoft_formatFileSize(out.used_bytes)],['可用',jplopsoft_formatFileSize(out.free_bytes)],
+    ['全部檔案邏輯大小',jplopsoft_formatFileSize(out.logical_all_files_bytes)],
+    ['檔案數',out.file_count],['資料夾數',out.folder_count],['Reparse Points',out.reparse_count],
+    ['歷史版本',out.version_count],['垃圾桶 Root',out.trash_root_count],['Commit Seq',out.commit_seq]
+  ].forEach(function(r){
+    tr=document.createElement('tr');th=document.createElement('th');th.textContent=r[0];td=document.createElement('td');td.textContent=String(r[1]);tr.appendChild(th);tr.appendChild(td);tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);host.appendChild(table);
+
+  var note=document.createElement('div');note.className='jplopsoft_disk-note';note.textContent='這是 ExFS 虛擬 C: 與使用者配額，不會暴露 Web Server 真正的 NTFS/ext4/實體硬碟容量。';host.appendChild(note);
+
+  status=jplopsoft_el(jplopsoft_DISKMGMT.statusId);
+  if(status)status.textContent='EXFS_VIRTUAL_DISK1 ｜ '+out.drive+' ｜ '+out.filesystem;
+}
+
+function jplopsoft_diskmgmtLoad(){
+  var status=jplopsoft_el(jplopsoft_DISKMGMT.statusId);
+  if(status)status.textContent='正在讀取磁碟資訊…';
+  jplopsoft_api('disk_info','GET',null,true,function(err,out){
+    if(err){if(status)status.textContent='讀取失敗：'+err.message;return;}
+    jplopsoft_diskmgmtRender(out);
+  });
+}
+
+function jplopsoft_closeDiskManager(){
+  var h=jplopsoft_DISKMGMT.hwnd;jplopsoft_DISKMGMT.hwnd=0;if(h)jplopsoft_DestroyWindow(h);
+}
+
+function jplopsoft_openDiskManager(){
+  var h,client,toolbar,b,body,status;
+  if(jplopsoft_DISKMGMT.hwnd&&jplopsoft_user32GetRecord(jplopsoft_DISKMGMT.hwnd)){
+    jplopsoft_ShowWindow(jplopsoft_DISKMGMT.hwnd,jplopsoft_SW_RESTORE);jplopsoft_diskmgmtLoad();return;
+  }
+  h=jplopsoft_CreateWindowEx(
+    jplopsoft_WS_EX_APPWINDOW,'ExFS.Window','磁碟管理員',
+    jplopsoft_WS_OVERLAPPEDWINDOW|jplopsoft_WS_VISIBLE,
+    110,70,980,640,null,null,null,
+    {appId:'diskmgmt',icon:'disk',windowClass:'jplopsoft_diskmgmt-window',taskbar:true,
+     wndProc:function(hwnd,msg){if(msg===jplopsoft_WM_CLOSE){jplopsoft_closeDiskManager();return 0;}return null;}}
+  );
+  if(!h)return;
+  jplopsoft_DISKMGMT.hwnd=h;client=jplopsoft_GetClientElement(h);client.className+=' jplopsoft_diskmgmt-client';
+
+  toolbar=document.createElement('div');toolbar.className='jplopsoft_app-toolbar';
+  b=document.createElement('button');b.type='button';b.className='jplopsoft_btn jplopsoft_small';b.textContent='重新整理';b.onclick=jplopsoft_diskmgmtLoad;toolbar.appendChild(b);
+  b=document.createElement('button');b.type='button';b.className='jplopsoft_btn jplopsoft_small';b.textContent='3D 拓樸';b.onclick=jplopsoft_openVolume3D;toolbar.appendChild(b);
+  client.appendChild(toolbar);
+
+  body=document.createElement('div');body.id=jplopsoft_DISKMGMT.bodyId;body.className='jplopsoft_diskmgmt-body';client.appendChild(body);
+  status=document.createElement('div');status.id=jplopsoft_DISKMGMT.statusId;status.className='jplopsoft_app-status';client.appendChild(status);
+  jplopsoft_diskmgmtLoad();
+}
+
+/* =========================================================================
+ * Taskbar context menu
+ * ========================================================================= */
+function jplopsoft_taskbarContextMenuEnsure(){
+  var menu=jplopsoft_el('jplopsoft_taskbarContextMenu'),b,icon,text;
+  if(menu)return menu;
+  menu=document.createElement('div');menu.id='jplopsoft_taskbarContextMenu';menu.className='jplopsoft_taskbar-context-menu jplopsoft_hidden';menu.setAttribute('role','menu');
+
+  function add(label,svg,fn){
+    var x=document.createElement('button');x.type='button';x.className='jplopsoft_taskbar-context-item';
+    icon=document.createElement('span');icon.className='jplopsoft_taskbar-context-icon';icon.setAttribute('data-exfs-svg',svg);icon.setAttribute('data-exfs-svg-size','18');x.appendChild(icon);
+    text=document.createElement('span');text.textContent=label;x.appendChild(text);
+    x.onclick=function(){jplopsoft_hideTaskbarContextMenu();fn();};menu.appendChild(x);
+  }
+  add('顯示桌面','desktop',jplopsoft_wmShowDesktop);
+  add('啟動工作管理員','taskmgr',jplopsoft_openTaskManager);
+  document.body.appendChild(menu);jplopsoft_applySvgIcons(menu);return menu;
+}
+
+function jplopsoft_hideTaskbarContextMenu(){
+  var menu=jplopsoft_el('jplopsoft_taskbarContextMenu');if(menu)menu.className='jplopsoft_taskbar-context-menu jplopsoft_hidden';
+}
+
+function jplopsoft_showTaskbarContextMenu(e){
+  var menu=jplopsoft_taskbarContextMenuEnsure(),x,y,w,h,vw,vh;
+  e=e||window.event;
+  if(e.preventDefault)e.preventDefault();e.returnValue=false;
+  x=typeof e.clientX==='number'?e.clientX:0;y=typeof e.clientY==='number'?e.clientY:0;
+  menu.className='jplopsoft_taskbar-context-menu';menu.style.left='0px';menu.style.top='0px';
+  w=menu.offsetWidth||220;h=menu.offsetHeight||80;vw=document.documentElement.clientWidth||window.innerWidth||1024;vh=document.documentElement.clientHeight||window.innerHeight||768;
+  if(x+w>vw)x=vw-w-4;if(y+h>vh)y=vh-h-4;if(x<0)x=0;if(y<0)y=0;
+  menu.style.left=Math.round(x)+'px';menu.style.top=Math.round(y)+'px';
+  return false;
+}
 
 function jplopsoft_RegisterExFSNativeWindows(){
   var hwnd;
@@ -13934,7 +14925,8 @@ function jplopsoft_bindTaskbar(){
       desktop=jplopsoft_el('jplopsoft_startDesktop'),
       control=jplopsoft_el('jplopsoft_startControlPanel'),
       cmd=jplopsoft_el('jplopsoft_startCmd'),
-      security=jplopsoft_el('jplopsoft_startSecurity');
+      security=jplopsoft_el('jplopsoft_startSecurity'),
+      taskbar=jplopsoft_el('jplopsoft_taskbar');
 
   if(!startBtn||!startMenu)return;
 
@@ -13951,10 +14943,12 @@ function jplopsoft_bindTaskbar(){
   if(control)control.onclick=jplopsoft_taskbarOpenControlPanel;
   if(cmd)cmd.onclick=jplopsoft_taskbarOpenCmd;
   if(security)security.onclick=jplopsoft_taskbarOpenSecurity;
+  if(taskbar)taskbar.oncontextmenu=jplopsoft_showTaskbarContextMenu;
 
   if(document.addEventListener){
     document.addEventListener('mousedown',function(e){
-      var t=e.target||e.srcElement;
+      var t=e.target||e.srcElement,tm=jplopsoft_el('jplopsoft_taskbarContextMenu');
+      if(tm&&tm.className.indexOf('jplopsoft_hidden')<0&&!jplopsoft_taskbarContains(tm,t))jplopsoft_hideTaskbarContextMenu();
       if(!jplopsoft_startMenuVisible())return;
       if(jplopsoft_taskbarContains(startMenu,t)||jplopsoft_taskbarContains(startBtn,t))return;
       jplopsoft_closeStartMenu();
@@ -13962,9 +14956,12 @@ function jplopsoft_bindTaskbar(){
 
     document.addEventListener('keydown',function(e){
       e=e||window.event;
-      if((e.keyCode||e.which)===27&&jplopsoft_startMenuVisible()){
-        jplopsoft_closeStartMenu();
-        try{startBtn.focus();}catch(ignoreStartFocus){}
+      if((e.keyCode||e.which)===27){
+        jplopsoft_hideTaskbarContextMenu();
+        if(jplopsoft_startMenuVisible()){
+          jplopsoft_closeStartMenu();
+          try{startBtn.focus();}catch(ignoreStartFocus){}
+        }
       }
     },false);
   }
@@ -13977,10 +14974,10 @@ function jplopsoft_bindTaskbar(){
   jplopsoft_taskbarUpdateAvailability();
 }
 
-function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=function(){if(state.kdfBusy)return;jplopsoft_unlockWithPassword(jplopsoft_el('jplopsoft_loginUserInput').value,jplopsoft_el('jplopsoft_keyInput').value,jplopsoft_rememberUnlockEnabled());};jplopsoft_el('jplopsoft_loginUserInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy){try{jplopsoft_el('jplopsoft_keyInput').focus();}catch(ignoreUserEnter){}}};jplopsoft_el('jplopsoft_loginUserInput').onchange=function(){if(state.kdfBusy)return;state.samUsername=String(this.value||state.defaultUsername||'administrator').toLowerCase();try{jplopsoft_el('jplopsoft_keyInput').value='';jplopsoft_el('jplopsoft_keyInput').focus();}catch(ignoreUserChange){}};jplopsoft_el('jplopsoft_keyInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy)jplopsoft_el('jplopsoft_unlockBtn').click();};if(jplopsoft_el('jplopsoft_rememberUnlock'))jplopsoft_el('jplopsoft_rememberUnlock').onchange=jplopsoft_onRememberUnlockChanged;if(jplopsoft_el('jplopsoft_largeTransferCancelBtn'))jplopsoft_el('jplopsoft_largeTransferCancelBtn').onclick=jplopsoft_cancelLargeTransfer;if(jplopsoft_el('jplopsoft_largeTransferMinBtn'))jplopsoft_el('jplopsoft_largeTransferMinBtn').onclick=jplopsoft_toggleLargeTransferMinimized;jplopsoft_el('jplopsoft_newFolderBtn').onclick=function(){jplopsoft_createItem('folder');};jplopsoft_el('jplopsoft_newHtmlBtn').onclick=function(){jplopsoft_createItem('file','html');};jplopsoft_el('jplopsoft_newTxtBtn').onclick=function(){jplopsoft_createItem('file','txt');};jplopsoft_el('jplopsoft_newCsvBtn').onclick=function(){jplopsoft_createItem('file','csv');};jplopsoft_el('jplopsoft_downloadBtn').onclick=jplopsoft_downloadSelected;jplopsoft_el('jplopsoft_renameBtn').onclick=jplopsoft_renameSelected;jplopsoft_el('jplopsoft_moveBtn').onclick=jplopsoft_openMoveDialog;jplopsoft_el('jplopsoft_deleteBtn').onclick=function(){if(jplopsoft_isDesktopFolder()){if(state.desktopSelectedTargetId)jplopsoft_deleteDesktopShortcut(state.desktopSelectedTargetId);return;}jplopsoft_deleteSelected();};if(jplopsoft_threeFeatureAllowed()){if(jplopsoft_el('jplopsoft_volume3dBtn'))jplopsoft_el('jplopsoft_volume3dBtn').onclick=jplopsoft_openVolume3D;if(jplopsoft_el('jplopsoft_volume3dPhysicalBtn'))jplopsoft_el('jplopsoft_volume3dPhysicalBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('physical');};if(jplopsoft_el('jplopsoft_volume3dSandboxBtn'))jplopsoft_el('jplopsoft_volume3dSandboxBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('sandbox');};if(jplopsoft_el('jplopsoft_volume3dCloseBtn'))jplopsoft_el('jplopsoft_volume3dCloseBtn').onclick=jplopsoft_closeVolume3D;if(jplopsoft_el('jplopsoft_volume3dFullscreenBtn'))jplopsoft_el('jplopsoft_volume3dFullscreenBtn').onclick=jplopsoft_threeVolumeToggleFullscreen;if(jplopsoft_el('jplopsoft_volume3dResetBtn'))jplopsoft_el('jplopsoft_volume3dResetBtn').onclick=jplopsoft_threeVolumeResetView;if(jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_el('jplopsoft_volume3dBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_closeVolume3D();else jplopsoft_wmActivateOverlay('jplopsoft_volume3dBackdrop','jplopsoft_volume3dWindow','volume3d');};}jplopsoft_el('jplopsoft_modalClose').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalCloseTop').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalVersionsBtn').onclick=jplopsoft_openVersions;jplopsoft_el('jplopsoft_versionCloseTop').onclick=jplopsoft_closeVersions;jplopsoft_el('jplopsoft_versionBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_versionBackdrop'))jplopsoft_closeVersions();};jplopsoft_el('jplopsoft_moveCloseTop').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveCancelBtn').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveConfirmBtn').onclick=jplopsoft_confirmMove;jplopsoft_el('jplopsoft_moveBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_moveBackdrop'))jplopsoft_closeMoveDialog();};jplopsoft_el('jplopsoft_trashCloseTop').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashCloseBtn').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashEmptyBtn').onclick=jplopsoft_emptyTrash;jplopsoft_el('jplopsoft_trashBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_trashBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');};jplopsoft_el('jplopsoft_modalDownloadBtn').onclick=jplopsoft_downloadCurrentDocument;jplopsoft_el('jplopsoft_modalPrintBtn').onclick=jplopsoft_printCurrentDocument;jplopsoft_el('jplopsoft_modalMaxBtn').onclick=jplopsoft_toggleMax;jplopsoft_el('jplopsoft_saveDocBtn').onclick=jplopsoft_saveDocument;jplopsoft_el('jplopsoft_csvAddRowBtn').onclick=jplopsoft_csvAddRow;jplopsoft_el('jplopsoft_csvAddColBtn').onclick=jplopsoft_csvAddColumn;jplopsoft_el('jplopsoft_csvDelRowBtn').onclick=jplopsoft_csvDeleteRow;jplopsoft_el('jplopsoft_csvDelColBtn').onclick=jplopsoft_csvDeleteColumn;jplopsoft_el('jplopsoft_csvFormulaInput').oninput=function(){if(state.csvReadOnly)return;var r=state.csvSelectedRow,c=state.csvSelectedCol,input;if(!state.csvData[r])return;state.csvData[r][c]=this.value;input=jplopsoft_csvSelectedCellInput();if(input)input.value=this.value;};jplopsoft_el('jplopsoft_tabEdit').onclick=jplopsoft_showSourceTab;jplopsoft_el('jplopsoft_tabRich').onclick=jplopsoft_showRichTab;jplopsoft_el('jplopsoft_tabPreview').onclick=function(){jplopsoft_showPreview();};jplopsoft_el('jplopsoft_modalBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_modalBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_modalBackdrop','jplopsoft_documentWindow','document');};if(jplopsoft_el('jplopsoft_galleryPrevImage'))jplopsoft_el('jplopsoft_galleryPrevImage').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextImage'))jplopsoft_el('jplopsoft_galleryNextImage').onclick=function(){jplopsoft_galleryNavigate(1);};if(jplopsoft_el('jplopsoft_galleryPrevMedia'))jplopsoft_el('jplopsoft_galleryPrevMedia').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextMedia'))jplopsoft_el('jplopsoft_galleryNextMedia').onclick=function(){jplopsoft_galleryNavigate(1);};jplopsoft_bindSecurityUI();jplopsoft_bindExconfig();jplopsoft_bindProperties();jplopsoft_bindTaskbar();jplopsoft_bindWindowManager();jplopsoft_bindRich();jplopsoft_bindSortHeaders();jplopsoft_bindBulkSelection();jplopsoft_bindFileDrop();jplopsoft_bindFileSearch();jplopsoft_bindExfsContextMenu();jplopsoft_bindCmdMode();jplopsoft_bindGlobalHotkeys();jplopsoft_bindSidebarResizer();if(jplopsoft_isIE11Browser()&&window.addEventListener)window.addEventListener('resize',jplopsoft_ie11FitDocumentModal,false);}
+function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_submitCredentialUI;jplopsoft_el('jplopsoft_loginUserInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy){try{jplopsoft_el('jplopsoft_keyInput').focus();}catch(ignoreUserEnter){}}};jplopsoft_el('jplopsoft_loginUserInput').onchange=function(){if(state.kdfBusy)return;jplopsoft_selectLogonAccount(String(this.value||state.defaultUsername||'administrator').toLowerCase(),true);};jplopsoft_el('jplopsoft_keyInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy)jplopsoft_submitCredentialUI();};jplopsoft_bindSecureDesktopUI();if(jplopsoft_el('jplopsoft_rememberUnlock'))jplopsoft_el('jplopsoft_rememberUnlock').onchange=jplopsoft_onRememberUnlockChanged;if(jplopsoft_el('jplopsoft_largeTransferCancelBtn'))jplopsoft_el('jplopsoft_largeTransferCancelBtn').onclick=jplopsoft_cancelLargeTransfer;if(jplopsoft_el('jplopsoft_largeTransferMinBtn'))jplopsoft_el('jplopsoft_largeTransferMinBtn').onclick=jplopsoft_toggleLargeTransferMinimized;jplopsoft_el('jplopsoft_newFolderBtn').onclick=function(){jplopsoft_createItem('folder');};jplopsoft_el('jplopsoft_newHtmlBtn').onclick=function(){jplopsoft_createItem('file','html');};jplopsoft_el('jplopsoft_newTxtBtn').onclick=function(){jplopsoft_createItem('file','txt');};jplopsoft_el('jplopsoft_newCsvBtn').onclick=function(){jplopsoft_createItem('file','csv');};jplopsoft_el('jplopsoft_downloadBtn').onclick=jplopsoft_downloadSelected;jplopsoft_el('jplopsoft_renameBtn').onclick=jplopsoft_renameSelected;jplopsoft_el('jplopsoft_moveBtn').onclick=jplopsoft_openMoveDialog;jplopsoft_el('jplopsoft_deleteBtn').onclick=function(){if(jplopsoft_isDesktopFolder()){if(state.desktopSelectedTargetId)jplopsoft_deleteDesktopShortcut(state.desktopSelectedTargetId);return;}jplopsoft_deleteSelected();};if(jplopsoft_threeFeatureAllowed()){if(jplopsoft_el('jplopsoft_volume3dBtn'))jplopsoft_el('jplopsoft_volume3dBtn').onclick=jplopsoft_openVolume3D;if(jplopsoft_el('jplopsoft_volume3dPhysicalBtn'))jplopsoft_el('jplopsoft_volume3dPhysicalBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('physical');};if(jplopsoft_el('jplopsoft_volume3dSandboxBtn'))jplopsoft_el('jplopsoft_volume3dSandboxBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('sandbox');};if(jplopsoft_el('jplopsoft_volume3dCloseBtn'))jplopsoft_el('jplopsoft_volume3dCloseBtn').onclick=jplopsoft_closeVolume3D;if(jplopsoft_el('jplopsoft_volume3dFullscreenBtn'))jplopsoft_el('jplopsoft_volume3dFullscreenBtn').onclick=jplopsoft_threeVolumeToggleFullscreen;if(jplopsoft_el('jplopsoft_volume3dResetBtn'))jplopsoft_el('jplopsoft_volume3dResetBtn').onclick=jplopsoft_threeVolumeResetView;if(jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_el('jplopsoft_volume3dBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_closeVolume3D();else jplopsoft_wmActivateOverlay('jplopsoft_volume3dBackdrop','jplopsoft_volume3dWindow','volume3d');};}jplopsoft_el('jplopsoft_modalClose').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalCloseTop').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalVersionsBtn').onclick=jplopsoft_openVersions;jplopsoft_el('jplopsoft_versionCloseTop').onclick=jplopsoft_closeVersions;jplopsoft_el('jplopsoft_versionBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_versionBackdrop'))jplopsoft_closeVersions();};jplopsoft_el('jplopsoft_moveCloseTop').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveCancelBtn').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveConfirmBtn').onclick=jplopsoft_confirmMove;jplopsoft_el('jplopsoft_moveBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_moveBackdrop'))jplopsoft_closeMoveDialog();};jplopsoft_el('jplopsoft_trashCloseTop').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashCloseBtn').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashEmptyBtn').onclick=jplopsoft_emptyTrash;jplopsoft_el('jplopsoft_trashBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_trashBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');};jplopsoft_el('jplopsoft_modalDownloadBtn').onclick=jplopsoft_downloadCurrentDocument;jplopsoft_el('jplopsoft_modalPrintBtn').onclick=jplopsoft_printCurrentDocument;jplopsoft_el('jplopsoft_modalMaxBtn').onclick=jplopsoft_toggleMax;jplopsoft_el('jplopsoft_saveDocBtn').onclick=jplopsoft_saveDocument;jplopsoft_el('jplopsoft_csvAddRowBtn').onclick=jplopsoft_csvAddRow;jplopsoft_el('jplopsoft_csvAddColBtn').onclick=jplopsoft_csvAddColumn;jplopsoft_el('jplopsoft_csvDelRowBtn').onclick=jplopsoft_csvDeleteRow;jplopsoft_el('jplopsoft_csvDelColBtn').onclick=jplopsoft_csvDeleteColumn;jplopsoft_el('jplopsoft_csvFormulaInput').oninput=function(){if(state.csvReadOnly)return;var r=state.csvSelectedRow,c=state.csvSelectedCol,input;if(!state.csvData[r])return;state.csvData[r][c]=this.value;input=jplopsoft_csvSelectedCellInput();if(input)input.value=this.value;};jplopsoft_el('jplopsoft_tabEdit').onclick=jplopsoft_showSourceTab;jplopsoft_el('jplopsoft_tabRich').onclick=jplopsoft_showRichTab;jplopsoft_el('jplopsoft_tabPreview').onclick=function(){jplopsoft_showPreview();};jplopsoft_el('jplopsoft_modalBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_modalBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_modalBackdrop','jplopsoft_documentWindow','document');};if(jplopsoft_el('jplopsoft_galleryPrevImage'))jplopsoft_el('jplopsoft_galleryPrevImage').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextImage'))jplopsoft_el('jplopsoft_galleryNextImage').onclick=function(){jplopsoft_galleryNavigate(1);};if(jplopsoft_el('jplopsoft_galleryPrevMedia'))jplopsoft_el('jplopsoft_galleryPrevMedia').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextMedia'))jplopsoft_el('jplopsoft_galleryNextMedia').onclick=function(){jplopsoft_galleryNavigate(1);};jplopsoft_bindSecurityUI();jplopsoft_bindExconfig();jplopsoft_bindProperties();jplopsoft_bindTaskbar();jplopsoft_bindWindowManager();jplopsoft_bindRich();jplopsoft_bindSortHeaders();jplopsoft_bindBulkSelection();jplopsoft_bindFileDrop();jplopsoft_bindFileSearch();jplopsoft_bindExfsContextMenu();jplopsoft_bindCmdMode();jplopsoft_bindGlobalHotkeys();jplopsoft_bindSidebarResizer();if(jplopsoft_isIE11Browser()&&window.addEventListener)window.addEventListener('resize',jplopsoft_ie11FitDocumentModal,false);}
 
 window.jplopsoft_EXFS_OS={
   ready:true,
-  version:'6.4.0-dev-os9',
-  build:'external-os-user32-dwm'
+  version:'6.4.0-dev-os11',
+  build:'external-os-oobe-logon-winsta'
 };
