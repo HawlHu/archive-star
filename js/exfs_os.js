@@ -1,6 +1,6 @@
 /*
  * ExFS OS Frontend Module
- * Version: 6.4.0-dev-os11
+ * Version: 6.4.0-dev-os12
  *
  * Stable browser-side operating-system UI functions extracted from exfs.php:
  * - CMD shell / parser / commands
@@ -12936,6 +12936,20 @@ function jplopsoft_submitCredentialUI(){
   jplopsoft_unlockWithPassword(username,raw,jplopsoft_rememberUnlockEnabled());
 }
 
+
+function jplopsoft_renderLogonSubmitButton(){
+  var b=jplopsoft_el('jplopsoft_unlockBtn'),span;
+  if(!b)return;
+  b.innerHTML='';
+  span=document.createElement('span');
+  span.setAttribute('data-exfs-svg','arrow_right');
+  span.setAttribute('data-exfs-svg-size','20');
+  span.setAttribute('aria-hidden','true');
+  b.appendChild(span);
+  b.setAttribute('aria-label','登入');
+  jplopsoft_applySvgIcons(b);
+}
+
 function jplopsoft_secureDesktopUpdate(){
   var shell=jplopsoft_el('jplopsoft_secureDesktopShell'),
       logon=jplopsoft_el('jplopsoft_logonView'),
@@ -12955,6 +12969,7 @@ function jplopsoft_secureDesktopUpdate(){
   if(setupName)setupName.value=String(state.defaultUsername||'administrator');
 
   jplopsoft_renderLogonAccounts();
+  jplopsoft_renderLogonSubmitButton();
   jplopsoft_oobePasswordFeedback();
   jplopsoft_ntSyncRouteSecurityContext();
 
@@ -14978,6 +14993,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXFS_OS={
   ready:true,
-  version:'6.4.0-dev-os11',
-  build:'external-os-oobe-logon-winsta'
+  version:'6.4.0-dev-os12',
+  build:'external-os-oobe-logon-alignment'
 };
