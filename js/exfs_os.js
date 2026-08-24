@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os23
+ * Version: 6.4.0-dev-os24
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -21,11 +21,20 @@ var jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI='data:image/svg+xml;base64,PHN2ZyB
 
 function jplopsoft_applyDesktopWallpaper(){
   var d=jplopsoft_el('jplopsoft_desktopSurface');
+
   if(!d)return;
-  d.style.backgroundImage='url("'+jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI+'")';
-  d.style.backgroundPosition='center center';
-  d.style.backgroundRepeat='no-repeat';
-  d.style.backgroundSize='cover';
+
+  /*
+   * os24: one wallpaper only.
+   * Using the background shorthand deliberately clears any older gradient,
+   * multi-background or cached inline layer before applying the Base64 SVG.
+   */
+  d.style.background=
+    '#075b9e url("'+
+    jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI+
+    '") center center / cover no-repeat';
+
+  d.setAttribute('data-exos-wallpaper-layers','1');
 }
 
 var jplopsoft_EXFS_SVG_ICONS={
@@ -14370,7 +14379,7 @@ function jplopsoft_AdoptWindow(options){
 function jplopsoft_CreateWindowEx(exStyle,className,windowName,style,x,y,width,height,parent,menu,instance,param){
   jplopsoft_dwmNormalizeRootStacking();
   var classDef=jplopsoft_USER32.classes[String(className||'')]||null,
-      p=param||{},app=jplopsoft_dwmWindowLayer()||jplopsoft_el('jplopsoft_app')||(document.querySelector?document.querySelector('.jplopsoft_app'):null),
+      p=param||{},app=jplopsoft_rootWindowHost()||jplopsoft_el('jplopsoft_app')||(document.querySelector?document.querySelector('.jplopsoft_app'):null),
       task=jplopsoft_el('jplopsoft_taskbar'),hwnd,rec,win,titlebar,icon,title,controls,b,client;
 
   if(!app)return 0;
@@ -14620,47 +14629,52 @@ function jplopsoft_explorerFrontmost(w){
 function jplopsoft_explorerForceInlineVisible(w){
   if(!w)return false;
 
-  /*
-   * Rescue path deliberately uses inline !important. If any stale route,
-   * legacy CSS, browser compatibility rule, or cached class tries to hide
-   * Explorer, the actual HWND visibility wins.
-   */
   try{
     w.style.setProperty('display','flex','important');
     w.style.setProperty('visibility','visible','important');
     w.style.setProperty('opacity','1','important');
     w.style.setProperty('pointer-events','auto','important');
-    w.style.setProperty('position','absolute','important');
+    w.style.setProperty('position','fixed','important');
     w.style.setProperty('transform','none','important');
     w.style.setProperty('filter','none','important');
     w.style.setProperty('clip','auto','important');
     w.style.setProperty('clip-path','none','important');
+    w.style.setProperty('overflow','hidden','important');
   }catch(ignoreExplorerImportant){
     w.style.display='flex';
     w.style.visibility='visible';
     w.style.opacity='1';
     w.style.pointerEvents='auto';
-    w.style.position='absolute';
+    w.style.position='fixed';
   }
 
   return true;
 }
 
 function jplopsoft_explorerPromoteForeground(w){
+  var z;
+
   if(!w)return false;
 
   jplopsoft_dwmNormalizeRootStacking();
-  jplopsoft_dwmAttachToWindowLayer(w);
+  jplopsoft_explorerPortalToRoot(w);
   jplopsoft_explorerForceInlineVisible(w);
 
   /*
-   * 350 is the top of the normal ExOS application range.
-   * Taskbar remains above it at 390.
+   * Use the normal window manager counter. Since Explorer is now a direct
+   * BODY child, its z-index is compared at the same root level as overlays,
+   * other applications and the taskbar.
    */
-  w.style.zIndex='350';
-  jplopsoft_WM.z=350;
+  z=jplopsoft_wmNextZ();
+  if(z<200)z=300;
 
-  jplopsoft_wmClassAdd(w,'jplopsoft_wm-active');
+  w.style.zIndex=String(z);
+  jplopsoft_WM.z=z;
+
+  jplopsoft_wmClassAdd(
+    w,
+    'jplopsoft_wm-active'
+  );
 
   return true;
 }
@@ -14694,6 +14708,7 @@ function jplopsoft_explorerResetGeometry(w){
   jplopsoft_wmClassRemove(w,'jplopsoft_maximized');
 
   try{
+    w.style.setProperty('position','fixed','important');
     w.style.setProperty('left','40px','important');
     w.style.setProperty('top','36px','important');
     w.style.setProperty('right','auto','important');
@@ -14706,6 +14721,7 @@ function jplopsoft_explorerResetGeometry(w){
     w.style.setProperty('max-height','none','important');
     w.style.setProperty('resize','both','important');
   }catch(ignoreExplorerGeometryImportant){
+    w.style.position='fixed';
     w.style.left='40px';
     w.style.top='36px';
     w.style.right='auto';
@@ -14740,7 +14756,7 @@ function jplopsoft_explorerHealthCheck(){
   if(!state.samAuthenticated||!state.vaultKey)return false;
   if(!w)return false;
 
-  jplopsoft_dwmAttachToWindowLayer(w);
+  jplopsoft_explorerPortalToRoot(w);
 
   visible=jplopsoft_explorerComputedVisible(w);
 
@@ -14763,15 +14779,17 @@ function jplopsoft_explorerHealthCheck(){
     jplopsoft_EXPLORER_LIFECYCLE.lastHealthReason='';
   }
 
-  jplopsoft_wmActivate('jplopsoft_explorerWindow','explorer');
+  jplopsoft_wmActivate(
+    'jplopsoft_explorerWindow',
+    'explorer'
+  );
 
-  /*
-   * wmActivate() uses the shared DWM range. If another layer still covers the
-   * Explorer after activation, promote it to the normal app ceiling.
-   */
   if(!jplopsoft_explorerFrontmost(w)){
     jplopsoft_explorerPromoteForeground(w);
-    jplopsoft_taskbarSetAppState('explorer','active');
+    jplopsoft_taskbarSetAppState(
+      'explorer',
+      'active'
+    );
   }
 
   return true;
@@ -14884,14 +14902,37 @@ function jplopsoft_wmDeactivateTaskButtons(exceptApp){
 
 function jplopsoft_wmActivate(windowId,appId){
   var w=jplopsoft_el(windowId),hwnd;
+
   if(!w)return;
+
+  if(windowId==='jplopsoft_explorerWindow'){
+    jplopsoft_explorerPortalToRoot(w);
+  }
+
   jplopsoft_wmDeactivateTaskButtons(appId);
   jplopsoft_WM.active=String(appId||'');
-  w.style.zIndex=String(jplopsoft_wmNextZ());
-  jplopsoft_wmClassAdd(w,'jplopsoft_wm-active');
-  jplopsoft_taskbarSetAppState(appId,'active');
-  hwnd=jplopsoft_user32GetHwndByElementId(windowId);
-  if(hwnd)jplopsoft_DwmActivateWindow(hwnd);
+
+  w.style.zIndex=String(
+    jplopsoft_wmNextZ()
+  );
+
+  jplopsoft_wmClassAdd(
+    w,
+    'jplopsoft_wm-active'
+  );
+
+  jplopsoft_taskbarSetAppState(
+    appId,
+    'active'
+  );
+
+  hwnd=jplopsoft_user32GetHwndByElementId(
+    windowId
+  );
+
+  if(hwnd){
+    jplopsoft_DwmActivateWindow(hwnd);
+  }
 }
 
 function jplopsoft_wmActivateOverlay(backdropId,panelId,appId){
@@ -14938,6 +14979,40 @@ function jplopsoft_dwmAttachToWindowLayer(w){
   w.style.pointerEvents='auto';
   return true;
 }
+
+function jplopsoft_rootWindowHost(){
+  return document.body||document.documentElement;
+}
+
+function jplopsoft_explorerPortalToRoot(w){
+  var host=jplopsoft_rootWindowHost();
+
+  if(!w||!host)return false;
+
+  if(w.parentNode!==host){
+    try{
+      host.appendChild(w);
+    }catch(ignoreExplorerPortal){
+      return false;
+    }
+  }
+
+  jplopsoft_wmClassAdd(
+    w,
+    'jplopsoft_explorer-root-portal'
+  );
+
+  try{
+    w.setAttribute(
+      'data-exos-window-host',
+      'BODY'
+    );
+  }catch(ignoreExplorerHostAttr){}
+
+  return true;
+}
+
+
 
 
 
@@ -14992,6 +15067,15 @@ function jplopsoft_wmMinimize(windowId,appId,explicitAction){
     w,
     'jplopsoft_wm-active'
   );
+
+  if(windowId==='jplopsoft_explorerWindow'){
+    try{
+      document.body.setAttribute(
+        'data-exos-explorer-visible',
+        '0'
+      );
+    }catch(ignoreExplorerMinAttr){}
+  }
 
   jplopsoft_taskbarSetAppState(
     appId,
@@ -15129,7 +15213,7 @@ function jplopsoft_wmRestoreExplorerStable(){
 
   jplopsoft_explorerSetDesiredVisible(true);
   jplopsoft_dwmNormalizeRootStacking();
-  jplopsoft_dwmAttachToWindowLayer(w);
+  jplopsoft_explorerPortalToRoot(w);
 
   jplopsoft_wmClassRemove(w,'jplopsoft_hidden');
   jplopsoft_wmClassRemove(w,'jplopsoft_dwm-inactive');
@@ -15180,13 +15264,20 @@ function jplopsoft_wmRestoreExplorerStable(){
     }catch(ignoreExplorerDwm){}
   }
 
-  /*
-   * The final truth is the compositor hit test, not the taskbar flag.
-   */
   if(!jplopsoft_explorerFrontmost(w)){
     jplopsoft_explorerPromoteForeground(w);
-    jplopsoft_taskbarSetAppState('explorer','active');
+    jplopsoft_taskbarSetAppState(
+      'explorer',
+      'active'
+    );
   }
+
+  try{
+    document.body.setAttribute(
+      'data-exos-explorer-visible',
+      '1'
+    );
+  }catch(ignoreExplorerVisibleAttr){}
 
   return jplopsoft_explorerComputedVisible(w);
 }
@@ -15197,12 +15288,12 @@ function jplopsoft_wmOpenExplorer(folderId){
   if(!state.samAuthenticated||!state.vaultKey)return false;
 
   generation=jplopsoft_explorerBeginOpen();
-
   w=jplopsoft_el('jplopsoft_explorerWindow');
 
   if(w){
-    jplopsoft_dwmAttachToWindowLayer(w);
+    jplopsoft_explorerPortalToRoot(w);
     jplopsoft_explorerForceInlineVisible(w);
+    jplopsoft_explorerResetGeometry(w);
   }
 
   jplopsoft_wmRestoreExplorerStable();
@@ -15277,6 +15368,13 @@ function jplopsoft_wmCloseExplorer(explicitAction){
     }
   }
 
+  try{
+    document.body.setAttribute(
+      'data-exos-explorer-visible',
+      '0'
+    );
+  }catch(ignoreExplorerCloseAttr){}
+
   jplopsoft_taskbarRemoveApp('explorer');
   return true;
 }
@@ -15323,7 +15421,7 @@ function jplopsoft_wmAfterUnlock(){
   jplopsoft_dwmNormalizeRootStacking();
 
   if(explorer){
-    jplopsoft_dwmAttachToWindowLayer(explorer);
+    jplopsoft_explorerPortalToRoot(explorer);
   }
 
   jplopsoft_applyDesktopWallpaper();
@@ -15359,6 +15457,13 @@ function jplopsoft_wmAfterUnlock(){
         explorer.style.display='none';
       }
     }
+
+    try{
+      document.body.setAttribute(
+        'data-exos-explorer-visible',
+        '0'
+      );
+    }catch(ignoreExplorerHiddenAttr){}
 
     jplopsoft_taskbarRemoveApp('explorer');
   }
@@ -17529,7 +17634,7 @@ function jplopsoft_bindWindowManager(){
       desktopSurface=jplopsoft_el('jplopsoft_desktopSurface');
 
   jplopsoft_dwmNormalizeRootStacking();
-  if(explorer)jplopsoft_dwmAttachToWindowLayer(explorer);
+  if(explorer)jplopsoft_explorerPortalToRoot(explorer);
   jplopsoft_applyDesktopWallpaper();
 
   if(explorer){
@@ -17877,6 +17982,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os23',
-  build:'external-os-dwm-window-layer-explorer-watchdog'
+  version:'6.4.0-dev-os24',
+  build:'external-os-root-window-portal-single-wallpaper'
 };
