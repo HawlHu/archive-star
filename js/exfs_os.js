@@ -1,6 +1,6 @@
 /*
  * ExFS OS Frontend Module
- * Version: 6.4.0-dev-os12
+ * Version: 6.4.0-dev-os13
  *
  * Stable browser-side operating-system UI functions extracted from exfs.php:
  * - CMD shell / parser / commands
@@ -8516,7 +8516,7 @@ function jplopsoft_desktopSystemItems(){
 
 function jplopsoft_openDesktopSystemItem(key){
   key=String(key||'');
-  if(key==='computer'){jplopsoft_wmOpenExplorer(0);return;}
+  if(key==='computer'){jplopsoft_openMyComputer();return;}
   if(key==='cmd'){jplopsoft_wmOpenCmd();return;}
   if(key==='trash'){jplopsoft_openTrash();return;}
 }
@@ -13477,9 +13477,12 @@ function jplopsoft_CreateWindowEx(exStyle,className,windowName,style,x,y,width,h
 
   win=document.createElement(p.tagName||'section');
   win.id=rec.windowId;
-  win.className='jplopsoft_wm-window jplopsoft_win32-window jplopsoft_dwm-surface '+String(p.windowClass||'');
+  win.className='jplopsoft_wm-window jplopsoft_win32-window jplopsoft_win32-created-window jplopsoft_dwm-surface '+String(p.windowClass||'');
   win.style.left=(typeof x==='number'?x:80)+'px';
   win.style.top=(typeof y==='number'?y:60)+'px';
+  win.style.display='flex';
+  win.style.flexDirection='column';
+  win.style.alignItems='stretch';
   if(typeof width==='number'&&width>0)win.style.width=width+'px';
   if(typeof height==='number'&&height>0)win.style.height=height+'px';
 
@@ -13709,18 +13712,30 @@ function jplopsoft_wmRestore(windowId,appId){
   jplopsoft_wmActivate(windowId,appId);
 }
 
+function jplopsoft_wmSetMaximized(windowId,on){
+  var w=jplopsoft_el(windowId);
+  if(!w)return;
+  if(on)jplopsoft_wmClassAdd(w,'jplopsoft_wm-maximized');
+  else jplopsoft_wmClassRemove(w,'jplopsoft_wm-maximized');
+}
+
 function jplopsoft_wmToggleMax(windowId){
   var w=jplopsoft_el(windowId);
   if(!w)return;
-  if(jplopsoft_wmClassHas(w,'jplopsoft_wm-maximized'))jplopsoft_wmClassRemove(w,'jplopsoft_wm-maximized');
-  else jplopsoft_wmClassAdd(w,'jplopsoft_wm-maximized');
+  jplopsoft_wmSetMaximized(windowId,!jplopsoft_wmClassHas(w,'jplopsoft_wm-maximized'));
+}
+
+function jplopsoft_wmSetOverlayMaximized(panelId,on){
+  var p=jplopsoft_el(panelId);
+  if(!p)return;
+  if(on)jplopsoft_wmClassAdd(p,'jplopsoft_wm-maximized');
+  else jplopsoft_wmClassRemove(p,'jplopsoft_wm-maximized');
 }
 
 function jplopsoft_wmToggleOverlayMax(panelId){
   var p=jplopsoft_el(panelId);
   if(!p)return;
-  if(jplopsoft_wmClassHas(p,'jplopsoft_wm-maximized'))jplopsoft_wmClassRemove(p,'jplopsoft_wm-maximized');
-  else jplopsoft_wmClassAdd(p,'jplopsoft_wm-maximized');
+  jplopsoft_wmSetOverlayMaximized(panelId,!jplopsoft_wmClassHas(p,'jplopsoft_wm-maximized'));
 }
 
 function jplopsoft_wmCanDragTarget(t){
@@ -13801,6 +13816,8 @@ function jplopsoft_wmIsDisplayed(id){
 }
 
 function jplopsoft_wmOpenExplorer(folderId){
+  var hwnd;
+
   if(!state.samAuthenticated||!state.vaultKey)return false;
 
   if(!jplopsoft_routeIsUser()||!jplopsoft_EXE_ROUTE||jplopsoft_EXE_ROUTE.app!=='explorer'||jplopsoft_EXE_ROUTE.action){
@@ -13813,14 +13830,27 @@ function jplopsoft_wmOpenExplorer(folderId){
     if(isNaN(state.currentFolder))state.currentFolder=0;
     state.selectedId=0;
     state.desktopSelectedTargetId=0;
+    state.desktopShellSelected='';
     state.checkedIds={};
     state.checkedFolder=state.currentFolder;
     jplopsoft_renderAll();
   }
 
   jplopsoft_taskbarEnsureApp('explorer','explorer','檔案總管');
-  jplopsoft_wmRestore('jplopsoft_explorerWindow','explorer');
+
+  hwnd=jplopsoft_user32GetHwndByElementId('jplopsoft_explorerWindow');
+  if(hwnd&&jplopsoft_user32GetRecord(hwnd)){
+    jplopsoft_ShowWindow(hwnd,jplopsoft_SW_RESTORE);
+  }else{
+    jplopsoft_wmSetMaximized('jplopsoft_explorerWindow',false);
+    jplopsoft_wmRestore('jplopsoft_explorerWindow','explorer');
+  }
+
   return true;
+}
+
+function jplopsoft_openMyComputer(){
+  return jplopsoft_wmOpenExplorer(0);
 }
 
 function jplopsoft_wmCloseExplorer(){
@@ -14492,8 +14522,8 @@ function jplopsoft_RegisterExFSNativeWindows(){
       maxButtonId:'jplopsoft_explorerMaxBtn',
       closeButtonId:'jplopsoft_explorerCloseBtn',
       onMinimize:function(){jplopsoft_wmMinimize('jplopsoft_explorerWindow','explorer');},
-      onMaximize:function(){jplopsoft_wmToggleMax('jplopsoft_explorerWindow');jplopsoft_wmActivate('jplopsoft_explorerWindow','explorer');},
-      onRestore:function(){jplopsoft_wmToggleMax('jplopsoft_explorerWindow');jplopsoft_wmActivate('jplopsoft_explorerWindow','explorer');},
+      onMaximize:function(){jplopsoft_wmSetMaximized('jplopsoft_explorerWindow',true);jplopsoft_wmActivate('jplopsoft_explorerWindow','explorer');},
+      onRestore:function(){jplopsoft_wmSetMaximized('jplopsoft_explorerWindow',false);jplopsoft_wmRestore('jplopsoft_explorerWindow','explorer');},
       onClose:function(){jplopsoft_wmCloseExplorer();}
     });
   }
@@ -14512,8 +14542,8 @@ function jplopsoft_RegisterExFSNativeWindows(){
       maxButtonId:'jplopsoft_cmdMaxBtn',
       closeButtonId:'jplopsoft_cmdCloseBtn',
       onMinimize:function(){jplopsoft_wmMinimizeCmd();},
-      onMaximize:function(){jplopsoft_wmToggleMax('jplopsoft_cmdWindow');jplopsoft_wmActivate('jplopsoft_cmdWindow','cmd');},
-      onRestore:function(){jplopsoft_wmToggleMax('jplopsoft_cmdWindow');jplopsoft_wmActivate('jplopsoft_cmdWindow','cmd');},
+      onMaximize:function(){jplopsoft_wmSetMaximized('jplopsoft_cmdWindow',true);jplopsoft_wmActivate('jplopsoft_cmdWindow','cmd');},
+      onRestore:function(){jplopsoft_wmSetMaximized('jplopsoft_cmdWindow',false);jplopsoft_wmRestore('jplopsoft_cmdWindow','cmd');},
       onClose:function(){jplopsoft_wmCloseCmd();}
     });
   }
@@ -14555,8 +14585,8 @@ function jplopsoft_RegisterExFSNativeWindows(){
       maxButtonId:'jplopsoft_exconfigMaxBtn',
       closeButtonId:'jplopsoft_exconfigCloseTop',
       onMinimize:function(){jplopsoft_wmOverlayMinimize('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');},
-      onMaximize:function(){jplopsoft_wmToggleOverlayMax('jplopsoft_controlWindow');jplopsoft_wmActivateOverlay('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');},
-      onRestore:function(){jplopsoft_wmToggleOverlayMax('jplopsoft_controlWindow');jplopsoft_wmActivateOverlay('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');},
+      onMaximize:function(){jplopsoft_wmSetOverlayMaximized('jplopsoft_controlWindow',true);jplopsoft_wmActivateOverlay('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');},
+      onRestore:function(){jplopsoft_wmSetOverlayMaximized('jplopsoft_controlWindow',false);jplopsoft_wmOverlayRestore('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');},
       onClose:function(){jplopsoft_closeExconfig();}
     });
   }
@@ -14574,8 +14604,8 @@ function jplopsoft_RegisterExFSNativeWindows(){
       maxButtonId:'jplopsoft_securityMaxBtn',
       closeButtonId:'jplopsoft_securityCloseTop',
       onMinimize:function(){jplopsoft_wmOverlayMinimize('jplopsoft_securityBackdrop','jplopsoft_securityWindow','security');},
-      onMaximize:function(){jplopsoft_wmToggleOverlayMax('jplopsoft_securityWindow');jplopsoft_wmActivateOverlay('jplopsoft_securityBackdrop','jplopsoft_securityWindow','security');},
-      onRestore:function(){jplopsoft_wmToggleOverlayMax('jplopsoft_securityWindow');jplopsoft_wmActivateOverlay('jplopsoft_securityBackdrop','jplopsoft_securityWindow','security');},
+      onMaximize:function(){jplopsoft_wmSetOverlayMaximized('jplopsoft_securityWindow',true);jplopsoft_wmActivateOverlay('jplopsoft_securityBackdrop','jplopsoft_securityWindow','security');},
+      onRestore:function(){jplopsoft_wmSetOverlayMaximized('jplopsoft_securityWindow',false);jplopsoft_wmOverlayRestore('jplopsoft_securityBackdrop','jplopsoft_securityWindow','security');},
       onClose:function(){jplopsoft_closeSecurityScreen();}
     });
   }
@@ -14593,8 +14623,8 @@ function jplopsoft_RegisterExFSNativeWindows(){
       maxButtonId:'jplopsoft_trashMaxBtn',
       closeButtonId:'jplopsoft_trashCloseTop',
       onMinimize:function(){jplopsoft_wmOverlayMinimize('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');},
-      onMaximize:function(){jplopsoft_wmToggleOverlayMax('jplopsoft_trashWindow');jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');},
-      onRestore:function(){jplopsoft_wmToggleOverlayMax('jplopsoft_trashWindow');jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');},
+      onMaximize:function(){jplopsoft_wmSetOverlayMaximized('jplopsoft_trashWindow',true);jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');},
+      onRestore:function(){jplopsoft_wmSetOverlayMaximized('jplopsoft_trashWindow',false);jplopsoft_wmOverlayRestore('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');},
       onClose:function(){jplopsoft_closeTrash();}
     });
   }
@@ -14693,7 +14723,7 @@ function jplopsoft_bindWindowManager(){
   if(jplopsoft_el('jplopsoft_trashMinBtn'))jplopsoft_el('jplopsoft_trashMinBtn').onclick=function(){jplopsoft_wmOverlayMinimize('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');};
   if(jplopsoft_el('jplopsoft_trashMaxBtn'))jplopsoft_el('jplopsoft_trashMaxBtn').onclick=function(){jplopsoft_wmToggleOverlayMax('jplopsoft_trashWindow');jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');};
 
-  if(desktopComputer)desktopComputer.ondblclick=function(){jplopsoft_wmOpenExplorer(0);};
+  if(desktopComputer)desktopComputer.ondblclick=function(){jplopsoft_openMyComputer();};
   if(desktopComputer)desktopComputer.onclick=function(e){if(e&&e.detail===1)return;};
   if(desktopCmd)desktopCmd.ondblclick=jplopsoft_wmOpenCmd;
   if(desktopTrash)desktopTrash.ondblclick=jplopsoft_openTrash;
@@ -14894,7 +14924,9 @@ function jplopsoft_taskbarOpenFolder(folderId){
 }
 
 function jplopsoft_taskbarOpenComputer(){
-  jplopsoft_taskbarOpenFolder(0);
+  if(!jplopsoft_taskbarRequireDesktop())return;
+  jplopsoft_closeStartMenu();
+  jplopsoft_openMyComputer();
 }
 
 function jplopsoft_taskbarOpenDesktop(){
@@ -14993,6 +15025,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXFS_OS={
   ready:true,
-  version:'6.4.0-dev-os12',
-  build:'external-os-oobe-logon-alignment'
+  version:'6.4.0-dev-os13',
+  build:'external-os-win32-layout-computer-fix'
 };
