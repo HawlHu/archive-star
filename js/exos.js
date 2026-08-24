@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os47
+ * Version: 6.4.0-dev-os48
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -74,6 +74,11 @@ var jplopsoft_EXFS_SVG_ICONS={
   'disk':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGVsbGlwc2UgY3g9IjEyIiBjeT0iNiIgcng9IjguNSIgcnk9IjMuMyIgZmlsbD0iI2RiZWFmZSIgc3Ryb2tlPSIjNDc1NTY5Ii8+PHBhdGggZD0iTTMuNSA2djExYzAgMS44IDMuOCAzLjMgOC41IDMuM3M4LjUtMS41IDguNS0zLjNWNiIgZmlsbD0iI2UyZThmMCIgc3Ryb2tlPSIjNDc1NTY5Ii8+PHBhdGggZD0iTTMuNSAxMWMwIDEuOCAzLjggMy4zIDguNSAzLjNzOC41LTEuNSA4LjUtMy4zTTMuNSAxNmMwIDEuOCAzLjggMy4zIDguNSAzLjNzOC41LTEuNSA4LjUtMy4zIiBmaWxsPSJub25lIiBzdHJva2U9IiM2NDc0OGIiLz48Y2lyY2xlIGN4PSIxNy4yIiBjeT0iMTciIHI9IjEiIGZpbGw9IiMyMmM1NWUiLz48L3N2Zz4=',
   'user':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIyMSIgcj0iMTMiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNMTAgNThjMi0xNiAxMC0yNCAyMi0yNHMyMCA4IDIyIDI0IiBmaWxsPSIjZmZmIi8+PC9zdmc+',
   'setup_user':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMjUiIGN5PSIyMCIgcj0iMTEiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNNyA1M2MyLTEzIDgtMjAgMTgtMjAgNSAwIDkgMiAxMiA1IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iNDciIGN5PSI0NSIgcj0iMTIiIGZpbGw9IiNkZmYzZmYiLz48cGF0aCBkPSJNNDcgMzh2MTRNNDAgNDVoMTQiIHN0cm9rZT0iIzAwNzhkNCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=',
+  'cut':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3" fill="none" stroke="#2563eb" stroke-width="1.6"/><circle cx="6" cy="18" r="3" fill="none" stroke="#2563eb" stroke-width="1.6"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4" fill="none" stroke="#2563eb" stroke-width="1.6"/></svg>',
+  'paste':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 4h8l1 2h3v15H4V6h3z" fill="#eaf4ff" stroke="#3b82f6"/><rect x="8" y="2" width="8" height="5" rx="1" fill="#fff" stroke="#3b82f6"/></svg>',
+  'rename':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 5h9M5 19h9M9.5 5v14" fill="none" stroke="#334155" stroke-width="1.6"/><path d="m14 16 5-5 2 2-5 5-3 1z" fill="#dbeafe" stroke="#2563eb"/></svg>',
+  'upload':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17V6m-4 4 4-4 4 4M5 20h14" fill="none" stroke="#2563eb" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  'view':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5h8v6H3zM13 5h8v6h-8zM3 13h8v6H3zM13 13h8v6h-8z" fill="#eaf4ff" stroke="#3b82f6"/></svg>',
   'arrow_right':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMTJoMTNtLTUtNSA1IDUtNSA1IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMS44IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4='
 };
 
@@ -20961,7 +20966,7 @@ function jplopsoft_xshCreateAppWindow(ctx,spec){
 }
 
 function jplopsoft_xshControl(ctx,controlId){return ctx.controls[String(controlId||'')]||null;}
-function jplopsoft_xshApplySafeStyle(n,style){var s=style||{},k,allowed={display:1,width:1,height:1,minWidth:1,minHeight:1,maxWidth:1,maxHeight:1,margin:1,marginTop:1,marginRight:1,marginBottom:1,marginLeft:1,padding:1,paddingTop:1,paddingRight:1,paddingBottom:1,paddingLeft:1,boxSizing:1,fontSize:1,fontWeight:1,fontFamily:1,lineHeight:1,textAlign:1,whiteSpace:1,overflow:1,overflowX:1,overflowY:1,resize:1,border:1,borderRadius:1,background:1,color:1,gap:1,gridTemplateColumns:1,gridTemplateRows:1,alignItems:1,justifyContent:1,flexDirection:1,flexWrap:1,flex:1};if(!n||!n.style)return;for(k in s){if(!s.hasOwnProperty(k)||!allowed[k])continue;try{n.style[k]=String(s[k]);}catch(ignoreXshStyle){}}}
+function jplopsoft_xshApplySafeStyle(n,style){var s=style||{},k,allowed={display:1,width:1,height:1,minWidth:1,minHeight:1,maxWidth:1,maxHeight:1,margin:1,marginTop:1,marginRight:1,marginBottom:1,marginLeft:1,padding:1,paddingTop:1,paddingRight:1,paddingBottom:1,paddingLeft:1,boxSizing:1,fontSize:1,fontWeight:1,fontFamily:1,lineHeight:1,textAlign:1,whiteSpace:1,overflow:1,overflowX:1,overflowY:1,resize:1,border:1,borderRadius:1,background:1,color:1,gap:1,gridTemplateColumns:1,gridTemplateRows:1,alignItems:1,justifyContent:1,flexDirection:1,flexWrap:1,flex:1,opacity:1,cursor:1,boxShadow:1,borderTop:1,borderRight:1,borderBottom:1,borderLeft:1};if(!n||!n.style)return;for(k in s){if(!s.hasOwnProperty(k)||!allowed[k])continue;try{n.style[k]=String(s[k]);}catch(ignoreXshStyle){}}}
 function jplopsoft_xshControlParent(ctx,client,parentId){var p=parentId?jplopsoft_xshControl(ctx,parentId):null;return p||client;}
 
 function jplopsoft_xshSetControlStyle(ctx,id,style){
@@ -25318,6 +25323,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os47',
+  version:'6.4.0-dev-os48',
   build:'external-os-comctl32-split-core-controls'
 };
