@@ -1,6 +1,6 @@
 /*
  * ExFS OS Frontend Module
- * Version: 6.4.0-dev-os2
+ * Version: 6.4.0-dev-os3
  *
  * Stable browser-side operating-system UI functions extracted from exfs.php:
  * - CMD shell / parser / commands
@@ -11832,6 +11832,7 @@ function jplopsoft_openEditor(id,routeInternal){
     try{src=jplopsoft_decContentCipher(out.content_enc,jplopsoft_nodeFekById(id));}catch(e){return alert(e.message);}
     if(src===null)return alert('文件內容無法解密。');
     state.editId=id;state.openId=id;state.openFormat=fmt;state.editorMode=fmt==='csv'?'csv':'source';
+    jplopsoft_taskbarSetDocumentApp(id,name||('#'+id),fmt);
     jplopsoft_el('jplopsoft_modalTitle').textContent='編輯：'+(name||('#'+id));jplopsoft_el('jplopsoft_saveDocBtn').className='jplopsoft_btn jplopsoft_primary';jplopsoft_hideDocumentPanes();
     if(fmt==='csv'){
       jplopsoft_el('jplopsoft_modalTabs').className='jplopsoft_modal-tabs jplopsoft_hidden';jplopsoft_el('jplopsoft_csvPane').className='jplopsoft_csv-pane';
@@ -12078,13 +12079,115 @@ function jplopsoft_renderPreview(src){
   }
 }
 function jplopsoft_toggleMax(){state.maximized=!state.maximized;var m=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal');m.className='jplopsoft_modal'+(state.maximized?' jplopsoft_maximized':'');jplopsoft_el('jplopsoft_modalMaxBtn').textContent=state.maximized?'還原':'放到最大';if(jplopsoft_isIE11Browser())setTimeout(jplopsoft_ie11FitDocumentModal,0);}
-function jplopsoft_closeModal(){var ieBody,ieModal,ieCsvPane,ieCsvWrap;jplopsoft_closeVersions();jplopsoft_el('jplopsoft_modalBackdrop').style.display='none';if(jplopsoft_isIE11Browser()){ieModal=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal');ieBody=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal-body');ieCsvPane=jplopsoft_el('jplopsoft_csvPane');ieCsvWrap=jplopsoft_el('jplopsoft_csvSheetWrap');if(ieModal){ieModal.style.height='';ieModal.style.maxHeight='';}if(ieBody){ieBody.style.height='';ieBody.style.maxHeight='';ieBody.style.msFlex='';ieBody.style.flex='';}if(ieCsvPane){ieCsvPane.style.height='';ieCsvPane.style.maxHeight='';ieCsvPane.style.msFlex='';ieCsvPane.style.flex='';}if(ieCsvWrap){ieCsvWrap.style.height='';ieCsvWrap.style.maxHeight='';ieCsvWrap.style.msFlex='';ieCsvWrap.style.flex='';}}state.editId=0;state.openId=0;state.openFormat='html';state.editorMode='source';state.csvData=[];state.csvHadBom=false;state.csvReadOnly=false;state.csvSelectedRow=0;state.csvSelectedCol=0;jplopsoft_el('jplopsoft_saveDocBtn').className='jplopsoft_btn jplopsoft_primary';jplopsoft_el('jplopsoft_modalTabs').className='jplopsoft_modal-tabs';jplopsoft_revokePreview();jplopsoft_revokeImagePreview();jplopsoft_revokeMediaPreview();jplopsoft_el('jplopsoft_csvPane').className='jplopsoft_csv-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_imagePreviewPane').className='jplopsoft_image-preview-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_mediaPreviewPane').className='jplopsoft_media-preview-pane jplopsoft_hidden';state.maximized=false;var m=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal');if(m)m.className='jplopsoft_modal';jplopsoft_el('jplopsoft_modalMaxBtn').textContent='放到最大';jplopsoft_routeClearExplorerAction();}
+function jplopsoft_closeModal(){var ieBody,ieModal,ieCsvPane,ieCsvWrap;jplopsoft_closeVersions();jplopsoft_el('jplopsoft_modalBackdrop').style.display='none';jplopsoft_taskbarRemoveDocumentApp();if(jplopsoft_isIE11Browser()){ieModal=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal');ieBody=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal-body');ieCsvPane=jplopsoft_el('jplopsoft_csvPane');ieCsvWrap=jplopsoft_el('jplopsoft_csvSheetWrap');if(ieModal){ieModal.style.height='';ieModal.style.maxHeight='';}if(ieBody){ieBody.style.height='';ieBody.style.maxHeight='';ieBody.style.msFlex='';ieBody.style.flex='';}if(ieCsvPane){ieCsvPane.style.height='';ieCsvPane.style.maxHeight='';ieCsvPane.style.msFlex='';ieCsvPane.style.flex='';}if(ieCsvWrap){ieCsvWrap.style.height='';ieCsvWrap.style.maxHeight='';ieCsvWrap.style.msFlex='';ieCsvWrap.style.flex='';}}state.editId=0;state.openId=0;state.openFormat='html';state.editorMode='source';state.csvData=[];state.csvHadBom=false;state.csvReadOnly=false;state.csvSelectedRow=0;state.csvSelectedCol=0;jplopsoft_el('jplopsoft_saveDocBtn').className='jplopsoft_btn jplopsoft_primary';jplopsoft_el('jplopsoft_modalTabs').className='jplopsoft_modal-tabs';jplopsoft_revokePreview();jplopsoft_revokeImagePreview();jplopsoft_revokeMediaPreview();jplopsoft_el('jplopsoft_csvPane').className='jplopsoft_csv-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_imagePreviewPane').className='jplopsoft_image-preview-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_mediaPreviewPane').className='jplopsoft_media-preview-pane jplopsoft_hidden';state.maximized=false;var m=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal');if(m)m.className='jplopsoft_modal';jplopsoft_el('jplopsoft_modalMaxBtn').textContent='放到最大';jplopsoft_routeClearExplorerAction();}
 
 function jplopsoft_bindRich(){var tb=jplopsoft_el('jplopsoft_richToolbar'),buttons=tb.getElementsByTagName('button'),i;for(i=0;i<buttons.length;i++)if(buttons[i].getAttribute('data-cmd'))(function(b){b.onclick=function(){jplopsoft_execRich(b.getAttribute('data-cmd'));};})(buttons[i]);jplopsoft_el('jplopsoft_richBlock').onchange=function(){if(this.value)jplopsoft_execRich('formatBlock','<'+this.value+'>');this.selectedIndex=0;};jplopsoft_el('jplopsoft_richFont').onchange=function(){if(this.value)jplopsoft_execRich('fontName',this.value);};jplopsoft_el('jplopsoft_richSize').onchange=function(){if(this.value)jplopsoft_execRich('fontSize',this.value);};jplopsoft_el('jplopsoft_richFore').onchange=function(){var v=String(this.value||'');if(!/^#[0-9a-f]{6}$/i.test(v)){if(jplopsoft_isIE11Browser())alert('請輸入 #RRGGBB 格式，例如 #ff0000。');return;}jplopsoft_execRich('foreColor',v);};jplopsoft_el('jplopsoft_richBack').onchange=function(){var v=String(this.value||'');if(!/^#[0-9a-f]{6}$/i.test(v)){if(jplopsoft_isIE11Browser())alert('請輸入 #RRGGBB 格式，例如 #ffff00。');return;}jplopsoft_execRich('hiliteColor',v);jplopsoft_execRich('backColor',v);};jplopsoft_el('jplopsoft_richLink').onclick=function(){var u=window.prompt('連結網址：','https://');if(u)jplopsoft_execRich('createLink',u);};jplopsoft_el('jplopsoft_richTable').onclick=function(){var r=parseInt(window.prompt('列數：','3'),10),c=parseInt(window.prompt('欄數：','3'),10),i,j,h='<table><tbody>';if(!(r>0&&r<=30&&c>0&&c<=20))return;for(i=0;i<r;i++){h+='<tr>';for(j=0;j<c;j++)h+='<td>&nbsp;</td>';h+='</tr>';}h+='</tbody></table><p><br></p>';jplopsoft_execRich('insertHTML',h);};}
 
 /* -------------------------------------------------------------------------
  * Windows 10-style ExFS taskbar / Start menu
  * ---------------------------------------------------------------------- */
+function jplopsoft_taskbarDocumentFormatInfo(fmt){
+  fmt=String(fmt||'').toLowerCase();
+  if(fmt==='csv')return{icon:'▦',app:'CSV 試算表'};
+  if(fmt==='txt')return{icon:'T',app:'文字編輯器'};
+  return{icon:'<>',app:'HTML 編輯器'};
+}
+
+function jplopsoft_taskbarDocumentButton(){
+  return jplopsoft_el('jplopsoft_taskbarDocumentApp');
+}
+
+function jplopsoft_taskbarSetDocumentApp(id,name,fmt){
+  var host=jplopsoft_el('jplopsoft_taskbarApps'),btn=jplopsoft_taskbarDocumentButton(),
+      info=jplopsoft_taskbarDocumentFormatInfo(fmt),icon,text,label;
+
+  if(!host)return;
+
+  if(!btn){
+    btn=document.createElement('button');
+    btn.id='jplopsoft_taskbarDocumentApp';
+    btn.type='button';
+    btn.className='jplopsoft_taskbar-app';
+    btn.setAttribute('aria-label','文件編輯器');
+    btn.onclick=jplopsoft_taskbarToggleDocument;
+
+    icon=document.createElement('span');
+    icon.id='jplopsoft_taskbarDocumentIcon';
+    icon.className='jplopsoft_taskbar-app-icon';
+    btn.appendChild(icon);
+
+    text=document.createElement('span');
+    text.id='jplopsoft_taskbarDocumentText';
+    text.className='jplopsoft_taskbar-app-text';
+    btn.appendChild(text);
+
+    host.appendChild(btn);
+  }
+
+  label=info.app+' - '+String(name||('#'+id));
+  btn.setAttribute('data-node-id',String(parseInt(id,10)||0));
+  btn.setAttribute('data-format',String(fmt||''));
+  btn.title=label;
+  btn.setAttribute('aria-label',label);
+
+  icon=jplopsoft_el('jplopsoft_taskbarDocumentIcon');
+  text=jplopsoft_el('jplopsoft_taskbarDocumentText');
+  if(icon)icon.textContent=info.icon;
+  if(text)text.textContent=label;
+
+  jplopsoft_taskbarDocumentActivated();
+}
+
+function jplopsoft_taskbarRemoveDocumentApp(){
+  var btn=jplopsoft_taskbarDocumentButton();
+  if(btn&&btn.parentNode)btn.parentNode.removeChild(btn);
+}
+
+function jplopsoft_taskbarDocumentVisible(){
+  var back=jplopsoft_el('jplopsoft_modalBackdrop');
+  return !!(back&&back.style.display!=='none'&&back.offsetWidth>0);
+}
+
+function jplopsoft_taskbarDocumentActivated(){
+  var btn=jplopsoft_taskbarDocumentButton();
+  if(!btn)return;
+  btn.className='jplopsoft_taskbar-app jplopsoft_active';
+  btn.setAttribute('aria-pressed','true');
+}
+
+function jplopsoft_taskbarDocumentMinimized(){
+  var btn=jplopsoft_taskbarDocumentButton();
+  if(!btn)return;
+  btn.className='jplopsoft_taskbar-app jplopsoft_minimized';
+  btn.setAttribute('aria-pressed','false');
+}
+
+function jplopsoft_taskbarMinimizeDocument(){
+  var back=jplopsoft_el('jplopsoft_modalBackdrop');
+  if(!back||!jplopsoft_taskbarDocumentButton())return false;
+  if(typeof jplopsoft_closeVersions==='function')jplopsoft_closeVersions();
+  back.style.display='none';
+  jplopsoft_taskbarDocumentMinimized();
+  return true;
+}
+
+function jplopsoft_taskbarRestoreDocument(){
+  var back=jplopsoft_el('jplopsoft_modalBackdrop');
+  if(!back||!jplopsoft_taskbarDocumentButton()||!state.openId)return false;
+  back.style.display='flex';
+  jplopsoft_taskbarDocumentActivated();
+  if(jplopsoft_isIE11Browser()){
+    setTimeout(jplopsoft_ie11FitDocumentModal,0);
+    setTimeout(jplopsoft_ie11FitDocumentModal,80);
+  }
+  return true;
+}
+
+function jplopsoft_taskbarToggleDocument(){
+  if(jplopsoft_taskbarDocumentVisible())jplopsoft_taskbarMinimizeDocument();
+  else jplopsoft_taskbarRestoreDocument();
+}
+
 function jplopsoft_taskbarPad2(n){
   n=parseInt(n,10)||0;
   return n<10?'0'+n:String(n);
@@ -12136,6 +12239,7 @@ function jplopsoft_taskbarUpdateAvailability(){
   var logged=!!(state&&state.samAuthenticated&&state.vaultKey),
       ids=['jplopsoft_startComputer','jplopsoft_startDesktop','jplopsoft_startControlPanel','jplopsoft_startCmd','jplopsoft_startSecurity'],
       i,n;
+  if(!logged)jplopsoft_taskbarRemoveDocumentApp();
   for(i=0;i<ids.length;i++){
     n=jplopsoft_el(ids[i]);
     if(n)n.disabled=!logged||!!state.kdfBusy;
@@ -12154,6 +12258,7 @@ function jplopsoft_taskbarOpenFolder(folderId){
   if(!jplopsoft_taskbarRequireDesktop())return;
   jplopsoft_closeStartMenu();
 
+  if(jplopsoft_taskbarDocumentVisible()&&jplopsoft_taskbarDocumentButton())jplopsoft_taskbarMinimizeDocument();
   if(state.cmdMode)jplopsoft_setCmdMode(false);
   if(!jplopsoft_routeIsUser()||!jplopsoft_EXE_ROUTE||jplopsoft_EXE_ROUTE.app!=='explorer'||jplopsoft_EXE_ROUTE.action){
     jplopsoft_routeExplorer(jplopsoft_routeUsername());
@@ -12269,6 +12374,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=function()
 
 window.jplopsoft_EXFS_OS={
   ready:true,
-  version:'6.4.0-dev-os2',
-  build:'external-os-taskbar'
+  version:'6.4.0-dev-os3',
+  build:'external-os-taskbar-apps'
 };
