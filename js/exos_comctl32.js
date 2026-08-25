@@ -1,6 +1,6 @@
 /* ExOS Common Controls Host Runtime
  * File: exos_comctl32.js
- * Version: 6.4.0-dev-os60
+ * Version: 6.4.0-dev-os64
  * Model: EXOS_COMCTL32_V2
  * Client: V8-only browsers
  *
@@ -13,7 +13,7 @@
   if(
     global.jplopsoft_EXOS_COMCTL32&&
     global.jplopsoft_EXOS_COMCTL32.ready===true&&
-    String(global.jplopsoft_EXOS_COMCTL32.version||'')==='6.4.0-dev-os60'
+    String(global.jplopsoft_EXOS_COMCTL32.version||'')==='6.4.0-dev-os64'
   ){
     return;
   }
@@ -1817,6 +1817,19 @@ function jplopsoft_comctlTreeRenderBranch(
         );
       };
 
+      row.oncontextmenu=function(e){
+        try{e.preventDefault();e.stopPropagation();}catch(ignoreTreeCtx){}
+        if(String(state.selectedId)!==String(itemId)){
+          jplopsoft_comctlTreeSelect(ctx,state,itemId,'rightclick');
+        }
+        jplopsoft_comctlNotify(ctx,state.id,'NM_RCLICK',{
+          item:jplopsoft_comctlTreeSnapshotItem(state,itemId),
+          x:e&&typeof e.clientX==='number'?e.clientX:0,
+          y:e&&typeof e.clientY==='number'?e.clientY:0
+        });
+        return false;
+      };
+
       row.ondblclick=function(){
         var current=state.items[itemId];
 
@@ -2078,6 +2091,30 @@ function jplopsoft_comctlTreeInsertItem(ctx,id,item){
 
   jplopsoft_comctlTreeRender(ctx,state);
   return node.id;
+}
+
+function jplopsoft_comctlTreeSetItem(ctx,id,itemId,patch){
+  var state=jplopsoft_comctlState(ctx,id,'TREEVIEW'),
+      item=state.items[String(itemId||'')],
+      p=patch&&typeof patch==='object'?patch:{};
+
+  if(!item){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,
+      'TreeView item not found.'
+    );
+  }
+
+  if(typeof p.text!=='undefined')item.text=String(p.text);
+  if(typeof p.icon!=='undefined')item.icon=String(p.icon||'folder');
+  if(typeof p.imageList!=='undefined')item.imageList=String(p.imageList||'');
+  if(typeof p.imageIndex==='number')item.imageIndex=parseInt(p.imageIndex,10);
+  if(p.data&&typeof p.data==='object')item.data=p.data;
+  if(typeof p.hasChildren!=='undefined')item.hasChildren=!!p.hasChildren;
+  if(typeof p.expanded!=='undefined')item.expanded=!!p.expanded;
+
+  jplopsoft_comctlTreeRender(ctx,state);
+  return jplopsoft_comctlTreeSnapshotItem(state,item.id);
 }
 
 function jplopsoft_comctlTreeDeleteItem(ctx,id,itemId){
@@ -4182,7 +4219,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
     return{
       ok:true,
       model:'EXOS_COMCTL32_V2',
-      version:'6.4.0-dev-os60',
+      version:'6.4.0-dev-os64',
       classes:jplopsoft_comctlClasses()
     };
   }
@@ -4190,7 +4227,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
   if(method==='GetCommonControlsVersion'){
     return{
       model:'EXOS_COMCTL32_V2',
-      version:'6.4.0-dev-os60'
+      version:'6.4.0-dev-os64'
     };
   }
 
@@ -4320,6 +4357,9 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
   }
   if(method==='TreeView_SetItems'){
     return jplopsoft_comctlTreeSetItems(ctx,args[0],args[1]);
+  }
+  if(method==='TreeView_SetItem'){
+    return jplopsoft_comctlTreeSetItem(ctx,args[0],args[1],args[2]);
   }
   if(method==='TreeView_SetChildren'){
     return jplopsoft_comctlTreeSetChildren(ctx,args[0],args[1],args[2]);
@@ -5055,7 +5095,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
 
   global.jplopsoft_EXOS_COMCTL32=Object.freeze({
     ready:true,
-    version:'6.4.0-dev-os60',
+    version:'6.4.0-dev-os64',
     model:'EXOS_COMCTL32_V2',
     build:'external-comctl32-core-controls',
     classes:Object.freeze(jplopsoft_comctlClasses().slice())

@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os60
+ * Version: 6.4.0-dev-os64
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -1883,7 +1883,7 @@ function jplopsoft_cmdApplyTabCompletion(input,reverse){
 }
 
 function jplopsoft_cmdHelp(){
-  jplopsoft_cmdWrite('ExOS CMD Mode 6.3 command help','success');
+  jplopsoft_cmdWrite('ExOS CMD Mode 6.4 command help','success');
   jplopsoft_cmdWrite('');
   jplopsoft_cmdWrite('VER');
   jplopsoft_cmdWrite('WINVER');
@@ -8596,7 +8596,7 @@ function jplopsoft_cmdExecute(raw){
 
   if(lower==='regedit'||lower==='regedit.exe'){
     if(arg!==''){jplopsoft_cmdWrite('Usage: REGEDIT','error');return;}
-    jplopsoft_cmdWrite('Opening Registry Editor ...','info');jplopsoft_openRegedit();return;
+    jplopsoft_cmdWrite('Opening Registry Editor ...','info');jplopsoft_launchSystemXshApp('regedit',[]);return;
   }
 
   if(lower==='diskmgmt'||lower==='diskmgmt.msc'){
@@ -11872,11 +11872,15 @@ function jplopsoft_printCurrentDocument(){
 function jplopsoft_downloadCurrentDocument(){var n=jplopsoft_findNode(state.openId),name,fmt,src;if(!n||n.type!=='file')return jplopsoft_exosMessage('目前沒有可下載的文件。');name=jplopsoft_decName(n)||('file-'+n.id);fmt=jplopsoft_fileFormatFromName(name);if(jplopsoft_binaryFormat(fmt)){jplopsoft_downloadNode(n.id);return;}try{if(state.editorMode==='rich'&&state.openFormat==='html')jplopsoft_syncRichToSource();src=fmt==='csv'?jplopsoft_csvCurrentSource():jplopsoft_el('jplopsoft_htmlEditor').value;if(src===null||src===undefined)return jplopsoft_exosMessage('文件內容尚未載入。');jplopsoft_saveFileBlob(name,src);}catch(e){jplopsoft_exosMessage(e.message);}}
 function jplopsoft_currentFolderLabel(){if(state.currentFolder===0)return '根目錄';var n=jplopsoft_findNode(state.currentFolder);return n?(jplopsoft_decName(n)||('資料夾 #'+n.id)):'根目錄';}
 function jplopsoft_hasDraggedFiles(e){var dt=e&&e.dataTransfer,t,i;if(!dt)return false;if(dt.files&&dt.files.length)return true;if(dt.types){for(i=0;i<dt.types.length;i++){t=String(dt.types[i]);if(t==='Files')return true;}}return false;}
-function jplopsoft_showDropOverlay(){if(!state.vaultKey)return;jplopsoft_el('jplopsoft_dropFolderLabel').textContent='將在瀏覽器端加密後放入「'+jplopsoft_currentFolderLabel()+'」。單檔最大 1 GiB；圖片上傳前會先建立並加密 128×128 JPEG 縮圖，預覽只讀縮圖；原圖只在下載時解密。文字 >18 MiB、其他檔案 >24 MiB 自動使用 CHUNKED_V1。';jplopsoft_el('jplopsoft_dropOverlay').className='jplopsoft_drop-overlay';document.body.className=(document.body.className||'').replace(/\bjplopsoft_drop-active\b/g,'')+' jplopsoft_drop-active';}
+function jplopsoft_globalDropTargetFolder(){var id=parseInt(state.currentFolder,10)||0;if(jplopsoft_isWritableProfileFolder(id)&&id!==jplopsoft_DESKTOP_FOLDER_ID)return id;id=parseInt(state.documentsNodeId,10)||0;if(jplopsoft_isWritableProfileFolder(id))return id;id=parseInt(state.profileRootId,10)||0;if(jplopsoft_isWritableProfileFolder(id))return id;return 0;}
+function jplopsoft_folderLabelById(id){id=parseInt(id,10)||0;if(id===jplopsoft_DESKTOP_FOLDER_ID)return '桌面';if(id===0)return '根目錄';var n=jplopsoft_findNode(id);return n?(jplopsoft_decName(n)||('資料夾 #'+n.id)):'資料夾 #'+id;}
+function jplopsoft_showDropOverlay(){if(!state.vaultKey)return;var target=jplopsoft_globalDropTargetFolder(),label=target?jplopsoft_folderLabelById(target):'無可寫入位置';jplopsoft_el('jplopsoft_dropFolderLabel').textContent='放開滑鼠後將在瀏覽器端加密並上傳到「'+label+'」。單檔最大 1 GiB；大型檔案使用 4 MiB CHUNKED_V1 分塊。';jplopsoft_el('jplopsoft_dropOverlay').className='jplopsoft_drop-overlay';document.body.className=(document.body.className||'').replace(/\bjplopsoft_drop-active\b/g,'')+' jplopsoft_drop-active';}
 function jplopsoft_hideDropOverlay(){var o=jplopsoft_el('jplopsoft_dropOverlay');if(o)o.className='jplopsoft_drop-overlay jplopsoft_hidden';document.body.className=(document.body.className||'').replace(/\s*\bjplopsoft_drop-active\b/g,'');state.dragDepth=0;}
-function jplopsoft_importUniqueName(raw,reserved){var ext0=jplopsoft_fileExtension(raw),name=jplopsoft_validateName(raw,'file',ext0),dot,baseName,ext,n=2,candidate;if(!name)return null;dot=name.lastIndexOf('.');baseName=dot>0?name.substring(0,dot):name;ext=dot>0?name.substring(dot):'.txt';candidate=name;while(jplopsoft_siblingNameExists(state.currentFolder,candidate,0)||reserved[candidate.toLowerCase()]){candidate=baseName+' ('+n+')'+ext;n++;if(n>10000)return null;}reserved[candidate.toLowerCase()]=true;return candidate;}
-function jplopsoft_uploadFiles(fileList){
-  if(jplopsoft_isDesktopFolder())return jplopsoft_exosMessage('桌面只存放捷徑，請先進入一般資料夾再上傳。');
+function jplopsoft_importUniqueName(raw,reserved,targetFolder){var ext0=jplopsoft_fileExtension(raw),name=jplopsoft_validateName(raw,'file',ext0),dot,baseName,ext,n=2,candidate,folder=parseInt(targetFolder,10)||0;if(!name)return null;dot=name.lastIndexOf('.');baseName=dot>0?name.substring(0,dot):name;ext=dot>0?name.substring(dot):'.txt';candidate=name;while(jplopsoft_siblingNameExists(folder,candidate,0)||reserved[candidate.toLowerCase()]){candidate=baseName+' ('+n+')'+ext;n++;if(n>10000)return null;}reserved[candidate.toLowerCase()]=true;return candidate;}
+function jplopsoft_uploadFiles(fileList,targetFolder){
+  var uploadTarget=typeof targetFolder==='undefined'?(parseInt(state.currentFolder,10)||0):(parseInt(targetFolder,10)||0);
+  if(uploadTarget===jplopsoft_DESKTOP_FOLDER_ID)return jplopsoft_exosMessage('桌面只存放捷徑，請將檔案拖到檔案總管資料夾或目前使用者的文件資料夾。');
+  if(!jplopsoft_isWritableProfileFolder(uploadTarget))return jplopsoft_exosMessage('此位置唯讀。拖放檔案只能寫入 C:\\Users\\'+state.samUsername+'\\ 內。');
   if(!state.vaultKey)return jplopsoft_exosMessage('請先解密。');
   if(!window.FileReader)return jplopsoft_exosMessage('瀏覽器不支援 FileReader，無法匯入本機檔案。');
 
@@ -11888,7 +11892,7 @@ function jplopsoft_uploadFiles(fileList){
   }
 
   if(!files.length){jplopsoft_exosMessage('沒有可上傳的檔案。');return;}
-  jplopsoft_setStatus('準備上傳 '+files.length+' 個檔案到「'+jplopsoft_currentFolderLabel()+'」…');
+  jplopsoft_setStatus('準備上傳 '+files.length+' 個檔案到「'+jplopsoft_folderLabelById(uploadTarget)+'」…');
 
   function jplopsoft_finishAll(){
     jplopsoft_hideDropOverlay();
@@ -11922,7 +11926,7 @@ function jplopsoft_uploadFiles(fileList){
       jplopsoft_next(idx+1);return;
     }
 
-    name=jplopsoft_importUniqueName(file.name,reserved);
+    name=jplopsoft_importUniqueName(file.name,reserved,uploadTarget);
     if(!name){skipped.push(file.name+'（檔名無效）');jplopsoft_next(idx+1);return;}
     var fileFek,fileFekWrap;try{fileFek=jplopsoft_newFek();fileFekWrap=jplopsoft_wrapFek(fileFek);}catch(fekErr){skipped.push(file.name+'（FEK 建立失敗：'+fekErr.message+'）');jplopsoft_next(idx+1);return;}
 
@@ -11931,7 +11935,7 @@ function jplopsoft_uploadFiles(fileList){
 
       if(useLarge){
         jplopsoft_setStatus('大型檔案模式：'+jplopsoft_htmlEscape(name)+' ｜ 4 MiB 原圖加密 Block'+(isImage?' ｜ 128×128 JPEG 縮圖已獨立加密':'')+' ｜ 最大 1 GiB');
-        jplopsoft_largeUploadFile(file,name,state.currentFolder,thumbnail,fileFek,fileFekWrap,function(err,out){
+        jplopsoft_largeUploadFile(file,name,uploadTarget,thumbnail,fileFek,fileFekWrap,function(err,out){
           if(err){
             skipped.push(file.name+'（大型分塊上傳中斷：'+err.message+'）');
           }else{
@@ -11961,7 +11965,7 @@ function jplopsoft_uploadFiles(fileList){
 
         jplopsoft_setStatus('正在 '+(isBin?'Base64 + EXES':'EXES')+' 加密上傳 '+(idx+1)+' / '+files.length+'：'+jplopsoft_htmlEscape(name)+(isImage?' ｜ 原圖 + JPEG128_V1 加密縮圖':''));
         jplopsoft_uploadCipherInChunks(
-          state.currentFolder,
+          uploadTarget,
           name,
           cipher,
           file.size||0,
@@ -12008,7 +12012,7 @@ function jplopsoft_uploadFiles(fileList){
 
   jplopsoft_next(0);
 }
-function jplopsoft_bindFileDrop(){var input=jplopsoft_el('jplopsoft_uploadFileInput');jplopsoft_el('jplopsoft_uploadFileBtn').onclick=function(){if(jplopsoft_isDesktopFolder())return jplopsoft_exosMessage('桌面只存放捷徑，請先進入一般資料夾再上傳。');if(!jplopsoft_isWritableProfileFolder(state.currentFolder))return jplopsoft_exosMessage('此位置唯讀。只能上傳到 C:\\Users\\'+state.samUsername+'\\ 內。');if(!state.vaultKey)return jplopsoft_exosMessage('請先解鎖。');input.value='';input.click();};input.onchange=function(){if(this.files&&this.files.length)jplopsoft_uploadFiles(this.files);this.value='';};document.addEventListener('dragenter',function(e){if(!jplopsoft_hasDraggedFiles(e))return;if(e.target&&e.target.closest&&e.target.closest('[data-exos-browser-drop-zone="1"]'))return;e.preventDefault();if(!state.vaultKey)return;state.dragDepth++;jplopsoft_showDropOverlay();});document.addEventListener('dragover',function(e){if(!jplopsoft_hasDraggedFiles(e))return;if(e.target&&e.target.closest&&e.target.closest('[data-exos-browser-drop-zone="1"]'))return;e.preventDefault();try{e.dataTransfer.dropEffect=state.vaultKey?'copy':'none';}catch(x){}if(state.vaultKey)jplopsoft_showDropOverlay();});document.addEventListener('dragleave',function(e){if(!jplopsoft_hasDraggedFiles(e)&&state.dragDepth<=0)return;if(state.dragDepth>0)state.dragDepth--;if(state.dragDepth<=0)jplopsoft_hideDropOverlay();});document.addEventListener('drop',function(e){if(!jplopsoft_hasDraggedFiles(e))return;if(e.defaultPrevented||e.__exosXshDropHandled){jplopsoft_hideDropOverlay();return;}e.preventDefault();var fs=e.dataTransfer&&e.dataTransfer.files;jplopsoft_hideDropOverlay();if(!state.vaultKey){jplopsoft_exosMessage('請先解鎖，再拖曳文件上傳。');return;}if(fs&&fs.length)jplopsoft_uploadFiles(fs);});}
+function jplopsoft_bindFileDrop(){var input=jplopsoft_el('jplopsoft_uploadFileInput');jplopsoft_el('jplopsoft_uploadFileBtn').onclick=function(){if(jplopsoft_isDesktopFolder())return jplopsoft_exosMessage('桌面只存放捷徑，請先進入一般資料夾再上傳。');if(!jplopsoft_isWritableProfileFolder(state.currentFolder))return jplopsoft_exosMessage('此位置唯讀。只能上傳到 C:\\Users\\'+state.samUsername+'\\ 內。');if(!state.vaultKey)return jplopsoft_exosMessage('請先解鎖。');input.value='';input.click();};input.onchange=function(){if(this.files&&this.files.length)jplopsoft_uploadFiles(this.files);this.value='';};document.addEventListener('dragenter',function(e){if(!jplopsoft_hasDraggedFiles(e))return;if(e.target&&e.target.closest&&e.target.closest('[data-exos-browser-drop-zone="1"]'))return;e.preventDefault();if(!state.vaultKey)return;state.dragDepth++;jplopsoft_showDropOverlay();});document.addEventListener('dragover',function(e){if(!jplopsoft_hasDraggedFiles(e))return;if(e.target&&e.target.closest&&e.target.closest('[data-exos-browser-drop-zone="1"]'))return;e.preventDefault();try{e.dataTransfer.dropEffect=state.vaultKey?'copy':'none';}catch(x){}if(state.vaultKey)jplopsoft_showDropOverlay();});document.addEventListener('dragleave',function(e){if(!jplopsoft_hasDraggedFiles(e)&&state.dragDepth<=0)return;if(state.dragDepth>0)state.dragDepth--;if(state.dragDepth<=0)jplopsoft_hideDropOverlay();});document.addEventListener('drop',function(e){if(!jplopsoft_hasDraggedFiles(e))return;if(e.defaultPrevented||e.__exosXshDropHandled){jplopsoft_hideDropOverlay();return;}e.preventDefault();var fs=e.dataTransfer&&e.dataTransfer.files,target=jplopsoft_globalDropTargetFolder();jplopsoft_hideDropOverlay();if(!state.vaultKey){jplopsoft_exosMessage('請先解鎖，再拖曳文件上傳。');return;}if(!target){jplopsoft_exosMessage('目前沒有可寫入的使用者資料夾。請先開啟檔案總管並選擇 C:\\Users\\'+state.samUsername+'\\ 內的資料夾。');return;}if(fs&&fs.length)jplopsoft_uploadFiles(fs,target);});}
 async function jplopsoft_createItem(type,fileFormat){
   if(jplopsoft_isDesktopFolder())return jplopsoft_exosMessage('桌面只存放捷徑，不能直接建立檔案或資料夾。');
   if(!jplopsoft_isWritableProfileFolder(state.currentFolder))return jplopsoft_exosMessage('此位置唯讀。只能在 C:\\Users\\'+state.samUsername+'\\ 內建立檔案或資料夾。');
@@ -16889,8 +16893,13 @@ var jplopsoft_STATUS_PROCESS_IS_TERMINATING=0xC000010A;
 var jplopsoft_STATUS_QUOTA_EXCEEDED=0xC0000044;
 var jplopsoft_STATUS_CANCELLED=0xC0000120;
 var jplopsoft_STATUS_TIMEOUT=0x00000102;
+var jplopsoft_STATUS_PARTIAL_COPY=0x8000000D;
+var jplopsoft_STATUS_INVALID_ADDRESS=0xC0000141;
 
 var jplopsoft_PROCESS_TERMINATE=0x0001;
+var jplopsoft_PROCESS_VM_OPERATION=0x0008;
+var jplopsoft_PROCESS_VM_READ=0x0010;
+var jplopsoft_PROCESS_VM_WRITE=0x0020;
 var jplopsoft_PROCESS_QUERY_INFORMATION=0x0400;
 var jplopsoft_PROCESS_QUERY_LIMITED_INFORMATION=0x1000;
 
@@ -17162,6 +17171,9 @@ function jplopsoft_ntObjectMaybeDelete(obj){
   if(obj.type==='SECTION'){
     views=obj.views?Object.keys(obj.views).length:0;
     if(views>0)return;
+    if(typeof jplopsoft_ntSectionDestroyBacking==='function'){
+      jplopsoft_ntSectionDestroyBacking(obj);
+    }
   }
 
   if(obj.type==='JOB'){
@@ -17419,19 +17431,45 @@ function jplopsoft_ntProcessReleaseMemory(process,bytes,sectionBytes){
   );
 }
 
-/* ------------------------------ SECTION -------------------------------- */
+
+/* ------------------------------ SECTION --------------------------------
+ * EXOS_VMM_V1 SECTION objects are page-backed kernel objects.  Each process
+ * maps a SECTION into a private 47-bit VAS at its own base address.  The VAD
+ * is process-private, while the 4 KiB page objects are shared by every view.
+ * ----------------------------------------------------------------------- */
+
+function jplopsoft_ntSectionDestroyBacking(obj){
+  var v,k,page,bytes;
+  if(!obj||obj.type!=='SECTION'||obj.backingReleased)return;
+  obj.backingReleased=true;
+  v=jplopsoft_vmmKernel();
+  if(obj.pages){
+    for(k in obj.pages){
+      if(!obj.pages.hasOwnProperty(k))continue;
+      page=obj.pages[k];
+      if(page)jplopsoft_vmmPageRelease(page);
+    }
+  }
+  obj.pages={};
+  bytes=Math.max(0,Number(obj.commitChargeBytes)||0);
+  if(bytes){
+    v.committedBytes=Math.max(0,v.committedBytes-bytes);
+    obj.commitChargeBytes=0;
+  }
+}
 
 function jplopsoft_ntSectionCreate(pid,name,size,options){
   var n=jplopsoft_ntNormalizeBaseNamedObject(name),
-      key,obj,h,bytes,zeroCopy,buffer;
+      key,obj,h,bytes,opt=options||{},v,initial,fileNodeId;
 
-  bytes=Math.max(1,parseInt(size,10)||0);
+  bytes=jplopsoft_vmmAlignUp(Math.max(1,Number(size)||0),jplopsoft_VMM_PAGE_SIZE);
+  v=jplopsoft_vmmKernel();
 
-  if(bytes>64*1024*1024){
+  if(bytes>v.commitLimitBytes){
     return{
       status:jplopsoft_STATUS_QUOTA_EXCEEDED,
       handle:0,
-      reason:'Section maximum is 64 MiB in the browser runtime.'
+      reason:'SECTION size exceeds the ExOS VMM commit limit.'
     };
   }
 
@@ -17454,14 +17492,21 @@ function jplopsoft_ntSectionCreate(pid,name,size,options){
     key=jplopsoft_ntNamedObjectKey('SECTION',n);
   }
 
-  zeroCopy=!!(
-    window.crossOriginIsolated&&
-    typeof SharedArrayBuffer==='function'
-  );
+  if(v.committedBytes+bytes>v.commitLimitBytes){
+    return{
+      status:jplopsoft_STATUS_QUOTA_EXCEEDED,
+      handle:0,
+      reason:'Insufficient ExOS VMM commit charge for SECTION.'
+    };
+  }
 
-  buffer=zeroCopy
-    ?new SharedArrayBuffer(bytes)
-    :new Uint8Array(bytes);
+  initial=opt.initialBytes instanceof Uint8Array
+    ?opt.initialBytes
+    :(opt.initialBytes instanceof ArrayBuffer
+      ?new Uint8Array(opt.initialBytes)
+      :(Array.isArray(opt.initialBytes)?new Uint8Array(opt.initialBytes):null));
+
+  fileNodeId=parseInt(opt.fileNodeId,10)||0;
 
   obj={
     objectId:jplopsoft_NT_KERNEL.nextObjectId++,
@@ -17470,12 +17515,21 @@ function jplopsoft_ntSectionCreate(pid,name,size,options){
     ownerPid:parseInt(pid,10)||0,
     size:bytes,
     createdAt:jplopsoft_ntKernelNow(),
-    zeroCopy:zeroCopy,
-    transport:zeroCopy?'SharedArrayBuffer':'MessageChannel',
-    buffer:buffer,
-    views:{}
+    zeroCopy:true,
+    transport:'EXOS_VMM_SHARED_PAGES',
+    pages:{},
+    views:{},
+    backingBytes:initial,
+    fileBacked:!!fileNodeId,
+    fileNodeId:fileNodeId,
+    filePath:String(opt.filePath||''),
+    dirty:false,
+    protect:jplopsoft_vmmProtectValue(opt.protect||jplopsoft_PAGE_READWRITE),
+    commitChargeBytes:bytes,
+    backingReleased:false
   };
 
+  v.committedBytes+=bytes;
   jplopsoft_NT_KERNEL.namedObjects[key]=obj;
   h=jplopsoft_ntObjectAllocateHandle(pid,obj,'SECTION_ALL_ACCESS');
 
@@ -17511,39 +17565,82 @@ function jplopsoft_ntSectionQuery(obj){
     name:obj.name,
     size:obj.size,
     transport:obj.transport,
-    zeroCopy:!!obj.zeroCopy,
-    crossOriginIsolated:!!window.crossOriginIsolated,
+    zeroCopy:true,
+    vmmModel:'EXOS_VMM_V1',
+    pageSize:jplopsoft_VMM_PAGE_SIZE,
+    fileBacked:!!obj.fileBacked,
+    filePath:String(obj.filePath||''),
+    dirty:!!obj.dirty,
     viewCount:obj.views?Object.keys(obj.views).length:0,
     handleCount:jplopsoft_ntObjectHandleCount(obj.objectId)
   };
 }
 
-function jplopsoft_ntSectionMap(pid,handle,offset,length){
+function jplopsoft_ntSectionMap(pid,handle,offset,length,options){
   var obj=jplopsoft_ntObjectFromHandle(pid,handle,'SECTION'),
       process=jplopsoft_ntKernelProcessByPid(pid),
-      off=Math.max(0,parseInt(offset,10)||0),
-      len=parseInt(length,10)||0,
-      charge,id,view,result;
+      opt=options||{},
+      off=Math.max(0,Math.floor(Number(offset)||0)),
+      len=Math.floor(Number(length)||0),
+      preferred=jplopsoft_vmmSafeAddress(opt.baseAddress||0),
+      base,charge,id,view,region,pageCount;
 
-  if(!obj)return{
-    status:jplopsoft_STATUS_INVALID_HANDLE
-  };
+  if(!obj)return{status:jplopsoft_STATUS_INVALID_HANDLE};
 
-  if(off>=obj.size)return{
-    status:jplopsoft_STATUS_INVALID_PARAMETER
-  };
+  if(!process||!process.alive||!process.vm){
+    return{status:jplopsoft_STATUS_INVALID_CID};
+  }
+
+  if((off%jplopsoft_VMM_ALLOCATION_GRANULARITY)!==0){
+    return{
+      status:jplopsoft_STATUS_INVALID_PARAMETER,
+      reason:'MapViewOfFile offset must be aligned to the 64 KiB allocation granularity.'
+    };
+  }
+
+  if(off>=obj.size)return{status:jplopsoft_STATUS_INVALID_PARAMETER};
 
   if(len<=0)len=obj.size-off;
   len=Math.min(len,obj.size-off);
+  len=jplopsoft_vmmAlignUp(len,jplopsoft_VMM_PAGE_SIZE);
+
+  base=jplopsoft_vmmFindFreeBase(
+    process.vm,
+    len,
+    preferred>0?preferred:0,
+    !!opt.topDown
+  );
+
+  if(!base){
+    return{
+      status:jplopsoft_STATUS_QUOTA_EXCEEDED,
+      reason:'No contiguous virtual address range is available for this SECTION view.'
+    };
+  }
 
   charge=jplopsoft_ntProcessChargeMemory(process,0,len);
-
-  if(!charge.ok)return{
-    status:charge.status,
-    reason:charge.reason
-  };
+  if(!charge.ok)return{status:charge.status,reason:charge.reason};
 
   id=jplopsoft_NT_KERNEL.nextMappingId++;
+
+  region=jplopsoft_vmmNewRegion(
+    process,
+    base,
+    len,
+    jplopsoft_vmmProtectValue(opt.protect||obj.protect||jplopsoft_PAGE_READWRITE),
+    jplopsoft_MEM_MAPPED,
+    obj.name,
+    {
+      mapped:true,
+      mappingId:id,
+      sectionObject:obj,
+      sectionOffset:off,
+      ownsCommit:false
+    }
+  );
+
+  pageCount=Math.ceil(len/jplopsoft_VMM_PAGE_SIZE);
+  jplopsoft_vmmRangeAdd(region,0,pageCount);
 
   view={
     mappingId:id,
@@ -17551,34 +17648,49 @@ function jplopsoft_ntSectionMap(pid,handle,offset,length){
     sectionId:obj.objectId,
     offset:off,
     length:len,
+    baseAddress:base,
+    regionId:region.id,
     createdAt:jplopsoft_ntKernelNow()
   };
 
   obj.views[String(id)]=view;
   jplopsoft_NT_KERNEL.sectionViews[String(id)]=view;
 
-  result={
+  return{
     status:jplopsoft_STATUS_SUCCESS,
     mappingId:id,
+    baseAddress:base,
     sectionName:obj.name,
     offset:off,
     length:len,
     transport:obj.transport,
-    zeroCopy:!!obj.zeroCopy
+    zeroCopy:true,
+    vmmModel:'EXOS_VMM_V1'
   };
-
-  if(obj.zeroCopy){
-    result.sharedBuffer=obj.buffer;
-  }
-
-  return result;
 }
 
-function jplopsoft_ntSectionView(pid,mappingId){
-  var view=jplopsoft_NT_KERNEL.sectionViews[
-        String(parseInt(mappingId,10)||0)
-      ],
-      obj,key;
+function jplopsoft_ntSectionView(pid,mappingOrAddress){
+  var raw=Number(mappingOrAddress),view=null,obj,key,k;
+
+  if(isFinite(raw)){
+    view=jplopsoft_NT_KERNEL.sectionViews[String(Math.floor(raw))]||null;
+  }
+
+  if(!view&&isFinite(raw)){
+    for(k in jplopsoft_NT_KERNEL.sectionViews){
+      if(!jplopsoft_NT_KERNEL.sectionViews.hasOwnProperty(k))continue;
+      var candidate=jplopsoft_NT_KERNEL.sectionViews[k];
+      if(
+        candidate&&
+        parseInt(candidate.pid,10)===(parseInt(pid,10)||0)&&
+        raw>=Number(candidate.baseAddress)&&
+        raw<Number(candidate.baseAddress)+Number(candidate.length)
+      ){
+        view=candidate;
+        break;
+      }
+    }
+  }
 
   if(!view||parseInt(view.pid,10)!==(parseInt(pid,10)||0))return null;
 
@@ -17598,18 +17710,21 @@ function jplopsoft_ntSectionView(pid,mappingId){
   return null;
 }
 
-function jplopsoft_ntSectionUnmap(pid,mappingId){
-  var pair=jplopsoft_ntSectionView(pid,mappingId),
-      process;
+function jplopsoft_ntSectionUnmap(pid,mappingOrAddress){
+  var pair=jplopsoft_ntSectionView(pid,mappingOrAddress),
+      process,region;
 
   if(!pair)return jplopsoft_STATUS_INVALID_HANDLE;
 
   process=jplopsoft_ntKernelProcessByPid(pid);
-  jplopsoft_ntProcessReleaseMemory(
-    process,
-    0,
-    pair.view.length
-  );
+  if(process&&process.vm){
+    region=jplopsoft_vmmFindRegion(process,pair.view.baseAddress);
+    if(region&&parseInt(region.mappingId,10)===parseInt(pair.view.mappingId,10)){
+      jplopsoft_vmmReleaseRegion(process,region,false);
+    }
+  }
+
+  jplopsoft_ntProcessReleaseMemory(process,0,pair.view.length);
 
   delete pair.section.views[String(pair.view.mappingId)];
   delete jplopsoft_NT_KERNEL.sectionViews[String(pair.view.mappingId)];
@@ -17618,13 +17733,14 @@ function jplopsoft_ntSectionUnmap(pid,mappingId){
   return jplopsoft_STATUS_SUCCESS;
 }
 
-function jplopsoft_ntSectionRead(pid,mappingId,offset,length){
-  var pair=jplopsoft_ntSectionView(pid,mappingId),
-      off=Math.max(0,parseInt(offset,10)||0),
-      len=parseInt(length,10)||0,
-      start,end,src;
+function jplopsoft_ntSectionRead(pid,mappingOrAddress,offset,length){
+  var pair=jplopsoft_ntSectionView(pid,mappingOrAddress),
+      process=jplopsoft_ntKernelProcessByPid(pid),
+      off=Math.max(0,Math.floor(Number(offset)||0)),
+      len=Math.floor(Number(length)||0),
+      data;
 
-  if(!pair)return{
+  if(!pair||!process)return{
     status:jplopsoft_STATUS_INVALID_HANDLE,
     data:[]
   };
@@ -17635,31 +17751,43 @@ function jplopsoft_ntSectionRead(pid,mappingId,offset,length){
   };
 
   if(len<=0)len=pair.view.length-off;
-  len=Math.min(len,pair.view.length-off);
+  len=Math.min(len,pair.view.length-off,64*1024*1024);
 
-  start=pair.view.offset+off;
-  end=start+len;
-
-  src=pair.section.zeroCopy
-    ?new Uint8Array(pair.section.buffer,start,len)
-    :pair.section.buffer.subarray(start,end);
+  try{
+    data=jplopsoft_vmmRead(
+      process,
+      Number(pair.view.baseAddress)+off,
+      len,
+      true
+    );
+  }catch(e){
+    return{
+      status:e&&e.ntstatus?e.ntstatus:jplopsoft_STATUS_PARTIAL_COPY,
+      reason:String(e&&e.message||e),
+      data:[]
+    };
+  }
 
   return{
     status:jplopsoft_STATUS_SUCCESS,
-    bytesRead:src.length,
-    data:jplopsoft_xshBytesToArray(src)
+    address:Number(pair.view.baseAddress)+off,
+    bytesRead:data.length,
+    data:jplopsoft_xshBytesToArray(data)
   };
 }
 
-function jplopsoft_ntSectionWrite(pid,mappingId,offset,data){
-  var pair=jplopsoft_ntSectionView(pid,mappingId),
-      off=Math.max(0,parseInt(offset,10)||0),
+function jplopsoft_ntSectionWrite(pid,mappingOrAddress,offset,data){
+  var pair=jplopsoft_ntSectionView(pid,mappingOrAddress),
+      process=jplopsoft_ntKernelProcessByPid(pid),
+      off=Math.max(0,Math.floor(Number(offset)||0)),
       bytes=data instanceof Uint8Array
         ?data
-        :new Uint8Array(data||[]),
-      len,start,dst;
+        :(data instanceof ArrayBuffer
+          ?new Uint8Array(data)
+          :new Uint8Array(data||[])),
+      len,written;
 
-  if(!pair)return{
+  if(!pair||!process)return{
     status:jplopsoft_STATUS_INVALID_HANDLE,
     bytesWritten:0
   };
@@ -17669,18 +17797,27 @@ function jplopsoft_ntSectionWrite(pid,mappingId,offset,data){
     bytesWritten:0
   };
 
-  len=Math.min(bytes.length,pair.view.length-off);
-  start=pair.view.offset+off;
+  len=Math.min(bytes.length,pair.view.length-off,64*1024*1024);
 
-  dst=pair.section.zeroCopy
-    ?new Uint8Array(pair.section.buffer,start,len)
-    :pair.section.buffer.subarray(start,start+len);
-
-  dst.set(bytes.subarray(0,len));
+  try{
+    written=jplopsoft_vmmWrite(
+      process,
+      Number(pair.view.baseAddress)+off,
+      bytes.subarray(0,len),
+      true
+    );
+  }catch(e){
+    return{
+      status:e&&e.ntstatus?e.ntstatus:jplopsoft_STATUS_PARTIAL_COPY,
+      reason:String(e&&e.message||e),
+      bytesWritten:0
+    };
+  }
 
   return{
     status:jplopsoft_STATUS_SUCCESS,
-    bytesWritten:len
+    address:Number(pair.view.baseAddress)+off,
+    bytesWritten:written
   };
 }
 
@@ -18185,6 +18322,1177 @@ function jplopsoft_ntKernelAllocatePid(){
   return jplopsoft_NT_KERNEL.nextPid;
 }
 
+
+function jplopsoft_ntUtf8Bytes(text){
+  text=String(text===undefined?'':text);
+  if(typeof TextEncoder!=='undefined')return new TextEncoder().encode(text);
+  var utf=unescape(encodeURIComponent(text)),out=new Uint8Array(utf.length),i;
+  for(i=0;i<utf.length;i++)out[i]=utf.charCodeAt(i)&255;
+  return out;
+}
+
+/* =========================================================================
+ * ExOS VMM - EXOS_VMM_V1
+ *
+ * The browser cannot expose real CPU page tables to XSH, so ExOS models an
+ * NT-style 47-bit user VAS in the host kernel.  Addresses are safe JavaScript
+ * Numbers (< 2^47).  Reserve is metadata-only; Commit consumes commit charge.
+ * A 4 KiB physical frame is materialized only on first touch.  Read/Write
+ * VirtualMemory and mapped-section accesses are therefore the software page-
+ * fault boundary.  Evicted pages move to the kernel-owned C:\pagefile.sys
+ * sparse swap store.
+ * ========================================================================= */
+
+var jplopsoft_MEM_COMMIT=0x00001000;
+var jplopsoft_MEM_RESERVE=0x00002000;
+var jplopsoft_MEM_DECOMMIT=0x00004000;
+var jplopsoft_MEM_RELEASE=0x00008000;
+var jplopsoft_MEM_RESET=0x00080000;
+var jplopsoft_MEM_TOP_DOWN=0x00100000;
+
+var jplopsoft_MEM_PRIVATE=0x00020000;
+var jplopsoft_MEM_MAPPED=0x00040000;
+var jplopsoft_MEM_IMAGE=0x01000000;
+var jplopsoft_MEM_FREE=0x00010000;
+
+var jplopsoft_PAGE_NOACCESS=0x01;
+var jplopsoft_PAGE_READONLY=0x02;
+var jplopsoft_PAGE_READWRITE=0x04;
+var jplopsoft_PAGE_WRITECOPY=0x08;
+var jplopsoft_PAGE_EXECUTE=0x10;
+var jplopsoft_PAGE_EXECUTE_READ=0x20;
+var jplopsoft_PAGE_EXECUTE_READWRITE=0x40;
+var jplopsoft_PAGE_EXECUTE_WRITECOPY=0x80;
+var jplopsoft_PAGE_GUARD=0x100;
+
+var jplopsoft_VMM_PAGE_SIZE=4096;
+var jplopsoft_VMM_ALLOCATION_GRANULARITY=65536;
+var jplopsoft_VMM_USER_ADDRESS_MIN=65536;
+var jplopsoft_VMM_USER_ADDRESS_BYTES=Math.pow(2,47);
+var jplopsoft_VMM_USER_ADDRESS_MAX=jplopsoft_VMM_USER_ADDRESS_BYTES-1;
+
+function jplopsoft_vmmAlignDown(value,alignment){
+  var a=Math.max(1,Number(alignment)||1),v=Math.max(0,Number(value)||0);
+  return Math.floor(v/a)*a;
+}
+function jplopsoft_vmmAlignUp(value,alignment){
+  var a=Math.max(1,Number(alignment)||1),v=Math.max(0,Number(value)||0);
+  return Math.ceil(v/a)*a;
+}
+function jplopsoft_vmmSafeAddress(value){
+  var n=Number(value);
+  if(!isFinite(n)||n<0||n>jplopsoft_VMM_USER_ADDRESS_MAX)return -1;
+  return Math.floor(n);
+}
+function jplopsoft_vmmProtectValue(value){
+  var s;
+  if(typeof value==='number'&&isFinite(value))return Number(value)>>>0;
+  s=String(value||'PAGE_READWRITE').toUpperCase();
+  if(s==='PAGE_NOACCESS')return jplopsoft_PAGE_NOACCESS;
+  if(s==='PAGE_READONLY')return jplopsoft_PAGE_READONLY;
+  if(s==='PAGE_WRITECOPY')return jplopsoft_PAGE_WRITECOPY;
+  if(s==='PAGE_EXECUTE')return jplopsoft_PAGE_EXECUTE;
+  if(s==='PAGE_EXECUTE_READ')return jplopsoft_PAGE_EXECUTE_READ;
+  if(s==='PAGE_EXECUTE_READWRITE')return jplopsoft_PAGE_EXECUTE_READWRITE;
+  if(s==='PAGE_EXECUTE_WRITECOPY')return jplopsoft_PAGE_EXECUTE_WRITECOPY;
+  return jplopsoft_PAGE_READWRITE;
+}
+function jplopsoft_vmmProtectName(value){
+  var n=jplopsoft_vmmProtectValue(value)&0xFF;
+  if(n===jplopsoft_PAGE_NOACCESS)return'PAGE_NOACCESS';
+  if(n===jplopsoft_PAGE_READONLY)return'PAGE_READONLY';
+  if(n===jplopsoft_PAGE_WRITECOPY)return'PAGE_WRITECOPY';
+  if(n===jplopsoft_PAGE_EXECUTE)return'PAGE_EXECUTE';
+  if(n===jplopsoft_PAGE_EXECUTE_READ)return'PAGE_EXECUTE_READ';
+  if(n===jplopsoft_PAGE_EXECUTE_READWRITE)return'PAGE_EXECUTE_READWRITE';
+  if(n===jplopsoft_PAGE_EXECUTE_WRITECOPY)return'PAGE_EXECUTE_WRITECOPY';
+  return'PAGE_READWRITE';
+}
+function jplopsoft_vmmProtectReadable(value){
+  var n=jplopsoft_vmmProtectValue(value)&0xFF;
+  return n===jplopsoft_PAGE_READONLY||
+    n===jplopsoft_PAGE_READWRITE||
+    n===jplopsoft_PAGE_WRITECOPY||
+    n===jplopsoft_PAGE_EXECUTE_READ||
+    n===jplopsoft_PAGE_EXECUTE_READWRITE||
+    n===jplopsoft_PAGE_EXECUTE_WRITECOPY;
+}
+function jplopsoft_vmmProtectWritable(value){
+  var n=jplopsoft_vmmProtectValue(value)&0xFF;
+  return n===jplopsoft_PAGE_READWRITE||
+    n===jplopsoft_PAGE_WRITECOPY||
+    n===jplopsoft_PAGE_EXECUTE_READWRITE||
+    n===jplopsoft_PAGE_EXECUTE_WRITECOPY;
+}
+function jplopsoft_vmmTypeName(type){
+  type=Number(type)>>>0;
+  if(type===jplopsoft_MEM_IMAGE)return'MEM_IMAGE';
+  if(type===jplopsoft_MEM_MAPPED)return'MEM_MAPPED';
+  return'MEM_PRIVATE';
+}
+function jplopsoft_vmmStateName(state){
+  state=Number(state)>>>0;
+  if(state===jplopsoft_MEM_COMMIT)return'MEM_COMMIT';
+  if(state===jplopsoft_MEM_RESERVE)return'MEM_RESERVE';
+  return'MEM_FREE';
+}
+function jplopsoft_vmmAllocationFlags(value){
+  var n,s,parts,i;
+  if(typeof value==='number'&&isFinite(value))return Number(value)>>>0;
+  s=String(value||'').toUpperCase();
+  if(!s)return jplopsoft_MEM_RESERVE|jplopsoft_MEM_COMMIT;
+  n=0;parts=s.split(/[|,\s]+/);
+  for(i=0;i<parts.length;i++){
+    if(parts[i]==='MEM_COMMIT')n|=jplopsoft_MEM_COMMIT;
+    else if(parts[i]==='MEM_RESERVE')n|=jplopsoft_MEM_RESERVE;
+    else if(parts[i]==='MEM_DECOMMIT')n|=jplopsoft_MEM_DECOMMIT;
+    else if(parts[i]==='MEM_RELEASE')n|=jplopsoft_MEM_RELEASE;
+    else if(parts[i]==='MEM_RESET')n|=jplopsoft_MEM_RESET;
+    else if(parts[i]==='MEM_TOP_DOWN')n|=jplopsoft_MEM_TOP_DOWN;
+  }
+  return n;
+}
+function jplopsoft_vmmKernel(){
+  var v=jplopsoft_NT_KERNEL.vmm,deviceMemory,physical,pagefile;
+  if(v)return v;
+
+  deviceMemory=Number(
+    typeof navigator!=='undefined'&&navigator.deviceMemory
+      ?navigator.deviceMemory
+      :0
+  );
+  physical=deviceMemory>0
+    ?Math.max(64*1024*1024,Math.min(512*1024*1024,Math.floor(deviceMemory*64*1024*1024)))
+    :256*1024*1024;
+  pagefile=2*1024*1024*1024;
+
+  v={
+    model:'EXOS_VMM_V1',
+    addressBits:47,
+    virtualAddressBytes:jplopsoft_VMM_USER_ADDRESS_BYTES,
+    pageSize:jplopsoft_VMM_PAGE_SIZE,
+    allocationGranularity:jplopsoft_VMM_ALLOCATION_GRANULARITY,
+    physicalLimitBytes:physical,
+    commitLimitBytes:physical+pagefile,
+    committedBytes:0,
+    residentBytes:0,
+    nextRegionId:1,
+    nextFrameId:1,
+    touchClock:1,
+    frames:{},
+    imageSections:{},
+    pagefile:{
+      path:'C:\\pagefile.sys',
+      model:'SPARSE_PAGEFILE_V1',
+      maxBytes:pagefile,
+      usedBytes:0,
+      nextSlot:1,
+      slots:{}
+    },
+    stats:{
+      pageFaults:0,
+      demandZeroFaults:0,
+      hardFaults:0,
+      pageIns:0,
+      pageOuts:0,
+      trims:0,
+      bytesPagedIn:0,
+      bytesPagedOut:0
+    },
+    pagerTimer:0
+  };
+  jplopsoft_NT_KERNEL.vmm=v;
+
+  if(typeof window!=='undefined'&&typeof window.setInterval==='function'){
+    v.pagerTimer=window.setInterval(function(){
+      try{
+        var k=jplopsoft_vmmKernel();
+        if(k.residentBytes>Math.floor(k.physicalLimitBytes*0.82)){
+          jplopsoft_vmmTrimTo(Math.floor(k.physicalLimitBytes*0.68),null);
+        }
+      }catch(ignoreVmmPager){}
+    },5000);
+  }
+
+  return v;
+}
+function jplopsoft_vmmPagefileFreeSlot(page){
+  var v=jplopsoft_vmmKernel(),pf=v.pagefile,slot=parseInt(page&&page.swapSlot,10)||0;
+  if(!slot)return;
+  if(pf.slots[String(slot)]){
+    delete pf.slots[String(slot)];
+    pf.usedBytes=Math.max(0,pf.usedBytes-jplopsoft_VMM_PAGE_SIZE);
+  }
+  page.swapSlot=0;
+}
+function jplopsoft_vmmPagefileStore(page){
+  var v=jplopsoft_vmmKernel(),pf=v.pagefile,slot;
+  if(!page||!page.bytes)return false;
+  slot=parseInt(page.swapSlot,10)||0;
+  if(!slot){
+    if(pf.usedBytes+jplopsoft_VMM_PAGE_SIZE>pf.maxBytes){
+      throw jplopsoft_xshError(
+        jplopsoft_STATUS_QUOTA_EXCEEDED,
+        'C:\\pagefile.sys has reached the ExOS commit backing limit.'
+      );
+    }
+    slot=pf.nextSlot++;
+    page.swapSlot=slot;
+    pf.usedBytes+=jplopsoft_VMM_PAGE_SIZE;
+  }
+  pf.slots[String(slot)]=page.bytes.slice(0);
+  return true;
+}
+function jplopsoft_vmmPageRelease(page){
+  var v=jplopsoft_vmmKernel();
+  if(!page)return;
+  if(page.resident){
+    delete v.frames[String(page.frameId)];
+    v.residentBytes=Math.max(0,v.residentBytes-jplopsoft_VMM_PAGE_SIZE);
+  }
+  jplopsoft_vmmPagefileFreeSlot(page);
+  page.bytes=null;
+  page.resident=false;
+  page.frameId=0;
+}
+function jplopsoft_vmmPageOut(page){
+  var v=jplopsoft_vmmKernel();
+  if(!page||!page.resident||!page.bytes)return false;
+  if(page.pinCount>0)return false;
+
+  if(page.dirty){
+    jplopsoft_vmmPagefileStore(page);
+    page.dirty=false;
+  }
+
+  delete v.frames[String(page.frameId)];
+  page.bytes=null;
+  page.resident=false;
+  page.frameId=0;
+  v.residentBytes=Math.max(0,v.residentBytes-jplopsoft_VMM_PAGE_SIZE);
+  v.stats.pageOuts++;
+  v.stats.bytesPagedOut+=jplopsoft_VMM_PAGE_SIZE;
+  return true;
+}
+function jplopsoft_vmmTrimTo(targetBytes,excludePage){
+  var v=jplopsoft_vmmKernel(),list=[],k,p,i,target=Math.max(0,Number(targetBytes)||0);
+  for(k in v.frames){
+    if(!v.frames.hasOwnProperty(k))continue;
+    p=v.frames[k];
+    if(!p||p===excludePage||p.pinCount>0)continue;
+    list.push(p);
+  }
+  list.sort(function(a,b){return(Number(a.lastAccess)||0)-(Number(b.lastAccess)||0);});
+  for(i=0;i<list.length&&v.residentBytes>target;i++){
+    try{jplopsoft_vmmPageOut(list[i]);}catch(ignorePageOut){}
+  }
+  v.stats.trims++;
+  return v.residentBytes;
+}
+function jplopsoft_vmmEnsureFrameCapacity(excludePage){
+  var v=jplopsoft_vmmKernel();
+  if(v.residentBytes+jplopsoft_VMM_PAGE_SIZE<=v.physicalLimitBytes)return true;
+  jplopsoft_vmmTrimTo(
+    Math.max(0,v.physicalLimitBytes-jplopsoft_VMM_PAGE_SIZE),
+    excludePage
+  );
+  if(v.residentBytes+jplopsoft_VMM_PAGE_SIZE>v.physicalLimitBytes){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_QUOTA_EXCEEDED,
+      'ExOS VMM could not obtain a free physical 4 KiB frame.'
+    );
+  }
+  return true;
+}
+function jplopsoft_vmmPageIn(page,section,pageIndex,countFault){
+  var v=jplopsoft_vmmKernel(),pf=v.pagefile,slot,src,start,end;
+  if(page.resident&&page.bytes){
+    page.lastAccess=v.touchClock++;
+    return page.bytes;
+  }
+
+  if(countFault!==false)v.stats.pageFaults++;
+  jplopsoft_vmmEnsureFrameCapacity(page);
+
+  page.bytes=new Uint8Array(jplopsoft_VMM_PAGE_SIZE);
+  slot=parseInt(page.swapSlot,10)||0;
+
+  if(slot&&pf.slots[String(slot)]){
+    page.bytes.set(pf.slots[String(slot)].subarray(0,jplopsoft_VMM_PAGE_SIZE));
+    if(countFault!==false){
+      v.stats.hardFaults++;
+      v.stats.pageIns++;
+      v.stats.bytesPagedIn+=jplopsoft_VMM_PAGE_SIZE;
+    }
+  }else if(section&&section.backingBytes){
+    start=Math.max(0,Math.floor(Number(pageIndex)||0)*jplopsoft_VMM_PAGE_SIZE);
+    end=Math.min(section.backingBytes.length,start+jplopsoft_VMM_PAGE_SIZE);
+    if(end>start)page.bytes.set(section.backingBytes.subarray(start,end),0);
+    if(countFault!==false)v.stats.demandZeroFaults++;
+  }else{
+    if(countFault!==false)v.stats.demandZeroFaults++;
+  }
+
+  page.resident=true;
+  page.frameId=v.nextFrameId++;
+  page.lastAccess=v.touchClock++;
+  v.frames[String(page.frameId)]=page;
+  v.residentBytes+=jplopsoft_VMM_PAGE_SIZE;
+  return page.bytes;
+}
+function jplopsoft_vmmRegionCommittedPages(region){
+  var n=0,i,ranges=region&&region.commitRanges?region.commitRanges:[];
+  for(i=0;i<ranges.length;i++)n+=Math.max(0,Number(ranges[i][1])-Number(ranges[i][0]));
+  return n;
+}
+function jplopsoft_vmmRangeAdd(region,startPage,endPage){
+  var old=jplopsoft_vmmRegionCommittedPages(region),
+      a=Math.max(0,Math.floor(Number(startPage)||0)),
+      b=Math.max(0,Math.floor(Number(endPage)||0)),
+      list=(region.commitRanges||[]).slice(),out=[],i,r,inserted=false;
+  if(b<=a)return 0;
+  list.push([a,b]);
+  list.sort(function(x,y){return x[0]-y[0];});
+  for(i=0;i<list.length;i++){
+    r=list[i];
+    if(!out.length||r[0]>out[out.length-1][1]){
+      out.push([r[0],r[1]]);
+    }else{
+      out[out.length-1][1]=Math.max(out[out.length-1][1],r[1]);
+    }
+  }
+  region.commitRanges=out;
+  return Math.max(0,jplopsoft_vmmRegionCommittedPages(region)-old);
+}
+function jplopsoft_vmmRangeRemove(region,startPage,endPage){
+  var old=jplopsoft_vmmRegionCommittedPages(region),
+      a=Math.max(0,Math.floor(Number(startPage)||0)),
+      b=Math.max(0,Math.floor(Number(endPage)||0)),
+      list=region.commitRanges||[],out=[],i,r;
+  if(b<=a)return 0;
+  for(i=0;i<list.length;i++){
+    r=list[i];
+    if(r[1]<=a||r[0]>=b){
+      out.push([r[0],r[1]]);
+      continue;
+    }
+    if(r[0]<a)out.push([r[0],a]);
+    if(r[1]>b)out.push([b,r[1]]);
+  }
+  region.commitRanges=out;
+  return Math.max(0,old-jplopsoft_vmmRegionCommittedPages(region));
+}
+function jplopsoft_vmmPageCommitted(region,pageIndex){
+  var a=region&&region.commitRanges?region.commitRanges:[],i,n=Math.floor(Number(pageIndex)||0);
+  for(i=0;i<a.length;i++){
+    if(n>=a[i][0]&&n<a[i][1])return true;
+    if(n<a[i][0])break;
+  }
+  return false;
+}
+function jplopsoft_vmmFindRegion(proc,address){
+  var vm=proc&&proc.vm,regions=vm&&vm.regions?vm.regions:[],
+      addr=jplopsoft_vmmSafeAddress(address),i,r;
+  if(addr<0)return null;
+  for(i=0;i<regions.length;i++){
+    r=regions[i];
+    if(addr>=Number(r.base)&&addr<Number(r.base)+Number(r.size))return r;
+  }
+  return null;
+}
+function jplopsoft_vmmRegionOverlaps(vm,base,size,ignoreRegion){
+  var regions=vm&&vm.regions?vm.regions:[],end=base+size,i,r,re;
+  for(i=0;i<regions.length;i++){
+    r=regions[i];
+    if(r===ignoreRegion)continue;
+    re=Number(r.base)+Number(r.size);
+    if(base<re&&end>Number(r.base))return true;
+  }
+  return false;
+}
+function jplopsoft_vmmSortRegions(vm){
+  if(vm&&vm.regions)vm.regions.sort(function(a,b){return Number(a.base)-Number(b.base);});
+}
+function jplopsoft_vmmFindFreeBase(vm,size,preferred,topDown){
+  var bytes=jplopsoft_vmmAlignUp(size,jplopsoft_VMM_ALLOCATION_GRANULARITY),
+      regions=(vm&&vm.regions?vm.regions:[]).slice(),base,i,r,end,maxStart;
+  regions.sort(function(a,b){return Number(a.base)-Number(b.base);});
+
+  if(preferred){
+    base=jplopsoft_vmmAlignDown(preferred,jplopsoft_VMM_ALLOCATION_GRANULARITY);
+    if(
+      base>=jplopsoft_VMM_USER_ADDRESS_MIN&&
+      base+bytes<=jplopsoft_VMM_USER_ADDRESS_BYTES&&
+      !jplopsoft_vmmRegionOverlaps(vm,base,bytes,null)
+    )return base;
+  }
+
+  if(topDown){
+    maxStart=jplopsoft_vmmAlignDown(
+      jplopsoft_VMM_USER_ADDRESS_BYTES-bytes,
+      jplopsoft_VMM_ALLOCATION_GRANULARITY
+    );
+    base=maxStart;
+    for(i=regions.length-1;i>=0;i--){
+      r=regions[i];
+      end=Number(r.base)+Number(r.size);
+      if(base>=end)break;
+      base=jplopsoft_vmmAlignDown(
+        Number(r.base)-bytes,
+        jplopsoft_VMM_ALLOCATION_GRANULARITY
+      );
+      if(base<jplopsoft_VMM_USER_ADDRESS_MIN)return 0;
+    }
+    return base>=jplopsoft_VMM_USER_ADDRESS_MIN?base:0;
+  }
+
+  base=Math.max(
+    jplopsoft_VMM_USER_ADDRESS_MIN,
+    jplopsoft_vmmAlignUp(Number(vm.nextBase)||0x100000000,jplopsoft_VMM_ALLOCATION_GRANULARITY)
+  );
+  for(i=0;i<regions.length;i++){
+    r=regions[i];
+    if(base+bytes<=Number(r.base))break;
+    end=Number(r.base)+Number(r.size);
+    if(base<end){
+      base=jplopsoft_vmmAlignUp(end,jplopsoft_VMM_ALLOCATION_GRANULARITY);
+    }
+  }
+  if(base+bytes>jplopsoft_VMM_USER_ADDRESS_BYTES)return 0;
+  vm.nextBase=base+bytes;
+  return base;
+}
+function jplopsoft_vmmNewRegion(proc,base,size,protect,type,name,options){
+  var vm=proc.vm,opt=options||{},r={
+    id:jplopsoft_vmmKernel().nextRegionId++,
+    base:Number(base),
+    allocationBase:Number(base),
+    size:jplopsoft_vmmAlignUp(size,jplopsoft_VMM_PAGE_SIZE),
+    allocationProtect:jplopsoft_vmmProtectValue(protect),
+    protect:jplopsoft_vmmProtectValue(protect),
+    type:Number(type)||jplopsoft_MEM_PRIVATE,
+    name:String(name||''),
+    commitRanges:[],
+    pages:{},
+    mapped:!!opt.mapped,
+    mappingId:parseInt(opt.mappingId,10)||0,
+    sectionObject:opt.sectionObject||null,
+    sectionOffset:Math.max(0,Number(opt.sectionOffset)||0),
+    ownsCommit:opt.ownsCommit!==false,
+    systemImage:!!opt.systemImage,
+    createdAt:jplopsoft_ntKernelNow()
+  };
+  vm.regions.push(r);
+  jplopsoft_vmmSortRegions(vm);
+  vm.reservedBytes=(Number(vm.reservedBytes)||0)+r.size;
+  return r;
+}
+function jplopsoft_vmmCommitCharge(proc,bytes,chargeProcess){
+  var v=jplopsoft_vmmKernel(),n=Math.max(0,Number(bytes)||0),chk;
+  if(!n)return true;
+  if(v.committedBytes+n>v.commitLimitBytes){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_QUOTA_EXCEEDED,
+      'ExOS VMM commit limit exceeded (RAM + C:\\pagefile.sys).'
+    );
+  }
+  if(chargeProcess!==false){
+    chk=jplopsoft_ntProcessChargeMemory(proc,n,0);
+    if(!chk.ok)throw jplopsoft_xshError(chk.status,chk.reason||'Process commit charge denied.');
+  }
+  v.committedBytes+=n;
+  if(proc&&proc.vm){
+    proc.vm.committedBytes=(Number(proc.vm.committedBytes)||0)+n;
+    proc.vmCommittedBytes=proc.vm.committedBytes;
+  }
+  return true;
+}
+function jplopsoft_vmmReleaseCommit(proc,bytes,chargeProcess){
+  var v=jplopsoft_vmmKernel(),n=Math.max(0,Number(bytes)||0);
+  if(!n)return;
+  v.committedBytes=Math.max(0,v.committedBytes-n);
+  if(proc&&proc.vm){
+    proc.vm.committedBytes=Math.max(0,(Number(proc.vm.committedBytes)||0)-n);
+    proc.vmCommittedBytes=proc.vm.committedBytes;
+  }
+  if(chargeProcess!==false)jplopsoft_ntProcessReleaseMemory(proc,n,0);
+}
+function jplopsoft_vmmCommitRegion(proc,region,address,size,chargeProcess){
+  var start=Math.max(Number(region.base),Number(address)),
+      finish=Math.min(Number(region.base)+Number(region.size),start+Math.max(0,Number(size)||0)),
+      first,last,added,bytes;
+  if(finish<=start)return 0;
+  first=Math.floor((start-Number(region.base))/jplopsoft_VMM_PAGE_SIZE);
+  last=Math.ceil((finish-Number(region.base))/jplopsoft_VMM_PAGE_SIZE);
+  added=jplopsoft_vmmRangeAdd(region,first,last);
+  bytes=added*jplopsoft_VMM_PAGE_SIZE;
+  if(bytes){
+    try{
+      if(region.ownsCommit!==false)jplopsoft_vmmCommitCharge(proc,bytes,chargeProcess);
+    }catch(e){
+      jplopsoft_vmmRangeRemove(region,first,last);
+      throw e;
+    }
+  }
+  return bytes;
+}
+function jplopsoft_vmmPageObject(proc,region,pageIndex,create){
+  var section=region.sectionObject,container,key,page,sectionPage;
+  if(section){
+    sectionPage=Math.floor(
+      (Number(region.sectionOffset)+pageIndex*jplopsoft_VMM_PAGE_SIZE)/
+      jplopsoft_VMM_PAGE_SIZE
+    );
+    container=section.pages||(section.pages={});
+    key=String(sectionPage);
+    page=container[key]||null;
+    if(!page&&create){
+      page={
+        key:'S:'+String(section.objectId)+':'+key,
+        ownerKind:region.systemImage?'IMAGE':'SECTION',
+        ownerPid:0,
+        ownerId:section.objectId,
+        pageIndex:sectionPage,
+        resident:false,
+        bytes:null,
+        frameId:0,
+        swapSlot:0,
+        dirty:false,
+        pinCount:0,
+        lastAccess:0
+      };
+      container[key]=page;
+    }
+    return page;
+  }
+
+  container=region.pages||(region.pages={});
+  key=String(pageIndex);
+  page=container[key]||null;
+  if(!page&&create){
+    page={
+      key:'P:'+String(proc.pid)+':'+String(region.id)+':'+key,
+      ownerKind:'PRIVATE',
+      ownerPid:proc.pid,
+      ownerId:region.id,
+      pageIndex:pageIndex,
+      resident:false,
+      bytes:null,
+      frameId:0,
+      swapSlot:0,
+      dirty:false,
+      pinCount:0,
+      lastAccess:0
+    };
+    container[key]=page;
+  }
+  return page;
+}
+function jplopsoft_vmmTouchPage(proc,region,pageIndex,write,countFault){
+  var page,section,bytes;
+  if(!jplopsoft_vmmPageCommitted(region,pageIndex)){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_ADDRESS,
+      'Page fault on an uncommitted virtual page.'
+    );
+  }
+  if(write&&!jplopsoft_vmmProtectWritable(region.protect)){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_ACCESS_DENIED,
+      'Write access violation at '+String(region.name||'virtual region')+'.'
+    );
+  }
+  if(!write&&!jplopsoft_vmmProtectReadable(region.protect)){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_ACCESS_DENIED,
+      'Read access violation at '+String(region.name||'virtual region')+'.'
+    );
+  }
+
+  page=jplopsoft_vmmPageObject(proc,region,pageIndex,true);
+  section=region.sectionObject||null;
+  bytes=jplopsoft_vmmPageIn(
+    page,
+    section,
+    section
+      ?Math.floor((Number(region.sectionOffset)+pageIndex*jplopsoft_VMM_PAGE_SIZE)/jplopsoft_VMM_PAGE_SIZE)
+      :pageIndex,
+    countFault
+  );
+  page.lastAccess=jplopsoft_vmmKernel().touchClock++;
+  if(write){
+    page.dirty=true;
+    if(section)section.dirty=true;
+  }
+  return bytes;
+}
+function jplopsoft_vmmRead(proc,address,size,countFault){
+  var addr=jplopsoft_vmmSafeAddress(address),
+      remaining=Math.max(0,Math.min(64*1024*1024,Math.floor(Number(size)||0))),
+      out=new Uint8Array(remaining),cursor=addr,outPos=0,region,pageIndex,pageOff,take,page;
+  if(addr<0)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'Invalid virtual address.');
+  while(remaining>0){
+    region=jplopsoft_vmmFindRegion(proc,cursor);
+    if(!region)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'Virtual address is MEM_FREE.');
+    pageIndex=Math.floor((cursor-Number(region.base))/jplopsoft_VMM_PAGE_SIZE);
+    pageOff=(cursor-Number(region.base))%jplopsoft_VMM_PAGE_SIZE;
+    take=Math.min(remaining,jplopsoft_VMM_PAGE_SIZE-pageOff,Number(region.base)+Number(region.size)-cursor);
+    page=jplopsoft_vmmTouchPage(proc,region,pageIndex,false,countFault);
+    out.set(page.subarray(pageOff,pageOff+take),outPos);
+    cursor+=take;outPos+=take;remaining-=take;
+  }
+  return out;
+}
+function jplopsoft_vmmWrite(proc,address,data,countFault){
+  var src=data instanceof Uint8Array
+        ?data
+        :(data instanceof ArrayBuffer
+          ?new Uint8Array(data)
+          :(Array.isArray(data)
+            ?new Uint8Array(data)
+            :jplopsoft_ntUtf8Bytes(String(data===undefined?'':data)))),
+      addr=jplopsoft_vmmSafeAddress(address),
+      remaining=src.length,cursor=addr,srcPos=0,region,pageIndex,pageOff,take,page;
+  if(src.length>64*1024*1024)throw jplopsoft_xshError(jplopsoft_STATUS_QUOTA_EXCEEDED,'Virtual write is limited to 64 MiB per call.');
+  if(addr<0)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'Invalid virtual address.');
+  while(remaining>0){
+    region=jplopsoft_vmmFindRegion(proc,cursor);
+    if(!region)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'Virtual address is MEM_FREE.');
+    pageIndex=Math.floor((cursor-Number(region.base))/jplopsoft_VMM_PAGE_SIZE);
+    pageOff=(cursor-Number(region.base))%jplopsoft_VMM_PAGE_SIZE;
+    take=Math.min(remaining,jplopsoft_VMM_PAGE_SIZE-pageOff,Number(region.base)+Number(region.size)-cursor);
+    page=jplopsoft_vmmTouchPage(proc,region,pageIndex,true,countFault);
+    page.set(src.subarray(srcPos,srcPos+take),pageOff);
+    cursor+=take;srcPos+=take;remaining-=take;
+  }
+  return src.length;
+}
+function jplopsoft_vmmReleaseRegion(proc,region,releaseCommit){
+  var vm=proc&&proc.vm,v=jplopsoft_vmmKernel(),k,page,committed;
+  if(!vm||!region)return false;
+
+  if(region.sectionObject){
+    /* Shared pages belong to the SECTION/image cache, not this mapping. */
+  }else{
+    for(k in region.pages){
+      if(region.pages.hasOwnProperty(k)){
+        page=region.pages[k];
+        jplopsoft_vmmPageRelease(page);
+      }
+    }
+  }
+
+  committed=jplopsoft_vmmRegionCommittedPages(region)*jplopsoft_VMM_PAGE_SIZE;
+  if(releaseCommit!==false&&region.ownsCommit!==false&&committed){
+    jplopsoft_vmmReleaseCommit(proc,committed,true);
+  }
+
+  vm.reservedBytes=Math.max(0,(Number(vm.reservedBytes)||0)-Number(region.size));
+  for(k=0;k<vm.regions.length;k++){
+    if(vm.regions[k]===region){
+      vm.regions.splice(k,1);
+      break;
+    }
+  }
+  return true;
+}
+function jplopsoft_vmmReleaseProcess(proc){
+  var vm=proc&&proc.vm,copy,i;
+  if(!vm)return true;
+  copy=vm.regions.slice();
+  for(i=0;i<copy.length;i++){
+    if(copy[i].mapped&&!copy[i].systemImage)continue;
+    jplopsoft_vmmReleaseRegion(proc,copy[i],true);
+  }
+  vm.regions=[];
+  vm.reservedBytes=0;
+  vm.modules={};
+  return true;
+}
+function jplopsoft_vmmVirtualAlloc(proc,address,size,allocationType,protect){
+  var vm=proc&&proc.vm,flags=jplopsoft_vmmAllocationFlags(allocationType),
+      bytes=jplopsoft_vmmAlignUp(size,jplopsoft_VMM_PAGE_SIZE),
+      addr=jplopsoft_vmmSafeAddress(address),base,region,offsetSize;
+
+  if(!vm)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_CID,'Process has no VMM address space.');
+  if(bytes<=0)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'VirtualAlloc size must be greater than zero.');
+
+  if(addr<0&&address!==null&&address!==undefined&&Number(address)!==0){
+    throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'VirtualAlloc address is outside the 128 TB user VAS.');
+  }
+
+  if((flags&(jplopsoft_MEM_RESERVE|jplopsoft_MEM_COMMIT))===0){
+    throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'VirtualAlloc requires MEM_RESERVE and/or MEM_COMMIT.');
+  }
+
+  if((flags&jplopsoft_MEM_RESERVE)!==0){
+    if(addr>0){
+      base=jplopsoft_vmmAlignDown(addr,jplopsoft_VMM_ALLOCATION_GRANULARITY);
+      offsetSize=(addr-base)+bytes;
+      bytes=jplopsoft_vmmAlignUp(offsetSize,jplopsoft_VMM_PAGE_SIZE);
+      if(
+        base<jplopsoft_VMM_USER_ADDRESS_MIN||
+        base+bytes>jplopsoft_VMM_USER_ADDRESS_BYTES||
+        jplopsoft_vmmRegionOverlaps(vm,base,bytes,null)
+      ){
+        throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'Requested VirtualAlloc range is unavailable.');
+      }
+    }else{
+      base=jplopsoft_vmmFindFreeBase(vm,bytes,0,(flags&jplopsoft_MEM_TOP_DOWN)!==0);
+      if(!base)throw jplopsoft_xshError(jplopsoft_STATUS_QUOTA_EXCEEDED,'No contiguous virtual address range is available.');
+    }
+    region=jplopsoft_vmmNewRegion(
+      proc,base,bytes,protect,jplopsoft_MEM_PRIVATE,'VirtualAlloc',
+      {ownsCommit:true}
+    );
+  }else{
+    if(!(addr>0))throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'MEM_COMMIT without MEM_RESERVE requires an existing reserved address.');
+    region=jplopsoft_vmmFindRegion(proc,addr);
+    if(!region||region.type!==jplopsoft_MEM_PRIVATE){
+      throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'MEM_COMMIT address is not inside a private reserved allocation.');
+    }
+    base=Number(region.base);
+  }
+
+  if((flags&jplopsoft_MEM_COMMIT)!==0){
+    jplopsoft_vmmCommitRegion(
+      proc,
+      region,
+      addr>0?addr:Number(region.base),
+      bytes,
+      true
+    );
+    region.protect=jplopsoft_vmmProtectValue(protect);
+  }
+
+  return addr>0&&!(flags&jplopsoft_MEM_RESERVE)?addr:Number(region.base);
+}
+function jplopsoft_vmmDecommit(proc,region,address,size){
+  var start=Math.max(Number(region.base),Number(address)),
+      finish=Math.min(Number(region.base)+Number(region.size),start+Math.max(0,Number(size)||0)),
+      first,last,removed,k,pageIndex,page;
+  if(finish<=start)return 0;
+  first=Math.floor((start-Number(region.base))/jplopsoft_VMM_PAGE_SIZE);
+  last=Math.ceil((finish-Number(region.base))/jplopsoft_VMM_PAGE_SIZE);
+  removed=jplopsoft_vmmRangeRemove(region,first,last);
+  for(k in region.pages){
+    if(!region.pages.hasOwnProperty(k))continue;
+    pageIndex=parseInt(k,10)||0;
+    if(pageIndex>=first&&pageIndex<last){
+      page=region.pages[k];
+      jplopsoft_vmmPageRelease(page);
+      delete region.pages[k];
+    }
+  }
+  if(removed&&region.ownsCommit!==false){
+    jplopsoft_vmmReleaseCommit(proc,removed*jplopsoft_VMM_PAGE_SIZE,true);
+  }
+  return removed*jplopsoft_VMM_PAGE_SIZE;
+}
+function jplopsoft_vmmVirtualFree(proc,address,size,freeType){
+  var addr=jplopsoft_vmmSafeAddress(address),
+      flags=jplopsoft_vmmAllocationFlags(freeType),
+      region;
+  if(addr<0)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'Invalid VirtualFree address.');
+  region=jplopsoft_vmmFindRegion(proc,addr);
+  if(!region||region.mapped)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'VirtualFree requires a private allocation.');
+
+  if((flags&jplopsoft_MEM_RELEASE)!==0){
+    if(addr!==Number(region.allocationBase)||Number(size||0)!==0){
+      throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'MEM_RELEASE requires AllocationBase and dwSize=0.');
+    }
+    return jplopsoft_vmmReleaseRegion(proc,region,true);
+  }
+
+  if((flags&jplopsoft_MEM_DECOMMIT)!==0){
+    if(!(Number(size)>0))throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'MEM_DECOMMIT requires a non-zero size.');
+    jplopsoft_vmmDecommit(proc,region,addr,size);
+    return true;
+  }
+
+  throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'VirtualFree requires MEM_DECOMMIT or MEM_RELEASE.');
+}
+function jplopsoft_vmmVirtualQuery(proc,address){
+  var vm=proc&&proc.vm,addr=jplopsoft_vmmSafeAddress(address),
+      regions=vm&&vm.regions?vm.regions.slice():[],region,i,r,next,end,pageIndex,
+      ranges,j,range,stateBase,stateEnd,state,protect,type;
+  if(addr<0)return null;
+  regions.sort(function(a,b){return Number(a.base)-Number(b.base);});
+  region=jplopsoft_vmmFindRegion(proc,addr);
+
+  if(!region){
+    next=jplopsoft_VMM_USER_ADDRESS_BYTES;
+    for(i=0;i<regions.length;i++){
+      if(Number(regions[i].base)>addr){next=Number(regions[i].base);break;}
+    }
+    end=Math.max(addr+jplopsoft_VMM_PAGE_SIZE,next);
+    stateBase=jplopsoft_vmmAlignDown(addr,jplopsoft_VMM_PAGE_SIZE);
+    return{
+      BaseAddress:stateBase,
+      AllocationBase:0,
+      AllocationProtect:0,
+      RegionSize:Math.max(jplopsoft_VMM_PAGE_SIZE,end-stateBase),
+      State:jplopsoft_MEM_FREE,
+      StateName:'MEM_FREE',
+      Protect:0,
+      ProtectName:'PAGE_NOACCESS',
+      Type:0,
+      TypeName:'MEM_FREE',
+      Name:''
+    };
+  }
+
+  pageIndex=Math.floor((addr-Number(region.base))/jplopsoft_VMM_PAGE_SIZE);
+  ranges=region.commitRanges||[];
+  state=jplopsoft_MEM_RESERVE;
+  stateBase=Number(region.base);
+  stateEnd=Number(region.base)+Number(region.size);
+
+  for(j=0;j<ranges.length;j++){
+    range=ranges[j];
+    if(pageIndex>=range[0]&&pageIndex<range[1]){
+      state=jplopsoft_MEM_COMMIT;
+      stateBase=Number(region.base)+range[0]*jplopsoft_VMM_PAGE_SIZE;
+      stateEnd=Math.min(Number(region.base)+Number(region.size),Number(region.base)+range[1]*jplopsoft_VMM_PAGE_SIZE);
+      break;
+    }
+    if(pageIndex<range[0]){
+      stateBase=Number(region.base)+
+        (j===0?0:ranges[j-1][1]*jplopsoft_VMM_PAGE_SIZE);
+      stateEnd=Number(region.base)+range[0]*jplopsoft_VMM_PAGE_SIZE;
+      break;
+    }
+  }
+  if(state===jplopsoft_MEM_RESERVE&&ranges.length&&pageIndex>=ranges[ranges.length-1][1]){
+    stateBase=Number(region.base)+ranges[ranges.length-1][1]*jplopsoft_VMM_PAGE_SIZE;
+  }
+
+  protect=state===jplopsoft_MEM_COMMIT?region.protect:0;
+  type=region.type;
+
+  return{
+    BaseAddress:stateBase,
+    AllocationBase:Number(region.allocationBase),
+    AllocationProtect:region.allocationProtect,
+    AllocationProtectName:jplopsoft_vmmProtectName(region.allocationProtect),
+    RegionSize:Math.max(jplopsoft_VMM_PAGE_SIZE,stateEnd-stateBase),
+    State:state,
+    StateName:jplopsoft_vmmStateName(state),
+    Protect:protect,
+    ProtectName:state===jplopsoft_MEM_COMMIT?jplopsoft_vmmProtectName(protect):'PAGE_NOACCESS',
+    Type:type,
+    TypeName:jplopsoft_vmmTypeName(type),
+    Name:String(region.name||''),
+    MappingId:parseInt(region.mappingId,10)||0,
+    Shared:!!region.sectionObject
+  };
+}
+function jplopsoft_vmmVirtualProtect(proc,address,size,newProtect){
+  var addr=jplopsoft_vmmSafeAddress(address),region=jplopsoft_vmmFindRegion(proc,addr),
+      bytes=Math.max(1,Number(size)||0),end=addr+bytes,old;
+  if(!region||end>Number(region.base)+Number(region.size)){
+    throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'VirtualProtect range must stay inside one allocation.');
+  }
+  old=region.protect;
+  region.protect=jplopsoft_vmmProtectValue(newProtect);
+  return{
+    ok:true,
+    oldProtect:old,
+    oldProtectName:jplopsoft_vmmProtectName(old),
+    newProtect:region.protect,
+    newProtectName:jplopsoft_vmmProtectName(region.protect)
+  };
+}
+function jplopsoft_vmmSystemImageSize(name){
+  var n=String(name||'').toLowerCase(),table={
+    'ntdll.dll':384*1024,
+    'kernel32.dll':512*1024,
+    'user32.dll':768*1024,
+    'gdi32.dll':512*1024,
+    'advapi32.dll':384*1024,
+    'comctl32.dll':640*1024,
+    'shell32.dll':768*1024,
+    'uxtheme.dll':256*1024,
+    'dwmapi.dll':256*1024,
+    'winui.dll':384*1024,
+    'd3d11.dll':640*1024,
+    'd3dx.dll':640*1024,
+    'three32.dll':640*1024,
+    'mfplat.dll':512*1024,
+    'mediafoundation.dll':512*1024
+  };
+  return table[n]||256*1024;
+}
+function jplopsoft_vmmImageSection(name){
+  var v=jplopsoft_vmmKernel(),n=String(name||'').toLowerCase(),s,size,marker;
+  if(!n)return null;
+  s=v.imageSections[n];
+  if(s)return s;
+  size=jplopsoft_vmmAlignUp(jplopsoft_vmmSystemImageSize(n),jplopsoft_VMM_PAGE_SIZE);
+  if(v.committedBytes+size>v.commitLimitBytes)return null;
+  marker=jplopsoft_ntUtf8Bytes('MZ\0\0EXOS_SHARED_IMAGE\0'+n+'\0EXOS_VMM_V1\0');
+  s={
+    objectId:'IMG:'+n,
+    type:'IMAGE_SECTION',
+    name:n,
+    size:size,
+    protect:jplopsoft_PAGE_EXECUTE_READ,
+    pages:{},
+    backingBytes:marker,
+    dirty:false,
+    systemImage:true,
+    commitChargeBytes:size
+  };
+  v.imageSections[n]=s;
+  v.committedBytes+=size;
+  return s;
+}
+function jplopsoft_vmmRegisterLoadedModule(proc,name){
+  var vm=proc&&proc.vm,n=String(name||'').toLowerCase(),section,base,region;
+  if(!vm||!n||n.length>128)return null;
+  if(vm.modules[n])return vm.modules[n];
+  section=jplopsoft_vmmImageSection(n);
+  if(!section)return null;
+  base=jplopsoft_vmmFindFreeBase(vm,section.size,0,true);
+  if(!base)return null;
+  region=jplopsoft_vmmNewRegion(
+    proc,base,section.size,section.protect,jplopsoft_MEM_IMAGE,n,
+    {mapped:true,sectionObject:section,sectionOffset:0,ownsCommit:false,systemImage:true}
+  );
+  jplopsoft_vmmRangeAdd(region,0,Math.ceil(section.size/jplopsoft_VMM_PAGE_SIZE));
+  vm.modules[n]=base;
+  vm.sharedImageBytes=(Number(vm.sharedImageBytes)||0)+section.size;
+  proc.sharedImageBytes=vm.sharedImageBytes;
+  return base;
+}
+function jplopsoft_vmmProcessStatus(proc){
+  var vm=proc&&proc.vm,v=jplopsoft_vmmKernel(),resident=0,swapped=0,k,r,page,
+      privateCommitted=vm?Number(vm.committedBytes)||0:0;
+  if(vm){
+    for(k=0;k<vm.regions.length;k++){
+      r=vm.regions[k];
+      if(r.sectionObject)continue;
+      for(var pk in r.pages){
+        if(!r.pages.hasOwnProperty(pk))continue;
+        page=r.pages[pk];
+        if(page.resident)resident+=jplopsoft_VMM_PAGE_SIZE;
+        if(page.swapSlot)swapped+=jplopsoft_VMM_PAGE_SIZE;
+      }
+    }
+  }
+  return{
+    model:'EXOS_VMM_V1',
+    pid:proc?proc.pid:0,
+    virtualAddressBits:47,
+    virtualAddressBytes:jplopsoft_VMM_USER_ADDRESS_BYTES,
+    reservedBytes:vm?Number(vm.reservedBytes)||0:0,
+    committedBytes:privateCommitted,
+    residentPrivateBytes:resident,
+    swappedPrivateBytes:swapped,
+    sharedImageBytes:vm?Number(vm.sharedImageBytes)||0:0,
+    regions:vm&&vm.regions?vm.regions.length:0,
+    pageSize:jplopsoft_VMM_PAGE_SIZE,
+    allocationGranularity:jplopsoft_VMM_ALLOCATION_GRANULARITY,
+    pagefilePath:v.pagefile.path
+  };
+}
+function jplopsoft_vmmGlobalStatus(proc){
+  var v=jplopsoft_vmmKernel(),ps=proc?jplopsoft_vmmProcessStatus(proc):null;
+  return{
+    model:v.model,
+    virtualAddressBits:v.addressBits,
+    virtualAddressBytes:v.virtualAddressBytes,
+    pageSize:v.pageSize,
+    allocationGranularity:v.allocationGranularity,
+    physicalLimitBytes:v.physicalLimitBytes,
+    residentBytes:v.residentBytes,
+    availablePhysicalBytes:Math.max(0,v.physicalLimitBytes-v.residentBytes),
+    commitLimitBytes:v.commitLimitBytes,
+    committedBytes:v.committedBytes,
+    availableCommitBytes:Math.max(0,v.commitLimitBytes-v.committedBytes),
+    pagefile:{
+      path:v.pagefile.path,
+      model:v.pagefile.model,
+      maxBytes:v.pagefile.maxBytes,
+      usedBytes:v.pagefile.usedBytes,
+      freeBytes:Math.max(0,v.pagefile.maxBytes-v.pagefile.usedBytes)
+    },
+    stats:{
+      pageFaults:v.stats.pageFaults,
+      demandZeroFaults:v.stats.demandZeroFaults,
+      hardFaults:v.stats.hardFaults,
+      pageIns:v.stats.pageIns,
+      pageOuts:v.stats.pageOuts,
+      trims:v.stats.trims,
+      bytesPagedIn:v.stats.bytesPagedIn,
+      bytesPagedOut:v.stats.bytesPagedOut
+    },
+    process:ps
+  };
+}
+function jplopsoft_vmmGlobalMemoryStatus(proc){
+  var v=jplopsoft_vmmKernel(),vm=proc&&proc.vm,
+      load=v.physicalLimitBytes>0?Math.min(100,Math.round((v.residentBytes/v.physicalLimitBytes)*100)):0;
+  return{
+    dwLength:64,
+    dwMemoryLoad:load,
+    ullTotalPhys:v.physicalLimitBytes,
+    ullAvailPhys:Math.max(0,v.physicalLimitBytes-v.residentBytes),
+    ullTotalPageFile:v.commitLimitBytes,
+    ullAvailPageFile:Math.max(0,v.commitLimitBytes-v.committedBytes),
+    ullTotalVirtual:jplopsoft_VMM_USER_ADDRESS_BYTES,
+    ullAvailVirtual:Math.max(0,jplopsoft_VMM_USER_ADDRESS_BYTES-(vm?Number(vm.reservedBytes)||0:0)),
+    ullAvailExtendedVirtual:0,
+    pageSize:jplopsoft_VMM_PAGE_SIZE,
+    pagefilePath:v.pagefile.path
+  };
+}
+function jplopsoft_vmmSeed(proc,address,data){
+  var region=jplopsoft_vmmFindRegion(proc,address),oldProtect;
+  if(!region)return 0;
+  oldProtect=region.protect;
+  region.protect=jplopsoft_PAGE_READWRITE;
+  try{
+    return jplopsoft_vmmWrite(proc,address,data,false);
+  }finally{
+    region.protect=oldProtect;
+  }
+}
+function jplopsoft_ntCreateProcessVm(rec){
+  var vm={
+        model:'EXOS_VMM_V1',
+        addressBits:47,
+        virtualAddressBytes:jplopsoft_VMM_USER_ADDRESS_BYTES,
+        pageSize:jplopsoft_VMM_PAGE_SIZE,
+        allocationGranularity:jplopsoft_VMM_ALLOCATION_GRANULARITY,
+        regions:[],
+        modules:{},
+        nextBase:0x100000000,
+        reservedBytes:0,
+        committedBytes:0,
+        sharedImageBytes:0
+      },
+      image,heapBase,heap,peb,params,banner;
+  rec.vm=vm;
+
+  image=jplopsoft_vmmNewRegion(rec,0x00400000,65536,jplopsoft_PAGE_EXECUTE_READ,jplopsoft_MEM_IMAGE,String(rec.imageName||'image'),{ownsCommit:true});
+  jplopsoft_vmmCommitRegion(rec,image,image.base,image.size,false);
+
+  heapBase=0x10000000+((Number(rec.pid)||0)%512)*0x00100000;
+  heap=jplopsoft_vmmNewRegion(rec,heapBase,262144,jplopsoft_PAGE_READWRITE,jplopsoft_MEM_PRIVATE,'Default Heap',{ownsCommit:true});
+  jplopsoft_vmmCommitRegion(rec,heap,heap.base,heap.size,false);
+
+  peb=jplopsoft_vmmNewRegion(rec,0x7FFDF000,4096,jplopsoft_PAGE_READWRITE,jplopsoft_MEM_PRIVATE,'PEB',{ownsCommit:true});
+  jplopsoft_vmmCommitRegion(rec,peb,peb.base,peb.size,false);
+
+  params=rec.peb&&rec.peb.processParameters?rec.peb.processParameters:{};
+  banner='MZ\u0000\u0000ExOS V8 Image\r\n'+String(rec.imageName||'unknown.exe')+'\r\n';
+  jplopsoft_vmmSeed(rec,image.base,jplopsoft_ntUtf8Bytes(banner));
+  jplopsoft_vmmSeed(rec,heap.base,jplopsoft_ntUtf8Bytes('EXOS_HEAP1\u0000PID='+String(rec.pid)+'\u0000IMAGE='+String(rec.imageName||'')+'\u0000'));
+  jplopsoft_vmmSeed(rec,peb.base,jplopsoft_ntUtf8Bytes('EXOS_PEB1\u0000PID='+String(rec.pid)+'\u0000PPID='+String(rec.ppid)+'\u0000CWD='+String(params.currentDirectory||'')+'\u0000CMD='+String(params.commandLine||'')+'\u0000'));
+
+  vm.heapBase=heapBase;
+  vm.heapSize=heap.size;
+
+  /* Every XSH/user process starts with the core user-mode DLL images mapped.
+   * They are backed by global IMAGE_SECTION pages, so identical code pages are
+   * physically resident only once even though every process sees its own VAS. */
+  jplopsoft_vmmRegisterLoadedModule(rec,'ntdll.dll');
+  jplopsoft_vmmRegisterLoadedModule(rec,'kernel32.dll');
+  jplopsoft_vmmRegisterLoadedModule(rec,'user32.dll');
+
+  return vm;
+}
+function jplopsoft_ntVmFindRegion(proc,address,size,write){
+  var addr=jplopsoft_vmmSafeAddress(address),n=Math.max(0,Number(size)||0),
+      region=jplopsoft_vmmFindRegion(proc,addr),end;
+  if(!region)return null;
+  end=addr+n;
+  if(end>Number(region.base)+Number(region.size))return null;
+  if(write&&!jplopsoft_vmmProtectWritable(region.protect))return null;
+  if(!write&&!jplopsoft_vmmProtectReadable(region.protect))return null;
+  return region;
+}
+
+function jplopsoft_ntProcessHandleForOwner(ownerPid,handle){
+  var h=jplopsoft_NT_KERNEL.processHandles[String(parseInt(handle,10)||0)];
+  if(!h)return null;
+  if(parseInt(ownerPid,10)>0&&parseInt(h.ownerPid,10)!==parseInt(ownerPid,10))return null;
+  return h;
+}
+function jplopsoft_ntCanOpenProcessForXsh(ctx,target,desiredAccess){
+  var self=ctx&&ctx.process?ctx.process:null,mask=Number(desiredAccess)>>>0,vmMask=jplopsoft_PROCESS_VM_READ|jplopsoft_PROCESS_VM_WRITE|jplopsoft_PROCESS_VM_OPERATION;
+  if(!self||!target||!target.alive)return{ok:false,status:jplopsoft_STATUS_INVALID_CID,reason:'Process not found.'};
+  if(target.pid===self.pid)return{ok:true,status:jplopsoft_STATUS_SUCCESS,reason:''};
+  if(target.kernel||target.critical||target.protection==='PPL')return{ok:false,status:jplopsoft_STATUS_ACCESS_DENIED,reason:'Protected/kernel process denies cross-process memory access.'};
+  if(String(target.username||'').toLowerCase()!==String(self.username||'').toLowerCase())return{ok:false,status:jplopsoft_STATUS_ACCESS_DENIED,reason:'Cross-user process access requires a privileged debugger token.'};
+  if((mask&vmMask)!==0)return{ok:true,status:jplopsoft_STATUS_SUCCESS,reason:''};
+  return{ok:true,status:jplopsoft_STATUS_SUCCESS,reason:''};
+}
+function jplopsoft_xshOpenProcess(ctx,desiredAccess,inheritHandle,pid){
+  var target=jplopsoft_ntKernelProcessByPid(pid),rights,h;
+  desiredAccess=Number(desiredAccess)>>>0;
+  rights=jplopsoft_ntCanOpenProcessForXsh(ctx,target,desiredAccess);
+  if(!rights.ok)throw jplopsoft_xshError(rights.status,rights.reason);
+  h=jplopsoft_NT_KERNEL.nextHandle++;
+  jplopsoft_NT_KERNEL.processHandles[String(h)]={handle:h,pid:target.pid,targetPid:target.pid,ownerPid:ctx.pid,desiredAccess:desiredAccess,inheritHandle:!!inheritHandle,openedAt:jplopsoft_ntKernelNow(),kind:'PROCESS'};
+  return h;
+}
+function jplopsoft_xshReadProcessMemory(ctx,handle,address,size){
+  var h=jplopsoft_ntProcessHandleForOwner(ctx.pid,handle),p,n,out,info;
+  if(!h)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid process handle.');
+  if((h.desiredAccess&jplopsoft_PROCESS_VM_READ)===0)throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'PROCESS_VM_READ was not granted.');
+  p=jplopsoft_ntKernelProcessByPid(h.pid);
+  if(!p||!p.alive)throw jplopsoft_xshError(jplopsoft_STATUS_PROCESS_IS_TERMINATING,'Target process is not running.');
+  n=Math.max(0,Math.min(1024*1024,Math.floor(Number(size)||0)));
+  if(n<=0)return{address:Number(address)||0,bytes:new Uint8Array(0),bytesRead:0};
+  try{
+    out=jplopsoft_vmmRead(p,address,n,true);
+    info=jplopsoft_vmmVirtualQuery(p,address);
+  }catch(e){
+    throw jplopsoft_xshError(
+      e&&e.ntstatus?e.ntstatus:jplopsoft_STATUS_PARTIAL_COPY,
+      'ReadProcessMemory failed: '+String(e&&e.message||e)
+    );
+  }
+  return{
+    address:Number(address)||0,
+    bytes:out,
+    bytesRead:out.length,
+    region:info
+  };
+}
+function jplopsoft_xshWriteProcessMemory(ctx,handle,address,data){
+  var h=jplopsoft_ntProcessHandleForOwner(ctx.pid,handle),p,src,written;
+  if(!h)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid process handle.');
+  if((h.desiredAccess&jplopsoft_PROCESS_VM_WRITE)===0||(h.desiredAccess&jplopsoft_PROCESS_VM_OPERATION)===0)throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'PROCESS_VM_WRITE | PROCESS_VM_OPERATION are required.');
+  p=jplopsoft_ntKernelProcessByPid(h.pid);
+  if(!p||!p.alive)throw jplopsoft_xshError(jplopsoft_STATUS_PROCESS_IS_TERMINATING,'Target process is not running.');
+  if(data instanceof Uint8Array)src=data;
+  else if(data instanceof ArrayBuffer)src=new Uint8Array(data);
+  else if(Array.isArray(data))src=new Uint8Array(data);
+  else if(typeof data==='string')src=jplopsoft_ntUtf8Bytes(data);
+  else throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'WriteProcessMemory data must be Uint8Array, ArrayBuffer, byte array, or string.');
+  if(src.length>1024*1024)throw jplopsoft_xshError(jplopsoft_STATUS_QUOTA_EXCEEDED,'WriteProcessMemory is limited to 1 MiB per call.');
+  try{
+    written=jplopsoft_vmmWrite(p,address,src,true);
+  }catch(e){
+    throw jplopsoft_xshError(
+      e&&e.ntstatus?e.ntstatus:jplopsoft_STATUS_PARTIAL_COPY,
+      'WriteProcessMemory failed: '+String(e&&e.message||e)
+    );
+  }
+  return{address:Number(address)||0,bytesWritten:written};
+}
+function jplopsoft_xshVirtualQueryEx(ctx,handle,address){
+  var h=jplopsoft_ntProcessHandleForOwner(ctx.pid,handle),p;
+  if(!h)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid process handle.');
+  if((h.desiredAccess&(jplopsoft_PROCESS_QUERY_INFORMATION|jplopsoft_PROCESS_QUERY_LIMITED_INFORMATION|jplopsoft_PROCESS_VM_READ))===0)throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Query access was not granted.');
+  p=jplopsoft_ntKernelProcessByPid(h.pid);
+  if(!p||!p.alive)throw jplopsoft_xshError(jplopsoft_STATUS_PROCESS_IS_TERMINATING,'Target process is not running.');
+  return jplopsoft_vmmVirtualQuery(p,address);
+}
+
 function jplopsoft_ntKernelRegisterProcess(spec){
   var p=spec||{},pid=parseInt(p.pid,10)||0,key=String(p.key||''),rec,parent=null,peb;
 
@@ -18241,6 +19549,9 @@ function jplopsoft_ntKernelRegisterProcess(spec){
     generation:jplopsoft_NT_KERNEL.generation++
   };
 
+  rec.vm=jplopsoft_ntCreateProcessVm(rec);
+  rec.vmCommittedBytes=rec.vm?parseInt(rec.vm.committedBytes,10)||0:0;
+  rec.accountedMemoryBytes=Math.max(rec.accountedMemoryBytes,rec.vmCommittedBytes);
   jplopsoft_NT_KERNEL.processByKey[key]=rec;
   jplopsoft_NT_KERNEL.processByPid[String(pid)]=rec;
   return rec;
@@ -18545,6 +19856,9 @@ function jplopsoft_NtQuerySystemInformation(infoClass){
         (parseInt(p.accountedMemoryBytes,10)||0)+
         (parseInt(p.sectionViewBytes,10)||0),
       sectionViewBytes:parseInt(p.sectionViewBytes,10)||0,
+      vmm:typeof jplopsoft_vmmProcessStatus==='function'
+        ?jplopsoft_vmmProcessStatus(p)
+        :null,
       jobObjectId:parseInt(p.jobObjectId,10)||0,
       jobObjectName:String(p.jobObjectName||''),
       imageFormat:String(p.imageFormat||''),
@@ -18612,6 +19926,8 @@ function jplopsoft_OpenProcess(desiredAccess,inheritHandle,pid){
     handle:h,
     pid:p.pid,
     desiredAccess:desiredAccess,
+    ownerPid:0,
+    kind:'PROCESS',
     openedAt:jplopsoft_ntKernelNow()
   };
 
@@ -18684,6 +20000,9 @@ function jplopsoft_ntForceTerminateProcessObject(p,exitStatus){
 
   jplopsoft_ntReleaseProcessSections(p.pid);
   jplopsoft_ntCloseAllObjectHandlesForPid(p.pid);
+  if(typeof jplopsoft_vmmReleaseProcess==='function'){
+    jplopsoft_vmmReleaseProcess(p);
+  }
   jplopsoft_ntJobOnProcessExit(p);
 
   p.alive=false;
@@ -18767,7 +20086,7 @@ var jplopsoft_XSH_IMAGE_FORMAT='EXOS_XSH_PE_V1';
 var jplopsoft_XSH_IMAGE_MACHINE='EXOS_IMAGE_FILE_MACHINE_V8';
 
 var jplopsoft_XSH={
-  version:'XSH3',
+  version:'XSH4',
   runs:{},
   byPid:{},
   builtinByApp:{},
@@ -18856,6 +20175,18 @@ function jplopsoft_xshSubsystemValue(value){
   }
 
   return jplopsoft_IMAGE_SUBSYSTEM_UNKNOWN;
+}
+
+function jplopsoft_xshNormalizeEmbeddedIcon(value){
+  var s=String(value||'').trim(),r;
+  if(!s)return'';
+  if(/^res:\/\//i.test(s)){
+    r=typeof jplopsoft_shareResResolve==='function'?jplopsoft_shareResResolve(s,'shell32.dll'):null;
+    return r?String(r.token||s):'';
+  }
+  if(s.length>262144)return'';
+  if(/^data:image\/(?:png|jpeg|jpg|gif|webp);base64,[a-z0-9+\/=]+$/i.test(s))return s;
+  return'';
 }
 
 function jplopsoft_xshParseImage(source,imagePath){
@@ -18950,6 +20281,7 @@ function jplopsoft_xshParseImage(source,imagePath){
       'EXECUTABLE_IMAGE|SANDBOXED'
     ),
     minimumEngine:String(fields.MinimumEngine||'V8'),
+    icon:jplopsoft_xshNormalizeEmbeddedIcon(fields.Icon||fields.IconData||''),
     imagePath:String(imagePath||'program.xsh'),
     headerBytes:prefixLen,
     code:raw.substring(prefixLen)
@@ -18968,6 +20300,7 @@ function jplopsoft_xshPeHeaderForProcess(image){
     entryPoint:String(x.entryPoint||'main'),
     characteristics:String(x.characteristics||''),
     minimumEngine:String(x.minimumEngine||'V8'),
+    icon:String(x.icon||''),
     headerBytes:parseInt(x.headerBytes,10)||0
   };
 }
@@ -19311,6 +20644,11 @@ function jplopsoft_xshCloseHandle(ctx,h){
 
   if(ctx.handles[String(h)]){
     delete ctx.handles[String(h)];
+    return true;
+  }
+
+  if(jplopsoft_ntProcessHandleForOwner(ctx.pid,h)){
+    delete jplopsoft_NT_KERNEL.processHandles[String(h)];
     return true;
   }
 
@@ -20516,6 +21854,118 @@ function jplopsoft_xshConsoleExpungeHistory(ctx){
   return true;
 }
 
+var jplopsoft_CONHOST_TEXT_CLIPBOARD='';
+function jplopsoft_conhostSelectedText(session){
+  var input=document.getElementById(session.inputId),out=document.getElementById(session.outputId),sel,text='';
+  if(input&&typeof input.selectionStart==='number'&&input.selectionEnd>input.selectionStart){
+    return String(input.value||'').substring(input.selectionStart,input.selectionEnd);
+  }
+  try{
+    sel=window.getSelection?window.getSelection():null;
+    if(sel&&sel.rangeCount&&out&&out.contains(sel.anchorNode)&&out.contains(sel.focusNode))text=String(sel.toString()||'');
+  }catch(ignoreConsoleSelection){}
+  return text;
+}
+function jplopsoft_conhostClipboardWrite(text){
+  text=String(text||'');jplopsoft_CONHOST_TEXT_CLIPBOARD=text;
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(text).then(function(){return true;},function(){return true;});
+  }catch(ignoreClipboardWrite){}
+  return Promise.resolve(true);
+}
+function jplopsoft_conhostClipboardRead(){
+  try{
+    if(navigator.clipboard&&navigator.clipboard.readText){
+      return navigator.clipboard.readText().then(function(t){if(String(t||''))jplopsoft_CONHOST_TEXT_CLIPBOARD=String(t);return String(t||jplopsoft_CONHOST_TEXT_CLIPBOARD||'');},function(){return String(jplopsoft_CONHOST_TEXT_CLIPBOARD||'');});
+    }
+  }catch(ignoreClipboardRead){}
+  return Promise.resolve(String(jplopsoft_CONHOST_TEXT_CLIPBOARD||''));
+}
+function jplopsoft_conhostCut(session){
+  var input=document.getElementById(session.inputId),start,end,text;
+  if(!input||typeof input.selectionStart!=='number')return Promise.resolve(false);
+  start=input.selectionStart;end=input.selectionEnd;
+  if(end<=start)return Promise.resolve(false);
+  text=String(input.value||'').substring(start,end);
+  input.value=String(input.value||'').substring(0,start)+String(input.value||'').substring(end);
+  input.selectionStart=input.selectionEnd=start;
+  input.focus();
+  return jplopsoft_conhostClipboardWrite(text);
+}
+function jplopsoft_conhostCopy(session){
+  var text=jplopsoft_conhostSelectedText(session);
+  if(!text)return Promise.resolve(false);
+  return jplopsoft_conhostClipboardWrite(text);
+}
+function jplopsoft_conhostPaste(session){
+  var input=document.getElementById(session.inputId);
+  if(!input)return Promise.resolve(false);
+  return jplopsoft_conhostClipboardRead().then(function(text){
+    var start=typeof input.selectionStart==='number'?input.selectionStart:String(input.value||'').length,
+        end=typeof input.selectionEnd==='number'?input.selectionEnd:start,
+        value=String(input.value||'');
+    text=String(text||'');
+    input.value=value.substring(0,start)+text+value.substring(end);
+    input.selectionStart=input.selectionEnd=start+text.length;
+    input.focus();
+    return true;
+  });
+}
+function jplopsoft_conhostSelectAll(session){
+  var out=document.getElementById(session.outputId),sel,range;
+  try{
+    if(out&&window.getSelection&&document.createRange){
+      range=document.createRange();range.selectNodeContents(out);sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);return true;
+    }
+  }catch(ignoreConsoleSelectAll){}
+  return false;
+}
+function jplopsoft_conhostHideEditMenu(session){
+  var n=session&&session.editMenuId?document.getElementById(session.editMenuId):null;
+  if(n&&n.parentNode)n.parentNode.removeChild(n);
+}
+function jplopsoft_conhostShowEditMenu(session,anchorNode){
+  var old=document.getElementById(session.editMenuId),menu,rect,items,i,row,sep;
+  if(old&&old.parentNode)old.parentNode.removeChild(old);
+  menu=document.createElement('div');menu.id=session.editMenuId;menu.className='jplopsoft_conhost-edit-menu';
+  items=[
+    {text:'剪下',shortcut:'Ctrl+X',run:function(){return jplopsoft_conhostCut(session);}},
+    {text:'複製',shortcut:'Ctrl+C',run:function(){return jplopsoft_conhostCopy(session);}},
+    {text:'貼上',shortcut:'Ctrl+V',run:function(){return jplopsoft_conhostPaste(session);}},
+    {separator:true},
+    {text:'全選',shortcut:'Ctrl+A',run:function(){return jplopsoft_conhostSelectAll(session);}}
+  ];
+  for(i=0;i<items.length;i++){
+    if(items[i].separator){sep=document.createElement('div');sep.className='jplopsoft_conhost-edit-sep';menu.appendChild(sep);continue;}
+    row=document.createElement('button');row.type='button';row.className='jplopsoft_conhost-edit-item';
+    row.innerHTML='<span>'+items[i].text+'</span><kbd>'+items[i].shortcut+'</kbd>';
+    (function(action){row.onclick=function(e){try{e.preventDefault();e.stopPropagation();}catch(ignoreMenuClick){}jplopsoft_conhostHideEditMenu(session);Promise.resolve(action()).catch(function(){});};})(items[i].run);
+    menu.appendChild(row);
+  }
+  document.body.appendChild(menu);
+  rect=anchorNode&&anchorNode.getBoundingClientRect?anchorNode.getBoundingClientRect():{right:window.innerWidth-20,bottom:40};
+  menu.style.left=Math.max(4,Math.min(window.innerWidth-230,rect.right-220))+'px';
+  menu.style.top=Math.max(4,Math.min(window.innerHeight-170,rect.bottom+2))+'px';
+  window.setTimeout(function(){
+    function close(e){if(!menu.contains(e.target)){jplopsoft_conhostHideEditMenu(session);document.removeEventListener('mousedown',close,true);}}
+    document.addEventListener('mousedown',close,true);
+  },0);
+  return true;
+}
+function jplopsoft_conhostInstallEditMenu(session,hwnd){
+  var rec=jplopsoft_user32GetRecord(hwnd),win=rec&&rec.windowId?document.getElementById(rec.windowId):null,
+      controls=win&&win.querySelector?win.querySelector('.jplopsoft_wm-controls'):null,
+      titleIcon=win&&win.querySelector?win.querySelector('.jplopsoft_wm-title-icon'):null,button;
+  if(!win||!controls)return false;
+  session.editMenuId='jplopsoft_conhost_editmenu_'+String(session.id);
+  button=document.createElement('button');button.type='button';button.className='jplopsoft_wm-control jplopsoft_conhost-edit-button';button.title='編輯';button.setAttribute('aria-label','編輯');button.setAttribute('data-exfs-svg','edit');button.setAttribute('data-exfs-svg-size','13');
+  button.onclick=function(e){try{e.preventDefault();e.stopPropagation();}catch(ignoreEditButton){}jplopsoft_conhostShowEditMenu(session,button);return false;};
+  controls.insertBefore(button,controls.firstChild||null);
+  if(titleIcon){titleIcon.style.cursor='default';titleIcon.title='命令提示字元功能表';titleIcon.onclick=function(e){try{e.preventDefault();e.stopPropagation();}catch(ignoreTitleIcon){}jplopsoft_conhostShowEditMenu(session,titleIcon);return false;};}
+  jplopsoft_applySvgIcons(win);
+  return true;
+}
+
 function jplopsoft_xshConsoleCreateSession(ctx){
   var id=++jplopsoft_XSH.consoleSeq,
       conhost,h,client,out,row,prompt,input,
@@ -20569,6 +22019,7 @@ function jplopsoft_xshConsoleCreateSession(ctx){
     inputRowId:'jplopsoft_conhost_inputrow_'+String(id),
     promptId:'jplopsoft_conhost_prompt_'+String(id),
     inputId:'jplopsoft_conhost_input_'+String(id),
+    editMenuId:'',
     closing:false
   };
 
@@ -20609,6 +22060,7 @@ function jplopsoft_xshConsoleCreateSession(ctx){
   );
 
   session.hwnd=h;
+  jplopsoft_conhostInstallEditMenu(session,h);
 
   client=jplopsoft_GetClientElement(h);
 
@@ -20639,6 +22091,13 @@ function jplopsoft_xshConsoleCreateSession(ctx){
 
       e=e||window.event;
       key=String(e.key||'');
+
+      if(e.ctrlKey&&!e.altKey){
+        if(key.toLowerCase()==='c'&&input.selectionEnd>input.selectionStart){try{e.preventDefault();}catch(ignoreConsoleCopyKey){}jplopsoft_conhostCopy(session);return;}
+        if(key.toLowerCase()==='x'){try{e.preventDefault();}catch(ignoreConsoleCutKey){}jplopsoft_conhostCut(session);return;}
+        if(key.toLowerCase()==='v'){try{e.preventDefault();}catch(ignoreConsolePasteKey){}jplopsoft_conhostPaste(session);return;}
+        if(key.toLowerCase()==='a'){try{e.preventDefault();}catch(ignoreConsoleAllKey){}input.select();return;}
+      }
 
       if(key==='Enter'){
         try{e.preventDefault();}catch(ignoreConsolePrevent){}
@@ -20919,6 +22378,7 @@ function jplopsoft_xshConsoleDetach(ctx){
 }
 
 function jplopsoft_xshConsoleCloseSession(session,reason){
+  jplopsoft_conhostHideEditMenu(session);
   var pids=[],k,i,ctx;
 
   if(!session||session.closing)return false;
@@ -21041,7 +22501,7 @@ function jplopsoft_xshCreateHostWindow(ctx){
   return h;
 }
 
-function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH3 API\n  kernel32: CreateFile ReadFile WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile ReadMappedView WriteMappedView CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess CreateThread PostThreadMessage GetThreadMessage WaitForSingleObject GetExitCodeThread TerminateThread DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow GetForegroundWindow SetForegroundWindow LoadIcon GetIconInfo EnumIconResources SetWindowIcon GetMessage PeekMessage PostMessage DispatchMessage InvalidateRect UpdateWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  gdi32(exos_gdi32.js): GetDC ReleaseDC BeginPaint EndPaint CreateDC CreatePrinterDC StartDoc StartPage EndPage EndDoc AbortDoc PrintImage GetPrintJobInfo CreateCompatibleDC DeleteDC CreatePen CreateSolidBrush CreateFont CreateBitmap CreateCompatibleBitmap SelectObject DeleteObject MoveToEx LineTo Rectangle Ellipse Polygon Polyline PolyBezier BitBlt TextOut ExtTextOut GetTextExtentPoint32 CreateRectRgn CreateEllipticRgn CreatePolygonRgn SelectClipRgn SetMapMode LPtoDP DPtoLP\n  d3d11(exos_d3d11.js): D3D11CreateDeviceAndSwapChain CreateBuffer CreateTexture2D CreateVertexShader CreatePixelShader CreateInputLayout IASetVertexBuffers IASetIndexBuffer IASetPrimitiveTopology VSSetShader PSSetShader OMSetRenderTargets RSSetViewports ClearRenderTargetView Draw DrawIndexed Present\n  d3dx/three32(exos_d3dx.js + three.min.js): Scene Camera Geometry Material Mesh Light WebGLRenderer TextureLoader Clock\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  uxtheme: IsThemeActive OpenThemeData CloseThemeData SetWindowTheme GetThemeColor ApplyTheme\n  dwmapi: DwmIsCompositionEnabled DwmEnableBlurBehindWindow DwmExtendFrameIntoClientArea DwmSetWindowAttribute DwmGetWindowAttribute DwmFlush\n  ExOS.WinUI: Render RenderMany SetData\n  ExOS.MediaFoundation(exos_media.js): MFStartup CreateAudioSession CreateSourceFromPath Play Pause Stop Seek SetVolume SetPan SetEQ GetSpectrum GetWaveform\n  advapi32(exos_advapi32.js): RegOpenKeyEx RegCreateKeyEx RegCloseKey RegQueryValueEx RegGetValue RegSetValueEx RegEnumKeyEx RegEnumValue RegQueryInfoKey RegDeleteValue RegDeleteKey RegFlushKey ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo GetSecurityInfo SetSecurityInfo InitializeAcl SetEntriesInAcl GetExplicitEntriesFromAcl OpenProcessToken GetTokenInformation DuplicateTokenEx CreateRestrictedToken CheckTokenMembership PrivilegeCheck AdjustTokenPrivileges LookupPrivilegeValue LookupPrivilegeName GetUserName LookupAccountSid LookupAccountName ConvertSidToStringSid ConvertStringSidToSid IsValidSid EqualSid\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop SHQueryRecycleBin SHRestoreFromRecycleBin SHDeleteFromRecycleBin SHEmptyRecycleBin\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath UploadPickedFile ReleasePickedFile QuerySystemConfig\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
+function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH4 API\n  kernel32: CreateFile ReadFile WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile FlushViewOfFile ReadMappedView WriteMappedView VirtualAlloc VirtualFree VirtualProtect VirtualQuery ReadVirtualMemory WriteVirtualMemory GlobalMemoryStatusEx QueryVmmStatistics CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess OpenProcess VirtualQueryEx ReadProcessMemory WriteProcessMemory CreateThread PostThreadMessage GetThreadMessage WaitForSingleObject GetExitCodeThread TerminateThread DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtAllocateVirtualMemory NtFreeVirtualMemory NtProtectVirtualMemory NtQueryVirtualMemory NtReadVirtualMemory NtWriteVirtualMemory NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow GetForegroundWindow SetForegroundWindow LoadIcon GetIconInfo EnumIconResources SetWindowIcon GetMessage PeekMessage PostMessage DispatchMessage InvalidateRect UpdateWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  gdi32(exos_gdi32.js): GetDC ReleaseDC BeginPaint EndPaint CreateDC CreatePrinterDC StartDoc StartPage EndPage EndDoc AbortDoc PrintImage GetPrintJobInfo CreateCompatibleDC DeleteDC CreatePen CreateSolidBrush CreateFont CreateBitmap CreateCompatibleBitmap SelectObject DeleteObject MoveToEx LineTo Rectangle Ellipse Polygon Polyline PolyBezier BitBlt TextOut ExtTextOut GetTextExtentPoint32 CreateRectRgn CreateEllipticRgn CreatePolygonRgn SelectClipRgn SetMapMode LPtoDP DPtoLP\n  d3d11(exos_d3d11.js): D3D11CreateDeviceAndSwapChain CreateBuffer CreateTexture2D CreateVertexShader CreatePixelShader CreateInputLayout IASetVertexBuffers IASetIndexBuffer IASetPrimitiveTopology VSSetShader PSSetShader OMSetRenderTargets RSSetViewports ClearRenderTargetView Draw DrawIndexed Present\n  d3dx/three32(exos_d3dx.js + three.min.js): Scene Camera Geometry Material Mesh Light WebGLRenderer TextureLoader Clock\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  uxtheme: IsThemeActive OpenThemeData CloseThemeData SetWindowTheme GetThemeColor ApplyTheme\n  dwmapi: DwmIsCompositionEnabled DwmEnableBlurBehindWindow DwmExtendFrameIntoClientArea DwmSetWindowAttribute DwmGetWindowAttribute DwmFlush\n  ExOS.WinUI: Render RenderMany SetData\n  ExOS.MediaFoundation(exos_media.js): MFStartup CreateAudioSession CreateSourceFromPath Play Pause Stop Seek SetVolume SetPan SetEQ GetSpectrum GetWaveform\n  advapi32(exos_advapi32.js): RegOpenKeyEx RegCreateKeyEx RegCloseKey RegQueryValueEx RegGetValue RegSetValueEx RegEnumKeyEx RegEnumValue RegQueryInfoKey RegDeleteValue RegDeleteKey RegFlushKey ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo GetSecurityInfo SetSecurityInfo InitializeAcl SetEntriesInAcl GetExplicitEntriesFromAcl OpenProcessToken GetTokenInformation DuplicateTokenEx CreateRestrictedToken CheckTokenMembership PrivilegeCheck AdjustTokenPrivileges LookupPrivilegeValue LookupPrivilegeName GetUserName LookupAccountSid LookupAccountName ConvertSidToStringSid ConvertStringSidToSid IsValidSid EqualSid\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop SHQueryRecycleBin SHRestoreFromRecycleBin SHDeleteFromRecycleBin SHEmptyRecycleBin\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath UploadPickedFile ReleasePickedFile QuerySystemConfig QueryLocalAccounts CreateLocalAccount ResetLocalAccountPassword SetLocalAccountEnabled SetLocalAccountType DeleteLocalAccount QueryEvents QueryEventLogInfo\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
 function jplopsoft_xshPrintIrpTrace(ctx){
   var a=ctx.irpTrace.slice(-20),i,j,irp,s='';
   for(i=0;i<a.length;i++){
@@ -21567,14 +23027,14 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
 }
 function jplopsoft_xshQueueWakeWaiter(ctx){
   var waiter;
-  if(!ctx||!ctx.messageWaiters||!ctx.messageWaiters.length||!ctx.messageQueue||!ctx.messageQueue.length)return;
+  if(!ctx||ctx.suspended||!ctx.messageWaiters||!ctx.messageWaiters.length||!ctx.messageQueue||!ctx.messageQueue.length)return;
   waiter=ctx.messageWaiters.shift();
   if(waiter.timer)window.clearTimeout(waiter.timer);
   waiter.resolve(ctx.messageQueue.shift());
 }
 function jplopsoft_xshScheduleMessageDrain(ctx){
   if(typeof jplopsoft_KERNEL_BUGCHECK_ACTIVE!=='undefined'&&jplopsoft_KERNEL_BUGCHECK_ACTIVE)return;
-  if(!ctx||ctx.messageDrainScheduled)return;
+  if(!ctx||ctx.suspended||ctx.messageDrainScheduled)return;
   ctx.messageDrainScheduled=true;
   var run=function(){
     ctx.messageDrainScheduled=false;
@@ -22017,7 +23477,7 @@ async function jplopsoft_xshLaunchSystemApp(ctx,name,args){
   }
 
   if(appName==='regedit'){
-    jplopsoft_openRegedit();
+    jplopsoft_launchSystemXshApp('regedit',list);
     return{ok:true};
   }
 
@@ -22438,6 +23898,50 @@ function jplopsoft_xshSystemDownloadPath(ctx,path){
 }
 
 
+
+function jplopsoft_xshAccountBuildCredential(username,password,title){
+  username=String(username||'').toLowerCase();password=String(password||'');
+  return new Promise(function(resolve,reject){
+    var salt='',iterations=20000;
+    try{salt=jplopsoft_secureRandomHex(32).toLowerCase();}catch(e){reject(e);return;}
+    try{
+      jplopsoft_derivePasswordKeyAsync(password,{username:username,salt:salt,iterations:iterations,title:String(title||'正在建立本機帳號認證'),detail:'使用 salted ex_md3n 建立 SAM3 verifier 與 Vault Key wrap；密碼不會送到 PHP'},function(err,samKey){
+        var wrapKey='',vaultEnc='',verifier='';password='';
+        if(err){reject(err);return;}
+        try{
+          verifier=jplopsoft_samVerifier(samKey);
+          wrapKey=jplopsoft_samWrapKey(username,salt,samKey);
+          vaultEnc=jplopsoft_encRaw(jplopsoft_SAM_VAULT_PREFIX+String(state.vaultKey||''),wrapKey);
+          resolve({password_salt:salt,password_iterations:iterations,password_verifier:verifier,vault_key_enc:vaultEnc});
+        }catch(e2){reject(e2);}finally{samKey='';wrapKey='';verifier='';}
+      });
+    }catch(e3){password='';reject(e3);}
+  });
+}
+async function jplopsoft_xshSystemQueryLocalAccounts(ctx){
+  return await jplopsoft_xshApiPromise('account_list','GET',null);
+}
+async function jplopsoft_xshSystemCreateLocalAccount(ctx,spec){
+  var o=spec&&typeof spec==='object'?spec:{},username=String(o.username||'').trim().toLowerCase(),password=String(o.password||''),administrator=!!o.administrator,cred,payload;
+  if(!/^[a-z0-9_.-]{1,64}$/.test(username)||username==='administrator')throw new Error('帳號名稱只能使用 a-z、0-9、_、.、-，且不能使用 administrator。');
+  if(password.length<8)throw new Error('密碼至少需要 8 個字元。');
+  if(!state.vaultKey||!jplopsoft_validVaultKey(state.vaultKey))throw new Error('Vault Key 尚未解鎖。');
+  cred=await jplopsoft_xshAccountBuildCredential(username,password,'正在建立 '+username+' 帳號');password='';
+  payload={username:username,administrator:administrator?1:0,password_salt:cred.password_salt,password_iterations:cred.password_iterations,password_verifier:cred.password_verifier,vault_key_enc:cred.vault_key_enc,profile_name_enc:jplopsoft_encRaw(jplopsoft_NAME2+username,state.vaultKey),documents_name_enc:jplopsoft_encRaw(jplopsoft_NAME2+'Documents',state.vaultKey)};
+  return await jplopsoft_xshApiPromise('account_create','POST',payload);
+}
+async function jplopsoft_xshSystemResetLocalAccountPassword(ctx,username,password){
+  username=String(username||'').trim().toLowerCase();password=String(password||'');if(!username||password.length<8)throw new Error('帳號或新密碼無效；密碼至少需要 8 個字元。');
+  if(!state.vaultKey||!jplopsoft_validVaultKey(state.vaultKey))throw new Error('Vault Key 尚未解鎖。');
+  var cred=await jplopsoft_xshAccountBuildCredential(username,password,'正在重設 '+username+' 密碼');password='';
+  return await jplopsoft_xshApiPromise('account_reset_password','POST',{username:username,password_salt:cred.password_salt,password_iterations:cred.password_iterations,password_verifier:cred.password_verifier,vault_key_enc:cred.vault_key_enc});
+}
+async function jplopsoft_xshSystemSetLocalAccountEnabled(ctx,username,enabled){return await jplopsoft_xshApiPromise('account_set_enabled','POST',{username:String(username||''),enabled:enabled?1:0});}
+async function jplopsoft_xshSystemSetLocalAccountType(ctx,username,administrator){return await jplopsoft_xshApiPromise('account_set_type','POST',{username:String(username||''),administrator:administrator?1:0});}
+async function jplopsoft_xshSystemDeleteLocalAccount(ctx,username){return await jplopsoft_xshApiPromise('account_delete','POST',{username:String(username||'')});}
+async function jplopsoft_xshSystemQueryEvents(ctx,filter){var f=filter&&typeof filter==='object'?filter:{};return await jplopsoft_xshApiPromise('event_query','POST',{event_id:parseInt(f.eventId,10)||0,event_name:String(f.eventName||''),limit:Math.max(1,Math.min(5000,parseInt(f.limit,10)||1000))});}
+async function jplopsoft_xshSystemQueryEventLogInfo(ctx){return await jplopsoft_xshApiPromise('audit_info','GET',null);}
+
 function jplopsoft_xshObjectStatus(result,message){
   if(!result||Number(result.status)!==Number(jplopsoft_STATUS_SUCCESS)){
     throw jplopsoft_xshError(
@@ -22826,6 +24330,108 @@ async function jplopsoft_xshSetFileSddl(ctx,path,sddl){
   return String(out.sddl||'');
 }
 
+
+async function jplopsoft_xshCreateFileMappingWin32(ctx,args){
+  var hFile,name,size,protect,opt={},handle,node,bytes,high,low,result;
+  args=args||[];
+
+  /* Win32 shape:
+   * CreateFileMapping(hFile, security, protect, sizeHigh, sizeLow, name)
+   * An INVALID_HANDLE_VALUE mapping is backed by the VMM pagefile.
+   */
+  if(args.length>=5){
+    hFile=Number(args[0]);
+    protect=jplopsoft_vmmProtectValue(args[2]||jplopsoft_PAGE_READWRITE);
+    high=Math.max(0,Number(args[3])||0);
+    low=Math.max(0,Number(args[4])||0);
+    size=Math.floor(high*4294967296+low);
+    name=String(args[5]||'');
+    opt.protect=protect;
+
+    if(hFile!==-1&&hFile!==4294967295){
+      handle=jplopsoft_xshHandle(ctx,hFile);
+      if(!handle||handle.kind!=='exfs-file'){
+        throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'CreateFileMapping requires an ExFS file handle or INVALID_HANDLE_VALUE.');
+      }
+      node=jplopsoft_findNode(parseInt(handle.nodeId,10)||0);
+      if(!node||node.type!=='file')throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Mapped file object no longer exists.');
+      if(size<=0)size=Math.max(1,parseInt(node.original_size,10)||0);
+      if(size>64*1024*1024){
+        throw jplopsoft_xshError(jplopsoft_STATUS_QUOTA_EXCEEDED,'File-backed mappings are limited to 64 MiB per SECTION image.');
+      }
+      bytes=await jplopsoft_xshReadNodeBytes(node);
+      opt.initialBytes=bytes;
+      opt.fileNodeId=parseInt(node.id,10)||0;
+      opt.filePath=String(handle.path||'');
+    }else if(size<=0){
+      throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Pagefile-backed CreateFileMapping requires a non-zero maximum size.');
+    }
+  }else{
+    /* Native ExOS SECTION helper shape: (name, size, options). */
+    name=String(args[0]||'');
+    size=Math.max(1,Number(args[1])||0);
+    opt=args[2]&&typeof args[2]==='object'?args[2]:{};
+  }
+
+  result=jplopsoft_ntSectionCreate(ctx.pid,name,size,opt);
+  jplopsoft_xshObjectStatus(result,'CreateFileMapping failed.');
+  return result.handle;
+}
+
+function jplopsoft_xshOpenFileMappingWin32(ctx,args){
+  var name=args&&args.length>=3?args[2]:args[0],r;
+  r=jplopsoft_ntSectionOpen(ctx.pid,String(name||''));
+  jplopsoft_xshObjectStatus(r,'OpenFileMapping failed.');
+  return r.handle;
+}
+
+function jplopsoft_xshMapViewOfFileWin32(ctx,args){
+  var handle=args[0],access=args[1],high,low,offset,length,opt={},r,a;
+  if(args.length>=5){
+    high=Math.max(0,Number(args[2])||0);
+    low=Math.max(0,Number(args[3])||0);
+    offset=Math.floor(high*4294967296+low);
+    length=Math.max(0,Math.floor(Number(args[4])||0));
+    a=Number(access)>>>0;
+    opt.protect=(a&0x0002)!==0||a===0x000F001F
+      ?jplopsoft_PAGE_READWRITE
+      :jplopsoft_PAGE_READONLY;
+  }else{
+    offset=Math.max(0,Math.floor(Number(args[1])||0));
+    length=Math.max(0,Math.floor(Number(args[2])||0));
+    opt=args[3]&&typeof args[3]==='object'?args[3]:{};
+  }
+  r=jplopsoft_ntSectionMap(ctx.pid,handle,offset,length,opt);
+  r=jplopsoft_xshObjectStatus(r,'MapViewOfFile failed.');
+  return r.baseAddress;
+}
+
+async function jplopsoft_xshFlushMappedView(ctx,mappingOrAddress,length){
+  var pair=jplopsoft_ntSectionView(ctx.pid,mappingOrAddress),obj,node,data,k,page;
+  if(!pair)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid mapped view.');
+  obj=pair.section;
+  if(!obj.fileBacked||!obj.fileNodeId)return true;
+  if(!obj.dirty)return true;
+  if(obj.size>64*1024*1024)throw jplopsoft_xshError(jplopsoft_STATUS_QUOTA_EXCEEDED,'FlushViewOfFile file mapping is limited to 64 MiB.');
+  node=jplopsoft_findNode(parseInt(obj.fileNodeId,10)||0);
+  if(!node||node.type!=='file')throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Mapped ExFS file no longer exists.');
+  data=new Uint8Array(obj.size);
+  if(obj.backingBytes)data.set(obj.backingBytes.subarray(0,Math.min(data.length,obj.backingBytes.length)));
+  for(k in obj.pages){
+    if(!obj.pages.hasOwnProperty(k))continue;
+    page=obj.pages[k];
+    if(!page)continue;
+    var bytes=jplopsoft_vmmPageIn(page,obj,parseInt(k,10)||0,false);
+    data.set(bytes.subarray(0,Math.min(bytes.length,data.length-(parseInt(k,10)||0)*jplopsoft_VMM_PAGE_SIZE)),(parseInt(k,10)||0)*jplopsoft_VMM_PAGE_SIZE);
+    page.dirty=false;
+    jplopsoft_vmmPagefileFreeSlot(page);
+  }
+  await jplopsoft_xshWriteNodeBytes(node,data);
+  obj.backingBytes=data.slice(0);
+  obj.dirty=false;
+  return true;
+}
+
 async function jplopsoft_xshDispatch(ctx,api,method,args){
   var r,h,attr,path,proc,child,code,drive,v,control;
   api=String(api||'');method=String(method||'');args=args||[];
@@ -23095,23 +24701,21 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
       return true;
     }
     if(method==='CreateFileMapping'){
-      r=jplopsoft_ntSectionCreate(ctx.pid,args[0],args[1],args[2]);
-      jplopsoft_xshObjectStatus(r,'CreateFileMapping failed.');
-      return r.handle;
+      return await jplopsoft_xshCreateFileMappingWin32(ctx,args);
     }
     if(method==='OpenFileMapping'){
-      r=jplopsoft_ntSectionOpen(ctx.pid,args[0]);
-      jplopsoft_xshObjectStatus(r,'OpenFileMapping failed.');
-      return r.handle;
+      return jplopsoft_xshOpenFileMappingWin32(ctx,args);
     }
     if(method==='MapViewOfFile'){
-      r=jplopsoft_ntSectionMap(ctx.pid,args[0],args[1],args[2]);
-      return jplopsoft_xshObjectStatus(r,'MapViewOfFile failed.');
+      return jplopsoft_xshMapViewOfFileWin32(ctx,args);
     }
     if(method==='UnmapViewOfFile'){
       r=jplopsoft_ntSectionUnmap(ctx.pid,args[0]);
       if(Number(r)!==Number(jplopsoft_STATUS_SUCCESS))throw jplopsoft_xshError(r,'UnmapViewOfFile failed.');
       return true;
+    }
+    if(method==='FlushViewOfFile'){
+      return await jplopsoft_xshFlushMappedView(ctx,args[0],args[1]);
     }
     if(method==='ReadMappedView'){
       r=jplopsoft_ntSectionRead(ctx.pid,args[0],args[1],args[2]);
@@ -23187,6 +24791,25 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     if(method==='ReadFileAsync')return jplopsoft_xshScheduleAsyncRead(ctx,args[0],args[1],args[2],args[3]);
     if(method==='WriteFileAsync')return jplopsoft_xshScheduleAsyncWrite(ctx,args[0],args[1],args[2],args[3]);
     if(method==='CancelIoEx')return jplopsoft_xshCancelIo(ctx,args[0]);
+    if(method==='VirtualAlloc')return jplopsoft_vmmVirtualAlloc(ctx.process,args[0],args[1],args[2],args[3]);
+    if(method==='VirtualFree')return jplopsoft_vmmVirtualFree(ctx.process,args[0],args[1],args[2]);
+    if(method==='VirtualProtect')return jplopsoft_vmmVirtualProtect(ctx.process,args[0],args[1],args[2]);
+    if(method==='VirtualQuery')return jplopsoft_vmmVirtualQuery(ctx.process,args[0]);
+    if(method==='ReadVirtualMemory'){
+      var selfRead=jplopsoft_vmmRead(ctx.process,args[0],Math.max(0,Math.min(64*1024*1024,Math.floor(Number(args[1])||0))),true);
+      return{address:Number(args[0])||0,bytesRead:selfRead.length,data:jplopsoft_xshBytesToArray(selfRead)};
+    }
+    if(method==='WriteVirtualMemory'){
+      var selfData=args[1] instanceof Uint8Array?args[1]:(args[1] instanceof ArrayBuffer?new Uint8Array(args[1]):(Array.isArray(args[1])?new Uint8Array(args[1]):jplopsoft_ntUtf8Bytes(args[1])));
+      return{address:Number(args[0])||0,bytesWritten:jplopsoft_vmmWrite(ctx.process,args[0],selfData,true)};
+    }
+    if(method==='GlobalMemoryStatusEx')return jplopsoft_vmmGlobalMemoryStatus(ctx.process);
+    if(method==='QueryVmmStatistics')return jplopsoft_vmmGlobalStatus(ctx.process);
+    if(method==='RegisterModule')return jplopsoft_vmmRegisterLoadedModule(ctx.process,args[0]);
+    if(method==='OpenProcess')return jplopsoft_xshOpenProcess(ctx,args[0],args[1],args[2]);
+    if(method==='ReadProcessMemory')return jplopsoft_xshReadProcessMemory(ctx,args[0],args[1],args[2]);
+    if(method==='WriteProcessMemory')return jplopsoft_xshWriteProcessMemory(ctx,args[0],args[1],args[2]);
+    if(method==='VirtualQueryEx')return jplopsoft_xshVirtualQueryEx(ctx,args[0],args[1]);
     if(method==='CreateProcess'){
       child=await jplopsoft_xshRunPath(ctx,String(args[0]||''),String(args[1]||''));return{pid:child.pid,processId:child.pid};
     }
@@ -23200,6 +24823,27 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     if(method==='NtClose')return jplopsoft_xshCloseHandle(ctx,args[0])?jplopsoft_STATUS_SUCCESS:jplopsoft_STATUS_INVALID_HANDLE;
     if(method==='NtQuerySystemInformation')return jplopsoft_NtQuerySystemInformation(String(args[0]||'SystemProcessInformation'));
     if(method==='NtDeviceIoControlFile')return await jplopsoft_xshDeviceIoControl(ctx,args[0],args[1],args[2]);
+    if(method==='NtAllocateVirtualMemory'){
+      try{return{status:jplopsoft_STATUS_SUCCESS,baseAddress:jplopsoft_vmmVirtualAlloc(ctx.process,args[0],args[1],args[2],args[3])};}
+      catch(e){return{status:e&&e.ntstatus?e.ntstatus:jplopsoft_STATUS_INVALID_PARAMETER,baseAddress:0,reason:String(e&&e.message||e)};}
+    }
+    if(method==='NtFreeVirtualMemory'){
+      try{return{status:jplopsoft_STATUS_SUCCESS,released:jplopsoft_vmmVirtualFree(ctx.process,args[0],args[1],args[2])};}
+      catch(e){return{status:e&&e.ntstatus?e.ntstatus:jplopsoft_STATUS_INVALID_PARAMETER,released:0,reason:String(e&&e.message||e)};}
+    }
+    if(method==='NtProtectVirtualMemory'){
+      try{return{status:jplopsoft_STATUS_SUCCESS,information:jplopsoft_vmmVirtualProtect(ctx.process,args[0],args[1],args[2])};}
+      catch(e){return{status:e&&e.ntstatus?e.ntstatus:jplopsoft_STATUS_INVALID_PARAMETER,reason:String(e&&e.message||e)};}
+    }
+    if(method==='NtQueryVirtualMemory')return{status:jplopsoft_STATUS_SUCCESS,information:jplopsoft_vmmVirtualQuery(ctx.process,args[0])};
+    if(method==='NtReadVirtualMemory'){
+      try{var nativeRead=jplopsoft_vmmRead(ctx.process,args[0],Math.max(0,Math.min(64*1024*1024,Math.floor(Number(args[1])||0))),true);return{status:jplopsoft_STATUS_SUCCESS,bytesRead:nativeRead.length,data:jplopsoft_xshBytesToArray(nativeRead)};}
+      catch(e){return{status:e&&e.ntstatus?e.ntstatus:jplopsoft_STATUS_PARTIAL_COPY,bytesRead:0,data:[],reason:String(e&&e.message||e)};}
+    }
+    if(method==='NtWriteVirtualMemory'){
+      try{var nativeData=args[1] instanceof Uint8Array?args[1]:(args[1] instanceof ArrayBuffer?new Uint8Array(args[1]):(Array.isArray(args[1])?new Uint8Array(args[1]):jplopsoft_ntUtf8Bytes(args[1])));return{status:jplopsoft_STATUS_SUCCESS,bytesWritten:jplopsoft_vmmWrite(ctx.process,args[0],nativeData,true)};}
+      catch(e){return{status:e&&e.ntstatus?e.ntstatus:jplopsoft_STATUS_PARTIAL_COPY,bytesWritten:0,reason:String(e&&e.message||e)};}
+    }
     if(method==='NtCreateSection')return jplopsoft_ntSectionCreate(ctx.pid,args[0],args[1],args[2]);
     if(method==='NtOpenSection')return jplopsoft_ntSectionOpen(ctx.pid,args[0]);
     if(method==='NtMapViewOfSection')return jplopsoft_ntSectionMap(ctx.pid,args[0],args[1],args[2]);
@@ -23395,6 +25039,15 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
       args[0]
     );
   }
+
+  if(api==='system'&&method==='QueryLocalAccounts')return await jplopsoft_xshSystemQueryLocalAccounts(ctx);
+  if(api==='system'&&method==='CreateLocalAccount')return await jplopsoft_xshSystemCreateLocalAccount(ctx,args[0]);
+  if(api==='system'&&method==='ResetLocalAccountPassword')return await jplopsoft_xshSystemResetLocalAccountPassword(ctx,args[0],args[1]);
+  if(api==='system'&&method==='SetLocalAccountEnabled')return await jplopsoft_xshSystemSetLocalAccountEnabled(ctx,args[0],args[1]);
+  if(api==='system'&&method==='SetLocalAccountType')return await jplopsoft_xshSystemSetLocalAccountType(ctx,args[0],args[1]);
+  if(api==='system'&&method==='DeleteLocalAccount')return await jplopsoft_xshSystemDeleteLocalAccount(ctx,args[0]);
+  if(api==='system'&&method==='QueryEvents')return await jplopsoft_xshSystemQueryEvents(ctx,args[0]);
+  if(api==='system'&&method==='QueryEventLogInfo')return await jplopsoft_xshSystemQueryEventLogInfo(ctx);
 
   if(api==='system'&&method==='QuerySystemConfig'){
     return await jplopsoft_xshApiPromise(
@@ -23675,6 +25328,10 @@ async function jplopsoft_runBuiltinXsh(appId,args,parentCtx){
     eventQueue:[],
     messageDrainScheduled:false,
     explicitMessageLoop:false,
+    suspended:false,
+    suspendReason:'',
+    suspendedRpcQueue:[],
+    suspendedRafIds:[],
     animationFrames:{},
     irpTrace:[],
     port:null,
@@ -23684,7 +25341,7 @@ async function jplopsoft_runBuiltinXsh(appId,args,parentCtx){
     showHost:false,
     autoExitOnLastWindow:
       image.subsystem===jplopsoft_IMAGE_SUBSYSTEM_WINDOWS_GUI,
-    icon:String(app.icon||'xsh'),
+    icon:String(app.icon||image.icon||'xsh'),
     builtinAppId:String(appId),
     consoleId:0
   };
@@ -23854,6 +25511,10 @@ async function jplopsoft_runXshNode(id,argLine,parentProcess){
     eventQueue:[],
     messageDrainScheduled:false,
     explicitMessageLoop:false,
+    suspended:false,
+    suspendReason:'',
+    suspendedRpcQueue:[],
+    suspendedRafIds:[],
     animationFrames:{},
     irpTrace:[],
     port:null,
@@ -23863,7 +25524,7 @@ async function jplopsoft_runXshNode(id,argLine,parentProcess){
     showHost:false,
     autoExitOnLastWindow:
       image.subsystem===jplopsoft_IMAGE_SUBSYSTEM_WINDOWS_GUI,
-    icon:'xsh',
+    icon:String(image.icon||'xsh'),
     builtinAppId:'',
     consoleId:0
   };
@@ -23888,6 +25549,7 @@ async function jplopsoft_runXshNode(id,argLine,parentProcess){
 function jplopsoft_xshRequestAnimationFrame(ctx,id){
   id=parseInt(id,10)||0;
   if(!ctx||ctx.terminating||!ctx.port||!id)return false;
+  if(ctx.suspended){if(!ctx.suspendedRafIds)ctx.suspendedRafIds=[];if(ctx.suspendedRafIds.indexOf(id)<0)ctx.suspendedRafIds.push(id);return true;}
   if(!ctx.animationFrames)ctx.animationFrames={};
   if(ctx.animationFrames[String(id)])return true;
   ctx.animationFrames[String(id)]=window.requestAnimationFrame(function(ts){
@@ -23997,6 +25659,7 @@ function jplopsoft_xshOnSandboxMessage(ctx,m){
     return;
   }
   if(m.type==='rpc'){
+    if(ctx.suspended){if(!ctx.suspendedRpcQueue)ctx.suspendedRpcQueue=[];if(ctx.suspendedRpcQueue.length<2048)ctx.suspendedRpcQueue.push(m);return;}
     Promise.resolve().then(function(){return jplopsoft_xshDispatch(ctx,m.api,m.method,m.args);}).then(function(result){
       if(!ctx.port)return;
       try{ctx.port.postMessage({type:'rpc-result',id:m.id,ok:true,result:result});}
@@ -24099,8 +25762,15 @@ async function jplopsoft_xshTerminate(ctx,exitCode,reason,skipKernel){
     try{jplopsoft_mediaCleanup(ctx);}catch(ignoreMediaCleanup){}
   }
   for(k in ctx.handles)if(ctx.handles.hasOwnProperty(k))delete ctx.handles[k];
+  for(k in jplopsoft_NT_KERNEL.processHandles){
+    if(jplopsoft_NT_KERNEL.processHandles.hasOwnProperty(k)&&parseInt(jplopsoft_NT_KERNEL.processHandles[k].ownerPid,10)===parseInt(ctx.pid,10))delete jplopsoft_NT_KERNEL.processHandles[k];
+  }
   jplopsoft_ntReleaseProcessSections(ctx.pid);
   jplopsoft_ntCloseAllObjectHandlesForPid(ctx.pid);
+  p=jplopsoft_ntKernelProcessByPid(ctx.pid);
+  if(p&&typeof jplopsoft_vmmReleaseProcess==='function'){
+    jplopsoft_vmmReleaseProcess(p);
+  }
   for(k in ctx.controls){
     if(ctx.controls.hasOwnProperty(k)&&ctx.controls[k]&&ctx.controls[k]._exosTopologyState){
       try{jplopsoft_xshTopologyDispose(ctx.controls[k]);}catch(ignoreTopologyDispose){}
@@ -24170,6 +25840,138 @@ function jplopsoft_xshMinimizeAllWindows(){
       }
     }
   }
+}
+
+function jplopsoft_xshSuspendAll(reason){
+  var k,ctx,p;
+  reason=String(reason||'SecureDesktop');
+  for(k in jplopsoft_XSH.runs){
+    if(!jplopsoft_XSH.runs.hasOwnProperty(k))continue;
+    ctx=jplopsoft_XSH.runs[k];
+    if(!ctx||ctx.terminating||ctx.suspended)continue;
+    ctx.suspended=true;
+    ctx.suspendReason=reason;
+    if(!ctx.suspendedRpcQueue)ctx.suspendedRpcQueue=[];
+    if(!ctx.suspendedRafIds)ctx.suspendedRafIds=[];
+    jplopsoft_xshCancelAllAnimationFrames(ctx);
+    p=jplopsoft_ntKernelProcessByPid(ctx.pid);
+    if(p){p.suspended=true;p.suspendReason=reason;}
+    try{if(ctx.port)ctx.port.postMessage({type:'suspend',reason:reason});}catch(ignoreXshSuspendPost){}
+  }
+  jplopsoft_NT_SCHEDULER.foregroundPid=0;
+  jplopsoft_NT_SCHEDULER.foregroundHwnd=0;
+  return true;
+}
+
+function jplopsoft_xshResumeAll(reason){
+  var k,ctx,p,rpcQueue,rafIds,i;
+  reason=String(reason||'SecureDesktopResume');
+  for(k in jplopsoft_XSH.runs){
+    if(!jplopsoft_XSH.runs.hasOwnProperty(k))continue;
+    ctx=jplopsoft_XSH.runs[k];
+    if(!ctx||ctx.terminating||!ctx.suspended)continue;
+    ctx.suspended=false;
+    ctx.suspendReason='';
+    p=jplopsoft_ntKernelProcessByPid(ctx.pid);
+    if(p){p.suspended=false;p.suspendReason='';}
+    try{if(ctx.port)ctx.port.postMessage({type:'resume',reason:reason});}catch(ignoreXshResumePost){}
+    rpcQueue=(ctx.suspendedRpcQueue||[]).splice(0);
+    rafIds=(ctx.suspendedRafIds||[]).splice(0);
+    jplopsoft_xshQueueWakeWaiter(ctx);
+    jplopsoft_xshScheduleMessageDrain(ctx);
+    for(i=0;i<rafIds.length;i++)jplopsoft_xshRequestAnimationFrame(ctx,rafIds[i]);
+    if(rpcQueue.length)(function(c,q){window.setTimeout(function(){var j;for(j=0;j<q.length;j++)jplopsoft_xshOnSandboxMessage(c,q[j]);},0);})(ctx,rpcQueue);
+  }
+  return true;
+}
+
+var jplopsoft_SECURE_SAS={active:false,locked:false,reason:'',enteredAt:0,bound:false,leaving:false};
+
+function jplopsoft_secureDesktopEnter(reason){
+  var back=jplopsoft_el('jplopsoft_securityBackdrop'),active=document.activeElement;
+  if(!state||!state.samAuthenticated||!state.vaultKey)return false;
+  reason=String(reason||'SAS');
+  if(!jplopsoft_SECURE_SAS.active){
+    jplopsoft_SECURE_SAS.active=true;
+    jplopsoft_SECURE_SAS.reason=reason;
+    jplopsoft_SECURE_SAS.enteredAt=(new Date()).getTime();
+    jplopsoft_xshSuspendAll('SecureDesktop:'+reason);
+  }
+  try{if(active&&active.blur)active.blur();}catch(ignoreSecureBlur){}
+  try{jplopsoft_closeStartMenu();}catch(ignoreSecureStart){}
+  try{jplopsoft_calendarHide();}catch(ignoreSecureCalendar){}
+  try{jplopsoft_hideExfsContextMenu();}catch(ignoreSecureMenu){}
+  if(jplopsoft_el('jplopsoft_securityUserName'))jplopsoft_el('jplopsoft_securityUserName').textContent=state.samUsername||'administrator';
+  if(jplopsoft_el('jplopsoft_securityUserSid'))jplopsoft_el('jplopsoft_securityUserSid').textContent=state.samSid||'';
+  state.securityScreenOpen=true;
+  state.securitySessionLocked=!!jplopsoft_SECURE_SAS.locked;
+  if(typeof jplopsoft_securitySetMode==='function')jplopsoft_securitySetMode(!!jplopsoft_SECURE_SAS.locked);
+  if(back){back.style.setProperty('display','flex','important');back.style.setProperty('z-index','2147483647','important');back.setAttribute('data-secure-desktop','1');}
+  return true;
+}
+
+function jplopsoft_secureDesktopLeave(reason){
+  var back=jplopsoft_el('jplopsoft_securityBackdrop');
+  if(!jplopsoft_SECURE_SAS.active)return true;
+  if(jplopsoft_SECURE_SAS.locked||state.securitySessionLocked)return false;
+  jplopsoft_SECURE_SAS.leaving=true;
+  if(back){back.style.setProperty('display','none','important');back.removeAttribute('data-secure-desktop');}
+  state.securityScreenOpen=false;
+  jplopsoft_SECURE_SAS.active=false;
+  jplopsoft_SECURE_SAS.reason='';
+  jplopsoft_xshResumeAll(String(reason||'SecureDesktopLeave'));
+  jplopsoft_SECURE_SAS.leaving=false;
+  return true;
+}
+
+function jplopsoft_secureDesktopLockSession(){
+  if(!jplopsoft_SECURE_SAS.active)jplopsoft_secureDesktopEnter('Lock');
+  jplopsoft_SECURE_SAS.locked=true;
+  state.securitySessionLocked=true;
+  if(typeof jplopsoft_securitySetMode==='function')jplopsoft_securitySetMode(true);
+  return true;
+}
+
+function jplopsoft_secureDesktopUnlockSuccess(){
+  jplopsoft_SECURE_SAS.locked=false;
+  state.securitySessionLocked=false;
+  if(typeof jplopsoft_securitySetMode==='function')jplopsoft_securitySetMode(false);
+  return jplopsoft_secureDesktopLeave('UnlockVerified');
+}
+
+function jplopsoft_secureDesktopLogout(){
+  var back=jplopsoft_el('jplopsoft_securityBackdrop');
+  jplopsoft_SECURE_SAS.locked=true;
+  state.securitySessionLocked=true;
+  if(back){back.style.setProperty('display','none','important');back.removeAttribute('data-secure-desktop');}
+  state.securityScreenOpen=false;
+  jplopsoft_SECURE_SAS.active=false;
+  jplopsoft_SECURE_SAS.reason='Logout';
+  /* Do not resume user-mode XSH here.  jplopsoft_lock(true) tears down the
+   * interactive desktop/processes; resuming them during the transition would
+   * briefly re-enable untrusted code beneath Winlogon. */
+  return jplopsoft_lock(true);
+}
+
+function jplopsoft_secureDesktopBindSas(){
+  if(jplopsoft_SECURE_SAS.bound||!document.addEventListener)return;
+  jplopsoft_SECURE_SAS.bound=true;
+  document.addEventListener('keydown',function(e){
+    e=e||window.event;
+    var key=String(e.key||'').toLowerCase(),code=e.keyCode||e.which;
+    if(e.ctrlKey&&e.altKey&&(key==='s'||code===83)){
+      if(e.preventDefault)e.preventDefault();
+      if(e.stopImmediatePropagation)e.stopImmediatePropagation();else if(e.stopPropagation)e.stopPropagation();
+      e.cancelBubble=true;
+      if(state&&state.samAuthenticated&&state.vaultKey)jplopsoft_secureDesktopEnter('Ctrl+Alt+S');
+      return false;
+    }
+    if(jplopsoft_SECURE_SAS.active){
+      /* Security Desktop owns keyboard focus while active. */
+      if(code===27&&!jplopsoft_SECURE_SAS.locked){if(e.preventDefault)e.preventDefault();jplopsoft_secureDesktopLeave('Escape');return false;}
+    }
+    return true;
+  },true);
 }
 
 function jplopsoft_xshTerminateAll(reason){
@@ -26042,10 +27844,10 @@ function jplopsoft_openVolume3D(){
 }
 function jplopsoft_closeVolume3D(){jplopsoft_xshTerminateBuiltin('volume3d');return true;}
 
-function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_submitCredentialUI;jplopsoft_el('jplopsoft_loginUserInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy){try{jplopsoft_el('jplopsoft_keyInput').focus();}catch(ignoreUserEnter){}}};jplopsoft_el('jplopsoft_loginUserInput').onchange=function(){if(state.kdfBusy)return;jplopsoft_selectLogonAccount(String(this.value||state.defaultUsername||'administrator').toLowerCase(),true);};jplopsoft_el('jplopsoft_keyInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy)jplopsoft_submitCredentialUI();};jplopsoft_bindSecureDesktopUI();if(jplopsoft_el('jplopsoft_rememberUnlock'))jplopsoft_el('jplopsoft_rememberUnlock').onchange=jplopsoft_onRememberUnlockChanged;if(jplopsoft_el('jplopsoft_largeTransferCancelBtn'))jplopsoft_el('jplopsoft_largeTransferCancelBtn').onclick=jplopsoft_cancelLargeTransfer;if(jplopsoft_el('jplopsoft_largeTransferMinBtn'))jplopsoft_el('jplopsoft_largeTransferMinBtn').onclick=jplopsoft_toggleLargeTransferMinimized;jplopsoft_el('jplopsoft_newFolderBtn').onclick=function(){jplopsoft_createItem('folder');};jplopsoft_el('jplopsoft_newHtmlBtn').onclick=function(){jplopsoft_createItem('file','html');};jplopsoft_el('jplopsoft_newTxtBtn').onclick=function(){jplopsoft_createItem('file','txt');};jplopsoft_el('jplopsoft_newCsvBtn').onclick=function(){jplopsoft_createItem('file','csv');};jplopsoft_el('jplopsoft_newXshBtn').onclick=function(){jplopsoft_createItem('file','xsh');};jplopsoft_el('jplopsoft_downloadBtn').onclick=jplopsoft_downloadSelected;jplopsoft_el('jplopsoft_renameBtn').onclick=jplopsoft_renameSelected;jplopsoft_el('jplopsoft_moveBtn').onclick=jplopsoft_openMoveDialog;jplopsoft_el('jplopsoft_deleteBtn').onclick=function(){if(jplopsoft_isDesktopFolder()){if(state.desktopSelectedTargetId)jplopsoft_deleteDesktopShortcut(state.desktopSelectedTargetId);return;}jplopsoft_deleteSelected();};if(jplopsoft_threeFeatureAllowed()){if(jplopsoft_el('jplopsoft_volume3dBtn'))jplopsoft_el('jplopsoft_volume3dBtn').onclick=jplopsoft_openVolume3D;if(jplopsoft_el('jplopsoft_volume3dPhysicalBtn'))jplopsoft_el('jplopsoft_volume3dPhysicalBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('physical');};if(jplopsoft_el('jplopsoft_volume3dSandboxBtn'))jplopsoft_el('jplopsoft_volume3dSandboxBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('sandbox');};if(jplopsoft_el('jplopsoft_volume3dCloseBtn'))jplopsoft_el('jplopsoft_volume3dCloseBtn').onclick=jplopsoft_closeVolume3D;if(jplopsoft_el('jplopsoft_volume3dFullscreenBtn'))jplopsoft_el('jplopsoft_volume3dFullscreenBtn').onclick=jplopsoft_threeVolumeToggleFullscreen;if(jplopsoft_el('jplopsoft_volume3dResetBtn'))jplopsoft_el('jplopsoft_volume3dResetBtn').onclick=jplopsoft_threeVolumeResetView;if(jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_el('jplopsoft_volume3dBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_closeVolume3D();else jplopsoft_wmActivateOverlay('jplopsoft_volume3dBackdrop','jplopsoft_volume3dWindow','volume3d');};}jplopsoft_el('jplopsoft_modalClose').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalCloseTop').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalVersionsBtn').onclick=jplopsoft_openVersions;jplopsoft_el('jplopsoft_versionCloseTop').onclick=jplopsoft_closeVersions;jplopsoft_el('jplopsoft_versionBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_versionBackdrop'))jplopsoft_closeVersions();};jplopsoft_el('jplopsoft_moveCloseTop').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveCancelBtn').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveConfirmBtn').onclick=jplopsoft_confirmMove;jplopsoft_el('jplopsoft_moveBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_moveBackdrop'))jplopsoft_closeMoveDialog();};jplopsoft_el('jplopsoft_trashCloseTop').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashCloseBtn').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashEmptyBtn').onclick=jplopsoft_emptyTrash;jplopsoft_el('jplopsoft_trashBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_trashBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');};jplopsoft_el('jplopsoft_modalDownloadBtn').onclick=jplopsoft_downloadCurrentDocument;jplopsoft_el('jplopsoft_modalPrintBtn').onclick=jplopsoft_printCurrentDocument;jplopsoft_el('jplopsoft_modalMaxBtn').onclick=jplopsoft_toggleMax;jplopsoft_el('jplopsoft_saveDocBtn').onclick=jplopsoft_saveDocument;jplopsoft_el('jplopsoft_csvAddRowBtn').onclick=jplopsoft_csvAddRow;jplopsoft_el('jplopsoft_csvAddColBtn').onclick=jplopsoft_csvAddColumn;jplopsoft_el('jplopsoft_csvDelRowBtn').onclick=jplopsoft_csvDeleteRow;jplopsoft_el('jplopsoft_csvDelColBtn').onclick=jplopsoft_csvDeleteColumn;jplopsoft_el('jplopsoft_csvFormulaInput').oninput=function(){if(state.csvReadOnly)return;var r=state.csvSelectedRow,c=state.csvSelectedCol,input;if(!state.csvData[r])return;state.csvData[r][c]=this.value;input=jplopsoft_csvSelectedCellInput();if(input)input.value=this.value;};jplopsoft_el('jplopsoft_tabEdit').onclick=jplopsoft_showSourceTab;jplopsoft_el('jplopsoft_tabRich').onclick=jplopsoft_showRichTab;jplopsoft_el('jplopsoft_tabPreview').onclick=function(){jplopsoft_showPreview();};jplopsoft_el('jplopsoft_modalBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_modalBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_modalBackdrop','jplopsoft_documentWindow','document');};if(jplopsoft_el('jplopsoft_galleryPrevImage'))jplopsoft_el('jplopsoft_galleryPrevImage').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextImage'))jplopsoft_el('jplopsoft_galleryNextImage').onclick=function(){jplopsoft_galleryNavigate(1);};if(jplopsoft_el('jplopsoft_galleryPrevMedia'))jplopsoft_el('jplopsoft_galleryPrevMedia').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextMedia'))jplopsoft_el('jplopsoft_galleryNextMedia').onclick=function(){jplopsoft_galleryNavigate(1);};jplopsoft_bindSecurityUI();jplopsoft_bindExconfig();jplopsoft_bindProperties();jplopsoft_bindTaskbar();jplopsoft_bindWindowManager();jplopsoft_bindRich();jplopsoft_bindSortHeaders();jplopsoft_bindBulkSelection();jplopsoft_bindFileDrop();jplopsoft_bindFileSearch();jplopsoft_bindExfsContextMenu();jplopsoft_bindCmdMode();jplopsoft_bindGlobalHotkeys();jplopsoft_bindSidebarResizer();if(jplopsoft_isIE11Browser()&&window.addEventListener)window.addEventListener('resize',jplopsoft_ie11FitDocumentModal,false);}
+function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_submitCredentialUI;jplopsoft_el('jplopsoft_loginUserInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy){try{jplopsoft_el('jplopsoft_keyInput').focus();}catch(ignoreUserEnter){}}};jplopsoft_el('jplopsoft_loginUserInput').onchange=function(){if(state.kdfBusy)return;jplopsoft_selectLogonAccount(String(this.value||state.defaultUsername||'administrator').toLowerCase(),true);};jplopsoft_el('jplopsoft_keyInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy)jplopsoft_submitCredentialUI();};jplopsoft_bindSecureDesktopUI();jplopsoft_secureDesktopBindSas();if(jplopsoft_el('jplopsoft_rememberUnlock'))jplopsoft_el('jplopsoft_rememberUnlock').onchange=jplopsoft_onRememberUnlockChanged;if(jplopsoft_el('jplopsoft_largeTransferCancelBtn'))jplopsoft_el('jplopsoft_largeTransferCancelBtn').onclick=jplopsoft_cancelLargeTransfer;if(jplopsoft_el('jplopsoft_largeTransferMinBtn'))jplopsoft_el('jplopsoft_largeTransferMinBtn').onclick=jplopsoft_toggleLargeTransferMinimized;jplopsoft_el('jplopsoft_newFolderBtn').onclick=function(){jplopsoft_createItem('folder');};jplopsoft_el('jplopsoft_newHtmlBtn').onclick=function(){jplopsoft_createItem('file','html');};jplopsoft_el('jplopsoft_newTxtBtn').onclick=function(){jplopsoft_createItem('file','txt');};jplopsoft_el('jplopsoft_newCsvBtn').onclick=function(){jplopsoft_createItem('file','csv');};jplopsoft_el('jplopsoft_newXshBtn').onclick=function(){jplopsoft_createItem('file','xsh');};jplopsoft_el('jplopsoft_downloadBtn').onclick=jplopsoft_downloadSelected;jplopsoft_el('jplopsoft_renameBtn').onclick=jplopsoft_renameSelected;jplopsoft_el('jplopsoft_moveBtn').onclick=jplopsoft_openMoveDialog;jplopsoft_el('jplopsoft_deleteBtn').onclick=function(){if(jplopsoft_isDesktopFolder()){if(state.desktopSelectedTargetId)jplopsoft_deleteDesktopShortcut(state.desktopSelectedTargetId);return;}jplopsoft_deleteSelected();};if(jplopsoft_threeFeatureAllowed()){if(jplopsoft_el('jplopsoft_volume3dBtn'))jplopsoft_el('jplopsoft_volume3dBtn').onclick=jplopsoft_openVolume3D;if(jplopsoft_el('jplopsoft_volume3dPhysicalBtn'))jplopsoft_el('jplopsoft_volume3dPhysicalBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('physical');};if(jplopsoft_el('jplopsoft_volume3dSandboxBtn'))jplopsoft_el('jplopsoft_volume3dSandboxBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('sandbox');};if(jplopsoft_el('jplopsoft_volume3dCloseBtn'))jplopsoft_el('jplopsoft_volume3dCloseBtn').onclick=jplopsoft_closeVolume3D;if(jplopsoft_el('jplopsoft_volume3dFullscreenBtn'))jplopsoft_el('jplopsoft_volume3dFullscreenBtn').onclick=jplopsoft_threeVolumeToggleFullscreen;if(jplopsoft_el('jplopsoft_volume3dResetBtn'))jplopsoft_el('jplopsoft_volume3dResetBtn').onclick=jplopsoft_threeVolumeResetView;if(jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_el('jplopsoft_volume3dBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_closeVolume3D();else jplopsoft_wmActivateOverlay('jplopsoft_volume3dBackdrop','jplopsoft_volume3dWindow','volume3d');};}jplopsoft_el('jplopsoft_modalClose').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalCloseTop').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalVersionsBtn').onclick=jplopsoft_openVersions;jplopsoft_el('jplopsoft_versionCloseTop').onclick=jplopsoft_closeVersions;jplopsoft_el('jplopsoft_versionBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_versionBackdrop'))jplopsoft_closeVersions();};jplopsoft_el('jplopsoft_moveCloseTop').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveCancelBtn').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveConfirmBtn').onclick=jplopsoft_confirmMove;jplopsoft_el('jplopsoft_moveBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_moveBackdrop'))jplopsoft_closeMoveDialog();};jplopsoft_el('jplopsoft_trashCloseTop').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashCloseBtn').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashEmptyBtn').onclick=jplopsoft_emptyTrash;jplopsoft_el('jplopsoft_trashBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_trashBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');};jplopsoft_el('jplopsoft_modalDownloadBtn').onclick=jplopsoft_downloadCurrentDocument;jplopsoft_el('jplopsoft_modalPrintBtn').onclick=jplopsoft_printCurrentDocument;jplopsoft_el('jplopsoft_modalMaxBtn').onclick=jplopsoft_toggleMax;jplopsoft_el('jplopsoft_saveDocBtn').onclick=jplopsoft_saveDocument;jplopsoft_el('jplopsoft_csvAddRowBtn').onclick=jplopsoft_csvAddRow;jplopsoft_el('jplopsoft_csvAddColBtn').onclick=jplopsoft_csvAddColumn;jplopsoft_el('jplopsoft_csvDelRowBtn').onclick=jplopsoft_csvDeleteRow;jplopsoft_el('jplopsoft_csvDelColBtn').onclick=jplopsoft_csvDeleteColumn;jplopsoft_el('jplopsoft_csvFormulaInput').oninput=function(){if(state.csvReadOnly)return;var r=state.csvSelectedRow,c=state.csvSelectedCol,input;if(!state.csvData[r])return;state.csvData[r][c]=this.value;input=jplopsoft_csvSelectedCellInput();if(input)input.value=this.value;};jplopsoft_el('jplopsoft_tabEdit').onclick=jplopsoft_showSourceTab;jplopsoft_el('jplopsoft_tabRich').onclick=jplopsoft_showRichTab;jplopsoft_el('jplopsoft_tabPreview').onclick=function(){jplopsoft_showPreview();};jplopsoft_el('jplopsoft_modalBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_modalBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_modalBackdrop','jplopsoft_documentWindow','document');};if(jplopsoft_el('jplopsoft_galleryPrevImage'))jplopsoft_el('jplopsoft_galleryPrevImage').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextImage'))jplopsoft_el('jplopsoft_galleryNextImage').onclick=function(){jplopsoft_galleryNavigate(1);};if(jplopsoft_el('jplopsoft_galleryPrevMedia'))jplopsoft_el('jplopsoft_galleryPrevMedia').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextMedia'))jplopsoft_el('jplopsoft_galleryNextMedia').onclick=function(){jplopsoft_galleryNavigate(1);};jplopsoft_bindSecurityUI();jplopsoft_bindExconfig();jplopsoft_bindProperties();jplopsoft_bindTaskbar();jplopsoft_bindWindowManager();jplopsoft_bindRich();jplopsoft_bindSortHeaders();jplopsoft_bindBulkSelection();jplopsoft_bindFileDrop();jplopsoft_bindFileSearch();jplopsoft_bindExfsContextMenu();jplopsoft_bindCmdMode();jplopsoft_bindGlobalHotkeys();jplopsoft_bindSidebarResizer();if(jplopsoft_isIE11Browser()&&window.addEventListener)window.addEventListener('resize',jplopsoft_ie11FitDocumentModal,false);}
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os60',
+  version:'6.4.0-dev-os64',
   build:'external-os-comctl32-split-core-controls'
 };

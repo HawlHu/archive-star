@@ -1,5 +1,5 @@
 /* ExOS shell32.dll emulation
- * Version: 6.4.0-dev-os60
+ * Version: 6.4.0-dev-os64
  * Model: EXOS_SHELL32_V1
  *
  * Browser/XSH shell API.  The implementation is intentionally restricted to
@@ -9,7 +9,7 @@
 'use strict';
 
 var SHELL={
-  version:'6.4.0-dev-os60',
+  version:'6.4.0-dev-os64',
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -230,6 +230,18 @@ function shellInfo(ctx,path){
   };
 }
 
+async function shellInfoWithImage(ctx,path){
+  var info=shellInfo(ctx,path),text,image;
+  if(info.directory)return info;
+  if(info.extension!=='xsh')return info;
+  try{
+    text=await jplopsoft_xshReadTextFile(ctx,info.path);
+    image=jplopsoft_xshParseImage(String(text||''),info.path);
+    if(image&&image.icon)info.icon=String(image.icon);
+  }catch(ignoreXshIcon){}
+  return info;
+}
+
 function shellEnsureStyle(){
   var style;
 
@@ -363,14 +375,18 @@ function shellContextMenu(ctx,paths,options){
 
   items.push(shellSeparator());
 
-  items.push(
-    shellMenuItem(
-      'rename',
-      '重新命名',
-      infos.length===1,
-      {icon:'rename'}
-    )
-  );
+  if(infos.length===1&&/^C:\\$/i.test(infos[0].path)){
+    items.push(shellMenuItem('renamevolume','重新命名磁碟',true,{icon:'rename'}));
+  }else{
+    items.push(
+      shellMenuItem(
+        'rename',
+        '重新命名',
+        infos.length===1,
+        {icon:'rename'}
+      )
+    );
+  }
 
   items.push(
     shellMenuItem(
@@ -1055,6 +1071,15 @@ async function shellInvokeCommand(ctx,verb,paths,options){
     );
   }
 
+  if(action==='renamevolume'){
+    var label=String(opt.label===undefined?opt.newLabel:opt.label);
+    var changed=await jplopsoft_xshApiPromise('volume_set_label','POST',{label:label});
+    if(typeof jplopsoft_XSH!=='undefined'&&jplopsoft_XSH.systemVdo){
+      jplopsoft_XSH.systemVdo.label=String(changed&&changed.label!==undefined?changed.label:label);
+    }
+    return{ok:true,verb:'renamevolume',label:String(changed&&changed.label!==undefined?changed.label:label)};
+  }
+
   if(action==='rename'){
     return await shellFileOperation(
       ctx,
@@ -1369,7 +1394,7 @@ async function shellDispatch(ctx,method,args){
   }
 
   if(method==='SHGetFileInfo'){
-    return shellInfo(
+    return await shellInfoWithImage(
       ctx,
       args[0]
     );

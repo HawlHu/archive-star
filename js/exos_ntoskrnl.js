@@ -1,5 +1,5 @@
 /* ExOS NT Kernel BugCheck Runtime
- * Version: 6.4.0-dev-os60
+ * Version: 6.4.0-dev-os64
  * Model: EXOS_NTOSKRNL_BUGCHECK_V1
  * Client: V8-only browsers
  *
@@ -11,9 +11,17 @@
 'use strict';
 
 var KERNEL={
-  version:'6.4.0-dev-os60',
+  version:'6.4.0-dev-os64',
   model:'EXOS_NTOSKRNL_BUGCHECK_V1',
   ready:true,
+  vmm:{
+    model:'EXOS_VMM_V1',
+    addressBits:47,
+    virtualAddressBytes:Math.pow(2,47),
+    pageSize:4096,
+    allocationGranularity:65536,
+    pagefilePath:'C:\\pagefile.sys'
+  },
   bugcheck:{
     active:false,
     code:0,
@@ -153,9 +161,32 @@ function queryBugCheck(){
   };
 }
 
+
+function queryVmm(pid){
+  var p=null;
+  try{
+    if(pid&&typeof global.jplopsoft_ntKernelProcessByPid==='function'){
+      p=global.jplopsoft_ntKernelProcessByPid(parseInt(pid,10)||0);
+    }
+    if(typeof global.jplopsoft_vmmGlobalStatus==='function'){
+      return global.jplopsoft_vmmGlobalStatus(p);
+    }
+  }catch(ignoreVmmQuery){}
+  return{
+    model:KERNEL.vmm.model,
+    available:false,
+    addressBits:KERNEL.vmm.addressBits,
+    virtualAddressBytes:KERNEL.vmm.virtualAddressBytes,
+    pageSize:KERNEL.vmm.pageSize,
+    allocationGranularity:KERNEL.vmm.allocationGranularity,
+    pagefilePath:KERNEL.vmm.pagefilePath
+  };
+}
+
 global.jplopsoft_NTOSKRNL=KERNEL;
 global.jplopsoft_KeBugCheck=bugCheck;
 global.jplopsoft_KeBugCheckEx=bugCheckEx;
 global.jplopsoft_QueryBugCheck=queryBugCheck;
+global.jplopsoft_QueryVmm=queryVmm;
 
 })(window);

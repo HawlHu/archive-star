@@ -1,12 +1,12 @@
 /* ExOS shared resource image library
  * File: exos_share_res.js
- * Version: 6.4.0-dev-os60
+ * Version: 6.4.0-dev-os64
  * Model: EXOS_SHARED_RES_V1
  * V8-only client. Shared Base64 image resources for virtual NT-style resource DLLs.
  */
 (function(global){
 'use strict';
-var VERSION='6.4.0-dev-os60';
+var VERSION='6.4.0-dev-os64';
 var MODEL='EXOS_SHARED_RES_V1';
 var LIBRARIES={};
 LIBRARIES["shell32.dll"]={};
@@ -113,7 +113,8 @@ function lookup(dll,name){var lib=library(dll),n=normName(name),k,r;if(!lib)retu
 function token(dll,name){var d=normDll(dll),r=lookup(d,name);return r?'res://'+d+'/'+encodeURIComponent(r.name):'';}
 function parse(value,defaultDll){var s,d,n,m;if(value&&typeof value==='object'){d=normDll(value.dll||value.library||defaultDll||'shell32.dll');n=value.name!==undefined?value.name:value.resource;return lookup(d,n)?{dll:d,name:lookup(d,n).name}:null;}s=String(value||'');m=/^(?:res|hicon):\/\/([^\/]+)\/(.+)$/i.exec(s);if(m){d=normDll(decodeURIComponent(m[1]));n=decodeURIComponent(m[2]);return lookup(d,n)?{dll:d,name:lookup(d,n).name}:null;}d=normDll(defaultDll||'shell32.dll');return lookup(d,s)?{dll:d,name:lookup(d,s).name}:null;}
 function get(dll,name){var d=normDll(dll),r=lookup(d,name);if(!r)return null;return{dll:d,id:r.id,name:r.name,uri:r.uri,mime:r.mime,width:r.width,height:r.height,token:'res://'+d+'/'+encodeURIComponent(r.name)};}
-function resolve(value,defaultDll){var p=parse(value,defaultDll),r;return p?(r=get(p.dll,p.name),r):null;}
+function embeddedDataIcon(value){var s=String(value||'');if(s.length>262144)return null;if(!/^data:image\/(?:png|jpeg|jpg|gif|webp);base64,[a-z0-9+\/=]+$/i.test(s))return null;return{dll:'embedded.xsh',id:0,name:'embedded',uri:s,mime:(/^data:([^;]+)/i.exec(s)||[])[1]||'image/png',width:32,height:32,token:s,embedded:true};}
+function resolve(value,defaultDll){var direct=embeddedDataIcon(value),p,r;if(direct)return direct;p=parse(value,defaultDll);return p?(r=get(p.dll,p.name),r):null;}
 function enumerate(dll){var d=normDll(dll),lib=library(d),out=[],k,r;if(!lib)return out;for(k in lib){if(lib.hasOwnProperty(k)){r=lib[k];out.push({dll:d,id:r.id,name:r.name,width:r.width,height:r.height,token:'res://'+d+'/'+encodeURIComponent(r.name)});}}out.sort(function(a,b){return a.id-b.id;});return out;}
 function libraries(){var out=[],k;for(k in LIBRARIES)if(LIBRARIES.hasOwnProperty(k))out.push(k);return out.sort();}
 function apply(node,value,size,defaultDll){var r=resolve(value,defaultDll||'shell32.dll'),cls,keep;if(!node||!r)return false;size=parseInt(size,10)||18;cls=' '+String(node.className||'')+' ';keep=cls.indexOf(' jplopsoft_wm-control ')>=0||cls.indexOf(' jplopsoft_wm-title-icon ')>=0;node.setAttribute('data-exos-resource-icon',r.token);node.style.backgroundImage='url("'+r.uri+'")';node.style.backgroundRepeat='no-repeat';node.style.backgroundPosition='center center';node.style.backgroundSize=size+'px '+size+'px';node.style.fontSize='0';node.style.lineHeight='0';node.textContent='';if(keep){node.style.width='';node.style.height='';node.style.minWidth='';node.style.display='';return true;}node.style.display='inline-block';node.style.width=size+'px';node.style.height=size+'px';node.style.minWidth=size+'px';return true;}
