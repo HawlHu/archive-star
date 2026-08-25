@@ -1,6 +1,6 @@
 /* ExOS Common Controls Host Runtime
  * File: exos_comctl32.js
- * Version: 6.4.0-dev-os58
+ * Version: 6.4.0-dev-os59
  * Model: EXOS_COMCTL32_V2
  * Client: V8-only browsers
  *
@@ -13,7 +13,7 @@
   if(
     global.jplopsoft_EXOS_COMCTL32&&
     global.jplopsoft_EXOS_COMCTL32.ready===true&&
-    String(global.jplopsoft_EXOS_COMCTL32.version||'')==='6.4.0-dev-os58'
+    String(global.jplopsoft_EXOS_COMCTL32.version||'')==='6.4.0-dev-os59'
   ){
     return;
   }
@@ -1607,23 +1607,7 @@ function jplopsoft_comctlTreeFlatten(
 
     if(node.children.length){
       map[node.id].hasChildren=true;
-      if(state.dragDrop){
-    root.setAttribute('data-exos-browser-drop-zone','1');
-    root.ondragover=function(e){
-      if(jplopsoft_comctlExternalDragOver(e))return;
-      try{e.preventDefault();}catch(ignoreTreeRootOver){}
-    };
-    root.ondrop=function(e){
-      var dropped=jplopsoft_comctlExternalDrop(ctx,e);
-      if(dropped){
-        jplopsoft_comctlNotify(ctx,state.id,'TVN_DROP',{item:null,ctrlKey:false,externalFiles:dropped,external:true});
-        return;
-      }
-      try{e.preventDefault();e.stopPropagation();}catch(ignoreTreeRootDrop){}
-    };
-  }
-
-  jplopsoft_comctlTreeFlatten(
+      jplopsoft_comctlTreeFlatten(
         node.children,
         node.id,
         map,
@@ -1769,23 +1753,25 @@ function jplopsoft_comctlTreeRenderBranch(
     row.appendChild(text);
 
     if(state.dragDrop){
-      row.ondragover=function(e){
-        if(jplopsoft_comctlExternalDragOver(e))return;
-        try{
-          e.preventDefault();
-          if(e.dataTransfer)e.dataTransfer.dropEffect=e.ctrlKey?'copy':'move';
-        }catch(ignoreTreeDragOver){}
-        jplopsoft_comctlNotify(ctx,state.id,'TVN_DRAGOVER',{item:jplopsoft_comctlTreeSnapshotItem(state,item.id),ctrlKey:!!(e&&e.ctrlKey)});
-      };
-      row.ondrop=function(e){
-        var dropped=jplopsoft_comctlExternalDrop(ctx,e);
-        if(dropped){
-          jplopsoft_comctlNotify(ctx,state.id,'TVN_DROP',{item:jplopsoft_comctlTreeSnapshotItem(state,item.id),ctrlKey:false,externalFiles:dropped,external:true});
-          return;
-        }
-        try{e.preventDefault();e.stopPropagation();}catch(ignoreTreeDrop){}
-        jplopsoft_comctlNotify(ctx,state.id,'TVN_DROP',{item:jplopsoft_comctlTreeSnapshotItem(state,item.id),ctrlKey:!!(e&&e.ctrlKey)});
-      };
+      (function(itemId){
+        row.ondragover=function(e){
+          if(jplopsoft_comctlExternalDragOver(e))return;
+          try{
+            e.preventDefault();
+            if(e.dataTransfer)e.dataTransfer.dropEffect=e.ctrlKey?'copy':'move';
+          }catch(ignoreTreeDragOver){}
+          jplopsoft_comctlNotify(ctx,state.id,'TVN_DRAGOVER',{item:jplopsoft_comctlTreeSnapshotItem(state,itemId),ctrlKey:!!(e&&e.ctrlKey)});
+        };
+        row.ondrop=function(e){
+          var dropped=jplopsoft_comctlExternalDrop(ctx,e);
+          if(dropped){
+            jplopsoft_comctlNotify(ctx,state.id,'TVN_DROP',{item:jplopsoft_comctlTreeSnapshotItem(state,itemId),ctrlKey:false,externalFiles:dropped,external:true});
+            return;
+          }
+          try{e.preventDefault();e.stopPropagation();}catch(ignoreTreeDrop){}
+          jplopsoft_comctlNotify(ctx,state.id,'TVN_DROP',{item:jplopsoft_comctlTreeSnapshotItem(state,itemId),ctrlKey:!!(e&&e.ctrlKey)});
+        };
+      })(item.id);
     }
 
     (function(itemId){
@@ -1903,6 +1889,22 @@ function jplopsoft_comctlCreateTreeView(ctx,hwnd,spec){
     selectedId:'',
     dragDrop:!!s.dragDrop
   };
+
+  if(state.dragDrop){
+    root.setAttribute('data-exos-browser-drop-zone','1');
+    root.ondragover=function(e){
+      if(jplopsoft_comctlExternalDragOver(e))return;
+      try{e.preventDefault();}catch(ignoreTreeRootOver){}
+    };
+    root.ondrop=function(e){
+      var dropped=jplopsoft_comctlExternalDrop(ctx,e);
+      if(dropped){
+        jplopsoft_comctlNotify(ctx,state.id,'TVN_DROP',{item:null,ctrlKey:false,externalFiles:dropped,external:true});
+        return;
+      }
+      try{e.preventDefault();e.stopPropagation();}catch(ignoreTreeRootDrop){}
+    };
+  }
 
   jplopsoft_comctlTreeFlatten(
     Array.isArray(s.items)?s.items:[],
@@ -4147,7 +4149,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
     return{
       ok:true,
       model:'EXOS_COMCTL32_V2',
-      version:'6.4.0-dev-os58',
+      version:'6.4.0-dev-os59',
       classes:jplopsoft_comctlClasses()
     };
   }
@@ -4155,7 +4157,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
   if(method==='GetCommonControlsVersion'){
     return{
       model:'EXOS_COMCTL32_V2',
-      version:'6.4.0-dev-os58'
+      version:'6.4.0-dev-os59'
     };
   }
 
@@ -5020,7 +5022,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
 
   global.jplopsoft_EXOS_COMCTL32=Object.freeze({
     ready:true,
-    version:'6.4.0-dev-os58',
+    version:'6.4.0-dev-os59',
     model:'EXOS_COMCTL32_V2',
     build:'external-comctl32-core-controls',
     classes:Object.freeze(jplopsoft_comctlClasses().slice())
