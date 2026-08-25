@@ -1,11 +1,11 @@
 /* ExOS uxtheme.dll emulation
- * Version: 6.4.0-dev-os67
+ * Version: 6.4.0-dev-os68
  * Model: EXOS_UXTHEME_V1
  * Client: V8-only browsers
  */
 (function(global){
 'use strict';
-var UX={version:'6.4.0-dev-os67',model:'EXOS_UXTHEME_V1',ready:true,current:'windows10',handles:{},nextHandle:1};
+var UX={version:'6.4.0-dev-os68',model:'EXOS_UXTHEME_V1',ready:true,current:'windows10',handles:{},nextHandle:1};
 var THEMES={
   windows10:{name:'Windows 10',dark:false,vars:{
     '--exos-ui-font':'"Segoe UI",Arial,sans-serif','--exos-ui-bg':'#ffffff','--exos-ui-surface':'#f8fafc','--exos-ui-surface-2':'#f1f5f9','--exos-ui-text':'#111827','--exos-ui-muted':'#64748b','--exos-ui-border':'#cbd5e1','--exos-ui-border-soft':'#dbe3ec','--exos-ui-accent':'#0078d7','--exos-ui-accent-soft':'#e5f1fb','--exos-ui-hover':'#eaf4fd','--exos-ui-selected':'#cce8ff','--exos-ui-danger':'#c42b1c','--exos-ui-radius':'2px','--exos-ui-shadow':'0 8px 28px rgba(15,23,42,.22)'

@@ -1,5 +1,5 @@
 /* ExOS Media Foundation / Web Audio facade
- * Version: 6.4.0-dev-os67
+ * Version: 6.4.0-dev-os68
  * Model: EXOS_MEDIA_FOUNDATION_V1
  *
  * Process-isolated MediaFoundation-style audio API for XSH.  The host owns
@@ -9,7 +9,7 @@
 'use strict';
 
 var MF={
-  version:'6.4.0-dev-os67',
+  version:'6.4.0-dev-os68',
   model:'EXOS_MEDIA_FOUNDATION_V1',
   ready:true,
   maxHandlesPerProcess:512,
@@ -150,7 +150,12 @@ async function mfSourceFromPath(ctx,sessionHandle,path,options){
   node=global.jplopsoft_xshResolveC(ctx,p,false);
   if(!node||node.type!=='file')throw mfError(mfStatus('jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND',0xC0000034),'Media source not found: '+p);
   if((parseInt(node.original_size,10)||0)>MF.maxDecodedSourceBytes)mfQuota('Decoded Web Audio source is limited to 48 MiB.');
-  bytes=await global.jplopsoft_xshReadNodeBytes(node);
+  bytes=await global.jplopsoft_xshReadNodeBytes(
+    node,
+    ctx&&ctx.process&&String(ctx.process.integrity||'').toUpperCase()==='LOW'
+      ?'XSH_SANDBOX'
+      :''
+  );
   if(bytes.length>MF.maxDecodedSourceBytes)mfQuota('Decoded Web Audio source is limited to 48 MiB.');
   try{buffer=await mfDecode(session.audio,bytes);}catch(e){throw mfError(mfStatus('jplopsoft_STATUS_INVALID_IMAGE_FORMAT',0xC000007B),'Audio decoder rejected the media source.');}
   options=options||{};

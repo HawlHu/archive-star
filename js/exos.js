@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os67
+ * Version: 6.4.0-dev-os68
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -20574,13 +20574,21 @@ function jplopsoft_xshNormalizeBytes(data){
   );
 }
 
-async function jplopsoft_xshReadNodeBytes(node){
+async function jplopsoft_xshReadNodeBytes(node,accessPurpose){
+  accessPurpose=String(accessPurpose||'').toUpperCase();
+
   var out=await new Promise(function(resolve,reject){
     /*
-     * XSH normal file I/O is ordinary CreateFile/ReadFile access.
-     * access_purpose is reserved for special policy paths such as DOWNLOAD.
-     * Passing the old private value XSH_READ caused PHP open_handle to reject
-     * an otherwise valid read with "Invalid file access purpose".
+     * os68:
+     * MOTW is not removed.  Two kernel-mediated read purposes are exposed:
+     *
+     *   IMAGE_LOAD   - loader may read a Zone.Identifier-marked .xsh image
+     *                  before the child process exists.
+     *   XSH_SANDBOX - a Low Integrity XSH process may read its data/image
+     *                  dependencies through the sandbox broker.
+     *
+     * Ordinary UI reads still use an empty purpose and remain subject to the
+     * regular MOTW policy.
      */
     jplopsoft_fetchNodeContent(
       node.id,
@@ -20589,7 +20597,7 @@ async function jplopsoft_xshReadNodeBytes(node){
         else resolve(o);
       },
       null,
-      ''
+      accessPurpose
     );
   }),fmt=jplopsoft_fileFormatFromName(jplopsoft_decName(node)||''),plain,fek;
   fek=jplopsoft_nodeFekById(node.id);
@@ -20729,6 +20737,16 @@ async function jplopsoft_xshNtCreateFile(ctx,path,desiredAccess,creationDisposit
   }
 }
 
+function jplopsoft_xshRuntimeReadPurpose(ctx){
+  return(
+    ctx&&
+    ctx.process&&
+    String(ctx.process.integrity||'').toUpperCase()==='LOW'
+  )
+    ?'XSH_SANDBOX'
+    :'';
+}
+
 async function jplopsoft_xshNtReadFile(ctx,handle,length,offset,win32Api){
   var h=jplopsoft_xshHandle(ctx,handle),irp,bytes,start,end,node,slice;
   if(!h)return{status:jplopsoft_STATUS_INVALID_HANDLE,bytesRead:0,data:[]};
@@ -20740,7 +20758,7 @@ async function jplopsoft_xshNtReadFile(ctx,handle,length,offset,win32Api){
     jplopsoft_xshTraceDownStack(irp,h.path||'','READ');
     if(h.kind!=='exfs-file')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'Handle does not support ReadFile.');
     node=jplopsoft_findNode(h.nodeId);if(!node)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'File object disappeared.');
-    bytes=await jplopsoft_xshReadNodeBytes(node);end=Math.min(bytes.length,start+length);if(end<start)end=start;slice=bytes.slice(start,end);h.position=end;
+    bytes=await jplopsoft_xshReadNodeBytes(node,jplopsoft_xshRuntimeReadPurpose(ctx));end=Math.min(bytes.length,start+length);if(end<start)end=start;slice=bytes.slice(start,end);h.position=end;
     jplopsoft_xshTraceReadComplete(irp,h.path||'');jplopsoft_xshCompleteIrp(irp,jplopsoft_STATUS_SUCCESS);
     return{status:jplopsoft_STATUS_SUCCESS,bytesRead:slice.length,data:jplopsoft_xshBytesToArray(slice),eof:end>=bytes.length,position:h.position};
   }catch(e){jplopsoft_xshCompleteIrp(irp,e.ntstatus||jplopsoft_STATUS_INVALID_PARAMETER);return{status:e.ntstatus||jplopsoft_STATUS_INVALID_PARAMETER,bytesRead:0,data:[],error:e.message};}
@@ -20803,7 +20821,7 @@ async function jplopsoft_xshNtReadFileBuffer(ctx,handle,length,offset,win32Api){
       );
     }
 
-    bytes=await jplopsoft_xshReadNodeBytes(node);
+    bytes=await jplopsoft_xshReadNodeBytes(node,jplopsoft_xshRuntimeReadPurpose(ctx));
     end=Math.min(bytes.length,start+length);
 
     if(end<start)end=start;
@@ -20861,7 +20879,7 @@ async function jplopsoft_xshNtWriteFile(ctx,handle,data,offset,win32Api){
     if(h.knownEmpty){
       old=new Uint8Array(0);
     }else{
-      old=await jplopsoft_xshReadNodeBytes(node);
+      old=await jplopsoft_xshReadNodeBytes(node,jplopsoft_xshRuntimeReadPurpose(ctx));
     }
 
     total=Math.max(
@@ -21150,7 +21168,7 @@ async function jplopsoft_xshCopyFile(ctx,source,destination,failIfExists){
     );
   }
 
-  bytes=await jplopsoft_xshReadNodeBytes(src);
+  bytes=await jplopsoft_xshReadNodeBytes(src,jplopsoft_xshRuntimeReadPurpose(ctx));
   await jplopsoft_xshWriteNodeBytes(dst,bytes);
   return true;
 }
@@ -24554,7 +24572,7 @@ async function jplopsoft_xshCreateFileMappingWin32(ctx,args){
       if(size>64*1024*1024){
         throw jplopsoft_xshError(jplopsoft_STATUS_QUOTA_EXCEEDED,'File-backed mappings are limited to 64 MiB per SECTION image.');
       }
-      bytes=await jplopsoft_xshReadNodeBytes(node);
+      bytes=await jplopsoft_xshReadNodeBytes(node,jplopsoft_xshRuntimeReadPurpose(ctx));
       opt.initialBytes=bytes;
       opt.fileNodeId=parseInt(node.id,10)||0;
       opt.filePath=String(handle.path||'');
@@ -25463,8 +25481,13 @@ async function jplopsoft_runBuiltinXsh(appId,args,parentCtx){
       sessionId:1,
       username:String(state.samUsername||'administrator'),
       sid:String(state.samSid||''),
-      integrity:'MEDIUM',
-      protection:'Sandbox',
+      /*
+       * os68: a Mark-of-the-Web XSH image is allowed through the kernel image
+       * loader, but the child is created at Low Integrity.  Unmarked images
+       * retain the normal Medium Integrity XSH token.
+       */
+      integrity:n.has_motw?'LOW':'MEDIUM',
+      protection:n.has_motw?'Sandbox+MOTW':'Sandbox',
       critical:false,
       systemProcess:false,
       imagePathName:imagePath,
@@ -25505,6 +25528,8 @@ async function jplopsoft_runBuiltinXsh(appId,args,parentCtx){
     name:String(app.title||app.fileName||appId),
     imagePath:imagePath,
     image:image,
+    markOfTheWeb:!!n.has_motw,
+    zoneId:n.has_motw?3:0,
     subsystem:image.subsystem,
     subsystemName:image.subsystemName,
     source:String(image.code||''),
@@ -25606,7 +25631,7 @@ async function jplopsoft_runXshNode(id,argLine,parentProcess){
     );
   }
 
-  bytes=await jplopsoft_xshReadNodeBytes(n);
+  bytes=await jplopsoft_xshReadNodeBytes(n,'IMAGE_LOAD');
   source=jplopsoft_xshUtf8Decode(bytes);
 
   image=jplopsoft_xshParseImage(
@@ -28085,6 +28110,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os67',
+  version:'6.4.0-dev-os68',
   build:'external-os-comctl32-split-core-controls'
 };
