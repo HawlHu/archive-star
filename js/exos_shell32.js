@@ -1,5 +1,5 @@
 /* ExOS shell32.dll emulation
- * Version: 6.4.0-dev-os56
+ * Version: 6.4.0-dev-os57
  * Model: EXOS_SHELL32_V1
  *
  * Browser/XSH shell API.  The implementation is intentionally restricted to
@@ -9,7 +9,7 @@
 'use strict';
 
 var SHELL={
-  version:'6.4.0-dev-os56',
+  version:'6.4.0-dev-os57',
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -116,6 +116,7 @@ function shellTypeName(path,isDirectory){
   if(ext==='csv')return'CSV 文件';
   if(ext==='html'||ext==='htm')return'HTML 文件';
   if(ext==='xsh')return'ExOS XSH 應用程式';
+  if(ext==='xba')return'ExOS Batch 批次檔';
   if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='gif'||ext==='webp'||ext==='bmp')return'圖片';
   if(ext==='mp3'||ext==='wav'||ext==='ogg'||ext==='m4a')return'音訊';
   if(ext==='mp4'||ext==='webm'||ext==='mov')return'影片';
@@ -136,7 +137,7 @@ function shellIconName(path,isDirectory){
   if(ext==='txt')return'txt';
   if(ext==='csv')return'csv';
   if(ext==='html'||ext==='htm')return'html';
-  if(ext==='xsh')return'cmd';
+  if(ext==='xsh'||ext==='xba')return'cmd';
   if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='gif'||ext==='webp'||ext==='bmp')return'image';
   if(ext==='mp3'||ext==='wav'||ext==='ogg'||ext==='m4a')return'media';
   if(ext==='mp4'||ext==='webm'||ext==='mov')return'media';
@@ -889,6 +890,15 @@ async function shellExecute(ctx,path,verb,args){
         pid:child.pid,
         path:p
       };
+    }
+
+    if(info.extension==='xba'){
+      var batchChild=await jplopsoft_runBuiltinXsh(
+        'cmd',
+        ['/c',shellQuote(p)].concat(shellEnsureArray(args||[])),
+        ctx
+      );
+      return{ok:true,verb:'open',pid:batchChild.pid,path:p,batch:true};
     }
 
     return await jplopsoft_xshSystemOpenPath(
