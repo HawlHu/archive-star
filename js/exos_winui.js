@@ -1,9 +1,9 @@
 /* ExOS.WinUI declarative UI host
- * Version: 6.4.0-dev-os75
+ * Version: 6.4.0-dev-os77
  * Model: EXOS_WINUI_V1
  */
 (function(global){'use strict';
-var WINUI={version:'6.4.0-dev-os75',model:'EXOS_WINUI_V1',ready:true};
+var WINUI={version:'6.4.0-dev-os77',model:'EXOS_WINUI_V1',ready:true};
 function arr(v){return Array.isArray(v)?v:(v==null?[]:[v]);}
 function safeType(v){return String(v||'div').toLowerCase();}
 async function renderNode(ctx,hwnd,node,parentId,path){node=node&&typeof node==='object'?node:{};path=path||'ui';var type=safeType(node.type),id=String(node.id||path.replace(/[^a-z0-9_]/gi,'_')),children=arr(node.children),i,controlId;

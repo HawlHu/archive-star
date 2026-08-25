@@ -1,5 +1,5 @@
 /* ExOS shell32.dll emulation
- * Version: 6.4.0-dev-os75
+ * Version: 6.4.0-dev-os77
  * Model: EXOS_SHELL32_V1
  *
  * Browser/XSH shell API.  The implementation is intentionally restricted to
@@ -9,7 +9,7 @@
 'use strict';
 
 var SHELL={
-  version:'6.4.0-dev-os75',
+  version:'6.4.0-dev-os77',
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -121,6 +121,7 @@ function shellTypeName(path,isDirectory){
   if(ext==='mp3'||ext==='wav'||ext==='ogg'||ext==='m4a')return'音訊';
   if(ext==='mp4'||ext==='webm'||ext==='mov')return'影片';
   if(ext==='pdf')return'PDF 文件';
+  if(ext==='zip')return'ZIP 壓縮資料夾';
 
   return ext
     ?ext.toUpperCase()+' 檔案'
@@ -141,6 +142,7 @@ function shellIconName(path,isDirectory){
   if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='gif'||ext==='webp'||ext==='bmp')return'image';
   if(ext==='mp3'||ext==='wav'||ext==='ogg'||ext==='m4a')return'media';
   if(ext==='mp4'||ext==='webm'||ext==='mov')return'media';
+  if(ext==='zip')return'zipfolder';
 
   return'file';
 }
@@ -181,6 +183,14 @@ function shellAssociation(path){
       table[key]||
       table[ext]||
       null;
+  }
+
+  if(ext==='zip'){
+    return{
+      extension:'.zip',registered:true,
+      association:{progId:'CompressedFolder',handler:'zipfldr.dll',shellNamespace:true},
+      defaultVerb:'open',shellNamespace:true
+    };
   }
 
   return{
@@ -233,7 +243,9 @@ function shellInfo(ctx,path){
     markOfTheWeb:!directory&&!!node.has_motw,
     blocked:!directory&&!!node.has_motw,
     zoneId:!directory&&node.has_motw?3:0,
-    association:shellAssociation(p)
+    association:shellAssociation(p),
+    compressedFolder:!directory&&shellExtension(p)==='zip',
+    shellNamespace:!directory&&shellExtension(p)==='zip'?'zipfldr':''
   };
 }
 
@@ -363,6 +375,10 @@ function shellContextMenu(ctx,paths,options){
 
     if(infos[0].directory){
       items.push(shellMenuItem('cmdhere','在此開啟命令提示字元',true,{icon:'cmd'}));
+    if(infos.length===1&&!infos[0].directory&&infos[0].extension==='zip'){
+      items.push(shellMenuItem('extractall','全部解壓縮…',true,{icon:'folder'}));
+    }
+
     }
 
     items.push(shellSeparator());
@@ -915,6 +931,11 @@ async function shellExecute(ctx,path,verb,args){
       };
     }
 
+    if(info.extension==='zip'){
+      var zipChild=await jplopsoft_runBuiltinXsh('zipfolder',[p],ctx);
+      return{ok:true,verb:'open',pid:zipChild.pid,path:p,compressedFolder:true};
+    }
+
     if(info.extension==='xba'){
       var batchChild=await jplopsoft_runBuiltinXsh(
         'cmd',
@@ -982,6 +1003,14 @@ async function shellInvokeCommand(ctx,verb,paths,options){
         .filter(function(x){return!!x;}),
       opt=options||{},
       i,out;
+
+  if(action==='extractall'){
+    if(list.length!==1||shellExtension(list[0])!=='zip'){
+      throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Extract All requires one ZIP archive.');
+    }
+    var zipExtract=await jplopsoft_runBuiltinXsh('zipfolder',[list[0],'/extract'],ctx);
+    return{ok:true,verb:'extractall',pid:zipExtract.pid,path:list[0]};
+  }
 
   if(action==='open'||action==='edit'||action==='download'){
     if(!list.length){
@@ -1187,7 +1216,12 @@ function shellEmptyClipboard(){
 
 function shellBeginDragDrop(ctx,paths,options){
   var list=shellEnsureArray(paths)
-        .map(shellNormalizePath)
+        .map(function(x){
+          x=String(x||'');
+          return typeof jplopsoft_zipfldrIsVirtualPath==='function'&&jplopsoft_zipfldrIsVirtualPath(x)
+            ?x
+            :shellNormalizePath(x);
+        })
         .filter(function(x){return!!x;}),
       opt=options||{};
 
@@ -1228,83 +1262,58 @@ function shellBeginDragDrop(ctx,paths,options){
 }
 
 function shellDragOver(ctx,targetPath,options){
-  var target=shellNormalizePath(targetPath),
-      opt=options||{},
-      node=shellResolve(ctx,target),
-      effect='none';
+  var raw=String(targetPath||''),
+      targetIsZip=typeof jplopsoft_zipfldrIsVirtualPath==='function'&&jplopsoft_zipfldrIsVirtualPath(raw),
+      target=targetIsZip?raw:shellNormalizePath(raw),
+      opt=options||{},node=null,effect='none',sourceHasZip=false,sourceHasNormal=false,i;
 
-  if(
-    !SHELL.drag.active||
-    !node||
-    node.type!=='folder'
-  ){
-    return{
-      accepted:false,
-      effect:'none',
-      targetPath:target
-    };
+  if(!SHELL.drag.active){return{accepted:false,effect:'none',targetPath:target};}
+  for(i=0;i<SHELL.drag.paths.length;i++){
+    if(typeof jplopsoft_zipfldrIsVirtualPath==='function'&&jplopsoft_zipfldrIsVirtualPath(SHELL.drag.paths[i]))sourceHasZip=true;
+    else sourceHasNormal=true;
   }
-
-  if(
-    opt.ctrlKey&&
-    SHELL.drag.allowedEffects.indexOf('copy')>=0
-  ){
+  if(targetIsZip){
+    if(sourceHasZip)return{accepted:false,effect:'none',targetPath:target};
+    effect=SHELL.drag.allowedEffects.indexOf('copy')>=0?'copy':'none';
+    return{accepted:effect!=='none',effect:effect,targetPath:target,namespace:'zipfldr'};
+  }
+  node=shellResolve(ctx,target);
+  if(!node||node.type!=='folder')return{accepted:false,effect:'none',targetPath:target};
+  if(sourceHasZip){
+    effect=SHELL.drag.allowedEffects.indexOf('copy')>=0?'copy':'none';
+  }else if(opt.ctrlKey&&SHELL.drag.allowedEffects.indexOf('copy')>=0){
     effect='copy';
-  }else if(
-    SHELL.drag.allowedEffects.indexOf('move')>=0
-  ){
+  }else if(SHELL.drag.allowedEffects.indexOf('move')>=0){
     effect='move';
-  }else if(
-    SHELL.drag.allowedEffects.indexOf('copy')>=0
-  ){
+  }else if(SHELL.drag.allowedEffects.indexOf('copy')>=0){
     effect='copy';
   }
-
-  return{
-    accepted:effect!=='none',
-    effect:effect,
-    targetPath:target
-  };
+  return{accepted:effect!=='none',effect:effect,targetPath:target};
 }
 
 async function shellDrop(ctx,targetPath,options){
-  var over=shellDragOver(
-        ctx,
-        targetPath,
-        options
-      ),
-      result;
-
-  if(!over.accepted){
-    SHELL.drag.active=false;
-
-    return{
-      ok:false,
-      effect:'none',
-      completed:0
-    };
-  }
-
-  result=await shellFileOperation(
-    ctx,
-    {
-      operation:
-        over.effect==='copy'
-          ?'copy'
-          :'move',
-      sources:SHELL.drag.paths.slice(),
-      destination:over.targetPath
+  var over=shellDragOver(ctx,targetPath,options),result,i,source;
+  if(!over.accepted){SHELL.drag.active=false;return{ok:false,effect:'none',completed:0};}
+  try{
+    if(typeof jplopsoft_zipfldrIsVirtualPath==='function'&&jplopsoft_zipfldrIsVirtualPath(over.targetPath)){
+      result=await jplopsoft_zipfldrAddPathsVirtual(ctx,over.targetPath,SHELL.drag.paths.slice());
+      return{ok:true,effect:'copy',completed:Number(result&&result.count)||SHELL.drag.paths.length,targetPath:over.targetPath,namespace:'zipfldr'};
     }
-  );
-
-  SHELL.drag.active=false;
-
-  return{
-    ok:!!result.ok,
-    effect:over.effect,
-    completed:result.completed||0,
-    targetPath:over.targetPath
-  };
+    if(SHELL.drag.paths.some(function(x){return typeof jplopsoft_zipfldrIsVirtualPath==='function'&&jplopsoft_zipfldrIsVirtualPath(x);})){ 
+      var done=0;
+      for(i=0;i<SHELL.drag.paths.length;i++){
+        source=SHELL.drag.paths[i];
+        if(typeof jplopsoft_zipfldrIsVirtualPath==='function'&&jplopsoft_zipfldrIsVirtualPath(source)){
+          await jplopsoft_zipfldrExtractVirtual(ctx,source,over.targetPath);done++;
+        }
+      }
+      return{ok:true,effect:'copy',completed:done,targetPath:over.targetPath,namespace:'zipfldr'};
+    }
+    result=await shellFileOperation(ctx,{operation:over.effect==='copy'?'copy':'move',sources:SHELL.drag.paths.slice(),destination:over.targetPath});
+    return{ok:!!result.ok,effect:over.effect,completed:result.completed||0,targetPath:over.targetPath};
+  }finally{
+    SHELL.drag.active=false;SHELL.drag.paths=[];SHELL.drag.sourcePid=0;
+  }
 }
 
 async function shellDoDragDrop(ctx,paths,targetPath,options){

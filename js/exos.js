@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os75
+ * Version: 6.4.0-dev-os77
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -18950,6 +18950,16 @@ function jplopsoft_vmmSystemImageSize(name){
     'advapi32.dll':384*1024,
     'comctl32.dll':640*1024,
     'comdlg32.dll':512*1024,
+    'zipfldr.dll':768*1024,
+    'wininet.dll':384*1024,
+    'ws2_32.dll':384*1024,
+    'ole32.dll':384*1024,
+    'crypt32.dll':384*1024,
+    'bcrypt.dll':384*1024,
+    'riched20.dll':512*1024,
+    'msftedit.dll':512*1024,
+    'webview2.dll':512*1024,
+    'shdocvw.dll':384*1024,
     'shell32.dll':768*1024,
     'uxtheme.dll':256*1024,
     'dwmapi.dll':256*1024,
@@ -21710,6 +21720,19 @@ function jplopsoft_xshConsoleExpungeHistory(ctx){
   return true;
 }
 
+var jplopsoft_XSH_CLIPBOARD={openPid:0,sequence:0,formats:{},names:{'1':'CF_TEXT','2':'CF_BITMAP','8':'CF_DIB','13':'CF_UNICODETEXT','49153':'Rich Text Format'},nextCustom:0xC100};
+function jplopsoft_xshClipboardFormat(fmt){if(typeof fmt==='number')return String(fmt|0);fmt=String(fmt||'').toUpperCase();if(fmt==='CF_TEXT')return'1';if(fmt==='CF_BITMAP')return'2';if(fmt==='CF_DIB')return'8';if(fmt==='CF_UNICODETEXT')return'13';if(fmt==='CF_RTF'||fmt==='RICH TEXT FORMAT')return'49153';if(/^\d+$/.test(fmt))return String(parseInt(fmt,10));return'';}
+function jplopsoft_xshClipboardOpen(ctx){var pid=parseInt(ctx&&ctx.pid,10)||0;if(jplopsoft_XSH_CLIPBOARD.openPid&&jplopsoft_XSH_CLIPBOARD.openPid!==pid)throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Clipboard is open by another XSH process.');jplopsoft_XSH_CLIPBOARD.openPid=pid;return true;}
+function jplopsoft_xshClipboardClose(ctx){var pid=parseInt(ctx&&ctx.pid,10)||0;if(jplopsoft_XSH_CLIPBOARD.openPid===pid)jplopsoft_XSH_CLIPBOARD.openPid=0;return true;}
+function jplopsoft_xshClipboardEnsureOwner(ctx){var p=parseInt(ctx&&ctx.pid,10)||0;if(jplopsoft_XSH_CLIPBOARD.openPid&&jplopsoft_XSH_CLIPBOARD.openPid!==p)throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Clipboard is open by another process.');}
+function jplopsoft_xshDataUrlToBlob(url){var m=String(url||'').match(/^data:([^;,]+);base64,(.*)$/i);if(!m)return null;var raw=atob(m[2]),a=new Uint8Array(raw.length),i;for(i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i)&255;return new Blob([a],{type:m[1]});}
+function jplopsoft_xshBlobToDataUrl(blob){return blob.arrayBuffer().then(function(ab){var a=new Uint8Array(ab),s='',i,chunk=0x8000;for(i=0;i<a.length;i+=chunk)s+=String.fromCharCode.apply(null,Array.prototype.slice.call(a,i,Math.min(a.length,i+chunk)));return'data:'+String(blob.type||'application/octet-stream')+';base64,'+btoa(s);});}
+async function jplopsoft_xshClipboardSet(ctx,format,data){jplopsoft_xshClipboardEnsureOwner(ctx);var f=jplopsoft_xshClipboardFormat(format);if(!f)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Unknown clipboard format.');var hostSynced=false;if(f==='1'||f==='13'){data=String(data===undefined?'':data);jplopsoft_XSH_CLIPBOARD.formats['1']=data;jplopsoft_XSH_CLIPBOARD.formats['13']=data;try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(data);hostSynced=true;}}catch(ignoreTextWrite){}}else if(f==='2'||f==='8'){var url=typeof data==='string'?String(data):(data&&data.dataUrl?String(data.dataUrl):'');if(!/^data:image\/(?:png|jpeg|gif|webp);base64,/i.test(url)||url.length>16*1024*1024)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'CF_BITMAP/CF_DIB expects a Base64 image Data URL <= 16 MiB.');jplopsoft_XSH_CLIPBOARD.formats['2']={dataUrl:url};jplopsoft_XSH_CLIPBOARD.formats['8']={dataUrl:url};try{var blob=jplopsoft_xshDataUrlToBlob(url);if(blob&&navigator.clipboard&&navigator.clipboard.write&&typeof ClipboardItem==='function'){await navigator.clipboard.write([new ClipboardItem({'image/png':blob.type==='image/png'?blob:new Blob([await blob.arrayBuffer()],{type:'image/png'})})]);hostSynced=true;}}catch(ignoreImageWrite){}}else{jplopsoft_XSH_CLIPBOARD.formats[f]=data;}
+ jplopsoft_XSH_CLIPBOARD.sequence++;return{ok:true,format:parseInt(f,10),hostSynced:hostSynced,sequence:jplopsoft_XSH_CLIPBOARD.sequence};}
+async function jplopsoft_xshClipboardGet(ctx,format,preferHost){jplopsoft_xshClipboardEnsureOwner(ctx);var f=jplopsoft_xshClipboardFormat(format);if(!f)return null;if((f==='1'||f==='13')&&preferHost!==false){try{if(navigator.clipboard&&navigator.clipboard.readText){var t=await navigator.clipboard.readText();if(typeof t==='string'){jplopsoft_XSH_CLIPBOARD.formats['1']=t;jplopsoft_XSH_CLIPBOARD.formats['13']=t;return t;}}}catch(ignoreReadText){}}if((f==='2'||f==='8')&&preferHost!==false){try{if(navigator.clipboard&&navigator.clipboard.read){var items=await navigator.clipboard.read(),i,j,it,types,blob;for(i=0;i<items.length;i++){it=items[i];types=it.types||[];for(j=0;j<types.length;j++){if(/^image\//i.test(types[j])){blob=await it.getType(types[j]);var url=await jplopsoft_xshBlobToDataUrl(blob);jplopsoft_XSH_CLIPBOARD.formats['2']={dataUrl:url};jplopsoft_XSH_CLIPBOARD.formats['8']={dataUrl:url};return{dataUrl:url,mime:String(blob.type||types[j])};}}}}}catch(ignoreReadImage){}}return jplopsoft_XSH_CLIPBOARD.formats.hasOwnProperty(f)?jplopsoft_XSH_CLIPBOARD.formats[f]:null;}
+async function jplopsoft_xshClipboardSetMany(ctx,formats){jplopsoft_xshClipboardEnsureOwner(ctx);var keys=Object.keys(formats||{}),results=[],i;for(i=0;i<keys.length;i++)results.push(await jplopsoft_xshClipboardSet(ctx,keys[i],formats[keys[i]]));return{ok:true,results:results};}
+async function jplopsoft_xshClipboardSnapshot(ctx,preferHost){var out={},keys=Object.keys(jplopsoft_XSH_CLIPBOARD.formats),i;for(i=0;i<keys.length;i++)out[keys[i]]=jplopsoft_XSH_CLIPBOARD.formats[keys[i]];if(preferHost){try{var t=await jplopsoft_xshClipboardGet(ctx,13,true);if(t!==null)out['13']=out['1']=t;}catch(ignore){}}return{sequence:jplopsoft_XSH_CLIPBOARD.sequence,formats:out};}
+globalThis.jplopsoft_xshClipboardSetMany=jplopsoft_xshClipboardSetMany;globalThis.jplopsoft_xshClipboardSnapshot=jplopsoft_xshClipboardSnapshot;
 var jplopsoft_CONHOST_TEXT_CLIPBOARD='';
 function jplopsoft_conhostSelectedText(session){
   var input=document.getElementById(session.inputId),out=document.getElementById(session.outputId),sel,text='';
@@ -22357,7 +22380,7 @@ function jplopsoft_xshCreateHostWindow(ctx){
   return h;
 }
 
-function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH4 API\n  kernel32: CreateFile ReadFile ReadFileBuffer WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile FlushViewOfFile ReadMappedView WriteMappedView VirtualAlloc VirtualFree VirtualProtect VirtualQuery ReadVirtualMemory WriteVirtualMemory GlobalMemoryStatusEx QueryVmmStatistics CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess OpenProcess VirtualQueryEx ReadProcessMemory WriteProcessMemory CreateThread PostThreadMessage GetThreadMessage WaitForSingleObject GetExitCodeThread TerminateThread DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtAllocateVirtualMemory NtFreeVirtualMemory NtProtectVirtualMemory NtQueryVirtualMemory NtReadVirtualMemory NtWriteVirtualMemory NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow GetForegroundWindow SetForegroundWindow LoadIcon GetIconInfo EnumIconResources SetWindowIcon GetMessage PeekMessage PostMessage DispatchMessage InvalidateRect UpdateWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  gdi32(exos_gdi32.js): GetDC ReleaseDC BeginPaint EndPaint CreateDC CreatePrinterDC StartDoc StartPage EndPage EndDoc AbortDoc PrintImage GetPrintJobInfo CreateCompatibleDC DeleteDC CreatePen CreateSolidBrush CreateFont EnumFontFamiliesEx CreateBitmap CreateCompatibleBitmap SelectObject DeleteObject MoveToEx LineTo Rectangle Ellipse Polygon Polyline PolyBezier BitBlt TextOut ExtTextOut GetTextExtentPoint32 CreateRectRgn CreateEllipticRgn CreatePolygonRgn SelectClipRgn SetMapMode LPtoDP DPtoLP\n  d3d11(exos_d3d11.js): D3D11CreateDeviceAndSwapChain CreateBuffer CreateTexture2D CreateVertexShader CreatePixelShader CreateInputLayout IASetVertexBuffers IASetIndexBuffer IASetPrimitiveTopology VSSetShader PSSetShader OMSetRenderTargets RSSetViewports ClearRenderTargetView Draw DrawIndexed PresentTextureFrame Present\n  d3dx/three32(exos_d3dx.js + three.min.js): Scene Camera Geometry Material Mesh Light WebGLRenderer TextureLoader Clock\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  comdlg32(exos_comdlg32.js): GetOpenFileName GetSaveFileName ChooseColor ChooseFont PrintDlg PrintDlgEx PageSetupDlg FindText ReplaceText\n  uxtheme: IsThemeActive OpenThemeData CloseThemeData SetWindowTheme GetThemeColor ApplyTheme\n  dwmapi: DwmIsCompositionEnabled DwmEnableBlurBehindWindow DwmExtendFrameIntoClientArea DwmSetWindowAttribute DwmGetWindowAttribute DwmFlush\n  ExOS.WinUI: Render RenderMany SetData\n  ExOS.MediaFoundation(exos_media.js): MFStartup CreateAudioSession CreateSourceFromPath Play Pause Stop Seek SetVolume SetPan SetEQ GetSpectrum GetWaveform\n  advapi32(exos_advapi32.js): RegOpenKeyEx RegCreateKeyEx RegCloseKey RegQueryValueEx RegGetValue RegSetValueEx RegEnumKeyEx RegEnumValue RegQueryInfoKey RegDeleteValue RegDeleteKey RegFlushKey ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo GetSecurityInfo SetSecurityInfo InitializeAcl SetEntriesInAcl GetExplicitEntriesFromAcl OpenProcessToken GetTokenInformation DuplicateTokenEx CreateRestrictedToken CheckTokenMembership PrivilegeCheck AdjustTokenPrivileges LookupPrivilegeValue LookupPrivilegeName GetUserName LookupAccountSid LookupAccountName ConvertSidToStringSid ConvertStringSidToSid IsValidSid EqualSid\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop SHQueryRecycleBin SHRestoreFromRecycleBin SHDeleteFromRecycleBin SHEmptyRecycleBin\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath UploadPickedFile ReleasePickedFile QuerySystemConfig QueryLocalAccounts CreateLocalAccount ResetLocalAccountPassword SetLocalAccountEnabled SetLocalAccountType DeleteLocalAccount QueryEvents QueryEventLogInfo\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
+function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH4 API\n  kernel32: CreateFile ReadFile ReadFileBuffer WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile FlushViewOfFile ReadMappedView WriteMappedView VirtualAlloc VirtualFree VirtualProtect VirtualQuery ReadVirtualMemory WriteVirtualMemory GlobalMemoryStatusEx QueryVmmStatistics CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess OpenProcess VirtualQueryEx ReadProcessMemory WriteProcessMemory CreateThread PostThreadMessage GetThreadMessage WaitForSingleObject GetExitCodeThread TerminateThread DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtAllocateVirtualMemory NtFreeVirtualMemory NtProtectVirtualMemory NtQueryVirtualMemory NtReadVirtualMemory NtWriteVirtualMemory NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow GetForegroundWindow SetForegroundWindow LoadIcon GetIconInfo EnumIconResources SetWindowIcon GetMessage PeekMessage PostMessage DispatchMessage InvalidateRect UpdateWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OpenClipboard CloseClipboard EmptyClipboard SetClipboardData GetClipboardData IsClipboardFormatAvailable EnumClipboardFormats RegisterClipboardFormat GetClipboardSequenceNumber OnControl\n  gdi32(exos_gdi32.js): GetDC ReleaseDC BeginPaint EndPaint CreateDC CreatePrinterDC StartDoc StartPage EndPage EndDoc AbortDoc PrintImage GetPrintJobInfo CreateCompatibleDC DeleteDC CreatePen CreateSolidBrush CreateFont EnumFontFamiliesEx CreateBitmap CreateCompatibleBitmap SelectObject DeleteObject MoveToEx LineTo Rectangle Ellipse Polygon Polyline PolyBezier BitBlt TextOut ExtTextOut GetTextExtentPoint32 CreateRectRgn CreateEllipticRgn CreatePolygonRgn SelectClipRgn SetMapMode LPtoDP DPtoLP\n  d3d11(exos_d3d11.js): D3D11CreateDeviceAndSwapChain CreateBuffer CreateTexture2D CreateVertexShader CreatePixelShader CreateInputLayout IASetVertexBuffers IASetIndexBuffer IASetPrimitiveTopology VSSetShader PSSetShader OMSetRenderTargets RSSetViewports ClearRenderTargetView Draw DrawIndexed PresentTextureFrame Present\n  d3dx/three32(exos_d3dx.js + three.min.js): Scene Camera Geometry Material Mesh Light WebGLRenderer TextureLoader Clock\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  comdlg32(exos_comdlg32.js): GetOpenFileName GetSaveFileName ChooseColor ChooseFont PrintDlg PrintDlgEx PageSetupDlg FindText ReplaceText\n  zipfldr(exos_zipfldr.js): GetVersion IsCompressedFolder CreateArchive OpenArchive BindToObject CloseArchive EnumItems ListDirectory GetItemInfo ReadItem ExtractItem ExtractAll AddFile AddPath AddPickedFile DeleteItem CreateFolder MakeVirtualPath ParseVirtualPath\n  wininet: InternetOpen InternetOpenUrl HttpOpenRequest HttpAddRequestHeaders HttpSendRequest InternetReadFile InternetReadText InternetQueryInfo InternetCloseHandle QueryNetworkPolicy\n  ws2_32: WSAStartup socket connect send recv shutdown closesocket select GetSocketState (WebSocket backend; no raw TCP/UDP)\n  ole32: OleInitialize CreateDataObject SetData GetData EnumFormatEtc OleSetClipboard OleGetClipboard RegisterDragDrop DoDragDrop DragEnter DragOver Drop\n  crypt32/bcrypt: ExMd3 ExMd3N ExesEncrypt ExesDecrypt CryptProtectData CryptUnprotectData BCryptGenRandom BCryptHash BCryptDeriveKeyPBKDF2\n  riched20/msftedit: CreateRichEdit SetText GetText SetHTML GetHTML ExecCommand GetSelection SetSelection InsertText InsertImage\n  webview2/shdocvw: CreateCoreWebView2Environment CreateCoreWebView2Controller Navigate NavigateToString Reload GoBack GoForward PostWebMessageAsString\n  uxtheme: IsThemeActive OpenThemeData CloseThemeData SetWindowTheme GetThemeColor ApplyTheme\n  dwmapi: DwmIsCompositionEnabled DwmEnableBlurBehindWindow DwmExtendFrameIntoClientArea DwmSetWindowAttribute DwmGetWindowAttribute DwmFlush\n  ExOS.WinUI: Render RenderMany SetData\n  ExOS.MediaFoundation(exos_media.js): MFStartup CreateAudioSession CreateSourceFromPath Play Pause Stop Seek SetVolume SetPan SetEQ GetSpectrum GetWaveform\n  advapi32(exos_advapi32.js): RegOpenKeyEx RegCreateKeyEx RegCloseKey RegQueryValueEx RegGetValue RegSetValueEx RegEnumKeyEx RegEnumValue RegQueryInfoKey RegDeleteValue RegDeleteKey RegFlushKey ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo GetSecurityInfo SetSecurityInfo InitializeAcl SetEntriesInAcl GetExplicitEntriesFromAcl OpenProcessToken GetTokenInformation DuplicateTokenEx CreateRestrictedToken CheckTokenMembership PrivilegeCheck AdjustTokenPrivileges LookupPrivilegeValue LookupPrivilegeName GetUserName LookupAccountSid LookupAccountName ConvertSidToStringSid ConvertStringSidToSid IsValidSid EqualSid\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop SHQueryRecycleBin SHRestoreFromRecycleBin SHDeleteFromRecycleBin SHEmptyRecycleBin\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath UploadPickedFile ReleasePickedFile QuerySystemConfig QueryLocalAccounts CreateLocalAccount ResetLocalAccountPassword SetLocalAccountEnabled SetLocalAccountType DeleteLocalAccount QueryEvents QueryEventLogInfo\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
 function jplopsoft_xshPrintIrpTrace(ctx){
   var a=ctx.irpTrace.slice(-20),i,j,irp,s='';
   for(i=0;i<a.length;i++){
@@ -22702,6 +22725,20 @@ function jplopsoft_xshTopologyInit(ctx,id,n,spec){
   else jplopsoft_loadOptionalMirroredScript('three',function(err){if(err)fail(err);else start();});
 }
 
+function jplopsoft_xshSanitizeRichHtml(html){
+  var template=document.createElement('template'),allowed={DIV:1,P:1,BR:1,B:1,STRONG:1,I:1,EM:1,U:1,S:1,STRIKE:1,SPAN:1,UL:1,OL:1,LI:1,BLOCKQUOTE:1,PRE:1,CODE:1,H1:1,H2:1,H3:1,H4:1,H5:1,H6:1,IMG:1},styleAllow={'color':1,'background-color':1,'font-weight':1,'font-style':1,'text-decoration':1,'font-family':1,'font-size':1,'text-align':1},nodes,i,n,attrs,j,a,clean=[],prop,val;
+  template.innerHTML=String(html||'');
+  nodes=template.content.querySelectorAll('*');
+  for(i=nodes.length-1;i>=0;i--){n=nodes[i];if(!allowed[String(n.tagName||'').toUpperCase()]){while(n.firstChild)n.parentNode.insertBefore(n.firstChild,n);if(n.parentNode)n.parentNode.removeChild(n);continue;}attrs=Array.prototype.slice.call(n.attributes||[]);for(j=0;j<attrs.length;j++){a=attrs[j];if(a.name==='style')continue;if(String(n.tagName).toUpperCase()==='IMG'&&a.name==='src'&&/^data:image\/(?:png|jpeg|gif|webp);base64,/i.test(a.value)&&a.value.length<=6*1024*1024)continue;if(String(n.tagName).toUpperCase()==='IMG'&&a.name==='alt')continue;n.removeAttribute(a.name);}if(n.hasAttribute&&n.hasAttribute('style')){clean=[];String(n.getAttribute('style')||'').split(';').forEach(function(x){var q=x.indexOf(':');if(q<1)return;prop=x.substring(0,q).trim().toLowerCase();val=x.substring(q+1).trim();if(styleAllow[prop]&&!/[<>{}]/.test(val))clean.push(prop+':'+val);});if(clean.length)n.setAttribute('style',clean.join(';'));else n.removeAttribute('style');}}
+  return template.innerHTML;
+}
+
+function jplopsoft_xshAttachRichEditEvents(ctx,id,n){
+  function send(action,e){jplopsoft_xshSendEvent(ctx,{event:'control',controlId:id,action:action,text:String(n.innerText||''),html:jplopsoft_xshSanitizeRichHtml(n.innerHTML),key:String(e&&e.key||''),code:String(e&&e.code||''),ctrlKey:!!(e&&e.ctrlKey),shiftKey:!!(e&&e.shiftKey),altKey:!!(e&&e.altKey)});}
+  n.oninput=function(e){send('input',e);};n.onchange=function(e){send('change',e);};n.onkeydown=function(e){send('keydown',e);};n.onkeyup=function(e){send('keyup',e);};n.onblur=function(e){send('blur',e);};n.onfocus=function(e){send('focus',e);};
+  n.onpaste=function(e){var cd=e&&e.clipboardData,html='',text='';try{if(cd){html=String(cd.getData('text/html')||'');text=String(cd.getData('text/plain')||'');}}catch(ignore){}if(!html&&!text)return;try{e.preventDefault();}catch(ignore2){}n.focus();try{if(html)document.execCommand('insertHTML',false,jplopsoft_xshSanitizeRichHtml(html));else document.execCommand('insertText',false,text);}catch(ignore3){}send('input',e);};
+}
+
 function jplopsoft_xshCreateControl(ctx,hwnd,spec){
   var client=jplopsoft_GetClientElement(parseInt(hwnd,10)||0),
       s=spec||{},
@@ -22798,6 +22835,16 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
       n.spellcheck=!!s.spellcheck;
     }
     jplopsoft_xshAttachTextControlEvents(ctx,id,n);
+  }else if(type==='richedit'){
+    n=document.createElement('div');
+    n.className='jplopsoft_xsh-control jplopsoft_xsh-control-richedit';
+    n.setAttribute('data-exos-rich-edit','1');
+    n.contentEditable=s.readOnly?'false':'true';
+    n.setAttribute('aria-readonly',s.readOnly?'true':'false');
+    n.spellcheck=typeof s.spellcheck==='undefined'?true:!!s.spellcheck;
+    if(typeof s.html!=='undefined')n.innerHTML=jplopsoft_xshSanitizeRichHtml(s.html);
+    else n.textContent=String(s.text||s.value||'');
+    jplopsoft_xshAttachRichEditEvents(ctx,id,n);
   }else if(type==='textarea'){
     n=document.createElement('textarea');
     n.className=
@@ -23938,6 +23985,15 @@ async function jplopsoft_xshSystemOpenPath(ctx,path){
     return{ok:true,pid:child.pid,audioPreview:true,path:jplopsoft_xshNodePath(n)};
   }
 
+  if(/\.zip$/i.test(String(jplopsoft_decName(n)||''))){
+    child=await jplopsoft_runBuiltinXsh(
+      'zipfolder',
+      [jplopsoft_xshNodePath(n)],
+      ctx
+    );
+    return{ok:true,pid:child.pid,path:jplopsoft_xshNodePath(n),compressedFolder:true};
+  }
+
   if(fmt==='xsh'){
     child=await jplopsoft_runXshNode(
       n.id,
@@ -25015,6 +25071,16 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     if(method==='PromptBox')return jplopsoft_xshPromptBox(ctx,args[0],args[1],args[2]);
     if(method==='ConfirmBox')return jplopsoft_xshConfirmBox(ctx,args[0],args[1]);
     if(method==='MessageBox'){await jplopsoft_exosMessage(String(args[0]||''),String(args[1]||ctx.name));return 1;}
+    if(method==='OpenClipboard')return jplopsoft_xshClipboardOpen(ctx);
+    if(method==='CloseClipboard')return jplopsoft_xshClipboardClose(ctx);
+    if(method==='EmptyClipboard'){jplopsoft_xshClipboardEnsureOwner(ctx);jplopsoft_XSH_CLIPBOARD.formats={};jplopsoft_XSH_CLIPBOARD.sequence++;return true;}
+    if(method==='SetClipboardData')return await jplopsoft_xshClipboardSet(ctx,args[0],args[1]);
+    if(method==='GetClipboardData')return await jplopsoft_xshClipboardGet(ctx,args[0],args[1]!==false);
+    if(method==='IsClipboardFormatAvailable'){var cf=jplopsoft_xshClipboardFormat(args[0]);return !!(cf&&jplopsoft_XSH_CLIPBOARD.formats.hasOwnProperty(cf));}
+    if(method==='EnumClipboardFormats')return Object.keys(jplopsoft_XSH_CLIPBOARD.formats).map(function(x){return parseInt(x,10)||0;});
+    if(method==='RegisterClipboardFormat'){var nm=String(args[0]||'');for(var ck in jplopsoft_XSH_CLIPBOARD.names)if(jplopsoft_XSH_CLIPBOARD.names.hasOwnProperty(ck)&&jplopsoft_XSH_CLIPBOARD.names[ck]===nm)return parseInt(ck,10)||0;var id=jplopsoft_XSH_CLIPBOARD.nextCustom++;jplopsoft_XSH_CLIPBOARD.names[String(id)]=nm;return id;}
+    if(method==='GetClipboardSequenceNumber')return jplopsoft_XSH_CLIPBOARD.sequence;
+    if(method==='QueryClipboardCapabilities')return{browserClipboard:!!navigator.clipboard,secureContext:!!window.isSecureContext,clipboardItem:typeof ClipboardItem==='function',internalFallback:true,formats:['CF_TEXT','CF_UNICODETEXT','CF_BITMAP','CF_DIB','CF_RTF']};
     if(method==='PostMessage')return jplopsoft_xshPostMessage(ctx,{hwnd:args[0],message:args[1],wParam:args[2],lParam:args[3]});
     if(method==='PeekMessage')return jplopsoft_xshPeekMessage(ctx,args[0]!==false);
     if(method==='GetMessage')return await jplopsoft_xshGetMessage(ctx,args[0]);
@@ -25070,6 +25136,13 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     return await jplopsoft_comdlg32Dispatch(ctx,method,args);
   }
 
+  if(api==='zipfldr'){
+    if(typeof jplopsoft_zipfldrDispatch!=='function'){
+      throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_zipfldr.js is not loaded.');
+    }
+    return await jplopsoft_zipfldrDispatch(ctx,method,args);
+  }
+
   if(api==='shell32'){
     if(typeof jplopsoft_shell32Dispatch!=='function'){
       throw jplopsoft_xshError(
@@ -25100,6 +25173,14 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     if(typeof jplopsoft_mediaDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_media.js is not loaded.');
     return await jplopsoft_mediaDispatch(ctx,method,args);
   }
+
+  if(api==='wininet'){if(typeof jplopsoft_wininetDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_wininet.js is not loaded.');return await jplopsoft_wininetDispatch(ctx,method,args);}
+  if(api==='ws2_32'){if(typeof jplopsoft_ws2Dispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_ws2_32.js is not loaded.');return await jplopsoft_ws2Dispatch(ctx,method,args);}
+  if(api==='ole32'){if(typeof jplopsoft_ole32Dispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_ole32.js is not loaded.');return await jplopsoft_ole32Dispatch(ctx,method,args);}
+  if(api==='crypt32'){if(typeof jplopsoft_crypt32Dispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_crypt32.js is not loaded.');return await jplopsoft_crypt32Dispatch(ctx,method,args);}
+  if(api==='bcrypt'){if(typeof jplopsoft_bcryptDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_crypt32.js is not loaded.');return await jplopsoft_bcryptDispatch(ctx,method,args);}
+  if(api==='richedit'){if(typeof jplopsoft_richeditDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_richedit.js is not loaded.');return await jplopsoft_richeditDispatch(ctx,method,args);}
+  if(api==='webview2'){if(typeof jplopsoft_webview2Dispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_webview2.js is not loaded.');return await jplopsoft_webview2Dispatch(ctx,method,args);}
 
   if(api==='exes'){
     if(method==='GetStatus')return{engine:'ExES V6',vaultUnlocked:!!state.vaultKey,systemVdo:jplopsoft_xshSystemVdoInfo()};
@@ -25918,6 +25999,12 @@ async function jplopsoft_xshTerminate(ctx,exitCode,reason,skipKernel){
   }
   ctx.asyncIrps={};
   jplopsoft_xshConsoleCancelReads(ctx);
+  if(typeof jplopsoft_zipfldrCleanup==='function'){try{jplopsoft_zipfldrCleanup(ctx);}catch(ignoreZipFldrCleanup){}}
+  if(typeof jplopsoft_wininetCleanup==='function'){try{jplopsoft_wininetCleanup(ctx);}catch(ignoreWininetCleanup){}}
+  if(typeof jplopsoft_ws2Cleanup==='function'){try{jplopsoft_ws2Cleanup(ctx);}catch(ignoreWs2Cleanup){}}
+  if(typeof jplopsoft_ole32Cleanup==='function'){try{jplopsoft_ole32Cleanup(ctx);}catch(ignoreOleCleanup){}}
+  if(typeof jplopsoft_webview2Cleanup==='function'){try{jplopsoft_webview2Cleanup(ctx);}catch(ignoreWebViewCleanup){}}
+  jplopsoft_xshClipboardClose(ctx);
   if(typeof jplopsoft_comdlg32CleanupContext==='function'){
     try{jplopsoft_comdlg32CleanupContext(ctx);}catch(ignoreComdlgCleanup){}
   }
@@ -27970,6 +28057,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os75',
+  version:'6.4.0-dev-os77',
   build:'external-os-comctl32-split-core-controls'
 };
