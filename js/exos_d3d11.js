@@ -1,5 +1,5 @@
 /* ExOS d3d11.dll emulation
- * Version: 6.4.0-dev-os69
+ * Version: 6.4.0-dev-os70
  * Model: EXOS_D3D11_V1
  * Client: V8-only browsers
  *
@@ -10,7 +10,7 @@
 (function(global){
 'use strict';
 
-var API={version:'6.4.0-dev-os69',model:'EXOS_D3D11_V1',ready:true};
+var API={version:'6.4.0-dev-os70',model:'EXOS_D3D11_V1',ready:true};
 var T={DEVICE:'DEVICE',CONTEXT:'CONTEXT',SWAPCHAIN:'SWAPCHAIN',BUFFER:'BUFFER',TEXTURE2D:'TEXTURE2D',RTV:'RTV',DSV:'DSV',SRV:'SRV',VS:'VS',PS:'PS',LAYOUT:'LAYOUT',SAMPLER:'SAMPLER',RASTERIZER:'RASTERIZER',BLEND:'BLEND',DEPTHSTATE:'DEPTHSTATE'};
 var BIND={VERTEX:0x1,INDEX:0x2,CONSTANT:0x4,SHADER_RESOURCE:0x8,RENDER_TARGET:0x20,DEPTH_STENCIL:0x40};
 var TOPO={POINTLIST:1,LINELIST:2,LINESTRIP:3,TRIANGLELIST:4,TRIANGLESTRIP:5};
@@ -25,7 +25,7 @@ function nv(v,d){v=Number(v);return isFinite(v)?v:(d||0);}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function ownWindow(ctx,hwnd){return !!(ctx&&ctx.windows&&ctx.windows[String(iv(hwnd))]);}
 function client(hwnd){return typeof global.jplopsoft_GetClientElement==='function'?global.jplopsoft_GetClientElement(iv(hwnd)):null;}
-function state(ctx){if(!ctx.d3d11)ctx.d3d11={next:0x6000,objects:{},surfaces:{},objectCount:0,bufferBytes:0,textureBytes:0,maxObjects:4096,maxBufferBytes:256*1024*1024,maxTextureBytes:512*1024*1024};return ctx.d3d11;}
+function state(ctx){if(!ctx.d3d11)ctx.d3d11={next:0x6000,objects:{},surfaces:{},objectCount:0,bufferBytes:0,textureBytes:0,maxObjects:4096,maxBufferBytes:256*1024*1024,maxTextureBytes:512*1024*1024,frameStats:{frames:0,bytes:0,totalMs:0,maxMs:0,lastMs:0}};return ctx.d3d11;}
 function alloc(ctx,type,o){var s=state(ctx),h;if(s.objectCount>=s.maxObjects)throw quota('D3D11 live-object quota exceeded.');h=s.next++;while(s.objects[String(h)])h=s.next++;o=o||{};o.type=type;o.handle=h;s.objects[String(h)]=o;s.objectCount++;return h;}
 function obj(ctx,h,type){var o=state(ctx).objects[String(iv(h))]||null;if(!o||(type&&o.type!==type))throw invalid('Invalid '+String(type||'D3D11')+' handle.');return o;}
 function deviceOf(ctx,h){return obj(ctx,h,T.DEVICE);}
@@ -67,6 +67,7 @@ if(method==='D3D11CreateDevice'){desc=args[0]||{};sf=offscreenSurface(desc);bund
 if(method==='D3D11CreateDeviceAndSwapChain'){var hwnd=iv(args[0]);desc=args[1]||{};sf=canvasSurface(ctx,hwnd,desc);bundle=deviceBundle(ctx,sf);sc=alloc(ctx,T.SWAPCHAIN,{device:bundle.device,context:bundle.context,hwnd:hwnd,surface:sf,desc:desc});var bb=alloc(ctx,T.TEXTURE2D,{device:bundle.device,kind:'backbuffer',swapChain:sc,width:sf.canvas.width,height:sf.canvas.height,bytes:0});obj(ctx,bundle.device,T.DEVICE).swapChain=sc;return{device:bundle.device,context:bundle.context,swapChain:sc,backBuffer:bb,featureLevel:bundle.featureLevel,driverType:bundle.driverType,width:sf.width,height:sf.height};}
 if(method==='GetDeviceInfo'){d=deviceOf(ctx,args[0]);return{featureLevel:d.webgl2?'D3D_FEATURE_LEVEL_11_0':'D3D_FEATURE_LEVEL_9_3',backend:d.webgl2?'WebGL2':'WebGL1',vendor:String(d.gl.getParameter(d.gl.VENDOR)||'WebGL'),renderer:String(d.gl.getParameter(d.gl.RENDERER)||'WebGL'),maxTextureSize:iv(d.gl.getParameter(d.gl.MAX_TEXTURE_SIZE)),maxVertexAttribs:iv(d.gl.getParameter(d.gl.MAX_VERTEX_ATTRIBS)),shaderLanguage:'GLSL ES'};}
 if(method==='GetLiveObjectSummary'){var counts={},kk;for(kk in s.objects)if(s.objects.hasOwnProperty(kk)){var t=s.objects[kk].type;counts[t]=(counts[t]||0)+1;}return{objects:s.objectCount,byType:counts,bufferBytes:s.bufferBytes,textureBytes:s.textureBytes};}
+if(method==='GetFrameStats'){var fs=s.frameStats||{frames:0,bytes:0,totalMs:0,maxMs:0,lastMs:0};return{frames:fs.frames,bytes:fs.bytes,totalMs:fs.totalMs,maxMs:fs.maxMs,lastMs:fs.lastMs,avgMs:fs.frames?fs.totalMs/fs.frames:0};}
 if(method==='CreateBuffer'){d=deviceOf(ctx,args[0]);desc=args[1]||{};bytes=resourceBytes(desc,'buffer');if(bytes<=0||bytes>128*1024*1024)throw param('Invalid D3D11 buffer size.');if(s.bufferBytes+bytes>s.maxBufferBytes)throw quota('D3D11 buffer memory quota exceeded.');data=typed(args[2],desc.format);if(data&&data.byteLength>bytes)throw param('Initial buffer data exceeds ByteWidth.');gl=d.gl;var target=(iv(desc.bindFlags)&BIND.INDEX)?gl.ELEMENT_ARRAY_BUFFER:gl.ARRAY_BUFFER;var b=gl.createBuffer();gl.bindBuffer(target,b);if(data)gl.bufferData(target,data,usage(gl,desc));else gl.bufferData(target,bytes,usage(gl,desc));h=alloc(ctx,T.BUFFER,{device:d.handle,gl:gl,buffer:b,target:target,desc:desc,bytes:bytes,shadow:data?Array.prototype.slice.call(data):null,format:String(desc.format||'FLOAT32')});s.bufferBytes+=bytes;return h;}
 if(method==='CreateTexture2D'){d=deviceOf(ctx,args[0]);desc=args[1]||{};var w=Math.max(1,iv(desc.width,1)),hh=Math.max(1,iv(desc.height,1));if(w>8192||hh>8192)throw param('Texture dimension exceeds ExOS D3D11 limit.');bytes=w*hh*4;if(s.textureBytes+bytes>s.maxTextureBytes)throw quota('D3D11 texture memory quota exceeded.');gl=d.gl;var gt=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,gt);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,desc.mipLevels>1?gl.LINEAR_MIPMAP_LINEAR:gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);data=typed(args[2],'UINT8');gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,hh,0,gl.RGBA,gl.UNSIGNED_BYTE,data);h=alloc(ctx,T.TEXTURE2D,{device:d.handle,gl:gl,texture:gt,width:w,height:hh,desc:desc,bytes:bytes});s.textureBytes+=bytes;return h;}
 if(method==='CreateRenderTargetView'){d=deviceOf(ctx,args[0]);tex=obj(ctx,args[1],T.TEXTURE2D);gl=d.gl;if(tex.kind==='backbuffer')return alloc(ctx,T.RTV,{device:d.handle,resource:tex.handle,framebuffer:null,backbuffer:true});var fb=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tex.texture,0);if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE){gl.deleteFramebuffer(fb);throw unsupported('Render-target framebuffer is incomplete.');}gl.bindFramebuffer(gl.FRAMEBUFFER,null);return alloc(ctx,T.RTV,{device:d.handle,resource:tex.handle,framebuffer:fb,backbuffer:false});}
@@ -99,6 +100,72 @@ if(method==='ClearDepthStencilView'){c=contextOf(ctx,args[0]);gl=c.gl;bindTarget
 if(method==='Draw'){c=contextOf(ctx,args[0]);gl=c.gl;applyPipeline(ctx,c);gl.drawArrays(topology(gl,c.state.topology),iv(args[2]),iv(args[1]));return true;}
 if(method==='DrawIndexed'){c=contextOf(ctx,args[0]);if(!c.state.indexBuffer)throw param('No index buffer is bound.');gl=c.gl;applyPipeline(ctx,c);var it=String(c.state.indexBuffer.format).toUpperCase()==='R32_UINT'?gl.UNSIGNED_INT:gl.UNSIGNED_SHORT,sz=it===gl.UNSIGNED_INT?4:2;gl.drawElements(topology(gl,c.state.topology),iv(args[1]),it,iv(c.state.indexBuffer.offset)+iv(args[2])*sz);return true;}
 if(method==='UpdateSubresource'){o=obj(ctx,args[1]);data=typed(args[2],o.format||(o.desc&&o.desc.format));if(o.type===T.BUFFER){gl=o.gl;gl.bindBuffer(o.target,o.buffer);gl.bufferSubData(o.target,iv(args[3]),data);o.shadow=Array.prototype.slice.call(data);return true;}if(o.type===T.TEXTURE2D&&o.texture){gl=o.gl;gl.bindTexture(gl.TEXTURE_2D,o.texture);gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,o.width,o.height,gl.RGBA,gl.UNSIGNED_BYTE,data);return true;}throw unsupported('UpdateSubresource supports buffers and Texture2D only.');}
+if(method==='PresentTextureFrame'){
+  c=contextOf(ctx,args[0]);
+  o=obj(ctx,args[1],T.TEXTURE2D);
+  data=typed(args[2],o.format||(o.desc&&o.desc.format)||'UINT8');
+
+  var po=args[3]||{},
+      vertexCount=Math.max(1,iv(po.vertexCount,6)),
+      startVertex=Math.max(0,iv(po.startVertex,0)),
+      t0=(global.performance&&typeof global.performance.now==='function')
+        ?global.performance.now()
+        :Date.now();
+
+  if(!o.texture)throw unsupported('PresentTextureFrame requires a Texture2D resource.');
+  if(data.byteLength!==o.width*o.height*4){
+    throw param(
+      'PresentTextureFrame byte length mismatch. Expected '+
+      String(o.width*o.height*4)+', got '+String(data.byteLength)+'.'
+    );
+  }
+
+  gl=c.gl;
+  gl.bindTexture(gl.TEXTURE_2D,o.texture);
+
+  /*
+   * os70 fast video path:
+   * The XSH already owns a packed 32-bit software framebuffer. Upload it
+   * directly once, then execute the already-bound D3D11 pipeline and flush.
+   * Color-channel swizzling belongs in the pixel shader, not in a 64K-pixel
+   * JavaScript loop.
+   */
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT,4);
+  gl.texSubImage2D(
+    gl.TEXTURE_2D,
+    0,
+    0,0,
+    o.width,o.height,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    data
+  );
+
+  applyPipeline(ctx,c);
+  gl.drawArrays(
+    topology(gl,c.state.topology),
+    startVertex,
+    vertexCount
+  );
+
+  if(po.flush!==false){
+    try{gl.flush();}catch(ignoreFastFlush){}
+  }
+
+  var t1=(global.performance&&typeof global.performance.now==='function')
+        ?global.performance.now()
+        :Date.now(),
+      elapsed=Math.max(0,t1-t0),
+      fs=s.frameStats;
+
+  fs.frames++;
+  fs.bytes+=data.byteLength;
+  fs.lastMs=elapsed;
+  fs.totalMs+=elapsed;
+  if(elapsed>fs.maxMs)fs.maxMs=elapsed;
+
+  return true;
+}
 if(method==='Map'){o=obj(ctx,args[1]);if(o.type!==T.BUFFER)throw unsupported('ExOS Map currently supports D3D11 buffers only.');if((o.bytes||0)>8*1024*1024)throw quota('Mapped buffer exceeds the 8 MiB XSH RPC map limit.');return{data:o.shadow?o.shadow.slice():[],byteWidth:o.bytes,format:o.format};}
 if(method==='Unmap'){o=obj(ctx,args[1],T.BUFFER);data=typed(args[2],o.format);gl=o.gl;gl.bindBuffer(o.target,o.buffer);gl.bufferSubData(o.target,0,data);o.shadow=Array.prototype.slice.call(data);return true;}
 if(method==='GenerateMips'){c=contextOf(ctx,args[0]);view=obj(ctx,args[1],T.SRV);tex=obj(ctx,view.resource,T.TEXTURE2D);gl=c.gl;gl.bindTexture(gl.TEXTURE_2D,tex.texture);gl.generateMipmap(gl.TEXTURE_2D);return true;}

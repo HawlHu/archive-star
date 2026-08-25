@@ -1,6 +1,6 @@
 /* ExOS advapi32.dll emulation
  * File: exos_advapi32.js
- * Version: 6.4.0-dev-os69
+ * Version: 6.4.0-dev-os70
  * Model: EXOS_ADVAPI32_V2
  * Client: V8-only browsers
  *
@@ -18,7 +18,7 @@
 'use strict';
 
 var ADV={
-  version:'6.4.0-dev-os69',
+  version:'6.4.0-dev-os70',
   model:'EXOS_ADVAPI32_V2',
   ready:true
 };
