@@ -1,5 +1,5 @@
 /* ExOS wininet.dll emulation
- * Version: 6.4.0-dev-os77
+ * Version: 6.4.0-dev-os79
  * Model: EXOS_WININET_V1
  * Client: V8-only browsers
  *
@@ -8,7 +8,7 @@
  */
 (function(global){
 'use strict';
-var API={version:'6.4.0-dev-os77',model:'EXOS_WININET_V1',ready:true};
+var API={version:'6.4.0-dev-os79',model:'EXOS_WININET_V1',ready:true};
 var POLICY={
   name:'PUBLIC_WEB_ONLY',
   schemes:['http:','https:'],

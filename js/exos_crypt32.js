@@ -1,11 +1,11 @@
 /* ExOS crypt32.dll + bcrypt.dll emulation
- * Version: 6.4.0-dev-os77
+ * Version: 6.4.0-dev-os79
  * Models: EXOS_CRYPT32_V1 / EXOS_BCRYPT_V1
  * Bridges XSH to trusted host ex_md3.js, exes.js and Web Crypto.
  */
 (function(global){'use strict';
-var C={version:'6.4.0-dev-os77',model:'EXOS_CRYPT32_V1',ready:true};
-var B={version:'6.4.0-dev-os77',model:'EXOS_BCRYPT_V1',ready:true};
+var C={version:'6.4.0-dev-os79',model:'EXOS_CRYPT32_V1',ready:true};
+var B={version:'6.4.0-dev-os79',model:'EXOS_BCRYPT_V1',ready:true};
 function exerr(s,m){if(typeof global.jplopsoft_xshError==='function')return global.jplopsoft_xshError(s,m);var e=new Error(m);e.ntstatus=s;return e;}
 function st(n,d){var k='jplopsoft_STATUS_'+n;return typeof global[k]!=='undefined'?global[k]:d;}
 function need(){if(typeof global.ex_md3!=='function'||typeof global.ex_md3n!=='function'||typeof global.exesEncrypt!=='function'||typeof global.exesDecrypt!=='function')throw exerr(st('NOT_SUPPORTED',0xC00000BB),'ex_md3.js / exes.js host crypto is unavailable.');}

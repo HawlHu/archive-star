@@ -1,5 +1,5 @@
 /* ExOS comdlg32.dll emulation
- * Version: 6.4.0-dev-os77
+ * Version: 6.4.0-dev-os79
  * Model: EXOS_COMDLG32_V1
  * Client: V8-only browsers
  *
@@ -19,7 +19,7 @@
 'use strict';
 
 var API={
-  version:'6.4.0-dev-os77',
+  version:'6.4.0-dev-os79',
   model:'EXOS_COMDLG32_V1',
   ready:true
 };

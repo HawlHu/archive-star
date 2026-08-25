@@ -1,10 +1,10 @@
 /* ExOS ole32.dll emulation
- * Version: 6.4.0-dev-os77
+ * Version: 6.4.0-dev-os79
  * Model: EXOS_OLE32_V1
  * OLE data objects, ExOS clipboard bridge and process-to-process drag broker.
  */
 (function(global){'use strict';
-var API={version:'6.4.0-dev-os77',model:'EXOS_OLE32_V1',ready:true};
+var API={version:'6.4.0-dev-os79',model:'EXOS_OLE32_V1',ready:true};
 var DRAG={active:null,targets:{}};
 function exerr(s,m){if(typeof global.jplopsoft_xshError==='function')return global.jplopsoft_xshError(s,m);var e=new Error(m);e.ntstatus=s;return e;}
 function st(n,d){var k='jplopsoft_STATUS_'+n;return typeof global[k]!=='undefined'?global[k]:d;}

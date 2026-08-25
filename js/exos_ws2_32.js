@@ -1,10 +1,10 @@
 /* ExOS ws2_32.dll emulation
- * Version: 6.4.0-dev-os77
+ * Version: 6.4.0-dev-os79
  * Model: EXOS_WS2_32_V1
  * Browser limitation: WebSocket broker only; raw TCP/UDP sockets are not exposed.
  */
 (function(global){'use strict';
-var API={version:'6.4.0-dev-os77',model:'EXOS_WS2_32_V1',ready:true};
+var API={version:'6.4.0-dev-os79',model:'EXOS_WS2_32_V1',ready:true};
 function exerr(status,msg){if(typeof global.jplopsoft_xshError==='function')return global.jplopsoft_xshError(status,msg);var e=new Error(msg);e.ntstatus=status;return e;}
 function st(n,d){var k='jplopsoft_STATUS_'+n;return typeof global[k]!=='undefined'?global[k]:d;}
 function state(ctx){if(!ctx.ws2)ctx.ws2={next:0xA800,sockets:{},started:false};return ctx.ws2;}
