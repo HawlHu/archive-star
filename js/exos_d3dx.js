@@ -1,12 +1,12 @@
 /* ExOS d3dx.dll / three32.dll emulation
- * Version: 6.4.0-dev-os64
+ * Version: 6.4.0-dev-os65
  * Model: EXOS_D3DX_V1
  * Three.js-backed high-level 3D scene API for XSH applications.
  * Host objects are process-local handles; raw host DOM/THREE objects never cross RPC.
  */
 (function(global){
 'use strict';
-var API={version:'6.4.0-dev-os64',model:'EXOS_D3DX_V1',ready:true};
+var API={version:'6.4.0-dev-os65',model:'EXOS_D3DX_V1',ready:true};
 function exerr(status,msg){if(typeof global.jplopsoft_xshError==='function')return global.jplopsoft_xshError(status,msg);var e=new Error(msg);e.status=status;return e;}
 function invalid(msg){return exerr(global.jplopsoft_STATUS_INVALID_HANDLE||0xC0000008,msg||'Invalid D3DX handle.');}
 function unsupported(msg){return exerr(global.jplopsoft_STATUS_NOT_SUPPORTED||0xC00000BB,msg||'D3DX operation not supported.');}

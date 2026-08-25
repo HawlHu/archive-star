@@ -1,5 +1,5 @@
 /* ExOS NT Kernel BugCheck Runtime
- * Version: 6.4.0-dev-os64
+ * Version: 6.4.0-dev-os65
  * Model: EXOS_NTOSKRNL_BUGCHECK_V1
  * Client: V8-only browsers
  *
@@ -11,7 +11,7 @@
 'use strict';
 
 var KERNEL={
-  version:'6.4.0-dev-os64',
+  version:'6.4.0-dev-os65',
   model:'EXOS_NTOSKRNL_BUGCHECK_V1',
   ready:true,
   vmm:{
