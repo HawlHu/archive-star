@@ -1,6 +1,6 @@
 /* ExOS Common Controls Host Runtime
  * File: exos_comctl32.js
- * Version: 6.4.0-dev-os57
+ * Version: 6.4.0-dev-os58
  * Model: EXOS_COMCTL32_V2
  * Client: V8-only browsers
  *
@@ -13,7 +13,7 @@
   if(
     global.jplopsoft_EXOS_COMCTL32&&
     global.jplopsoft_EXOS_COMCTL32.ready===true&&
-    String(global.jplopsoft_EXOS_COMCTL32.version||'')==='6.4.0-dev-os57'
+    String(global.jplopsoft_EXOS_COMCTL32.version||'')==='6.4.0-dev-os58'
   ){
     return;
   }
@@ -32,6 +32,31 @@
   }
 
   jplopsoft_comctlInstallStyles();
+
+function jplopsoft_comctlBrowserFiles(e){
+  try{return e&&e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length?e.dataTransfer.files:null;}catch(ignore){return null;}
+}
+function jplopsoft_comctlExternalDrop(ctx,e){
+  var files=jplopsoft_comctlBrowserFiles(e),out=[];
+  if(!files)return null;
+  try{e.__exosXshDropHandled=true;}catch(ignoreMark){}
+  try{e.preventDefault();}catch(ignorePrevent){}
+  try{e.stopPropagation();}catch(ignoreStop){}
+  try{if(e.dataTransfer)e.dataTransfer.dropEffect='copy';}catch(ignoreEffect){}
+  if(typeof global.jplopsoft_xshRegisterDroppedFiles!=='function'){
+    throw new Error('ExOS browser-drop token bridge is unavailable.');
+  }
+  out=global.jplopsoft_xshRegisterDroppedFiles(ctx,files,{maxBytes:1024*1024*1024});
+  return out;
+}
+function jplopsoft_comctlExternalDragOver(e){
+  if(!jplopsoft_comctlBrowserFiles(e))return false;
+  try{e.__exosXshDropHandled=true;}catch(ignoreMark){}
+  try{e.preventDefault();}catch(ignorePrevent){}
+  try{e.stopPropagation();}catch(ignoreStop){}
+  try{if(e.dataTransfer)e.dataTransfer.dropEffect='copy';}catch(ignoreEffect){}
+  return true;
+}
 
 function jplopsoft_comctlEnsureContext(ctx){
   if(!ctx.commonControls)ctx.commonControls={};
@@ -162,6 +187,24 @@ function jplopsoft_comctlListTemplate(state){
   var cols=state.columns,
       out=[],
       i;
+
+  if(state.dragDrop){
+    root.setAttribute('data-exos-browser-drop-zone','1');
+    body.setAttribute('data-exos-browser-drop-zone','1');
+    body.ondragover=function(e){
+      if(jplopsoft_comctlExternalDragOver(e))return;
+      try{e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect=e.ctrlKey?'copy':'move';}catch(ignoreBodyDragOver){}
+    };
+    body.ondrop=function(e){
+      var dropped=jplopsoft_comctlExternalDrop(ctx,e);
+      if(dropped){
+        jplopsoft_comctlNotify(ctx,state.id,'NM_DROP',{item:null,ctrlKey:false,externalFiles:dropped,external:true});
+        return;
+      }
+      try{e.preventDefault();e.stopPropagation();}catch(ignoreBodyDrop){}
+      jplopsoft_comctlNotify(ctx,state.id,'NM_DROP',{item:null,ctrlKey:!!(e&&e.ctrlKey)});
+    };
+  }
 
   for(i=0;i<cols.length;i++){
     out.push(
@@ -495,6 +538,7 @@ function jplopsoft_comctlListBindItem(
       jplopsoft_comctlNotify(ctx,state.id,'LVN_BEGINDRAG',{item:{id:item.id,text:item.text,data:item.data}});
     };
     node.ondragover=function(e){
+      if(jplopsoft_comctlExternalDragOver(e))return;
       try{
         e.preventDefault();
         if(e.dataTransfer)e.dataTransfer.dropEffect=e.ctrlKey?'copy':'move';
@@ -502,7 +546,12 @@ function jplopsoft_comctlListBindItem(
       jplopsoft_comctlNotify(ctx,state.id,'LVN_DRAGOVER',{item:{id:item.id,text:item.text,data:item.data},ctrlKey:!!(e&&e.ctrlKey)});
     };
     node.ondrop=function(e){
-      try{e.preventDefault();}catch(ignoreDrop){}
+      var dropped=jplopsoft_comctlExternalDrop(ctx,e);
+      if(dropped){
+        jplopsoft_comctlNotify(ctx,state.id,'NM_DROP',{item:{id:item.id,text:item.text,data:item.data},ctrlKey:false,externalFiles:dropped,external:true});
+        return;
+      }
+      try{e.preventDefault();e.stopPropagation();}catch(ignoreDrop){}
       jplopsoft_comctlNotify(ctx,state.id,'NM_DROP',{item:{id:item.id,text:item.text,data:item.data},ctrlKey:!!(e&&e.ctrlKey)});
     };
   }
@@ -1558,7 +1607,23 @@ function jplopsoft_comctlTreeFlatten(
 
     if(node.children.length){
       map[node.id].hasChildren=true;
-      jplopsoft_comctlTreeFlatten(
+      if(state.dragDrop){
+    root.setAttribute('data-exos-browser-drop-zone','1');
+    root.ondragover=function(e){
+      if(jplopsoft_comctlExternalDragOver(e))return;
+      try{e.preventDefault();}catch(ignoreTreeRootOver){}
+    };
+    root.ondrop=function(e){
+      var dropped=jplopsoft_comctlExternalDrop(ctx,e);
+      if(dropped){
+        jplopsoft_comctlNotify(ctx,state.id,'TVN_DROP',{item:null,ctrlKey:false,externalFiles:dropped,external:true});
+        return;
+      }
+      try{e.preventDefault();e.stopPropagation();}catch(ignoreTreeRootDrop){}
+    };
+  }
+
+  jplopsoft_comctlTreeFlatten(
         node.children,
         node.id,
         map,
@@ -1705,6 +1770,7 @@ function jplopsoft_comctlTreeRenderBranch(
 
     if(state.dragDrop){
       row.ondragover=function(e){
+        if(jplopsoft_comctlExternalDragOver(e))return;
         try{
           e.preventDefault();
           if(e.dataTransfer)e.dataTransfer.dropEffect=e.ctrlKey?'copy':'move';
@@ -1712,7 +1778,12 @@ function jplopsoft_comctlTreeRenderBranch(
         jplopsoft_comctlNotify(ctx,state.id,'TVN_DRAGOVER',{item:jplopsoft_comctlTreeSnapshotItem(state,item.id),ctrlKey:!!(e&&e.ctrlKey)});
       };
       row.ondrop=function(e){
-        try{e.preventDefault();}catch(ignoreTreeDrop){}
+        var dropped=jplopsoft_comctlExternalDrop(ctx,e);
+        if(dropped){
+          jplopsoft_comctlNotify(ctx,state.id,'TVN_DROP',{item:jplopsoft_comctlTreeSnapshotItem(state,item.id),ctrlKey:false,externalFiles:dropped,external:true});
+          return;
+        }
+        try{e.preventDefault();e.stopPropagation();}catch(ignoreTreeDrop){}
         jplopsoft_comctlNotify(ctx,state.id,'TVN_DROP',{item:jplopsoft_comctlTreeSnapshotItem(state,item.id),ctrlKey:!!(e&&e.ctrlKey)});
       };
     }
@@ -4076,7 +4147,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
     return{
       ok:true,
       model:'EXOS_COMCTL32_V2',
-      version:'6.4.0-dev-os57',
+      version:'6.4.0-dev-os58',
       classes:jplopsoft_comctlClasses()
     };
   }
@@ -4084,7 +4155,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
   if(method==='GetCommonControlsVersion'){
     return{
       model:'EXOS_COMCTL32_V2',
-      version:'6.4.0-dev-os57'
+      version:'6.4.0-dev-os58'
     };
   }
 
@@ -4949,7 +5020,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
 
   global.jplopsoft_EXOS_COMCTL32=Object.freeze({
     ready:true,
-    version:'6.4.0-dev-os57',
+    version:'6.4.0-dev-os58',
     model:'EXOS_COMCTL32_V2',
     build:'external-comctl32-core-controls',
     classes:Object.freeze(jplopsoft_comctlClasses().slice())

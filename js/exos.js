@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os57
+ * Version: 6.4.0-dev-os58
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -12008,7 +12008,7 @@ function jplopsoft_uploadFiles(fileList){
 
   jplopsoft_next(0);
 }
-function jplopsoft_bindFileDrop(){var input=jplopsoft_el('jplopsoft_uploadFileInput');jplopsoft_el('jplopsoft_uploadFileBtn').onclick=function(){if(jplopsoft_isDesktopFolder())return jplopsoft_exosMessage('桌面只存放捷徑，請先進入一般資料夾再上傳。');if(!jplopsoft_isWritableProfileFolder(state.currentFolder))return jplopsoft_exosMessage('此位置唯讀。只能上傳到 C:\\Users\\'+state.samUsername+'\\ 內。');if(!state.vaultKey)return jplopsoft_exosMessage('請先解鎖。');input.value='';input.click();};input.onchange=function(){if(this.files&&this.files.length)jplopsoft_uploadFiles(this.files);this.value='';};document.addEventListener('dragenter',function(e){if(!jplopsoft_hasDraggedFiles(e))return;e.preventDefault();if(!state.vaultKey)return;state.dragDepth++;jplopsoft_showDropOverlay();});document.addEventListener('dragover',function(e){if(!jplopsoft_hasDraggedFiles(e))return;e.preventDefault();try{e.dataTransfer.dropEffect=state.vaultKey?'copy':'none';}catch(x){}if(state.vaultKey)jplopsoft_showDropOverlay();});document.addEventListener('dragleave',function(e){if(!jplopsoft_hasDraggedFiles(e)&&state.dragDepth<=0)return;if(state.dragDepth>0)state.dragDepth--;if(state.dragDepth<=0)jplopsoft_hideDropOverlay();});document.addEventListener('drop',function(e){if(!jplopsoft_hasDraggedFiles(e))return;e.preventDefault();var fs=e.dataTransfer&&e.dataTransfer.files;jplopsoft_hideDropOverlay();if(!state.vaultKey){jplopsoft_exosMessage('請先解鎖，再拖曳文件上傳。');return;}if(fs&&fs.length)jplopsoft_uploadFiles(fs);});}
+function jplopsoft_bindFileDrop(){var input=jplopsoft_el('jplopsoft_uploadFileInput');jplopsoft_el('jplopsoft_uploadFileBtn').onclick=function(){if(jplopsoft_isDesktopFolder())return jplopsoft_exosMessage('桌面只存放捷徑，請先進入一般資料夾再上傳。');if(!jplopsoft_isWritableProfileFolder(state.currentFolder))return jplopsoft_exosMessage('此位置唯讀。只能上傳到 C:\\Users\\'+state.samUsername+'\\ 內。');if(!state.vaultKey)return jplopsoft_exosMessage('請先解鎖。');input.value='';input.click();};input.onchange=function(){if(this.files&&this.files.length)jplopsoft_uploadFiles(this.files);this.value='';};document.addEventListener('dragenter',function(e){if(!jplopsoft_hasDraggedFiles(e))return;if(e.target&&e.target.closest&&e.target.closest('[data-exos-browser-drop-zone="1"]'))return;e.preventDefault();if(!state.vaultKey)return;state.dragDepth++;jplopsoft_showDropOverlay();});document.addEventListener('dragover',function(e){if(!jplopsoft_hasDraggedFiles(e))return;if(e.target&&e.target.closest&&e.target.closest('[data-exos-browser-drop-zone="1"]'))return;e.preventDefault();try{e.dataTransfer.dropEffect=state.vaultKey?'copy':'none';}catch(x){}if(state.vaultKey)jplopsoft_showDropOverlay();});document.addEventListener('dragleave',function(e){if(!jplopsoft_hasDraggedFiles(e)&&state.dragDepth<=0)return;if(state.dragDepth>0)state.dragDepth--;if(state.dragDepth<=0)jplopsoft_hideDropOverlay();});document.addEventListener('drop',function(e){if(!jplopsoft_hasDraggedFiles(e))return;if(e.defaultPrevented||e.__exosXshDropHandled){jplopsoft_hideDropOverlay();return;}e.preventDefault();var fs=e.dataTransfer&&e.dataTransfer.files;jplopsoft_hideDropOverlay();if(!state.vaultKey){jplopsoft_exosMessage('請先解鎖，再拖曳文件上傳。');return;}if(fs&&fs.length)jplopsoft_uploadFiles(fs);});}
 async function jplopsoft_createItem(type,fileFormat){
   if(jplopsoft_isDesktopFolder())return jplopsoft_exosMessage('桌面只存放捷徑，不能直接建立檔案或資料夾。');
   if(!jplopsoft_isWritableProfileFolder(state.currentFolder))return jplopsoft_exosMessage('此位置唯讀。只能在 C:\\Users\\'+state.samUsername+'\\ 內建立檔案或資料夾。');
@@ -14824,8 +14824,29 @@ function jplopsoft_SendMessage(hwnd,msg,wParam,lParam){
   return jplopsoft_DefWindowProc(hwnd,msg,wParam,lParam);
 }
 
+var jplopsoft_USER32_NC_CAPTURE_BOUND=false;
+function jplopsoft_user32InstallNcCaptureRouter(){
+  if(jplopsoft_USER32_NC_CAPTURE_BOUND||!document||!document.addEventListener)return false;
+  jplopsoft_USER32_NC_CAPTURE_BOUND=true;
+  document.addEventListener('click',function(e){
+    var t=e&&e.target,btn,hwnd,hit;
+    if(!t)return;
+    btn=t.closest?t.closest('[data-exfs-hwnd][data-exfs-nc-hit]'):null;
+    if(!btn)return;
+    hwnd=parseInt(btn.getAttribute('data-exfs-hwnd'),10)||0;
+    hit=parseInt(btn.getAttribute('data-exfs-nc-hit'),10)||0;
+    if(!hwnd||!hit)return;
+    if(e.preventDefault)e.preventDefault();
+    if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+    else if(e.stopPropagation)e.stopPropagation();
+    jplopsoft_SendMessage(hwnd,jplopsoft_WM_NCLBUTTONDOWN,hit,0);
+  },true);
+  return true;
+}
+
 function jplopsoft_user32BindNcButtonNode(hwnd,b,hitCode){
   if(!b)return false;
+  jplopsoft_user32InstallNcCaptureRouter();
 
   hwnd=parseInt(hwnd,10)||0;
   hitCode=parseInt(hitCode,10)||0;
@@ -22020,6 +22041,40 @@ async function jplopsoft_xshConfirmBox(ctx,message,title){
   );
 }
 
+function jplopsoft_xshRegisterBrowserFiles(ctx,fileList,options){
+  var opt=options||{},
+      files=fileList||[],
+      hardMax=1024*1024*1024,
+      maxBytes=Math.max(1,Math.min(hardMax,parseInt(opt.maxBytes,10)||hardMax)),
+      out=[],i,f,size,token;
+
+  if(!ctx)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'XSH process context is unavailable.');
+  if(!ctx.localFiles)ctx.localFiles={};
+  if(!ctx.nextLocalFile)ctx.nextLocalFile=1;
+
+  for(i=0;i<files.length;i++){
+    f=files[i];
+    if(!f)continue;
+    size=parseInt(f.size,10)||0;
+    if(size>maxBytes){
+      out.push({name:String(f.name||''),size:size,type:String(f.type||''),lastModified:parseInt(f.lastModified,10)||0,error:'FILE_TOO_LARGE',fileToken:''});
+      continue;
+    }
+    token='LF'+String(ctx.pid)+'_'+String(ctx.nextLocalFile++);
+    ctx.localFiles[token]={file:f,name:String(f.name||''),size:size,type:String(f.type||''),lastModified:parseInt(f.lastModified,10)||0,createdAt:(new Date()).getTime(),source:String(opt.source||'browser')};
+    out.push({name:String(f.name||''),size:size,type:String(f.type||''),lastModified:parseInt(f.lastModified,10)||0,error:'',fileToken:token});
+  }
+  return out;
+}
+
+/* Common Controls uses this bridge for native desktop/browser file drops. */
+function jplopsoft_xshRegisterDroppedFiles(ctx,fileList,options){
+  options=options||{};
+  options.source='drop';
+  return jplopsoft_xshRegisterBrowserFiles(ctx,fileList,options);
+}
+if(typeof window!=='undefined')window.jplopsoft_xshRegisterDroppedFiles=jplopsoft_xshRegisterDroppedFiles;
+
 function jplopsoft_xshPickFiles(ctx,options){
   var opt=options||{},
       tokenMode=!!opt.returnFileToken,
@@ -22095,23 +22150,8 @@ function jplopsoft_xshPickFiles(ctx,options){
          * host process and let ExOS stream it through SINGLE_V1/CHUNKED_V1.
          */
         if(tokenMode){
-          token='LF'+String(ctx.pid)+'_'+String(ctx.nextLocalFile++);
-          ctx.localFiles[token]={
-            file:f,
-            name:String(f.name||''),
-            size:size,
-            type:String(f.type||''),
-            lastModified:parseInt(f.lastModified,10)||0,
-            createdAt:(new Date()).getTime()
-          };
-          out.push({
-            name:String(f.name||''),
-            size:size,
-            type:String(f.type||''),
-            lastModified:parseInt(f.lastModified,10)||0,
-            error:'',
-            fileToken:token
-          });
+          var registered=jplopsoft_xshRegisterBrowserFiles(ctx,[f],{maxBytes:maxBytes,source:'picker'});
+          if(registered.length)out.push(registered[0]);
           next();
           return;
         }
@@ -23607,6 +23647,7 @@ async function jplopsoft_runBuiltinXsh(appId,args,parentCtx){
     eventQueue:[],
     messageDrainScheduled:false,
     explicitMessageLoop:false,
+    animationFrames:{},
     irpTrace:[],
     port:null,
     frame:null,
@@ -23785,6 +23826,7 @@ async function jplopsoft_runXshNode(id,argLine,parentProcess){
     eventQueue:[],
     messageDrainScheduled:false,
     explicitMessageLoop:false,
+    animationFrames:{},
     irpTrace:[],
     port:null,
     frame:null,
@@ -23813,6 +23855,36 @@ async function jplopsoft_runXshNode(id,argLine,parentProcess){
 
   jplopsoft_xshAttachSandbox(ctx);
   return ctx;
+}
+
+function jplopsoft_xshRequestAnimationFrame(ctx,id){
+  id=parseInt(id,10)||0;
+  if(!ctx||ctx.terminating||!ctx.port||!id)return false;
+  if(!ctx.animationFrames)ctx.animationFrames={};
+  if(ctx.animationFrames[String(id)])return true;
+  ctx.animationFrames[String(id)]=window.requestAnimationFrame(function(ts){
+    if(!ctx||ctx.terminating)return;
+    delete ctx.animationFrames[String(id)];
+    try{if(ctx.port)ctx.port.postMessage({type:'raf-fire',id:id,time:Number(ts)||0});}catch(ignoreRafPost){}
+  });
+  return true;
+}
+function jplopsoft_xshCancelAnimationFrame(ctx,id){
+  id=parseInt(id,10)||0;
+  if(!ctx||!ctx.animationFrames||!id)return false;
+  var h=ctx.animationFrames[String(id)];
+  if(!h)return false;
+  try{window.cancelAnimationFrame(h);}catch(ignoreRafCancel){}
+  delete ctx.animationFrames[String(id)];
+  return true;
+}
+function jplopsoft_xshCancelAllAnimationFrames(ctx){
+  if(!ctx||!ctx.animationFrames)return;
+  var k;
+  for(k in ctx.animationFrames)if(ctx.animationFrames.hasOwnProperty(k)){
+    try{window.cancelAnimationFrame(ctx.animationFrames[k]);}catch(ignoreRafCancelAll){}
+  }
+  ctx.animationFrames={};
 }
 
 function jplopsoft_xshOnSandboxMessage(ctx,m){
@@ -23860,6 +23932,8 @@ function jplopsoft_xshOnSandboxMessage(ctx,m){
     jplopsoft_xshSetStatus(ctx,'Running ｜ PID '+ctx.pid);
     return;
   }
+  if(m.type==='raf-request'){jplopsoft_xshRequestAnimationFrame(ctx,m.id);return;}
+  if(m.type==='raf-cancel'){jplopsoft_xshCancelAnimationFrame(ctx,m.id);return;}
   if(m.type==='stdout'){
     var a=m.args||[],parts=[],i;
     for(i=0;i<a.length;i++){
@@ -23895,7 +23969,11 @@ function jplopsoft_xshOnSandboxMessage(ctx,m){
     return;
   }
   if(m.type==='rpc'){
-    Promise.resolve().then(function(){return jplopsoft_xshDispatch(ctx,m.api,m.method,m.args);}).then(function(result){if(ctx.port)ctx.port.postMessage({type:'rpc-result',id:m.id,ok:true,result:result});}).catch(function(e){if(ctx.port)ctx.port.postMessage({type:'rpc-result',id:m.id,ok:false,error:jplopsoft_xshRpcError(e)});});return;
+    Promise.resolve().then(function(){return jplopsoft_xshDispatch(ctx,m.api,m.method,m.args);}).then(function(result){
+      if(!ctx.port)return;
+      try{ctx.port.postMessage({type:'rpc-result',id:m.id,ok:true,result:result});}
+      catch(cloneErr){ctx.port.postMessage({type:'rpc-result',id:m.id,ok:false,error:jplopsoft_xshRpcError(new Error('XSH RPC result is not structured-clone safe: '+String(cloneErr&&cloneErr.message?cloneErr.message:cloneErr)))});}
+    }).catch(function(e){if(ctx.port)ctx.port.postMessage({type:'rpc-result',id:m.id,ok:false,error:jplopsoft_xshRpcError(e)});});return;
   }
   if(m.type==='main-complete'){
     if(
@@ -23969,6 +24047,7 @@ async function jplopsoft_xshTerminate(ctx,exitCode,reason,skipKernel){
     }catch(ignoreXshTerminateBootTimer){}
     ctx.bootstrapTimer=0;
   }
+  jplopsoft_xshCancelAllAnimationFrames(ctx);
   try{if(ctx.port)ctx.port.close();}catch(ignorePort){}ctx.port=null;
   try{if(ctx.frame&&ctx.frame.parentNode)ctx.frame.parentNode.removeChild(ctx.frame);}catch(ignoreFrame){}ctx.frame=null;
   for(k in ctx.asyncIrps){
@@ -25939,6 +26018,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os57',
+  version:'6.4.0-dev-os58',
   build:'external-os-comctl32-split-core-controls'
 };

@@ -1,5 +1,5 @@
 /* ExOS gdi32.dll emulation
- * Version: 6.4.0-dev-os57
+ * Version: 6.4.0-dev-os58
  * Model: EXOS_GDI32_V1
  * Client: V8-only browsers
  *
@@ -10,7 +10,7 @@
 'use strict';
 
 var API={
-  version:'6.4.0-dev-os57',
+  version:'6.4.0-dev-os58',
   model:'EXOS_GDI32_V1',
   ready:true
 };
