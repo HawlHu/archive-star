@@ -1,12 +1,12 @@
 /* ExOS shared resource image library
  * File: exos_share_res.js
- * Version: 6.4.0-dev-os79
+ * Version: 6.4.0-dev-os80
  * Model: EXOS_SHARED_RES_V1
  * V8-only client. Shared Base64 image resources for virtual NT-style resource DLLs.
  */
 (function(global){
 'use strict';
-var VERSION='6.4.0-dev-os79';
+var VERSION='6.4.0-dev-os80';
 var MODEL='EXOS_SHARED_RES_V1';
 var LIBRARIES={};
 LIBRARIES["shell32.dll"]={};
@@ -59,6 +59,7 @@ LIBRARIES["shell32.dll"]["display"]={"id":46,"name":"display","uri":"data:image/
 LIBRARIES["shell32.dll"]["network"]={"id":47,"name":"network","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOCIgZmlsbD0iI2UwZjJmZSIgc3Ryb2tlPSIjMDI4NGM3Ii8+PHBhdGggZD0iTTQgMTJoMTZNMTIgNGMyLjUgMi40IDMuNSA1IDMuNSA4UzE0LjUgMTcuNiAxMiAyMGMtMi41LTIuNC0zLjUtNS0zLjUtOFM5LjUgNi40IDEyIDR6IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMjg0YzciIHN0cm9rZS13aWR0aD0iMS4yIi8+PC9zdmc+","mime":"image/svg+xml","width":24,"height":24};
 LIBRARIES["shell32.dll"]["media"]={"id":48,"name":"media","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iNCIgeT0iMyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE4IiByeD0iMiIgZmlsbD0iI2VkZTlmZSIgc3Ryb2tlPSIjN2MzYWVkIi8+PHBhdGggZD0ibTEwIDggNiA0LTYgNHoiIGZpbGw9IiM3YzNhZWQiLz48L3N2Zz4=","mime":"image/svg+xml","width":24,"height":24};
 LIBRARIES["shell32.dll"]["paint"]={"id":49,"name":"paint","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+CjxwYXRoIGQ9Ik0xMiAzQzYuNSAzIDIuNSA2LjYgMi41IDExLjJjMCA0LjIgMy4yIDcuMyA3LjUgNy4zaDEuM2MuNyAwIDEuMi0uNiAxLjItMS4yIDAtLjQtLjItLjctLjQtMS0uMy0uNC0uNS0uNy0uNS0xLjEgMC0uOS44LTEuNSAxLjgtMS41SDE2YzMuMyAwIDUuNS0yLjEgNS41LTVDMjEuNSA1LjIgMTcuNCAzIDEyIDN6IiBmaWxsPSIjZjhmYWZjIiBzdHJva2U9IiM0NzU1NjkiLz4KPGNpcmNsZSBjeD0iNyIgY3k9IjkiIHI9IjEuNCIgZmlsbD0iI2VmNDQ0NCIvPgo8Y2lyY2xlIGN4PSIxMC41IiBjeT0iNi44IiByPSIxLjQiIGZpbGw9IiNmNTllMGIiLz4KPGNpcmNsZSBjeD0iMTQuNiIgY3k9IjYuOCIgcj0iMS40IiBmaWxsPSIjMjJjNTVlIi8+CjxjaXJjbGUgY3g9IjE3LjgiIGN5PSI5LjQiIHI9IjEuNCIgZmlsbD0iIzNiODJmNiIvPgo8cGF0aCBkPSJNMTcuNSAxNC4yIDIxIDE4LjdsLTEuOCAxLjQtMy42LTQuNXoiIGZpbGw9IiNjMDg0ZmMiIHN0cm9rZT0iIzdjM2FlZCIvPgo8cGF0aCBkPSJtMTUuNiAxNS42LTEuMyAzLjEgMy4yLTEuMXoiIGZpbGw9IiNmZGU2OGEiIHN0cm9rZT0iI2ExNjIwNyIvPgo8L3N2Zz4=","mime":"image/svg+xml","width":24,"height":24};
+LIBRARIES["shell32.dll"]["minesweeper"]={"id":51,"name":"minesweeper","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+CjxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcng9IjMiIGZpbGw9IiNkMWQ1ZGIiIHN0cm9rZT0iIzQ3NTU2OSIvPgo8cGF0aCBkPSJNMTIgNXYzTTEyIDE2djNNNSAxMmgzTTE2IDEyaDNNNy4yIDcuMmwyLjEgMi4xTTE0LjcgMTQuN2wyLjEgMi4xTTE2LjggNy4ybC0yLjEgMi4xTTkuMyAxNC43bC0yLjEgMi4xIiBzdHJva2U9IiMzMzQxNTUiIHN0cm9rZS13aWR0aD0iMS41Ii8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjQuMiIgZmlsbD0iIzExMTgyNyIvPgo8Y2lyY2xlIGN4PSIxMC42IiBjeT0iMTAuNiIgcj0iMS4xIiBmaWxsPSIjZjhmYWZjIiBvcGFjaXR5PSIuOCIvPgo8cGF0aCBkPSJNNCA0aDV2NUg0eiIgZmlsbD0iI2VmNDQ0NCIgb3BhY2l0eT0iLjkiLz48cGF0aCBkPSJNNSA1djNNNSA1aDMiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIuOCIvPgo8L3N2Zz4=","mime":"image/svg+xml","width":24,"height":24};
 LIBRARIES["shell32.dll"]["zipfolder"]={"id":50,"name":"zipfolder","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2Y0YzU0MiIgc3Ryb2tlPSIjOWE2YTAwIiBkPSJNMi41IDYuNWg3bDIgMkgyMnYxMUgyLjV6Ii8+PHBhdGggZmlsbD0iI2Y4ZmFmYyIgc3Ryb2tlPSIjNjQ3NDhiIiBkPSJNOCAzaDh2MTNIOHoiLz48cGF0aCBmaWxsPSIjNDc1NTY5IiBkPSJNMTEgM2gydjJoLTJ6bTAgNGgydjJoLTJ6bTAgNGgydjJoLTJ6Ii8+PC9zdmc+","mime":"image/svg+xml","width":24,"height":24};
 LIBRARIES["imageres.dll"]={};
 LIBRARIES["imageres.dll"]["file"]={"id":1,"name":"file","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMmgxMGw0IDR2MTZINXoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzY0NzQ4YiIvPjxwYXRoIGQ9Ik0xNSAydjVoNCIgZmlsbD0iI2RiZWFmZSIvPjwvc3ZnPg==","mime":"image/svg+xml","width":24,"height":24};

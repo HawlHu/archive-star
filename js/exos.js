@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os79
+ * Version: 6.4.0-dev-os80
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -64,6 +64,7 @@ function jplopsoft_taskbarIconName(icon,appId){
   if(a==='security')return'res://shell32.dll/security';
   if(a==='trash')return'res://shell32.dll/trash';
   if(a==='calc')return'res://shell32.dll/calc';
+  if(a==='winmine'||a==='minesweeper')return'res://shell32.dll/minesweeper';
   if(a.indexOf('xsh_')===0)return'res://shell32.dll/xsh';
   if(a.indexOf('editor_')===0){if(a.indexOf('_csv_')>=0)return'res://shell32.dll/csv';if(a.indexOf('_txt_')>=0)return'res://shell32.dll/txt';}
   return'res://shell32.dll/file';
@@ -23175,6 +23176,15 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
     };
   }
 
+  if(s.preventContextMenu){
+    n.oncontextmenu=function(e){
+      e=e||window.event;
+      if(e&&e.preventDefault)e.preventDefault();
+      if(e)e.returnValue=false;
+      return false;
+    };
+  }
+
   if(s.trackPointer){
     (function(){
       function sendPointer(action,e){
@@ -28265,7 +28275,7 @@ function jplopsoft_toggleStartMenu(){
 
 function jplopsoft_taskbarUpdateAvailability(){
   var logged=!!(state&&state.samAuthenticated&&state.vaultKey),
-      ids=['jplopsoft_startComputer','jplopsoft_startDesktop','jplopsoft_startControlPanel','jplopsoft_startCmd','jplopsoft_startCalc','jplopsoft_startSecurity'],
+      ids=['jplopsoft_startComputer','jplopsoft_startDesktop','jplopsoft_startControlPanel','jplopsoft_startCmd','jplopsoft_startCalc','jplopsoft_startMinesweeper','jplopsoft_startSecurity'],
       i,n;
   if(!logged)jplopsoft_taskbarRemoveDocumentApp();
   for(i=0;i<ids.length;i++){
@@ -28318,6 +28328,12 @@ function jplopsoft_taskbarOpenCalculator(){
   jplopsoft_openCalculator();
 }
 
+function jplopsoft_taskbarOpenMinesweeper(){
+  if(!jplopsoft_taskbarRequireDesktop())return;
+  jplopsoft_closeStartMenu();
+  jplopsoft_launchSystemXshApp('winmine',[]);
+}
+
 function jplopsoft_taskbarOpenSecurity(){
   if(!jplopsoft_taskbarRequireDesktop())return;
   jplopsoft_closeStartMenu();
@@ -28333,10 +28349,10 @@ function jplopsoft_taskbarContains(parent,node){
 }
 
 function jplopsoft_bindTaskbar(){
-  var startBtn=jplopsoft_el('jplopsoft_startBtn'),startMenu=jplopsoft_el('jplopsoft_startMenu'),computer=jplopsoft_el('jplopsoft_startComputer'),desktop=jplopsoft_el('jplopsoft_startDesktop'),control=jplopsoft_el('jplopsoft_startControlPanel'),cmd=jplopsoft_el('jplopsoft_startCmd'),calc=jplopsoft_el('jplopsoft_startCalc'),security=jplopsoft_el('jplopsoft_startSecurity'),clock=jplopsoft_el('jplopsoft_taskbarClock'),calPrev=jplopsoft_el('jplopsoft_calendarPrev'),calNext=jplopsoft_el('jplopsoft_calendarNext'),calToday=jplopsoft_el('jplopsoft_calendarToday'),calendar=jplopsoft_el('jplopsoft_calendarFlyout'),taskbar=jplopsoft_el('jplopsoft_taskbar');
+  var startBtn=jplopsoft_el('jplopsoft_startBtn'),startMenu=jplopsoft_el('jplopsoft_startMenu'),computer=jplopsoft_el('jplopsoft_startComputer'),desktop=jplopsoft_el('jplopsoft_startDesktop'),control=jplopsoft_el('jplopsoft_startControlPanel'),cmd=jplopsoft_el('jplopsoft_startCmd'),calc=jplopsoft_el('jplopsoft_startCalc'),mines=jplopsoft_el('jplopsoft_startMinesweeper'),security=jplopsoft_el('jplopsoft_startSecurity'),clock=jplopsoft_el('jplopsoft_taskbarClock'),calPrev=jplopsoft_el('jplopsoft_calendarPrev'),calNext=jplopsoft_el('jplopsoft_calendarNext'),calToday=jplopsoft_el('jplopsoft_calendarToday'),calendar=jplopsoft_el('jplopsoft_calendarFlyout'),taskbar=jplopsoft_el('jplopsoft_taskbar');
   if(!startBtn||!startMenu)return;
   startBtn.onclick=function(e){e=e||window.event;if(e.stopPropagation)e.stopPropagation();e.cancelBubble=true;jplopsoft_calendarHide();jplopsoft_toggleStartMenu();return false;};
-  if(computer)computer.onclick=jplopsoft_taskbarOpenComputer;if(desktop)desktop.onclick=jplopsoft_taskbarOpenDesktop;if(control)control.onclick=jplopsoft_taskbarOpenControlPanel;if(cmd)cmd.onclick=jplopsoft_taskbarOpenCmd;if(calc)calc.onclick=jplopsoft_taskbarOpenCalculator;if(security)security.onclick=jplopsoft_taskbarOpenSecurity;
+  if(computer)computer.onclick=jplopsoft_taskbarOpenComputer;if(desktop)desktop.onclick=jplopsoft_taskbarOpenDesktop;if(control)control.onclick=jplopsoft_taskbarOpenControlPanel;if(cmd)cmd.onclick=jplopsoft_taskbarOpenCmd;if(calc)calc.onclick=jplopsoft_taskbarOpenCalculator;if(mines)mines.onclick=jplopsoft_taskbarOpenMinesweeper;if(security)security.onclick=jplopsoft_taskbarOpenSecurity;
   if(clock)clock.onclick=function(e){e=e||window.event;if(e.stopPropagation)e.stopPropagation();e.cancelBubble=true;jplopsoft_calendarToggle();return false;};
   if(calendar)calendar.onclick=function(e){e=e||window.event;if(e.stopPropagation)e.stopPropagation();e.cancelBubble=true;};
   if(calPrev)calPrev.onclick=function(e){if(e&&e.stopPropagation)e.stopPropagation();jplopsoft_calendarNavigate(-1);};if(calNext)calNext.onclick=function(e){if(e&&e.stopPropagation)e.stopPropagation();jplopsoft_calendarNavigate(1);};if(calToday)calToday.onclick=function(e){if(e&&e.stopPropagation)e.stopPropagation();jplopsoft_calendarToday();};
@@ -28373,6 +28389,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os79',
+  version:'6.4.0-dev-os80',
   build:'external-os-comctl32-split-core-controls'
 };

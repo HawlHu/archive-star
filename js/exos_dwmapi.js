@@ -1,9 +1,9 @@
 /* ExOS dwmapi.dll emulation
- * Version: 6.4.0-dev-os79
+ * Version: 6.4.0-dev-os80
  * Model: EXOS_DWMAPI_V1
  */
 (function(global){'use strict';
-var API={version:'6.4.0-dev-os79',model:'EXOS_DWMAPI_V1',ready:true};
+var API={version:'6.4.0-dev-os80',model:'EXOS_DWMAPI_V1',ready:true};
 function rec(hwnd){return typeof global.jplopsoft_user32GetRecord==='function'?global.jplopsoft_user32GetRecord(parseInt(hwnd,10)||0):null;}
 function el(hwnd){return typeof global.jplopsoft_GetWindowElement==='function'?global.jplopsoft_GetWindowElement(parseInt(hwnd,10)||0):null;}
 function owned(ctx,hwnd){return !!(ctx&&ctx.windows&&ctx.windows[String(parseInt(hwnd,10)||0)]);}
