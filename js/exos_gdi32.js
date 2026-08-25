@@ -1,5 +1,5 @@
 /* ExOS gdi32.dll emulation
- * Version: 6.4.0-dev-os70
+ * Version: 6.4.0-dev-os72
  * Model: EXOS_GDI32_V1
  * Client: V8-only browsers
  *
@@ -10,7 +10,7 @@
 'use strict';
 
 var API={
-  version:'6.4.0-dev-os70',
+  version:'6.4.0-dev-os72',
   model:'EXOS_GDI32_V1',
   ready:true
 };
@@ -393,6 +393,43 @@ function cleanup(ctx){
   for(k in s.dcs){if(!s.dcs.hasOwnProperty(k))continue;try{if(s.dcs[k]&&s.dcs[k].kind==='printer')printerAbort(ctx,s.dcs[k]);}catch(ignorePrintAbort){}}
   ctx.gdi32=null;
 }
+
+function bitmapFromDataUrl(ctx,url){
+  url=String(url||'');
+  if(!/^data:image\/(?:png|jpeg|jpg|gif|webp|bmp);base64,/i.test(url)){
+    return Promise.reject(param('CreateBitmapFromDataUrl requires a base64 image data URL.'));
+  }
+  if(url.length>48*1024*1024){
+    return Promise.reject(quota('Image data URL exceeds the 48 MiB limit.'));
+  }
+  return new Promise(function(resolve,reject){
+    var img=new Image();
+    img.onload=function(){
+      try{
+        var w=Math.max(1,Math.min(16384,intv(img.naturalWidth||img.width))),h=Math.max(1,Math.min(16384,intv(img.naturalHeight||img.height))),bytes=w*h*4,s=state(ctx),cv,bh;
+        if(bytes>128*1024*1024||s.bitmapBytes+bytes>s.maxBitmapBytes)throw quota('Decoded GDI bitmap exceeds process quota.');
+        cv=document.createElement('canvas');cv.width=w;cv.height=h;
+        ensureCanvas2d(cv).drawImage(img,0,0,w,h);
+        bh=alloc(ctx,TYPE.BITMAP,{width:w,height:h,planes:1,bitsPixel:32,canvas:cv});
+        s.bitmapBytes+=bytes;
+        resolve(bh);
+      }catch(e){reject(e);}
+    };
+    img.onerror=function(){reject(param('Browser image decoder rejected the image.'));};
+    img.src=url;
+  });
+}
+function dcDataUrl(ctx,handle,rect,mime,quality){
+  var dc=object(ctx,handle,TYPE.DC),src=dcCanvas(dc),sz=dcSize(dc),r=rect||{left:0,top:0,right:sz.width,bottom:sz.height},left=Math.max(0,Number(r.left)||0),top=Math.max(0,Number(r.top)||0),right=Math.min(sz.width,Number(r.right)||sz.width),bottom=Math.min(sz.height,Number(r.bottom)||sz.height),w=Math.max(1,right-left),h=Math.max(1,bottom-top),dpr=sz.dpr||1,out=document.createElement('canvas'),c;
+  out.width=Math.max(1,Math.round(w*dpr));out.height=Math.max(1,Math.round(h*dpr));
+  c=ensureCanvas2d(out);
+  c.drawImage(src,Math.round(left*dpr),Math.round(top*dpr),Math.round(w*dpr),Math.round(h*dpr),0,0,out.width,out.height);
+  mime=String(mime||'image/png').toLowerCase();
+  if(mime!=='image/png'&&mime!=='image/jpeg'&&mime!=='image/webp')mime='image/png';
+  quality=Math.max(.1,Math.min(1,Number(quality)||.92));
+  return out.toDataURL(mime,quality);
+}
+
 function dispatch(ctx,method,args){
   args=args||[];var h,dc,o,spec,idx,ret,pts,text,rect,opt;
   if(method==='GetVersion')return{version:API.version,model:API.model,device:'Canvas2D',logicalDpi:96,printing:'EXOS_BROWSER_SPOOL_V1'};
@@ -420,6 +457,8 @@ function dispatch(ctx,method,args){
     if(args[0]&&typeof args[0]==='object')spec=args[0];else spec={height:args[0],width:args[1],escapement:args[2],orientation:args[3],weight:args[4],italic:args[5],underline:args[6],strikeOut:args[7],charSet:args[8],faceName:args[13]};
     return alloc(ctx,TYPE.FONT,{height:Number(spec.height)||16,width:Number(spec.width)||0,escapement:Number(spec.escapement)||0,orientation:Number(spec.orientation)||0,weight:intv(spec.weight)||400,italic:!!spec.italic,underline:!!spec.underline,strikeOut:!!spec.strikeOut,charSet:intv(spec.charSet),faceName:String(spec.faceName||'Segoe UI')});
   }
+  if(method==='CreateBitmapFromDataUrl')return bitmapFromDataUrl(ctx,args[0]);
+  if(method==='GetDCDataUrl')return dcDataUrl(ctx,args[0],args[1],args[2],args[3]);
   if(method==='CreateBitmap'||method==='CreateCompatibleBitmap'){
     if(method==='CreateCompatibleBitmap')object(ctx,args[0],TYPE.DC);
     var w=Math.max(1,Math.min(16384,intv(method==='CreateCompatibleBitmap'?args[1]:args[0]))),hh=Math.max(1,Math.min(16384,intv(method==='CreateCompatibleBitmap'?args[2]:args[1]))),bytes=w*hh*4,gs=state(ctx);if(bytes>128*1024*1024||gs.bitmapBytes+bytes>gs.maxBitmapBytes)throw err(global.jplopsoft_STATUS_QUOTA_EXCEEDED||0xC0000044,'GDI bitmap memory quota exceeded.');var bc=document.createElement('canvas');bc.width=w;bc.height=hh;var bh=alloc(ctx,TYPE.BITMAP,{width:w,height:hh,planes:1,bitsPixel:32,canvas:bc});gs.bitmapBytes+=bytes;

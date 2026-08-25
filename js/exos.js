@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os70
+ * Version: 6.4.0-dev-os72
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -22671,7 +22671,7 @@ function jplopsoft_xshSetWindowIcon(ctx,hwnd,icon){
   if(rec.taskbar)jplopsoft_taskbarEnsureApp(rec.appId,rec.icon,rec.title);
   return true;
 }
-function jplopsoft_xshApplySafeStyle(n,style){var s=style||{},k,allowed={display:1,width:1,height:1,minWidth:1,minHeight:1,maxWidth:1,maxHeight:1,margin:1,marginTop:1,marginRight:1,marginBottom:1,marginLeft:1,padding:1,paddingTop:1,paddingRight:1,paddingBottom:1,paddingLeft:1,boxSizing:1,fontSize:1,fontWeight:1,fontFamily:1,lineHeight:1,textAlign:1,whiteSpace:1,overflow:1,overflowX:1,overflowY:1,resize:1,border:1,borderRadius:1,background:1,color:1,gap:1,gridTemplateColumns:1,gridTemplateRows:1,alignItems:1,justifyContent:1,flexDirection:1,flexWrap:1,flex:1,opacity:1,cursor:1,boxShadow:1,borderTop:1,borderRight:1,borderBottom:1,borderLeft:1};if(!n||!n.style)return;for(k in s){if(!s.hasOwnProperty(k)||!allowed[k])continue;try{n.style[k]=String(s[k]);}catch(ignoreXshStyle){}}}
+function jplopsoft_xshApplySafeStyle(n,style){var s=style||{},k,allowed={display:1,position:1,left:1,top:1,right:1,bottom:1,zIndex:1,pointerEvents:1,transform:1,width:1,height:1,minWidth:1,minHeight:1,maxWidth:1,maxHeight:1,margin:1,marginTop:1,marginRight:1,marginBottom:1,marginLeft:1,padding:1,paddingTop:1,paddingRight:1,paddingBottom:1,paddingLeft:1,boxSizing:1,fontSize:1,fontWeight:1,fontFamily:1,lineHeight:1,textAlign:1,whiteSpace:1,overflow:1,overflowX:1,overflowY:1,resize:1,border:1,borderRadius:1,background:1,color:1,gap:1,gridTemplateColumns:1,gridTemplateRows:1,alignItems:1,justifyContent:1,flexDirection:1,flexWrap:1,flex:1,opacity:1,cursor:1,boxShadow:1,borderTop:1,borderRight:1,borderBottom:1,borderLeft:1};if(!n||!n.style)return;for(k in s){if(!s.hasOwnProperty(k)||!allowed[k])continue;try{n.style[k]=String(s[k]);}catch(ignoreXshStyle){}}}
 function jplopsoft_xshControlParent(ctx,client,parentId){var p=parentId?jplopsoft_xshControl(ctx,parentId):null;return p||client;}
 
 function jplopsoft_xshSetControlStyle(ctx,id,style){
@@ -22709,6 +22709,7 @@ function jplopsoft_xshAttachTextControlEvents(ctx,id,n){
         controlId:id,
         action:action,
         value:n.value,
+        checked:('checked' in n)?!!n.checked:false,
         selectionStart:sel.start,
         selectionEnd:sel.end,
         selectionDirection:sel.direction,
@@ -23031,6 +23032,9 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
     n.className=
       'jplopsoft_xsh-control jplopsoft_xsh-control-input';
     n.value=String(s.text||s.value||'');
+    if(n.type==='checkbox'||n.type==='radio'){
+      n.checked=!!s.checked;
+    }
     n.readOnly=!!s.readOnly;
     if(typeof s.placeholder!=='undefined'){
       n.placeholder=String(s.placeholder||'');
@@ -23115,6 +23119,49 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
       );
     };
   }
+
+  if(s.trackPointer){
+    (function(){
+      function sendPointer(action,e){
+        var r=n.getBoundingClientRect?n.getBoundingClientRect():{left:0,top:0,width:0,height:0};
+        jplopsoft_xshSendEvent(
+          ctx,
+          {
+            event:'control',
+            controlId:id,
+            action:action,
+            x:(typeof e.clientX==='number'?e.clientX:0)-r.left,
+            y:(typeof e.clientY==='number'?e.clientY:0)-r.top,
+            width:Number(r.width)||0,
+            height:Number(r.height)||0,
+            clientX:typeof e.clientX==='number'?e.clientX:0,
+            clientY:typeof e.clientY==='number'?e.clientY:0,
+            button:parseInt(e.button,10)||0,
+            buttons:parseInt(e.buttons,10)||0,
+            pressure:typeof e.pressure==='number'?e.pressure:0,
+            pointerType:String(e.pointerType||'mouse'),
+            ctrlKey:!!e.ctrlKey,
+            shiftKey:!!e.shiftKey,
+            altKey:!!e.altKey
+          }
+        );
+      }
+      n.style.touchAction='none';
+      n.onpointerdown=function(e){
+        try{n.setPointerCapture(e.pointerId);}catch(ignoreCapture){}
+        sendPointer('pointerdown',e);
+      };
+      n.onpointermove=function(e){sendPointer('pointermove',e);};
+      n.onpointerup=function(e){
+        sendPointer('pointerup',e);
+        try{n.releasePointerCapture(e.pointerId);}catch(ignoreRelease){}
+      };
+      n.onpointercancel=function(e){sendPointer('pointercancel',e);};
+      n.onpointerleave=function(e){sendPointer('pointerleave',e);};
+    })();
+  }
+
+  n._jplopsoftXshHwnd=parseInt(hwnd,10)||0;
 
   n.setAttribute(
     'data-xsh-control-id',
@@ -23355,6 +23402,11 @@ function jplopsoft_xshSetControlProperty(ctx,id,prop,value){
     return true;
   }
 
+  if(p==='checked'&&('checked' in n)){
+    n.checked=!!value;
+    return true;
+  }
+
   if(p==='spellcheck'&&('spellcheck' in n)){
     n.spellcheck=!!value;
     return true;
@@ -23425,6 +23477,7 @@ function jplopsoft_xshGetControlProperty(ctx,id,prop){
   if(p==='visible')return n.style.display!=='none';
   if(p==='readOnly')return !!n.readOnly;
   if(p==='disabled')return !!n.disabled;
+  if(p==='checked'&&('checked' in n))return !!n.checked;
   if(p==='spellcheck')return !!n.spellcheck;
   if(p==='placeholder')return String(n.placeholder||'');
   if(p==='wrap'&&String(n.tagName||'').toLowerCase()==='textarea')return String(n.wrap||'soft');
@@ -25120,6 +25173,12 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     if(method==='AppendControlText')return jplopsoft_xshAppendControlText(ctx,args[0],args[1]);
     if(method==='SetControlProperty')return jplopsoft_xshSetControlProperty(ctx,args[0],args[1],args[2]);
     if(method==='GetControlProperty')return jplopsoft_xshGetControlProperty(ctx,args[0],args[1]);
+    if(method==='GetControlRect'){
+      control=jplopsoft_xshControl(ctx,args[0]);
+      if(!control)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Control not found.');
+      var rr=control.getBoundingClientRect(),hh=parseInt(control._jplopsoftXshHwnd,10)||0,ce=hh?jplopsoft_GetClientElement(hh):null,cr=ce&&ce.getBoundingClientRect?ce.getBoundingClientRect():{left:0,top:0};
+      return{left:rr.left-cr.left,top:rr.top-cr.top,right:rr.right-cr.left,bottom:rr.bottom-cr.top,width:rr.width,height:rr.height};
+    }
     if(method==='SetControlStyle')return jplopsoft_xshSetControlStyle(ctx,args[0],args[1]);
     if(method==='InsertControlText')return jplopsoft_xshInsertControlText(ctx,args[0],args[1]);
     if(method==='FocusControl')return jplopsoft_xshFocusControl(ctx,args[0]);
@@ -28118,6 +28177,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os70',
+  version:'6.4.0-dev-os72',
   build:'external-os-comctl32-split-core-controls'
 };

@@ -1,5 +1,5 @@
 /* ExOS shell32.dll emulation
- * Version: 6.4.0-dev-os70
+ * Version: 6.4.0-dev-os72
  * Model: EXOS_SHELL32_V1
  *
  * Browser/XSH shell API.  The implementation is intentionally restricted to
@@ -9,7 +9,7 @@
 'use strict';
 
 var SHELL={
-  version:'6.4.0-dev-os70',
+  version:'6.4.0-dev-os72',
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -226,6 +226,13 @@ function shellInfo(ctx,path){
     },
     filesystem:'ExFS',
     backingVdo:'PHP /_exfs/',
+    /*
+     * os71: Zone.Identifier / Mark-of-the-Web state is surfaced as a normal
+     * Shell property. The encrypted ADS itself is never exposed here.
+     */
+    markOfTheWeb:!directory&&!!node.has_motw,
+    blocked:!directory&&!!node.has_motw,
+    zoneId:!directory&&node.has_motw?3:0,
     association:shellAssociation(p)
   };
 }
@@ -938,6 +945,7 @@ async function shellExecute(ctx,path,verb,args){
 
     if(ext==='csv')app='csvedit';
     if(ext==='html'||ext==='htm')app='html_editor';
+    if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='gif'||ext==='webp'||ext==='bmp')app='paint';
 
     var editor=
       await jplopsoft_runBuiltinXsh(
@@ -1332,6 +1340,54 @@ function shellReloadNodesPromise(){
   });
 }
 
+async function shellUnblockFile(ctx,path){
+  var info=shellInfo(ctx,path),out;
+
+  if(info.directory){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_PARAMETER,
+      'Zone.Identifier unblock applies to files only.'
+    );
+  }
+
+  if(!info.nodeId){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,
+      'Shell file node was not found.'
+    );
+  }
+
+  if(!info.markOfTheWeb){
+    return{
+      ok:true,
+      changed:false,
+      path:info.path,
+      markOfTheWeb:false,
+      zoneId:0
+    };
+  }
+
+  /*
+   * Dedicated API: do not expose generic ADS_DELETE to XSH. The server accepts
+   * only deletion of Zone.Identifier and still performs the file DACL check.
+   */
+  out=await jplopsoft_xshApiPromise(
+    'motw_unblock',
+    'POST',
+    {id:info.nodeId}
+  );
+
+  await shellReloadNodesPromise();
+
+  return{
+    ok:true,
+    changed:!!(out&&out.changed),
+    path:info.path,
+    markOfTheWeb:false,
+    zoneId:0
+  };
+}
+
 async function shellQueryRecycleBin(ctx){
   var out=await jplopsoft_xshApiPromise('trash_list','GET',null),
       items=out&&out.items&&Object.prototype.toString.call(out.items)==='[object Array]'?out.items:[],
@@ -1491,6 +1547,13 @@ async function shellDispatch(ctx,method,args){
 
   if(method==='CancelDragDrop'){
     return shellCancelDragDrop();
+  }
+
+  if(method==='UnblockFile'){
+    return await shellUnblockFile(
+      ctx,
+      args[0]
+    );
   }
 
   if(method==='SHQueryRecycleBin'){
