@@ -1,5 +1,5 @@
 /* ExOS shell32.dll emulation
- * Version: 6.4.0-dev-os48
+ * Version: 6.4.0-dev-os56
  * Model: EXOS_SHELL32_V1
  *
  * Browser/XSH shell API.  The implementation is intentionally restricted to
@@ -9,7 +9,7 @@
 'use strict';
 
 var SHELL={
-  version:'6.4.0-dev-os48',
+  version:'6.4.0-dev-os56',
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -1286,6 +1286,62 @@ function shellCancelDragDrop(){
   return true;
 }
 
+
+function shellReloadNodesPromise(){
+  return new Promise(function(resolve){
+    try{
+      jplopsoft_reloadNodes(function(){resolve(true);});
+    }catch(e){
+      resolve(false);
+    }
+  });
+}
+
+async function shellQueryRecycleBin(ctx){
+  var out=await jplopsoft_xshApiPromise('trash_list','GET',null),
+      items=out&&out.items&&Object.prototype.toString.call(out.items)==='[object Array]'?out.items:[],
+      result=[],i,item,name,original;
+
+  for(i=0;i<items.length;i++){
+    item=items[i]||{};
+    try{name=jplopsoft_decName(item);}catch(ignoreName){name='';}
+    if(!name)name='[encrypted #'+String(item.id||0)+']';
+    try{original=jplopsoft_trashOriginalPath(item);}catch(ignorePath){original='C:\\';}
+    result.push({
+      id:parseInt(item.id,10)||0,
+      name:String(name),
+      type:String(item.type||'file'),
+      trashedAt:String(item.trashed_at||''),
+      originalParentId:parseInt(item.original_parent_id,10)||0,
+      originalPath:String(original||'C:\\'),
+      itemCount:parseInt(item.item_count,10)||1
+    });
+  }
+  return result;
+}
+
+async function shellRestoreFromRecycleBin(ctx,id){
+  id=parseInt(id,10)||0;
+  if(id<=0)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Recycle Bin item id is required.');
+  await jplopsoft_xshApiPromise('trash_restore','POST',{id:id});
+  await shellReloadNodesPromise();
+  return true;
+}
+
+async function shellDeleteFromRecycleBin(ctx,id){
+  id=parseInt(id,10)||0;
+  if(id<=0)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Recycle Bin item id is required.');
+  await jplopsoft_xshApiPromise('trash_delete','POST',{id:id});
+  await shellReloadNodesPromise();
+  return true;
+}
+
+async function shellEmptyRecycleBin(ctx){
+  var out=await jplopsoft_xshApiPromise('trash_empty','POST',{});
+  await shellReloadNodesPromise();
+  return {ok:true,deleted:out&&out.deleted?parseInt(out.deleted,10)||0:0};
+}
+
 async function shellDispatch(ctx,method,args){
   args=args||[];
 
@@ -1400,6 +1456,22 @@ async function shellDispatch(ctx,method,args){
 
   if(method==='CancelDragDrop'){
     return shellCancelDragDrop();
+  }
+
+  if(method==='SHQueryRecycleBin'){
+    return await shellQueryRecycleBin(ctx);
+  }
+
+  if(method==='SHRestoreFromRecycleBin'){
+    return await shellRestoreFromRecycleBin(ctx,args[0]);
+  }
+
+  if(method==='SHDeleteFromRecycleBin'){
+    return await shellDeleteFromRecycleBin(ctx,args[0]);
+  }
+
+  if(method==='SHEmptyRecycleBin'){
+    return await shellEmptyRecycleBin(ctx);
   }
 
   throw jplopsoft_xshError(

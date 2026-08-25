@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os48
+ * Version: 6.4.0-dev-os56
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -38,116 +38,35 @@ function jplopsoft_applyDesktopWallpaper(){
   d.setAttribute('data-exos-wallpaper-layers','1');
 }
 
-var jplopsoft_EXFS_SVG_ICONS={
-  'xsh':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMmgxMGw0IDR2MTZINXoiIGZpbGw9IiNlZWY3ZmYiIHN0cm9rZT0iIzJiNmVhNiIvPjxwYXRoIGQ9Ik0xNSAydjVoNCIgZmlsbD0iI2NkZThmYiIvPjxyZWN0IHg9IjciIHk9IjEwIiB3aWR0aD0iMTAiIGhlaWdodD0iOCIgcng9IjEiIGZpbGw9IiMxMTE4MjciLz48cGF0aCBkPSJtOSAxMiAyIDItMiAybTQgMGgyIiBmaWxsPSJub25lIiBzdHJva2U9IiM2N2U4ZjkiIHN0cm9rZS13aWR0aD0iMS4zIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=',
-  'calc':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMyIgeT0iMiIgd2lkdGg9IjE4IiBoZWlnaHQ9IjIwIiByeD0iMiIgZmlsbD0iI2VhZjRmZiIgc3Ryb2tlPSIjM2I2ZjljIi8+PHJlY3QgeD0iNiIgeT0iNSIgd2lkdGg9IjEyIiBoZWlnaHQ9IjQiIHJ4PSIuNyIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjOGFhNmJkIi8+PGcgZmlsbD0iIzJmODBjOSI+PHJlY3QgeD0iNiIgeT0iMTIiIHdpZHRoPSIyLjYiIGhlaWdodD0iMi42IiByeD0iLjQiLz48cmVjdCB4PSIxMC43IiB5PSIxMiIgd2lkdGg9IjIuNiIgaGVpZ2h0PSIyLjYiIHJ4PSIuNCIvPjxyZWN0IHg9IjE1LjQiIHk9IjEyIiB3aWR0aD0iMi42IiBoZWlnaHQ9IjIuNiIgcng9Ii40Ii8+PHJlY3QgeD0iNiIgeT0iMTYuNCIgd2lkdGg9IjIuNiIgaGVpZ2h0PSIyLjYiIHJ4PSIuNCIvPjxyZWN0IHg9IjEwLjciIHk9IjE2LjQiIHdpZHRoPSIyLjYiIGhlaWdodD0iMi42IiByeD0iLjQiLz48cmVjdCB4PSIxNS40IiB5PSIxNi40IiB3aWR0aD0iMi42IiBoZWlnaHQ9IjIuNiIgcng9Ii40Ii8+PC9nPjwvc3ZnPg==',
-  'calendar':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMyIgeT0iNC41IiB3aWR0aD0iMTgiIGhlaWdodD0iMTYiIHJ4PSIxLjgiIGZpbGw9IiNlZWY2ZmYiIHN0cm9rZT0iIzNiNmY5YyIvPjxwYXRoIGQ9Ik0zIDloMTgiIHN0cm9rZT0iIzNiNmY5YyIvPjxwYXRoIGQ9Ik03IDIuOHY0TTE3IDIuOHY0IiBzdHJva2U9IiMyZjgwYzkiIHN0cm9rZS13aWR0aD0iMS44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48ZyBmaWxsPSIjMmY4MGM5Ij48cmVjdCB4PSI2IiB5PSIxMiIgd2lkdGg9IjIuNCIgaGVpZ2h0PSIyLjQiIHJ4PSIuNCIvPjxyZWN0IHg9IjEwLjgiIHk9IjEyIiB3aWR0aD0iMi40IiBoZWlnaHQ9IjIuNCIgcng9Ii40Ii8+PHJlY3QgeD0iMTUuNiIgeT0iMTIiIHdpZHRoPSIyLjQiIGhlaWdodD0iMi40IiByeD0iLjQiLz48cmVjdCB4PSI2IiB5PSIxNiIgd2lkdGg9IjIuNCIgaGVpZ2h0PSIyLjQiIHJ4PSIuNCIvPjxyZWN0IHg9IjEwLjgiIHk9IjE2IiB3aWR0aD0iMi40IiBoZWlnaHQ9IjIuNCIgcng9Ii40Ii8+PC9nPjwvc3ZnPg==',
-  'chevron_left':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0ibTE0LjUgNi02IDYgNiA2IiBmaWxsPSJub25lIiBzdHJva2U9IiMzMzQxNTUiIHN0cm9rZS13aWR0aD0iMS44IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=',
-  'chevron_right':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0ibTkuNSA2IDYgNi02IDYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzNDE1NSIgc3Ryb2tlLXdpZHRoPSIxLjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==',
-  'close':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0ibTcgNyAxMCAxME0xNyA3IDcgMTciIHN0cm9rZT0iIzExMTgyNyIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==',
-  'cmd':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMiIgeT0iMyIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE4IiByeD0iMS44IiBmaWxsPSIjMTAxMjE0IiBzdHJva2U9IiM2YjcyODAiLz48cGF0aCBkPSJtNiA4IDQgMy00IDNNMTIgMTVoNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjhmYWZjIiBzdHJva2Utd2lkdGg9IjEuNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+',
-  'computer':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMi41IiB5PSIzLjUiIHdpZHRoPSIxOSIgaGVpZ2h0PSIxMyIgcng9IjEuNiIgZmlsbD0iI2U4ZjRmZiIgc3Ryb2tlPSIjMmI2ZWE2Ii8+PHJlY3QgeD0iNSIgeT0iNiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjgiIGZpbGw9IiM0ZGEzZDkiLz48cGF0aCBkPSJNOSAxOWg2bS04IDJoMTAiIHN0cm9rZT0iI2Q4ZTdmMSIgc3Ryb2tlLXdpZHRoPSIxLjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==',
-  'control':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2U4ZjJmYiIgc3Ryb2tlPSIjNWY3Zjk5IiBkPSJtMTAuNiAyIC41IDJhOCA4IDAgMCAxIDEuOCAwbC41LTIgMi4yLjktLjcgMS45cS44LjUgMS4zIDEuM2wxLjktLjcuOSAyLjItMiAuNWE4IDggMCAwIDEgMCAxLjhsMiAuNS0uOSAyLjItMS45LS43cS0uNS44LTEuMyAxLjNsLjcgMS45LTIuMi45LS41LTJhOCA4IDAgMCAxLTEuOCAwbC0uNSAyLTIuMi0uOS43LTEuOWE3IDcgMCAwIDEtMS4zLTEuM2wtMS45LjctLjktMi4yIDItLjVhOCA4IDAgMCAxIDAtMS44bC0yLS41LjktMi4yIDEuOS43cS41LS44IDEuMy0xLjNsLS43LTEuOXoiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjkiIHI9IjMiIGZpbGw9IiM0Y2E0ZDgiLz48L3N2Zz4=',
-  'csv':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMS41IiBmaWxsPSIjZWRmZGY1IiBzdHJva2U9IiMyMzg2NWQiLz48cGF0aCBkPSJNMyA4aDE4TTMgMTNoMThNOCAzdjE4TTE0IDN2MTgiIHN0cm9rZT0iIzM3YTg3NCIgc3Ryb2tlLXdpZHRoPSIxLjIiLz48L3N2Zz4=',
-  'desktop':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMi41IiB5PSIzIiB3aWR0aD0iMTkiIGhlaWdodD0iMTQiIHJ4PSIxLjUiIGZpbGw9IiNkZmYzZmYiIHN0cm9rZT0iIzJiNmVhNiIvPjxwYXRoIGQ9Ik00LjUgMTQgMTAgOWwzLjIgMi44IDIuMS0yIDQuMiA0LjJ6IiBmaWxsPSIjMzlhMGQ4Ii8+PHBhdGggZD0iTTkgMjBoNm0tOCAyaDEwIiBzdHJva2U9IiNjYmQ1ZTEiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=',
-  'download':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDN2MTFtLTQtNCA0IDQgNC00TTUgMTloMTQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzI1NjNlYiIgc3Ryb2tlLXdpZHRoPSIxLjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==',
-  'explorer':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIuNSA2LjVoOGwyLTJoOXYxNWgtMTl6IiBmaWxsPSIjZmZkNDVkIiBzdHJva2U9IiNiYjhhMTEiLz48cGF0aCBkPSJNMyA5aDE4bC0xLjcgMTBINC43eiIgZmlsbD0iI2ZmZTI4YSIvPjwvc3ZnPg==',
-  'file':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMmgxMGw0IDR2MTZINXoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzY0NzQ4YiIvPjxwYXRoIGQ9Ik0xNSAydjVoNCIgZmlsbD0iI2RiZWFmZSIvPjwvc3ZnPg==',
-  'folder':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIuNSA2aDhsMi0yaDl2MTZoLTE5eiIgZmlsbD0iI2ZmZDU1ZiIgc3Ryb2tlPSIjYjk4MjA4Ii8+PHBhdGggZD0iTTMgOWgxOCIgc3Ryb2tlPSIjZTNhZDJlIi8+PC9zdmc+',
-  'history':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgN1YzTDIgNmwzIDNWN2E4IDggMCAxIDEtMSA4IiBmaWxsPSJub25lIiBzdHJva2U9IiMyNTYzZWIiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNMTIgN3Y1bDMgMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+',
-  'html':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMmgxMGw0IDR2MTZINXoiIGZpbGw9IiNmZmY0ZWQiIHN0cm9rZT0iI2MyNWQyNSIvPjxwYXRoIGQ9Ik0xNSAydjVoNCIgZmlsbD0iI2ZlZDdhYSIvPjxwYXRoIGQ9Im0xMCAxMS0zIDMgMyAzbTQtNiAzIDMtMyAzIiBmaWxsPSJub25lIiBzdHJva2U9IiNlYTU4MGMiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=',
-  'link':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTkuNSAxNC41IDE0LjUgOW0tOCA5LjUtMS0xYTQgNCAwIDAgMSAwLTUuN2wzLTNhNCA0IDAgMCAxIDUuNyAwbDEgMW0yLjMtNC4zIDEgMWE0IDQgMCAwIDEgMCA1LjdsLTMgM2E0IDQgMCAwIDEtNS43IDBsLTEtMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjM2I4MmY2IiBzdHJva2Utd2lkdGg9IjEuNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+',
-  'maximize':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iNiIgeT0iNSIgd2lkdGg9IjEyIiBoZWlnaHQ9IjEyIiBmaWxsPSJub25lIiBzdHJva2U9IiMxMTE4MjciIHN0cm9rZS13aWR0aD0iMS40Ii8+PC9zdmc+',
-  'minimize':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTYgMTZoMTIiIHN0cm9rZT0iIzExMTgyNyIgc3Ryb2tlLXdpZHRoPSIxLjYiLz48L3N2Zz4=',
-  'print':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTcgM2gxMHY1SDd6TTYgMTZoMTJ2NUg2eiIgZmlsbD0iI2VhZjJmNyIgc3Ryb2tlPSIjNTU2YjdhIi8+PHJlY3QgeD0iMyIgeT0iOCIgd2lkdGg9IjE4IiBoZWlnaHQ9IjkiIHJ4PSIyIiBmaWxsPSIjY2JkNWUxIiBzdHJva2U9IiM1NTZiN2EiLz48Y2lyY2xlIGN4PSIxNy41IiBjeT0iMTEuNSIgcj0iMSIgZmlsbD0iIzI1NjNlYiIvPjwvc3ZnPg==',
-  'properties':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOSIgZmlsbD0iI2VhZjRmZiIgc3Ryb2tlPSIjM2I4MmY2Ii8+PGNpcmNsZSBjeD0iMTIiIGN5PSI4IiByPSIxLjMiIGZpbGw9IiMyNTYzZWIiLz48cGF0aCBkPSJNMTIgMTF2NiIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjEuNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+',
-  'save':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTQgM2gxNGwyIDJ2MTZINHoiIGZpbGw9IiNkYmVhZmUiIHN0cm9rZT0iIzNiNmY5YyIvPjxwYXRoIGQ9Ik03IDNoOHY2SDd6IiBmaWxsPSIjZmZmIiBzdHJva2U9IiMzYjZmOWMiLz48cmVjdCB4PSI3IiB5PSIxMyIgd2lkdGg9IjEwIiBoZWlnaHQ9IjYiIHJ4PSIxIiBmaWxsPSIjZmZmIi8+PC9zdmc+',
-  'security':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDIgMjAgNXY2YzAgNS0zLjIgOC43LTggMTEtNC44LTIuMy04LTYtOC0xMVY1eiIgZmlsbD0iIzJkOGZkNSIvPjxwYXRoIGQ9Ik0xMiA1djEzLjZjMy4yLTEuOSA1LTQuNCA1LTcuNlY3eiIgZmlsbD0iI2U5ZjZmZiIgb3BhY2l0eT0iLjg1Ii8+PC9zdmc+',
-  'start':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGcgZmlsbD0iI2ZmZiI+PHBhdGggZD0iTTMgNC41IDEwLjUgM3Y4SDN6Ii8+PHBhdGggZD0iTTEyIDIuNyAyMSAxdjEwaC05eiIvPjxwYXRoIGQ9Ik0zIDEzaDcuNXY4TDMgMTkuNnoiLz48cGF0aCBkPSJNMTIgMTNoOXYxMGwtOS0xLjd6Ii8+PC9nPjwvc3ZnPg==',
-  'trash':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTYgN2gxMmwtMSAxNEg3eiIgZmlsbD0iI2U4ZjJmOCIgc3Ryb2tlPSIjNTM3NThjIi8+PHBhdGggZD0iTTggNGg4bDEgMkg3ek00IDZoMTYiIGZpbGw9IiNjZmUzZWUiIHN0cm9rZT0iIzUzNzU4YyIgc3Ryb2tlLXdpZHRoPSIxLjMiLz48cGF0aCBkPSJNMTAgMTB2N200LTd2NyIgc3Ryb2tlPSIjM2I4MmM0IiBzdHJva2Utd2lkdGg9IjEuNSIvPjwvc3ZnPg==',
-  'txt':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMmgxMGw0IDR2MTZINXoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzY0NzQ4YiIvPjxwYXRoIGQ9Ik0xNSAydjVoNCIgZmlsbD0iI2RiZWFmZSIvPjxwYXRoIGQ9Ik04IDExaDhNOCAxNGg4TTggMTdoNiIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxwYXRoIGQ9Ik04IDhoNSIgc3Ryb2tlPSIjMTExODI3IiBzdHJva2Utd2lkdGg9IjEuNiIvPjwvc3ZnPg==',
-  'minimize_light':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTYgMTZoMTIiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Y4ZmFmYyIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48L3N2Zz4=',
-  'maximize_light':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iNi41IiB5PSI1LjUiIHdpZHRoPSIxMSIgaGVpZ2h0PSIxMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjhmYWZjIiBzdHJva2Utd2lkdGg9IjEuMzUiLz48L3N2Zz4=',
-  'close_light':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTcuNSA3LjUgMTYuNSAxNi41TTE2LjUgNy41IDcuNSAxNi41IiBmaWxsPSJub25lIiBzdHJva2U9IiNmOGZhZmMiIHN0cm9rZS13aWR0aD0iMS40NSIgc3Ryb2tlLWxpbmVjYXA9InNxdWFyZSIvPjwvc3ZnPg==',
-  'taskmgr':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMi41IiB5PSIzIiB3aWR0aD0iMTkiIGhlaWdodD0iMTgiIHJ4PSIxLjUiIGZpbGw9IiNlYWY0ZmYiIHN0cm9rZT0iIzNiNmY5YyIvPjxwYXRoIGQ9Ik01IDE2aDIuNXYtNEg1em00IDBoMi41VjhIOXptNCAwaDIuNXYtNkgxM3ptNCAwaDJWNmgtMnoiIGZpbGw9IiMzYjgyZjYiLz48L3N2Zz4=',
-  'regedit':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGcgZmlsbD0iIzYwYTVmYSIgc3Ryb2tlPSIjMWQ0ZWQ4IiBzdHJva2Utd2lkdGg9Ii44Ij48cmVjdCB4PSIzIiB5PSIzIiB3aWR0aD0iNyIgaGVpZ2h0PSI3Ii8+PHJlY3QgeD0iMTQiIHk9IjMiIHdpZHRoPSI3IiBoZWlnaHQ9IjciLz48cmVjdCB4PSIzIiB5PSIxNCIgd2lkdGg9IjciIGhlaWdodD0iNyIvPjxyZWN0IHg9IjE0IiB5PSIxNCIgd2lkdGg9IjciIGhlaWdodD0iNyIvPjwvZz48Y2lyY2xlIGN4PSI2LjUiIGN5PSI2LjUiIHI9IjEuNCIgZmlsbD0iI2VmZjZmZiIvPjxjaXJjbGUgY3g9IjE3LjUiIGN5PSIxNy41IiByPSIxLjQiIGZpbGw9IiNlZmY2ZmYiLz48L3N2Zz4=',
-  'disk':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGVsbGlwc2UgY3g9IjEyIiBjeT0iNiIgcng9IjguNSIgcnk9IjMuMyIgZmlsbD0iI2RiZWFmZSIgc3Ryb2tlPSIjNDc1NTY5Ii8+PHBhdGggZD0iTTMuNSA2djExYzAgMS44IDMuOCAzLjMgOC41IDMuM3M4LjUtMS41IDguNS0zLjNWNiIgZmlsbD0iI2UyZThmMCIgc3Ryb2tlPSIjNDc1NTY5Ii8+PHBhdGggZD0iTTMuNSAxMWMwIDEuOCAzLjggMy4zIDguNSAzLjNzOC41LTEuNSA4LjUtMy4zTTMuNSAxNmMwIDEuOCAzLjggMy4zIDguNSAzLjNzOC41LTEuNSA4LjUtMy4zIiBmaWxsPSJub25lIiBzdHJva2U9IiM2NDc0OGIiLz48Y2lyY2xlIGN4PSIxNy4yIiBjeT0iMTciIHI9IjEiIGZpbGw9IiMyMmM1NWUiLz48L3N2Zz4=',
-  'user':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIyMSIgcj0iMTMiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNMTAgNThjMi0xNiAxMC0yNCAyMi0yNHMyMCA4IDIyIDI0IiBmaWxsPSIjZmZmIi8+PC9zdmc+',
-  'setup_user':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMjUiIGN5PSIyMCIgcj0iMTEiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNNyA1M2MyLTEzIDgtMjAgMTgtMjAgNSAwIDkgMiAxMiA1IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iNDciIGN5PSI0NSIgcj0iMTIiIGZpbGw9IiNkZmYzZmYiLz48cGF0aCBkPSJNNDcgMzh2MTRNNDAgNDVoMTQiIHN0cm9rZT0iIzAwNzhkNCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=',
-  'cut':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3" fill="none" stroke="#2563eb" stroke-width="1.6"/><circle cx="6" cy="18" r="3" fill="none" stroke="#2563eb" stroke-width="1.6"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4" fill="none" stroke="#2563eb" stroke-width="1.6"/></svg>',
-  'paste':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 4h8l1 2h3v15H4V6h3z" fill="#eaf4ff" stroke="#3b82f6"/><rect x="8" y="2" width="8" height="5" rx="1" fill="#fff" stroke="#3b82f6"/></svg>',
-  'rename':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 5h9M5 19h9M9.5 5v14" fill="none" stroke="#334155" stroke-width="1.6"/><path d="m14 16 5-5 2 2-5 5-3 1z" fill="#dbeafe" stroke="#2563eb"/></svg>',
-  'upload':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17V6m-4 4 4-4 4 4M5 20h14" fill="none" stroke="#2563eb" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  'view':'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5h8v6H3zM13 5h8v6h-8zM3 13h8v6H3zM13 13h8v6h-8z" fill="#eaf4ff" stroke="#3b82f6"/></svg>',
-  'arrow_right':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMTJoMTNtLTUtNSA1IDUtNSA1IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMS44IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4='
-};
-
+/* os56: shared image resources moved to exos_share_res.js. */
 function jplopsoft_svgIconApply(node,name,size){
-  var uri=jplopsoft_EXFS_SVG_ICONS[String(name||'')],
-      cls,keepLayoutBox;
-  if(!node||!uri)return false;
-
-  size=parseInt(size,10)||18;
-  cls=' '+String(node.className||'')+' ';
-  keepLayoutBox=
-    cls.indexOf(' jplopsoft_wm-control ')>=0 ||
-    cls.indexOf(' jplopsoft_wm-title-icon ')>=0;
-
-  node.setAttribute('data-exfs-svg',String(name||''));
-  node.style.backgroundImage='url("'+uri+'")';
-  node.style.backgroundRepeat='no-repeat';
-  node.style.backgroundPosition='center center';
-  node.style.backgroundSize=size+'px '+size+'px';
-  node.style.fontSize='0';
-  node.style.lineHeight='0';
-  node.textContent='';
-
-  /*
-   * Window chrome owns its physical box through CSS:
-   * - title app icon slot: 32x32
-   * - minimize/maximize/close hit target: 46x31
-   * Only the SVG glyph itself uses data-exfs-svg-size.
-   */
-  if(keepLayoutBox){
-    node.style.width='';
-    node.style.height='';
-    node.style.minWidth='';
-    node.style.display='';
-    return true;
-  }
-
-  node.style.display='inline-block';
-  node.style.width=size+'px';
-  node.style.height=size+'px';
-  node.style.minWidth=size+'px';
-  return true;
+  if(typeof jplopsoft_shareResApplyIcon!=='function')return false;
+  return jplopsoft_shareResApplyIcon(node,name,size,'shell32.dll');
 }
 function jplopsoft_applySvgIcons(root){
   var nodes,i,n,name,size;
   root=root||document;
   if(!root.querySelectorAll)return;
-  nodes=root.querySelectorAll('[data-exfs-svg]');
+  nodes=root.querySelectorAll('[data-exfs-svg],[data-exos-resource-icon]');
   for(i=0;i<nodes.length;i++){
-    n=nodes[i];name=n.getAttribute('data-exfs-svg');
+    n=nodes[i];
+    name=n.getAttribute('data-exos-resource-icon')||n.getAttribute('data-exfs-svg');
     size=n.getAttribute('data-exfs-svg-size')||18;
     jplopsoft_svgIconApply(n,name,size);
   }
 }
 function jplopsoft_taskbarIconName(icon,appId){
-  var s=String(icon||'').toLowerCase(),a=String(appId||'').toLowerCase();
-  if(jplopsoft_EXFS_SVG_ICONS[s])return s;
-  if(a==='explorer'||a.indexOf('explorer_')===0)return'explorer';
-  if(a==='cmd'||a.indexOf('cmd_')===0)return'cmd';
-  if(a==='control')return'control';
-  if(a==='security')return'security';
-  if(a==='trash')return'trash';
-  if(a==='calc')return'calc';
-  if(a.indexOf('xsh_')===0)return'xsh';
-  if(a.indexOf('editor_')===0){
-    if(a.indexOf('_csv_')>=0)return'csv';
-    if(a.indexOf('_txt_')>=0)return'txt';
-  }
-  return'file';
+  var s=String(icon||''),a=String(appId||'').toLowerCase(),r;
+  if(typeof jplopsoft_shareResResolve==='function'){r=jplopsoft_shareResResolve(s,'shell32.dll');if(r)return r.token;}
+  if(a==='explorer'||a.indexOf('explorer_')===0)return'res://shell32.dll/explorer';
+  if(a==='cmd'||a.indexOf('cmd_')===0)return'res://shell32.dll/cmd';
+  if(a==='control')return'res://shell32.dll/control';
+  if(a==='security')return'res://shell32.dll/security';
+  if(a==='trash')return'res://shell32.dll/trash';
+  if(a==='calc')return'res://shell32.dll/calc';
+  if(a.indexOf('xsh_')===0)return'res://shell32.dll/xsh';
+  if(a.indexOf('editor_')===0){if(a.indexOf('_csv_')>=0)return'res://shell32.dll/csv';if(a.indexOf('_txt_')>=0)return'res://shell32.dll/txt';}
+  return'res://shell32.dll/file';
 }
 
 
@@ -11731,6 +11650,113 @@ function jplopsoft_exfsPrintFrame(title,bodyHtml,extraCss,waitForImage){
   setTimeout(jplopsoft_doPrint,30);
 }
 
+
+/*
+ * XSH browser print spooler.
+ *
+ * Security boundary:
+ * - XSH never receives DOM/iframe/Window/printer handles.
+ * - The GDI printer DC submits rasterized image pages only.
+ * - Only this host-side function calls the browser print engine.
+ */
+function jplopsoft_xshSpoolPrintJob(ctx,job){
+  return new Promise(function(resolve,reject){
+    var spec=job&&typeof job==='object'?job:{},pages=Array.isArray(spec.pages)?spec.pages:[],frame,win,doc,html=[],i,p,title,paper,orientation,widthMm,heightMm,totalChars=0,done=false,loaded=0,timer=0;
+
+    function fail(message){
+      if(done)return;
+      done=true;
+      if(timer){try{window.clearTimeout(timer);}catch(ignoreTimer){}}
+      if(frame)jplopsoft_exfsPrintRemoveFrame(frame);
+      reject(jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,String(message||'Print spooler failed.')));
+    }
+    function cleanup(){
+      if(timer){try{window.clearTimeout(timer);}catch(ignoreTimer2){}timer=0;}
+      if(frame)jplopsoft_exfsPrintRemoveFrame(frame);
+    }
+    function finish(result){
+      if(done)return;
+      done=true;
+      cleanup();
+      resolve(result);
+    }
+
+    if(!ctx||ctx.terminating){fail('The XSH process is not available for printing.');return;}
+    if(!pages.length||pages.length>64){fail('Print job must contain 1 to 64 raster pages.');return;}
+
+    for(i=0;i<pages.length;i++){
+      p=pages[i]||{};
+      if(!/^data:image\/(?:png|jpeg|webp);base64,/i.test(String(p.dataUrl||''))){fail('Print spool accepts PNG, JPEG or WebP Base64 image pages only.');return;}
+      totalChars+=String(p.dataUrl||'').length;
+      if(String(p.dataUrl||'').length>48*1024*1024){fail('A print page exceeds the 48 MiB encoded spool limit.');return;}
+    }
+    if(totalChars>384*1024*1024){fail('Print job exceeds the 384 MiB encoded spool limit.');return;}
+
+    title=String(spec.title||'ExOS Print Job').substring(0,240);
+    paper=String(spec.paper||'A4').toUpperCase();
+    orientation=String(spec.orientation||'portrait').toLowerCase()==='landscape'?'landscape':'portrait';
+    widthMm=Math.max(20,Math.min(500,Number(spec.widthMm)||210));
+    heightMm=Math.max(20,Math.min(500,Number(spec.heightMm)||297));
+
+    frame=document.createElement('iframe');
+    frame.setAttribute('aria-hidden','true');
+    frame.setAttribute('title','ExOS XSH print spool buffer');
+    /* No scripts are allowed in the spool document. allow-modals is required for print(). */
+    frame.setAttribute('sandbox','allow-same-origin allow-modals');
+    frame.style.cssText='position:fixed;left:-100000px;top:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
+    document.body.appendChild(frame);
+
+    win=frame.contentWindow;
+    doc=win&&win.document?win.document:null;
+    if(!win||!doc){fail('Unable to create ExOS print spool buffer.');return;}
+
+    html.push('<!doctype html><html><head><meta charset="utf-8"><title>'+jplopsoft_htmlEscape(title)+'</title><style>');
+    html.push('@page{size:'+widthMm+'mm '+heightMm+'mm;margin:0;}');
+    html.push('html,body{margin:0;padding:0;background:#fff;color:#000;}');
+    html.push('.exos-print-page{box-sizing:border-box;width:'+widthMm+'mm;height:'+heightMm+'mm;margin:0;display:flex;align-items:center;justify-content:center;overflow:hidden;page-break-after:always;break-after:page;background:#fff;}');
+    html.push('.exos-print-page:last-child{page-break-after:auto;break-after:auto;}');
+    html.push('.exos-print-page img{display:block;max-width:100%;max-height:100%;object-fit:contain;}');
+    html.push('@media print{html,body{width:auto;height:auto}.exos-print-page{margin:0;box-shadow:none;}}');
+    html.push('</style></head><body>');
+    for(i=0;i<pages.length;i++){
+      p=pages[i]||{};
+      html.push('<section class="exos-print-page"><img data-exos-print-page="'+(i+1)+'" alt="Print page '+(i+1)+'" src="'+jplopsoft_htmlEscape(String(p.dataUrl||''))+'"></section>');
+    }
+    html.push('</body></html>');
+
+    try{doc.open();doc.write(html.join(''));doc.close();}catch(e){fail('Unable to write print spool document: '+String(e&&e.message?e.message:e));return;}
+
+    function invokePrint(){
+      if(done)return;
+      if(timer){try{window.clearTimeout(timer);}catch(ignoreReadyTimer){}timer=0;}
+      try{
+        if(win.focus)win.focus();
+        if(win.addEventListener){
+          win.addEventListener('afterprint',function(){
+            finish({ok:true,submitted:true,jobId:Number(spec.jobId)||0,pages:pages.length,title:title,note:'Browser print dialog closed; ExOS cannot determine whether the user printed or cancelled.'});
+          },false);
+        }
+        /* The physical printer / PDF backend is intentionally delegated to the browser. */
+        win.print();
+        /* Some Chromium builds return from print() without a reliable afterprint event. */
+        window.setTimeout(function(){
+          finish({ok:true,submitted:true,jobId:Number(spec.jobId)||0,pages:pages.length,title:title,note:'Print job was submitted to the browser print engine.'});
+        },250);
+      }catch(e2){fail('Browser print engine rejected the spool job: '+String(e2&&e2.message?e2.message:e2));}
+    }
+
+    var imgs=doc.getElementsByTagName('img');
+    if(!imgs.length){fail('Print spool contains no raster pages.');return;}
+    function oneReady(){loaded++;if(loaded>=imgs.length)window.setTimeout(invokePrint,30);}
+    for(i=0;i<imgs.length;i++){
+      if(imgs[i].complete&&imgs[i].naturalWidth>0){oneReady();continue;}
+      imgs[i].onload=oneReady;
+      imgs[i].onerror=function(){fail('A raster page failed to load into the print spool buffer.');};
+    }
+    timer=window.setTimeout(function(){fail('Timed out while preparing print pages.');},15000);
+  });
+}
+
 function jplopsoft_printCurrentDocument(){
   var n=jplopsoft_findNode(state.openId),
       name,fmt,src,safeBody,imgSrc;
@@ -14542,6 +14568,7 @@ function jplopsoft_user32BringToFront(hwnd){
   var rec=jplopsoft_user32GetRecord(hwnd);
   if(!rec)return false;
   jplopsoft_user32Display(rec,true);
+  jplopsoft_user32SetWindowState(rec,'normal');
   jplopsoft_user32Activate(rec);
   return true;
 }
@@ -14565,6 +14592,18 @@ function jplopsoft_user32Display(rec,show){
   return true;
 }
 
+function jplopsoft_user32SetWindowState(rec,stateName){
+  var w,b,s=String(stateName||'normal');
+  if(!rec)return false;
+  if(s!=='normal'&&s!=='minimized'&&s!=='maximized'&&s!=='hidden')s='normal';
+  rec.windowState=s;
+  w=jplopsoft_el(rec.windowId);
+  b=rec.backdropId?jplopsoft_el(rec.backdropId):null;
+  try{if(w)w.setAttribute('data-exos-window-state',s);}catch(ignoreStateAttr){}
+  try{if(b)b.setAttribute('data-exos-window-state',s);}catch(ignoreBackdropStateAttr){}
+  return true;
+}
+
 function jplopsoft_ShowWindow(hwnd,cmd){
   var rec=jplopsoft_user32GetRecord(hwnd),w;
   if(!rec)return false;
@@ -14572,6 +14611,7 @@ function jplopsoft_ShowWindow(hwnd,cmd){
 
   if(cmd===jplopsoft_SW_HIDE){
     jplopsoft_user32Display(rec,false);
+    jplopsoft_user32SetWindowState(rec,'hidden');
     return true;
   }
 
@@ -14651,6 +14691,8 @@ function jplopsoft_ShowWindow(hwnd,cmd){
       if(c)c.visible=false;
     }
 
+    jplopsoft_user32SetWindowState(rec,'minimized');
+
     jplopsoft_SendMessage(
       hwnd,
       jplopsoft_WM_SIZE,
@@ -14666,6 +14708,7 @@ function jplopsoft_ShowWindow(hwnd,cmd){
     if(typeof rec.onMaximize==='function')rec.onMaximize(rec);
     else if(rec.overlay)jplopsoft_wmClassAdd(w,'jplopsoft_wm-maximized');
     else jplopsoft_wmClassAdd(w,'jplopsoft_wm-maximized');
+    jplopsoft_user32SetWindowState(rec,'maximized');
     jplopsoft_user32Activate(rec);
     jplopsoft_SendMessage(hwnd,jplopsoft_WM_SIZE,jplopsoft_SIZE_MAXIMIZED,0);
     return true;
@@ -14678,6 +14721,7 @@ function jplopsoft_ShowWindow(hwnd,cmd){
       jplopsoft_wmClassRemove(w,'jplopsoft_wm-maximized');
       jplopsoft_wmClassRemove(w,'jplopsoft_maximized');
     }
+    jplopsoft_user32SetWindowState(rec,'normal');
     jplopsoft_user32Activate(rec);
     jplopsoft_SendMessage(hwnd,jplopsoft_WM_SIZE,jplopsoft_SIZE_RESTORED,0);
     return true;
@@ -14737,6 +14781,7 @@ function jplopsoft_DefWindowProc(hwnd,msg,wParam,lParam){
     if(wParam===jplopsoft_SC_MAXIMIZE){
       if(typeof rec.onMaximize==='function'){
         rec.onMaximize(rec);
+        jplopsoft_user32SetWindowState(rec,'maximized');
         jplopsoft_user32Activate(rec);
         jplopsoft_SendMessage(hwnd,jplopsoft_WM_SIZE,jplopsoft_SIZE_MAXIMIZED,0);
       }else jplopsoft_ShowWindow(hwnd,jplopsoft_SW_SHOWMAXIMIZED);
@@ -14745,6 +14790,7 @@ function jplopsoft_DefWindowProc(hwnd,msg,wParam,lParam){
     if(wParam===jplopsoft_SC_RESTORE){
       if(typeof rec.onRestore==='function'){
         rec.onRestore(rec);
+        jplopsoft_user32SetWindowState(rec,'normal');
         jplopsoft_user32Activate(rec);
         jplopsoft_SendMessage(hwnd,jplopsoft_WM_SIZE,jplopsoft_SIZE_RESTORED,0);
       }else jplopsoft_ShowWindow(hwnd,jplopsoft_SW_RESTORE);
@@ -14910,6 +14956,7 @@ function jplopsoft_AdoptWindow(options){
     icon:String(o.icon||'file'),
     displayMode:String(o.displayMode||'block'),
     taskbar:o.taskbar===false?false:true,
+    windowState:'normal',
     wndProc:typeof o.wndProc==='function'?o.wndProc:(classDef?classDef.wndProc:null),
     onMinimize:typeof o.onMinimize==='function'?o.onMinimize:null,
     onMaximize:typeof o.onMaximize==='function'?o.onMaximize:null,
@@ -14970,6 +15017,7 @@ function jplopsoft_CreateWindowEx(exStyle,className,windowName,style,x,y,width,h
     icon:String(p.icon||'file'),
     displayMode:'flex',
     taskbar:p.taskbar===false?false:true,
+    windowState:'normal',
     wndProc:typeof p.wndProc==='function'?p.wndProc:(classDef?classDef.wndProc:null),
     onMinimize:null,onMaximize:null,onRestore:null,onClose:null,
     param:p
@@ -20941,7 +20989,7 @@ function jplopsoft_xshCreateHostWindow(ctx){
   return h;
 }
 
-function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH3 API\n  kernel32: CreateFile ReadFile WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile ReadMappedView WriteMappedView CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow GetForegroundWindow SetForegroundWindow GetMessage PeekMessage PostMessage DispatchMessage CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  uxtheme: IsThemeActive OpenThemeData CloseThemeData SetWindowTheme GetThemeColor ApplyTheme\n  dwmapi: DwmIsCompositionEnabled DwmEnableBlurBehindWindow DwmExtendFrameIntoClientArea DwmSetWindowAttribute DwmGetWindowAttribute DwmFlush\n  ExOS.WinUI: Render RenderMany SetData\n  advapi32: ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
+function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH3 API\n  kernel32: CreateFile ReadFile WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile ReadMappedView WriteMappedView CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow GetForegroundWindow SetForegroundWindow LoadIcon GetIconInfo EnumIconResources SetWindowIcon GetMessage PeekMessage PostMessage DispatchMessage InvalidateRect UpdateWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  gdi32(exos_gdi32.js): GetDC ReleaseDC BeginPaint EndPaint CreateDC CreatePrinterDC StartDoc StartPage EndPage EndDoc AbortDoc PrintImage GetPrintJobInfo CreateCompatibleDC DeleteDC CreatePen CreateSolidBrush CreateFont CreateBitmap CreateCompatibleBitmap SelectObject DeleteObject MoveToEx LineTo Rectangle Ellipse Polygon Polyline PolyBezier BitBlt TextOut ExtTextOut GetTextExtentPoint32 CreateRectRgn CreateEllipticRgn CreatePolygonRgn SelectClipRgn SetMapMode LPtoDP DPtoLP\n  d3d11(exos_d3d11.js): D3D11CreateDeviceAndSwapChain CreateBuffer CreateTexture2D CreateVertexShader CreatePixelShader CreateInputLayout IASetVertexBuffers IASetIndexBuffer IASetPrimitiveTopology VSSetShader PSSetShader OMSetRenderTargets RSSetViewports ClearRenderTargetView Draw DrawIndexed Present\n  d3dx/three32(exos_d3dx.js + three.min.js): Scene Camera Geometry Material Mesh Light WebGLRenderer TextureLoader Clock\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  uxtheme: IsThemeActive OpenThemeData CloseThemeData SetWindowTheme GetThemeColor ApplyTheme\n  dwmapi: DwmIsCompositionEnabled DwmEnableBlurBehindWindow DwmExtendFrameIntoClientArea DwmSetWindowAttribute DwmGetWindowAttribute DwmFlush\n  ExOS.WinUI: Render RenderMany SetData\n  advapi32(exos_advapi32.js): RegOpenKeyEx RegCreateKeyEx RegCloseKey RegQueryValueEx RegGetValue RegSetValueEx RegEnumKeyEx RegEnumValue RegQueryInfoKey RegDeleteValue RegDeleteKey RegFlushKey ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo GetSecurityInfo SetSecurityInfo InitializeAcl SetEntriesInAcl GetExplicitEntriesFromAcl OpenProcessToken GetTokenInformation DuplicateTokenEx CreateRestrictedToken CheckTokenMembership PrivilegeCheck AdjustTokenPrivileges LookupPrivilegeValue LookupPrivilegeName GetUserName LookupAccountSid LookupAccountName ConvertSidToStringSid ConvertStringSidToSid IsValidSid EqualSid\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop SHQueryRecycleBin SHRestoreFromRecycleBin SHDeleteFromRecycleBin SHEmptyRecycleBin\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath UploadPickedFile ReleasePickedFile QuerySystemConfig\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
 function jplopsoft_xshPrintIrpTrace(ctx){
   var a=ctx.irpTrace.slice(-20),i,j,irp,s='';
   for(i=0;i<a.length;i++){
@@ -20966,6 +21014,34 @@ function jplopsoft_xshCreateAppWindow(ctx,spec){
 }
 
 function jplopsoft_xshControl(ctx,controlId){return ctx.controls[String(controlId||'')]||null;}
+function jplopsoft_xshLoadIcon(ctx,dll,name){
+  var token;
+  if(typeof jplopsoft_shareResLoadIcon!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_share_res.js is not loaded.');
+  token=jplopsoft_shareResLoadIcon(dll,name);
+  if(!token)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Icon resource not found: '+String(dll||'shell32.dll')+'!'+String(name||''));
+  return token;
+}
+function jplopsoft_xshGetIconInfo(ctx,value){
+  var r=typeof jplopsoft_shareResResolve==='function'?jplopsoft_shareResResolve(value,'shell32.dll'):null;
+  if(!r)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Icon resource not found.');
+  return r;
+}
+function jplopsoft_xshEnumIconResources(ctx,dll){
+  if(typeof jplopsoft_shareResEnumIcons!=='function')return[];
+  return jplopsoft_shareResEnumIcons(dll);
+}
+function jplopsoft_xshSetWindowIcon(ctx,hwnd,icon){
+  var h=parseInt(hwnd,10)||0,rec;
+  if(!ctx.windows[String(h)])throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'HWND is not owned by this XSH process.');
+  if(!jplopsoft_shareResResolve(icon,'shell32.dll'))throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Icon resource not found.');
+  rec=jplopsoft_user32GetRecord(h);
+  if(!rec)return false;
+  rec.icon=String(icon);
+  var winNode=rec.windowId?document.getElementById(rec.windowId):null, titleIcon=winNode&&winNode.querySelector?winNode.querySelector('.jplopsoft_wm-title-icon'):null;
+  if(titleIcon){titleIcon.setAttribute('data-exfs-svg',rec.icon);jplopsoft_svgIconApply(titleIcon,rec.icon,18);}
+  if(rec.taskbar)jplopsoft_taskbarEnsureApp(rec.appId,rec.icon,rec.title);
+  return true;
+}
 function jplopsoft_xshApplySafeStyle(n,style){var s=style||{},k,allowed={display:1,width:1,height:1,minWidth:1,minHeight:1,maxWidth:1,maxHeight:1,margin:1,marginTop:1,marginRight:1,marginBottom:1,marginLeft:1,padding:1,paddingTop:1,paddingRight:1,paddingBottom:1,paddingLeft:1,boxSizing:1,fontSize:1,fontWeight:1,fontFamily:1,lineHeight:1,textAlign:1,whiteSpace:1,overflow:1,overflowX:1,overflowY:1,resize:1,border:1,borderRadius:1,background:1,color:1,gap:1,gridTemplateColumns:1,gridTemplateRows:1,alignItems:1,justifyContent:1,flexDirection:1,flexWrap:1,flex:1,opacity:1,cursor:1,boxShadow:1,borderTop:1,borderRight:1,borderBottom:1,borderLeft:1};if(!n||!n.style)return;for(k in s){if(!s.hasOwnProperty(k)||!allowed[k])continue;try{n.style[k]=String(s[k]);}catch(ignoreXshStyle){}}}
 function jplopsoft_xshControlParent(ctx,client,parentId){var p=parentId?jplopsoft_xshControl(ctx,parentId):null;return p||client;}
 
@@ -20987,48 +21063,50 @@ function jplopsoft_xshSetControlStyle(ctx,id,style){
   return true;
 }
 
+function jplopsoft_xshTextSelection(n){
+  return{
+    start:typeof n.selectionStart==='number'?n.selectionStart:0,
+    end:typeof n.selectionEnd==='number'?n.selectionEnd:0,
+    direction:String(n.selectionDirection||'none')
+  };
+}
 function jplopsoft_xshAttachTextControlEvents(ctx,id,n){
-  n.onchange=function(){
+  function send(action,e){
+    var sel=jplopsoft_xshTextSelection(n);
     jplopsoft_xshSendEvent(
       ctx,
       {
         event:'control',
         controlId:id,
-        action:'change',
-        value:n.value
+        action:action,
+        value:n.value,
+        selectionStart:sel.start,
+        selectionEnd:sel.end,
+        selectionDirection:sel.direction,
+        key:String(e&&e.key||''),
+        keyCode:parseInt(e&&(e.keyCode||e.which),10)||0,
+        ctrlKey:!!(e&&e.ctrlKey),
+        shiftKey:!!(e&&e.shiftKey),
+        altKey:!!(e&&e.altKey)
       }
     );
-  };
-
-  n.oninput=function(){
-    jplopsoft_xshSendEvent(
-      ctx,
-      {
-        event:'control',
-        controlId:id,
-        action:'input',
-        value:n.value
-      }
-    );
-  };
-
+  }
+  n.onchange=function(e){send('change',e);};
+  n.oninput=function(e){send('input',e);};
+  n.onfocus=function(e){send('focus',e);};
+  n.onclick=function(e){send('click',e);};
+  n.onkeyup=function(e){send('keyup',e);};
   n.onkeydown=function(e){
     e=e||window.event;
-
-    jplopsoft_xshSendEvent(
-      ctx,
-      {
-        event:'control',
-        controlId:id,
-        action:'keydown',
-        value:n.value,
-        key:String(e.key||''),
-        keyCode:parseInt(e.keyCode||e.which,10)||0,
-        ctrlKey:!!e.ctrlKey,
-        shiftKey:!!e.shiftKey,
-        altKey:!!e.altKey
-      }
-    );
+    var key=String(e.key||'').toLowerCase();
+    if(
+      (e.ctrlKey&&(key==='s'||key==='f'||key==='h'||key==='g'))||
+      key==='f3'||key==='f5'
+    ){
+      try{e.preventDefault();}catch(ignorePreventDefault){}
+      try{e.returnValue=false;}catch(ignoreReturnValue){}
+    }
+    send('keydown',e);
   };
 }
 
@@ -21051,6 +21129,209 @@ function jplopsoft_xshAttachTextControlEvents(ctx,id,n){
  * --------------------------------------------------------------------- */
 
 /* Common Controls host implementation is loaded from exos_comctl32.js. */
+
+
+function jplopsoft_xshTopologySnapshot(mode){
+  var out=[],nodes=state&&state.nodes&&Object.prototype.toString.call(state.nodes)==='[object Array]'?state.nodes:[],
+      i,n,name,path,parentId,modeName=String(mode||'physical').toLowerCase();
+
+  if(modeName==='sandbox'){
+    out.push({id:'root',parentId:'',label:'本機磁碟 (C:)',kind:'root',path:'C:\\',detail:'ExOS 使用者沙盒根目錄'});
+    for(i=0;i<nodes.length&&out.length<181;i++){
+      n=nodes[i];
+      if(!n||!n.id)continue;
+      try{name=jplopsoft_decName(n);}catch(ignoreName){name='';}
+      if(!name)name='[encrypted #'+String(n.id)+']';
+      try{path=jplopsoft_xshNodePath(n);}catch(ignorePath){path='';}
+      parentId=parseInt(n.parent_id,10)||0;
+      out.push({
+        id:'n'+String(n.id),
+        parentId:parentId>0?'n'+String(parentId):'root',
+        label:String(name),
+        kind:n.type==='folder'?'folder':'file',
+        type:String(n.type||''),
+        path:String(path||''),
+        detail:n.type==='folder'?'Logical Folder':'Encrypted ExFS Object',
+        size:parseInt(n.original_size,10)||0
+      });
+    }
+    return out;
+  }
+
+  out.push({id:'phys_root',parentId:'',label:'/_exfs/',kind:'root',detail:'ExFS PHP VDO backing root'});
+  out.push({id:'mft',parentId:'phys_root',label:'_MFT.x6f',kind:'metadata',detail:'Master File Table / nodes / versions'});
+  out.push({id:'mftmirr',parentId:'phys_root',label:'_MFTMirr.x6f',kind:'metadata',detail:'MFT mirror'});
+  out.push({id:'log',parentId:'phys_root',label:'_LogFile.x6f',kind:'metadata',detail:'ExFS transaction log'});
+  out.push({id:'volume',parentId:'phys_root',label:'_Volume.x6f',kind:'metadata',detail:'Volume metadata'});
+  out.push({id:'secure',parentId:'phys_root',label:'_Secure.x6f',kind:'security',detail:'Security descriptors / ACL'});
+  out.push({id:'storage',parentId:'phys_root',label:'_Storage/',kind:'folder',detail:'Encrypted data object store'});
+  for(i=0;i<nodes.length&&out.length<135;i++){
+    n=nodes[i];
+    if(!n||!n.id)continue;
+    try{name=jplopsoft_decName(n);}catch(ignorePhysName){name='';}
+    if(!name)name='#'+String(n.id);
+    out.push({
+      id:'p'+String(n.id),
+      parentId:'storage',
+      label:String(name),
+      kind:n.type==='folder'?'folder':'data',
+      type:String(n.type||''),
+      detail:n.type==='folder'?'Logical folder metadata':'Encrypted .x6f data object',
+      size:parseInt(n.original_size,10)||0
+    });
+  }
+  return out;
+}
+
+function jplopsoft_xshTopologyColor(kind){
+  if(kind==='root')return 0xffffff;
+  if(kind==='folder')return 0x22d3ee;
+  if(kind==='metadata')return 0x60a5fa;
+  if(kind==='security')return 0xf59e0b;
+  if(kind==='data')return 0xa78bfa;
+  return 0xf472b6;
+}
+
+function jplopsoft_xshTopologyDisposeObject(obj){
+  if(!obj)return;
+  try{
+    if(obj.traverse){
+      obj.traverse(function(child){
+        try{if(child.geometry&&child.geometry.dispose)child.geometry.dispose();}catch(ignoreGeometryDispose){}
+        try{
+          if(child.material){
+            if(Object.prototype.toString.call(child.material)==='[object Array]'){
+              for(var mi=0;mi<child.material.length;mi++)if(child.material[mi]&&child.material[mi].dispose)child.material[mi].dispose();
+            }else if(child.material.dispose)child.material.dispose();
+          }
+        }catch(ignoreMaterialDispose){}
+      });
+    }
+  }catch(ignoreTraverseDispose){}
+}
+function jplopsoft_xshTopologyDispose(n){
+  var t=n&&n._exosTopologyState?n._exosTopologyState:null;
+  if(!t)return;
+  t.disposed=true;
+  if(t.animationFrame){try{cancelAnimationFrame(t.animationFrame);}catch(ignoreAnim){}}
+  if(t.resizeObserver){try{t.resizeObserver.disconnect();}catch(ignoreRO){}}
+  try{jplopsoft_xshTopologyDisposeObject(t.group);}catch(ignoreGroupDispose){}
+  try{if(t.renderer)t.renderer.dispose();}catch(ignoreRendererDispose){}
+  n._exosTopologyState=null;
+}
+
+function jplopsoft_xshTopologyReset(n){
+  var t=n&&n._exosTopologyState?n._exosTopologyState:null;
+  if(!t)return false;
+  t.rotX=-0.28;t.rotY=0.35;t.distance=26;
+  if(t.group){t.group.rotation.x=t.rotX;t.group.rotation.y=t.rotY;}
+  if(t.camera){t.camera.position.set(0,2,t.distance);t.camera.lookAt(0,0,0);}
+  return true;
+}
+
+function jplopsoft_xshTopologyRebuild(ctx,id,n){
+  var t=n&&n._exosTopologyState?n._exosTopologyState:null,T=window.THREE,data,group,map={},levels={},i,d,item,parent,mesh,geo,mat,
+      positions={},keys,k,angle,radius,x,y,z,segments=[],a,b,lineGeo,lineMat,line,stats;
+  if(!t||!T||!t.scene)return false;
+  if(t.group){
+    try{t.scene.remove(t.group);}catch(ignoreRemove){}
+    try{jplopsoft_xshTopologyDisposeObject(t.group);}catch(ignoreOldTopologyDispose){}
+  }
+  group=new T.Group();t.scene.add(group);t.group=group;t.pickables=[];
+  data=jplopsoft_xshTopologySnapshot(t.mode);t.data=data;
+  for(i=0;i<data.length;i++)map[data[i].id]=data[i];
+  function depthOf(rec){
+    var depth=0,p=rec,guard=0;
+    while(p&&p.parentId&&map[p.parentId]&&guard++<24){depth++;p=map[p.parentId];}
+    return depth;
+  }
+  for(i=0;i<data.length;i++){d=depthOf(data[i]);if(!levels[d])levels[d]=[];levels[d].push(data[i]);}
+  keys=Object.keys(levels).map(Number).sort(function(a,b){return a-b;});
+  for(k=0;k<keys.length;k++){
+    d=keys[k];
+    for(i=0;i<levels[d].length;i++){
+      item=levels[d][i];
+      if(d===0){x=0;y=0;z=0;}
+      else{
+        angle=(i/Math.max(1,levels[d].length))*Math.PI*2+(d%2?0.22:0);
+        radius=4.3+d*3.8;
+        x=Math.cos(angle)*radius;
+        z=Math.sin(angle)*radius;
+        y=(d-1)*1.1+(i%3-1)*0.45;
+      }
+      positions[item.id]=new T.Vector3(x,y,z);
+      geo=(item.kind==='folder'||item.kind==='metadata')?new T.BoxGeometry(item.kind==='folder'?0.85:0.7,item.kind==='folder'?0.65:0.7,item.kind==='folder'?0.85:0.7):new T.SphereGeometry(item.kind==='root'?0.95:0.52,16,12);
+      mat=new T.MeshStandardMaterial({color:jplopsoft_xshTopologyColor(item.kind),roughness:0.48,metalness:0.14});
+      mesh=new T.Mesh(geo,mat);mesh.position.copy(positions[item.id]);mesh.userData={topology:item};group.add(mesh);t.pickables.push(mesh);
+    }
+  }
+  for(i=0;i<data.length;i++){
+    item=data[i];
+    if(!item.parentId||!positions[item.parentId]||!positions[item.id])continue;
+    segments.push(positions[item.parentId],positions[item.id]);
+  }
+  if(segments.length){
+    lineGeo=new T.BufferGeometry().setFromPoints(segments);
+    lineMat=new T.LineBasicMaterial({color:0x64748b,transparent:true,opacity:0.58});
+    line=new T.LineSegments(lineGeo,lineMat);group.add(line);
+  }
+  stats=data.length+' nodes ｜ '+(t.mode==='sandbox'?'Sandbox':'Physical');
+  if(t.stats)t.stats.textContent=stats;
+  jplopsoft_xshSendEvent(ctx,{event:'control',controlId:id,action:'topologyready',nodeCount:data.length,mode:t.mode});
+  return true;
+}
+
+function jplopsoft_xshTopologyInit(ctx,id,n,spec){
+  var canvas=document.createElement('canvas'),stats=document.createElement('div'),tip=document.createElement('div'),t;
+  n.style.position='relative';n.style.overflow='hidden';n.style.background='#07101e';
+  canvas.style.cssText='display:block;width:100%;height:100%;touch-action:none;outline:0;';
+  stats.style.cssText='position:absolute;left:10px;bottom:8px;padding:4px 7px;border-radius:5px;background:rgba(15,23,42,.72);color:#cbd5e1;font:11px Segoe UI,Arial,sans-serif;pointer-events:none;';
+  tip.style.cssText='display:none;position:absolute;z-index:4;max-width:260px;padding:6px 8px;border-radius:5px;background:rgba(15,23,42,.92);color:#f8fafc;font:12px Segoe UI,Arial,sans-serif;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.28);';
+  n.appendChild(canvas);n.appendChild(stats);n.appendChild(tip);
+  t={canvas:canvas,stats:stats,tip:tip,mode:String(spec.topologyMode||'physical')==='sandbox'?'sandbox':'physical',renderer:null,scene:null,camera:null,group:null,pickables:[],raycaster:null,mouse:null,rotX:-0.28,rotY:0.35,distance:26,dragging:false,lastX:0,lastY:0,animationFrame:0,resizeObserver:null,disposed:false,data:[]};
+  n._exosTopologyState=t;
+  function fail(err){
+    if(t.disposed)return;
+    stats.textContent='3D unavailable';
+    jplopsoft_xshSendEvent(ctx,{event:'control',controlId:id,action:'topologyerror',message:String(err&&err.message?err.message:err)});
+  }
+  function start(){
+    try{
+      var T=window.THREE;
+      if(!T)throw new Error('Three.js is not available.');
+      t.renderer=new T.WebGLRenderer({canvas:canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
+      t.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+      t.scene=new T.Scene();t.scene.background=new T.Color(0x07101e);
+      t.camera=new T.PerspectiveCamera(48,1,0.1,200);t.camera.position.set(0,2,t.distance);t.camera.lookAt(0,0,0);
+      t.scene.add(new T.HemisphereLight(0xdbeafe,0x0f172a,1.4));
+      var light=new T.DirectionalLight(0xffffff,1.0);light.position.set(6,10,8);t.scene.add(light);
+      var grid=new T.GridHelper(38,38,0x334155,0x1e293b);grid.position.y=-3.3;t.scene.add(grid);
+      t.raycaster=new T.Raycaster();t.mouse=new T.Vector2();
+      jplopsoft_xshTopologyRebuild(ctx,id,n);jplopsoft_xshTopologyReset(n);
+      function resize(){
+        if(t.disposed||!t.renderer)return;
+        var r=n.getBoundingClientRect(),w=Math.max(2,Math.floor(r.width)),h=Math.max(2,Math.floor(r.height));
+        t.renderer.setSize(w,h,false);t.camera.aspect=w/h;t.camera.updateProjectionMatrix();
+      }
+      if(typeof ResizeObserver!=='undefined'){t.resizeObserver=new ResizeObserver(resize);t.resizeObserver.observe(n);}else window.setTimeout(resize,0);
+      resize();
+      function animate(){if(t.disposed)return;t.animationFrame=requestAnimationFrame(animate);if(t.group&&!t.dragging)t.group.rotation.y+=0.0007;try{t.renderer.render(t.scene,t.camera);}catch(ignoreRender){}}
+      animate();
+      canvas.onpointerdown=function(e){t.dragging=true;t.lastX=e.clientX;t.lastY=e.clientY;try{canvas.setPointerCapture(e.pointerId);}catch(ignoreCapture){}};
+      canvas.onpointermove=function(e){
+        if(t.dragging&&t.group){t.rotY+=(e.clientX-t.lastX)*0.008;t.rotX+=(e.clientY-t.lastY)*0.008;t.rotX=Math.max(-1.25,Math.min(1.25,t.rotX));t.group.rotation.x=t.rotX;t.group.rotation.y=t.rotY;t.lastX=e.clientX;t.lastY=e.clientY;}
+        var r=canvas.getBoundingClientRect();t.mouse.x=((e.clientX-r.left)/Math.max(1,r.width))*2-1;t.mouse.y=-((e.clientY-r.top)/Math.max(1,r.height))*2+1;t.raycaster.setFromCamera(t.mouse,t.camera);var hit=t.raycaster.intersectObjects(t.pickables,false)[0];
+        if(hit&&hit.object&&hit.object.userData&&hit.object.userData.topology){var d=hit.object.userData.topology;tip.style.display='block';tip.style.left=Math.min(r.width-230,Math.max(8,e.clientX-r.left+12))+'px';tip.style.top=Math.min(r.height-60,Math.max(8,e.clientY-r.top+12))+'px';tip.textContent=d.label;}else tip.style.display='none';
+      };
+      canvas.onpointerup=function(e){t.dragging=false;try{canvas.releasePointerCapture(e.pointerId);}catch(ignoreRelease){}};
+      canvas.onpointercancel=function(){t.dragging=false;};
+      canvas.onwheel=function(e){try{e.preventDefault();}catch(ignorePrevent){}t.distance=Math.max(8,Math.min(65,t.distance+(e.deltaY>0?2:-2)));t.camera.position.z=t.distance;};
+      canvas.onclick=function(e){var r=canvas.getBoundingClientRect();t.mouse.x=((e.clientX-r.left)/Math.max(1,r.width))*2-1;t.mouse.y=-((e.clientY-r.top)/Math.max(1,r.height))*2+1;t.raycaster.setFromCamera(t.mouse,t.camera);var hit=t.raycaster.intersectObjects(t.pickables,false)[0];if(hit&&hit.object&&hit.object.userData&&hit.object.userData.topology)jplopsoft_xshSendEvent(ctx,{event:'control',controlId:id,action:'topologynode',data:hit.object.userData.topology});};
+    }catch(e){fail(e);}
+  }
+  if(window.THREE&&jplopsoft_threeReady())start();
+  else jplopsoft_loadOptionalMirroredScript('three',function(err){if(err)fail(err);else start();});
+}
 
 function jplopsoft_xshCreateControl(ctx,hwnd,spec){
   var client=jplopsoft_GetClientElement(parseInt(hwnd,10)||0),
@@ -21150,14 +21431,14 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
     n=document.createElement('img');
     n.className='jplopsoft_xsh-control';
     n.alt=String(s.alt||'');
-    if(
-      s.src&&
-      /^data:image\/(?:png|jpeg|gif|webp);base64,/i.test(
-        String(s.src)
-      )
-    ){
-      n.src=String(s.src);
+    if(s.src){
+      var imageRes=typeof jplopsoft_shareResResolve==='function'?jplopsoft_shareResResolve(s.src,'shell32.dll'):null;
+      if(imageRes){n.src=imageRes.uri;n._exosResourceToken=imageRes.token;}
+      else if(/^data:image\/(?:png|jpeg|gif|webp|svg\+xml);base64,/i.test(String(s.src))){n.src=String(s.src);}
     }
+  }else if(type==='topology3d'){
+    n=document.createElement('div');
+    n.className='jplopsoft_xsh-control jplopsoft_xsh-topology3d';
   }else if(type==='htmlpreview'){
     n=document.createElement('iframe');
     n.className='jplopsoft_xsh-control';
@@ -21221,6 +21502,14 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
 
   parent.appendChild(n);
   ctx.controls[id]=n;
+
+  if(type==='topology3d'){
+    window.setTimeout(function(){
+      if(!ctx.terminating&&ctx.controls[id]===n){
+        jplopsoft_xshTopologyInit(ctx,id,n,s);
+      }
+    },0);
+  }
 
   return id;
 }
@@ -21391,18 +21680,15 @@ function jplopsoft_xshSetControlProperty(ctx,id,prop,value){
   }
 
   if(p==='src'){
-    if(
-      String(n.tagName||'').toLowerCase()!=='img'||
-      !/^data:image\/(?:png|jpeg|gif|webp);base64,/i.test(
-        String(value||'')
-      )
-    ){
-      throw jplopsoft_xshError(
-        jplopsoft_STATUS_INVALID_PARAMETER,
-        'Only Base64 image Data URLs are allowed.'
-      );
+    var imageRes=typeof jplopsoft_shareResResolve==='function'?jplopsoft_shareResResolve(value,'shell32.dll'):null;
+    if(String(n.tagName||'').toLowerCase()!=='img'){
+      throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Image control required.');
     }
-    n.src=String(value);
+    if(imageRes){n.src=imageRes.uri;n._exosResourceToken=imageRes.token;return true;}
+    if(!/^data:image\/(?:png|jpeg|gif|webp|svg\+xml);base64,/i.test(String(value||''))){
+      throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Only ExOS resource icons or Base64 image Data URLs are allowed.');
+    }
+    n.src=String(value);n._exosResourceToken='';
     return true;
   }
 
@@ -21450,9 +21736,46 @@ function jplopsoft_xshSetControlProperty(ctx,id,prop,value){
     return true;
   }
 
+  if(p==='wrap'&&String(n.tagName||'').toLowerCase()==='textarea'){
+    n.wrap=value===false?'off':String(value||'soft');
+    return true;
+  }
+
+  if(p==='selection'&&('selectionStart' in n)){
+    var range=value&&typeof value==='object'?value:{},
+        len=String(n.value||'').length,
+        start=Math.max(0,Math.min(len,parseInt(range.start,10)||0)),
+        end=Math.max(0,Math.min(len,parseInt(range.end,10)||start)),
+        direction=String(range.direction||'none');
+    if(end<start){var tmp=start;start=end;end=tmp;}
+    try{
+      n.setSelectionRange(start,end,direction);
+      if(range.focus!==false)n.focus();
+    }catch(ignoreXshSelection){}
+    return true;
+  }
+
+  if(p==='scrollTop'&&('scrollTop' in n)){
+    n.scrollTop=Math.max(0,Number(value)||0);
+    return true;
+  }
+
   if(p==='title'){
     n.title=String(value||'');
     return true;
+  }
+
+  if(n._exosTopologyState){
+    if(p==='topologyMode'){
+      n._exosTopologyState.mode=String(value||'physical')==='sandbox'?'sandbox':'physical';
+      return jplopsoft_xshTopologyRebuild(ctx,String(id||''),n);
+    }
+    if(p==='refreshTopology'){
+      return jplopsoft_xshTopologyRebuild(ctx,String(id||''),n);
+    }
+    if(p==='resetView'){
+      return jplopsoft_xshTopologyReset(n);
+    }
   }
 
   throw jplopsoft_xshError(
@@ -21475,8 +21798,16 @@ function jplopsoft_xshGetControlProperty(ctx,id,prop){
   if(p==='disabled')return !!n.disabled;
   if(p==='spellcheck')return !!n.spellcheck;
   if(p==='placeholder')return String(n.placeholder||'');
+  if(p==='wrap'&&String(n.tagName||'').toLowerCase()==='textarea')return String(n.wrap||'soft');
+  if(p==='selection'&&('selectionStart' in n))return jplopsoft_xshTextSelection(n);
+  if(p==='selectionStart'&&('selectionStart' in n))return Number(n.selectionStart)||0;
+  if(p==='selectionEnd'&&('selectionEnd' in n))return Number(n.selectionEnd)||0;
+  if(p==='scrollTop'&&('scrollTop' in n))return Number(n.scrollTop)||0;
+  if(p==='scrollHeight'&&('scrollHeight' in n))return Number(n.scrollHeight)||0;
   if(p==='title')return String(n.title||'');
-  if(p==='src')return String(n.getAttribute('src')||'');
+  if(p==='src')return String(n._exosResourceToken||n.getAttribute('src')||'');
+  if(n._exosTopologyState&&p==='topologyMode')return String(n._exosTopologyState.mode||'physical');
+  if(n._exosTopologyState&&p==='topologyStats')return {mode:String(n._exosTopologyState.mode||'physical'),nodeCount:n._exosTopologyState.data?n._exosTopologyState.data.length:0};
   return null;
 }
 function jplopsoft_xshInsertControlText(ctx,id,text){var n=jplopsoft_xshControl(ctx,id),s=String(text||''),start,end,v;if(!n||!('value' in n))throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Text control required.');v=String(n.value||'');start=typeof n.selectionStart==='number'?n.selectionStart:v.length;end=typeof n.selectionEnd==='number'?n.selectionEnd:start;n.value=v.substring(0,start)+s+v.substring(end);try{n.selectionStart=n.selectionEnd=start+s.length;n.focus();}catch(ignoreInsertFocus){}return n.value;}
@@ -21688,13 +22019,18 @@ async function jplopsoft_xshConfirmBox(ctx,message,title){
 
 function jplopsoft_xshPickFiles(ctx,options){
   var opt=options||{},
+      tokenMode=!!opt.returnFileToken,
+      hardMax=1024*1024*1024,
       maxBytes=Math.max(
         1,
         Math.min(
-          jplopsoft_XSH.maxIoBytes,
-          parseInt(opt.maxBytes,10)||jplopsoft_XSH.maxIoBytes
+          tokenMode?hardMax:jplopsoft_XSH.maxIoBytes,
+          parseInt(opt.maxBytes,10)||(tokenMode?hardMax:jplopsoft_XSH.maxIoBytes)
         )
       );
+
+  if(!ctx.localFiles)ctx.localFiles={};
+  if(!ctx.nextLocalFile)ctx.nextLocalFile=1;
 
   return new Promise(function(resolve,reject){
     var input=document.createElement('input');
@@ -21719,7 +22055,7 @@ function jplopsoft_xshPickFiles(ctx,options){
           index=0;
 
       function next(){
-        var f,r;
+        var f,r,size,token;
 
         if(index>=files.length){
           cleanup();
@@ -21734,13 +22070,44 @@ function jplopsoft_xshPickFiles(ctx,options){
           return;
         }
 
-        if((parseInt(f.size,10)||0)>maxBytes){
+        size=parseInt(f.size,10)||0;
+
+        if(size>maxBytes){
           out.push({
             name:String(f.name||''),
-            size:parseInt(f.size,10)||0,
+            size:size,
             type:String(f.type||''),
+            lastModified:parseInt(f.lastModified,10)||0,
             error:'FILE_TOO_LARGE',
+            fileToken:'',
             dataBuffer:new ArrayBuffer(0)
+          });
+          next();
+          return;
+        }
+
+        /*
+         * Token mode is the V8 large-file path.  Do not FileReader the whole
+         * object into the XSH sandbox: retain the browser File handle in the
+         * host process and let ExOS stream it through SINGLE_V1/CHUNKED_V1.
+         */
+        if(tokenMode){
+          token='LF'+String(ctx.pid)+'_'+String(ctx.nextLocalFile++);
+          ctx.localFiles[token]={
+            file:f,
+            name:String(f.name||''),
+            size:size,
+            type:String(f.type||''),
+            lastModified:parseInt(f.lastModified,10)||0,
+            createdAt:(new Date()).getTime()
+          };
+          out.push({
+            name:String(f.name||''),
+            size:size,
+            type:String(f.type||''),
+            lastModified:parseInt(f.lastModified,10)||0,
+            error:'',
+            fileToken:token
           });
           next();
           return;
@@ -21751,9 +22118,11 @@ function jplopsoft_xshPickFiles(ctx,options){
         r.onerror=function(){
           out.push({
             name:String(f.name||''),
-            size:parseInt(f.size,10)||0,
+            size:size,
             type:String(f.type||''),
+            lastModified:parseInt(f.lastModified,10)||0,
             error:'READ_FAILED',
+            fileToken:'',
             dataBuffer:new ArrayBuffer(0)
           });
           next();
@@ -21769,7 +22138,9 @@ function jplopsoft_xshPickFiles(ctx,options){
             name:String(f.name||''),
             size:buffer.byteLength,
             type:String(f.type||''),
+            lastModified:parseInt(f.lastModified,10)||0,
             error:'',
+            fileToken:'',
             dataBuffer:buffer
           });
 
@@ -21781,9 +22152,11 @@ function jplopsoft_xshPickFiles(ctx,options){
         }catch(e){
           out.push({
             name:String(f.name||''),
-            size:parseInt(f.size,10)||0,
+            size:size,
             type:String(f.type||''),
+            lastModified:parseInt(f.lastModified,10)||0,
             error:String(e&&e.message?e.message:e),
+            fileToken:'',
             dataBuffer:new ArrayBuffer(0)
           });
           next();
@@ -21802,6 +22175,146 @@ function jplopsoft_xshPickFiles(ctx,options){
       reject(e);
     }
   });
+}
+
+function jplopsoft_xshLocalFile(ctx,token){
+  var rec=ctx&&ctx.localFiles?ctx.localFiles[String(token||'')]:null;
+  if(!rec||!rec.file){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_HANDLE,
+      'Picked browser file token is no longer valid.'
+    );
+  }
+  return rec;
+}
+
+function jplopsoft_xshReleasePickedFile(ctx,token){
+  token=String(token||'');
+  if(ctx&&ctx.localFiles&&ctx.localFiles[token]){
+    delete ctx.localFiles[token];
+    return true;
+  }
+  return false;
+}
+
+function jplopsoft_xshReadBrowserFile(file){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onerror=function(){reject(new Error('Browser FileReader failed.'));};
+    reader.onload=function(){
+      var b=Object.prototype.toString.call(reader.result)==='[object ArrayBuffer]'
+        ?reader.result
+        :new ArrayBuffer(0);
+      resolve(b);
+    };
+    try{reader.readAsArrayBuffer(file);}catch(e){reject(e);}
+  });
+}
+
+async function jplopsoft_xshUploadPickedFile(ctx,token,path){
+  var rec=jplopsoft_xshLocalFile(ctx,token),
+      file=rec.file,
+      size=parseInt(rec.size,10)||0,
+      maxLogical=1024*1024*1024,
+      parent=jplopsoft_xshResolveC(ctx,String(path||''),true),
+      name,node,createResult,handle=0,buffer,wr,fek,fekWrap,out;
+
+  if(size>maxLogical){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_INVALID_PARAMETER,
+      'ExOS Explorer accepts at most 1 GiB per uploaded file.'
+    );
+  }
+  if(!parent){
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,
+      'Upload destination folder was not found.'
+    );
+  }
+  name=String(parent.name||'');
+  if(!jplopsoft_xshValidLeafName(name)){
+    throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Invalid upload file name.');
+  }
+  if(jplopsoft_xshFindChild(parent.parentId,name,null)){
+    throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_COLLISION,'Upload destination already exists.');
+  }
+  if(!jplopsoft_isWritableProfileFolder(parent.parentId)){
+    throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Upload is allowed only inside the current user profile.');
+  }
+
+  /* Ordinary XSH I/O remains efficient for smaller files. */
+  if(size<=jplopsoft_XSH.maxIoBytes){
+    buffer=await jplopsoft_xshReadBrowserFile(file);
+    if(buffer.byteLength!==size){
+      throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Browser file size changed while reading.');
+    }
+    createResult=await jplopsoft_xshNtCreateFile(ctx,path,0x40000000,2,'CreateFile');
+    if(!createResult||Number(createResult.status)!==Number(jplopsoft_STATUS_SUCCESS)||!createResult.handle){
+      throw jplopsoft_xshError(createResult&&createResult.status?createResult.status:jplopsoft_STATUS_INVALID_PARAMETER,createResult&&createResult.error?createResult.error:'CreateFile failed.');
+    }
+    handle=createResult.handle;
+    var smallWriteOk=false;
+    try{
+      wr=await jplopsoft_xshNtWriteFile(ctx,handle,buffer,0,'WriteFile');
+      if(!wr||Number(wr.status)!==Number(jplopsoft_STATUS_SUCCESS)||Number(wr.bytesWritten)!==size){
+        throw jplopsoft_xshError(wr&&wr.status?wr.status:jplopsoft_STATUS_INVALID_PARAMETER,wr&&wr.error?wr.error:'WriteFile failed.');
+      }
+      smallWriteOk=true;
+    }finally{
+      jplopsoft_xshCloseHandle(ctx,handle);
+      handle=0;
+      if(!smallWriteOk){
+        try{await jplopsoft_xshDeleteFile(ctx,path);}catch(ignorePartialUploadCleanup){}
+      }
+    }
+    await jplopsoft_xshReloadNodes();
+    node=jplopsoft_xshResolveC(ctx,path,false);
+    return{
+      ok:true,
+      path:String(path||''),
+      size:size,
+      nodeId:node&&node.id?parseInt(node.id,10)||0:0,
+      storageMode:'SINGLE_V1',
+      blockCount:1
+    };
+  }
+
+  /*
+   * Large-file path: File.slice() -> 4 MiB plaintext blocks -> browser FEK
+   * encryption -> small HTTP chunks -> PHP _Uploads staging -> CHUNKED_V1.
+   * No request and no sandbox ArrayBuffer ever contains the whole 1 GiB file.
+   */
+  if(typeof jplopsoft_largeUploadFile!=='function'){
+    throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'ExOS large-file upload engine is unavailable.');
+  }
+  fek=jplopsoft_newFek();
+  fekWrap=jplopsoft_wrapFek(fek);
+  out=await new Promise(function(resolve,reject){
+    jplopsoft_largeUploadFile(
+      file,
+      name,
+      parent.parentId,
+      null,
+      fek,
+      fekWrap,
+      function(err,result){
+        if(err)reject(err);
+        else resolve(result||{});
+      }
+    );
+  });
+  fek='';
+  fekWrap='';
+  await jplopsoft_xshReloadNodes();
+  return{
+    ok:true,
+    path:String(path||''),
+    size:size,
+    nodeId:parseInt(out.id,10)||0,
+    storageMode:String(out.storage_mode||'CHUNKED_V1'),
+    blockSize:parseInt(out.block_size,10)||4194304,
+    blockCount:parseInt(out.block_count,10)||Math.ceil(size/4194304)
+  };
 }
 
 async function jplopsoft_xshSystemOpenPath(ctx,path){
@@ -22275,7 +22788,7 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
       }
       r=await jplopsoft_xshNtWriteFile(ctx,args[0],args[1],args[2],'WriteFile');if(r.status!==jplopsoft_STATUS_SUCCESS)throw jplopsoft_xshError(r.status,r.error);return r;
     }
-    if(method==='CloseHandle'){if(!jplopsoft_xshCloseHandle(ctx,args[0]))throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid handle.');return true;}
+    if(method==='CloseHandle'){if(jplopsoft_xshCloseHandle(ctx,args[0]))return true;if(typeof jplopsoft_advapi32CloseHandle==='function'&&jplopsoft_advapi32CloseHandle(ctx,args[0]))return true;throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid handle.');}
     if(method==='GetFileSize')return jplopsoft_xshGetFileSizeByHandle(ctx,args[0]);
     if(method==='FlushFileBuffers')return await jplopsoft_xshFlushFileBuffers(ctx,args[0]);
     if(method==='ReadTextFile')return await jplopsoft_xshReadTextFile(ctx,args[0]);
@@ -22662,6 +23175,10 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     if(method==='SetWindowText'){if(!jplopsoft_SetWindowText(parseInt(args[0],10)||0,String(args[1]||'')))throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid HWND.');return true;}
     if(method==='ShowWindow'){return !!jplopsoft_ShowWindow(parseInt(args[0],10)||0,parseInt(args[1],10)||jplopsoft_SW_SHOW);}
     if(method==='DestroyWindow'){h=parseInt(args[0],10)||0;if(!ctx.windows[String(h)])throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'HWND is not owned by this XSH process.');delete ctx.windows[String(h)];return !!jplopsoft_DestroyWindow(h);}
+    if(method==='LoadIcon')return jplopsoft_xshLoadIcon(ctx,args[0],args[1]);
+    if(method==='GetIconInfo')return jplopsoft_xshGetIconInfo(ctx,args[0]);
+    if(method==='EnumIconResources')return jplopsoft_xshEnumIconResources(ctx,args[0]);
+    if(method==='SetWindowIcon')return jplopsoft_xshSetWindowIcon(ctx,args[0],args[1]);
     if(method==='CreateControl')return jplopsoft_xshCreateControl(ctx,args[0],args[1]);
     if(method==='SetControlText'){control=jplopsoft_xshControl(ctx,args[0]);if(!control)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Control not found.');if('value' in control)control.value=String(args[1]||'');else control.textContent=String(args[1]||'');return true;}
     if(method==='GetControlText'){control=jplopsoft_xshControl(ctx,args[0]);if(!control)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Control not found.');return 'value' in control?String(control.value||''):String(control.textContent||'');}
@@ -22681,8 +23198,30 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     if(method==='PeekMessage')return jplopsoft_xshPeekMessage(ctx,args[0]!==false);
     if(method==='GetMessage')return await jplopsoft_xshGetMessage(ctx,args[0]);
     if(method==='DispatchMessage')return jplopsoft_xshDispatchMessage(ctx,args[0]);
+    if(method==='InvalidateRect'){h=parseInt(args[0],10)||0;if(!ctx.windows[String(h)])throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'HWND is not owned by this XSH process.');if(typeof jplopsoft_gdi32Invalidate==='function')jplopsoft_gdi32Invalidate(ctx,h,args[1]||null);return jplopsoft_xshPostMessage(ctx,{hwnd:h,message:'WM_PAINT',wParam:args[2]?1:0,lParam:{rect:args[1]||null}});}
+    if(method==='UpdateWindow'){h=parseInt(args[0],10)||0;if(!ctx.windows[String(h)])throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'HWND is not owned by this XSH process.');if(typeof jplopsoft_gdi32Invalidate==='function')jplopsoft_gdi32Invalidate(ctx,h,null);return jplopsoft_xshPostMessage(ctx,{hwnd:h,message:'WM_PAINT',wParam:0,lParam:{rect:null}});}
     if(method==='GetForegroundWindow')return jplopsoft_NT_SCHEDULER.foregroundHwnd||0;
     if(method==='SetForegroundWindow'){h=parseInt(args[0],10)||0;if(!ctx.windows[String(h)])throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'HWND is not owned by this XSH process.');return jplopsoft_user32BringToFront(h);}
+  }
+
+  if(api==='gdi32'){
+    if(typeof jplopsoft_gdi32Dispatch!=='function'){
+      throw jplopsoft_xshError(
+        jplopsoft_STATUS_NOT_SUPPORTED,
+        'exos_gdi32.js is not loaded.'
+      );
+    }
+    return await jplopsoft_gdi32Dispatch(ctx,method,args);
+  }
+
+  if(api==='d3d11'){
+    if(typeof jplopsoft_d3d11Dispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_d3d11.js is not loaded.');
+    return await jplopsoft_d3d11Dispatch(ctx,method,args);
+  }
+
+  if(api==='d3dx'){
+    if(typeof jplopsoft_d3dxDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_d3dx.js is not loaded.');
+    return await jplopsoft_d3dxDispatch(ctx,method,args);
   }
 
   if(api==='comctl32'){
@@ -22722,10 +23261,8 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
   if(api==='winui'){if(typeof jplopsoft_winuiDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_winui.js is not loaded.');return await jplopsoft_winuiDispatch(ctx,method,args);}
 
   if(api==='advapi32'){
-    if(method==='ConvertStringSecurityDescriptorToSecurityDescriptor')return await jplopsoft_xshSddlCompile(ctx,args[0]);
-    if(method==='ConvertSecurityDescriptorToStringSecurityDescriptor')return await jplopsoft_xshSddlDecompile(ctx,args[0]);
-    if(method==='GetFileSecurity'||method==='GetNamedSecurityInfo')return await jplopsoft_xshGetFileSddl(ctx,args[0]);
-    if(method==='SetFileSecurity'||method==='SetNamedSecurityInfo')return await jplopsoft_xshSetFileSddl(ctx,args[0],args[1]);
+    if(typeof jplopsoft_advapi32Dispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_advapi32.js is not loaded.');
+    return await jplopsoft_advapi32Dispatch(ctx,method,args);
   }
 
   if(api==='exes'){
@@ -22765,6 +23302,29 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     return jplopsoft_xshSystemDownloadPath(
       ctx,
       args[0]
+    );
+  }
+
+  if(api==='system'&&method==='UploadPickedFile'){
+    return await jplopsoft_xshUploadPickedFile(
+      ctx,
+      args[0],
+      args[1]
+    );
+  }
+
+  if(api==='system'&&method==='ReleasePickedFile'){
+    return jplopsoft_xshReleasePickedFile(
+      ctx,
+      args[0]
+    );
+  }
+
+  if(api==='system'&&method==='QuerySystemConfig'){
+    return await jplopsoft_xshApiPromise(
+      'system_config',
+      'GET',
+      null
     );
   }
 
@@ -23026,6 +23586,8 @@ async function jplopsoft_runBuiltinXsh(appId,args,parentCtx){
     windowSeq:0,
     controlSeq:0,
     nextHandle:0x100,
+    nextLocalFile:1,
+    localFiles:{},
     handles:{},
     asyncIrps:{},
     windows:{},
@@ -23202,6 +23764,8 @@ async function jplopsoft_runXshNode(id,argLine,parentProcess){
     windowSeq:0,
     controlSeq:0,
     nextHandle:0x100,
+    nextLocalFile:1,
+    localFiles:{},
     handles:{},
     asyncIrps:{},
     windows:{},
@@ -23404,15 +23968,33 @@ async function jplopsoft_xshTerminate(ctx,exitCode,reason,skipKernel){
   }
   ctx.asyncIrps={};
   jplopsoft_xshConsoleCancelReads(ctx);
+  if(typeof jplopsoft_gdi32CleanupContext==='function'){
+    try{jplopsoft_gdi32CleanupContext(ctx);}catch(ignoreGdiCleanup){}
+  }
+  if(typeof jplopsoft_d3d11CleanupContext==='function'){
+    try{jplopsoft_d3d11CleanupContext(ctx);}catch(ignoreD3dCleanup){}
+  }
+  if(typeof jplopsoft_d3dxCleanupContext==='function'){
+    try{jplopsoft_d3dxCleanupContext(ctx);}catch(ignoreD3dxCleanup){}
+  }
+  if(typeof jplopsoft_advapi32CleanupContext==='function'){
+    try{jplopsoft_advapi32CleanupContext(ctx);}catch(ignoreAdvapiCleanup){}
+  }
   for(k in ctx.handles)if(ctx.handles.hasOwnProperty(k))delete ctx.handles[k];
   jplopsoft_ntReleaseProcessSections(ctx.pid);
   jplopsoft_ntCloseAllObjectHandlesForPid(ctx.pid);
+  for(k in ctx.controls){
+    if(ctx.controls.hasOwnProperty(k)&&ctx.controls[k]&&ctx.controls[k]._exosTopologyState){
+      try{jplopsoft_xshTopologyDispose(ctx.controls[k]);}catch(ignoreTopologyDispose){}
+    }
+  }
   var hwnds=[];for(k in ctx.windows)if(ctx.windows.hasOwnProperty(k))hwnds.push(parseInt(k,10)||0);
   for(k=0;k<hwnds.length;k++){var h=hwnds[k];if(h&&jplopsoft_user32GetRecord(h)){try{jplopsoft_DestroyWindow(h);}catch(ignoreWindow){}}}
   ctx.windows={};
   ctx.controls={};
   ctx.commonControls={};
   ctx.imageLists={};
+  ctx.localFiles={};
 
   if(ctx.consoleId){
     jplopsoft_xshConsoleDetach(ctx);
@@ -25027,8 +25609,13 @@ function jplopsoft_bindWindowManager(){
   if(jplopsoft_el('jplopsoft_explorerTitlebar'))jplopsoft_el('jplopsoft_explorerTitlebar').ondblclick=function(e){if(jplopsoft_wmCanDragTarget(e.target||e.srcElement)){jplopsoft_explorerActivateInstance('1',true);jplopsoft_wmToggleMax('jplopsoft_explorerWindow');}};
   if(jplopsoft_el('jplopsoft_cmdTitlebar'))jplopsoft_el('jplopsoft_cmdTitlebar').ondblclick=function(e){if(jplopsoft_wmCanDragTarget(e.target||e.srcElement))jplopsoft_wmToggleMax('jplopsoft_cmdWindow');};
 
-  /* user32 owns all Non-Client Area controls from this point onward. */
+  /*
+   * RegisterExFSNativeWindows() adopts the legacy/static windows and may add
+   * their HWND metadata after the first pass.  Rebind once more afterwards:
+   * USER32 is the single final owner of every top-right NC button.
+   */
   jplopsoft_RegisterExFSNativeWindows();
+  jplopsoft_user32RebindNonClientButtons(document);
 }
 
 
@@ -25319,10 +25906,28 @@ function jplopsoft_bindTaskbar(){
   window.jplopsoft_EXOS_TASKBAR_CLOCK_TIMER=window.setInterval(jplopsoft_taskbarUpdateClock,1000);jplopsoft_taskbarUpdateAvailability();
 }
 
+
+/* os52: Control Panel, Recycle Bin and 3D Topology remain XSH system apps; GDI32 is now available to all XSH GUI processes. */
+function jplopsoft_openExconfig(){
+  if(!state.samAuthenticated||!state.vaultKey){jplopsoft_exosMessage('請先登入 ExOS。');return false;}
+  jplopsoft_launchSystemXshApp('control',[]);return true;
+}
+function jplopsoft_closeExconfig(){jplopsoft_xshTerminateBuiltin('control');return true;}
+function jplopsoft_openTrash(){
+  if(!state.samAuthenticated||!state.vaultKey){jplopsoft_exosMessage('請先登入 ExOS。');return false;}
+  jplopsoft_launchSystemXshApp('trash',[]);return true;
+}
+function jplopsoft_closeTrash(){jplopsoft_xshTerminateBuiltin('trash');return true;}
+function jplopsoft_openVolume3D(){
+  if(!state.samAuthenticated||!state.vaultKey){jplopsoft_exosMessage('請先登入 ExOS。');return false;}
+  jplopsoft_launchSystemXshApp('volume3d',[]);return true;
+}
+function jplopsoft_closeVolume3D(){jplopsoft_xshTerminateBuiltin('volume3d');return true;}
+
 function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_submitCredentialUI;jplopsoft_el('jplopsoft_loginUserInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy){try{jplopsoft_el('jplopsoft_keyInput').focus();}catch(ignoreUserEnter){}}};jplopsoft_el('jplopsoft_loginUserInput').onchange=function(){if(state.kdfBusy)return;jplopsoft_selectLogonAccount(String(this.value||state.defaultUsername||'administrator').toLowerCase(),true);};jplopsoft_el('jplopsoft_keyInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy)jplopsoft_submitCredentialUI();};jplopsoft_bindSecureDesktopUI();if(jplopsoft_el('jplopsoft_rememberUnlock'))jplopsoft_el('jplopsoft_rememberUnlock').onchange=jplopsoft_onRememberUnlockChanged;if(jplopsoft_el('jplopsoft_largeTransferCancelBtn'))jplopsoft_el('jplopsoft_largeTransferCancelBtn').onclick=jplopsoft_cancelLargeTransfer;if(jplopsoft_el('jplopsoft_largeTransferMinBtn'))jplopsoft_el('jplopsoft_largeTransferMinBtn').onclick=jplopsoft_toggleLargeTransferMinimized;jplopsoft_el('jplopsoft_newFolderBtn').onclick=function(){jplopsoft_createItem('folder');};jplopsoft_el('jplopsoft_newHtmlBtn').onclick=function(){jplopsoft_createItem('file','html');};jplopsoft_el('jplopsoft_newTxtBtn').onclick=function(){jplopsoft_createItem('file','txt');};jplopsoft_el('jplopsoft_newCsvBtn').onclick=function(){jplopsoft_createItem('file','csv');};jplopsoft_el('jplopsoft_newXshBtn').onclick=function(){jplopsoft_createItem('file','xsh');};jplopsoft_el('jplopsoft_downloadBtn').onclick=jplopsoft_downloadSelected;jplopsoft_el('jplopsoft_renameBtn').onclick=jplopsoft_renameSelected;jplopsoft_el('jplopsoft_moveBtn').onclick=jplopsoft_openMoveDialog;jplopsoft_el('jplopsoft_deleteBtn').onclick=function(){if(jplopsoft_isDesktopFolder()){if(state.desktopSelectedTargetId)jplopsoft_deleteDesktopShortcut(state.desktopSelectedTargetId);return;}jplopsoft_deleteSelected();};if(jplopsoft_threeFeatureAllowed()){if(jplopsoft_el('jplopsoft_volume3dBtn'))jplopsoft_el('jplopsoft_volume3dBtn').onclick=jplopsoft_openVolume3D;if(jplopsoft_el('jplopsoft_volume3dPhysicalBtn'))jplopsoft_el('jplopsoft_volume3dPhysicalBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('physical');};if(jplopsoft_el('jplopsoft_volume3dSandboxBtn'))jplopsoft_el('jplopsoft_volume3dSandboxBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('sandbox');};if(jplopsoft_el('jplopsoft_volume3dCloseBtn'))jplopsoft_el('jplopsoft_volume3dCloseBtn').onclick=jplopsoft_closeVolume3D;if(jplopsoft_el('jplopsoft_volume3dFullscreenBtn'))jplopsoft_el('jplopsoft_volume3dFullscreenBtn').onclick=jplopsoft_threeVolumeToggleFullscreen;if(jplopsoft_el('jplopsoft_volume3dResetBtn'))jplopsoft_el('jplopsoft_volume3dResetBtn').onclick=jplopsoft_threeVolumeResetView;if(jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_el('jplopsoft_volume3dBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_closeVolume3D();else jplopsoft_wmActivateOverlay('jplopsoft_volume3dBackdrop','jplopsoft_volume3dWindow','volume3d');};}jplopsoft_el('jplopsoft_modalClose').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalCloseTop').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalVersionsBtn').onclick=jplopsoft_openVersions;jplopsoft_el('jplopsoft_versionCloseTop').onclick=jplopsoft_closeVersions;jplopsoft_el('jplopsoft_versionBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_versionBackdrop'))jplopsoft_closeVersions();};jplopsoft_el('jplopsoft_moveCloseTop').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveCancelBtn').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveConfirmBtn').onclick=jplopsoft_confirmMove;jplopsoft_el('jplopsoft_moveBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_moveBackdrop'))jplopsoft_closeMoveDialog();};jplopsoft_el('jplopsoft_trashCloseTop').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashCloseBtn').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashEmptyBtn').onclick=jplopsoft_emptyTrash;jplopsoft_el('jplopsoft_trashBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_trashBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');};jplopsoft_el('jplopsoft_modalDownloadBtn').onclick=jplopsoft_downloadCurrentDocument;jplopsoft_el('jplopsoft_modalPrintBtn').onclick=jplopsoft_printCurrentDocument;jplopsoft_el('jplopsoft_modalMaxBtn').onclick=jplopsoft_toggleMax;jplopsoft_el('jplopsoft_saveDocBtn').onclick=jplopsoft_saveDocument;jplopsoft_el('jplopsoft_csvAddRowBtn').onclick=jplopsoft_csvAddRow;jplopsoft_el('jplopsoft_csvAddColBtn').onclick=jplopsoft_csvAddColumn;jplopsoft_el('jplopsoft_csvDelRowBtn').onclick=jplopsoft_csvDeleteRow;jplopsoft_el('jplopsoft_csvDelColBtn').onclick=jplopsoft_csvDeleteColumn;jplopsoft_el('jplopsoft_csvFormulaInput').oninput=function(){if(state.csvReadOnly)return;var r=state.csvSelectedRow,c=state.csvSelectedCol,input;if(!state.csvData[r])return;state.csvData[r][c]=this.value;input=jplopsoft_csvSelectedCellInput();if(input)input.value=this.value;};jplopsoft_el('jplopsoft_tabEdit').onclick=jplopsoft_showSourceTab;jplopsoft_el('jplopsoft_tabRich').onclick=jplopsoft_showRichTab;jplopsoft_el('jplopsoft_tabPreview').onclick=function(){jplopsoft_showPreview();};jplopsoft_el('jplopsoft_modalBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_modalBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_modalBackdrop','jplopsoft_documentWindow','document');};if(jplopsoft_el('jplopsoft_galleryPrevImage'))jplopsoft_el('jplopsoft_galleryPrevImage').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextImage'))jplopsoft_el('jplopsoft_galleryNextImage').onclick=function(){jplopsoft_galleryNavigate(1);};if(jplopsoft_el('jplopsoft_galleryPrevMedia'))jplopsoft_el('jplopsoft_galleryPrevMedia').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextMedia'))jplopsoft_el('jplopsoft_galleryNextMedia').onclick=function(){jplopsoft_galleryNavigate(1);};jplopsoft_bindSecurityUI();jplopsoft_bindExconfig();jplopsoft_bindProperties();jplopsoft_bindTaskbar();jplopsoft_bindWindowManager();jplopsoft_bindRich();jplopsoft_bindSortHeaders();jplopsoft_bindBulkSelection();jplopsoft_bindFileDrop();jplopsoft_bindFileSearch();jplopsoft_bindExfsContextMenu();jplopsoft_bindCmdMode();jplopsoft_bindGlobalHotkeys();jplopsoft_bindSidebarResizer();if(jplopsoft_isIE11Browser()&&window.addEventListener)window.addEventListener('resize',jplopsoft_ie11FitDocumentModal,false);}
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os48',
+  version:'6.4.0-dev-os56',
   build:'external-os-comctl32-split-core-controls'
 };
