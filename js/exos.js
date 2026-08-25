@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os73
+ * Version: 6.4.0-dev-os75
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -1083,7 +1083,6 @@ function jplopsoft_cmdWelcome(){
   jplopsoft_cmdWrite('  DEL / DELETE / ERASE filename');
   jplopsoft_cmdWrite('  DEL / DELETE *.ext');
   jplopsoft_cmdWrite('  TYPE / CAT / LESS / HEAD / TAIL textfile');
-  jplopsoft_cmdWrite('  OLD / FILEVER / FV / OL filename');
   jplopsoft_cmdWrite('  TOUCH filename.txt');
   jplopsoft_cmdWrite('  EDIT / E / VI / V / VIM / WORD / NANO filename');
   jplopsoft_cmdWrite('  DL / DOWNLOAD filename');
@@ -1477,7 +1476,7 @@ function jplopsoft_cmdCompletionCommandNames(){
     'm','math','mr','random','date','time','cd','chdir','pwd',
     'md','mkdir','rd','rmdir','deltree','ren','rename','mv',
     'copy','xcopy','cp','robocopy','move','dir','ls','find',
-    'del','delete','erase','old','filever','fv','ol','touch',
+    'del','delete','erase','touch',
     'edit','e','vi','v','vim','word','nano','dl','download',
     'type','cat','less','head','tail','start','notepad',
     'chkdsk','scandisk','sfc','tree','clip','whoami','ex','ex_md3',
@@ -1523,7 +1522,6 @@ function jplopsoft_cmdCompletionPathMode(canonical,argIndex){
 
   if(canonical==='dir'&&argIndex===0)return 'either';
   if(canonical==='del'&&argIndex===0)return 'file';
-  if(canonical==='old'&&argIndex===0)return 'file';
   if(canonical==='edit'&&argIndex===0)return 'file';
   if(canonical==='download'&&argIndex===0)return 'file';
   if(canonical==='type'&&argIndex===0)return 'file';
@@ -1975,7 +1973,7 @@ function jplopsoft_cmdHelp(){
   jplopsoft_cmdWrite('SFC');
   jplopsoft_cmdWrite('    逐一讀取目前所有檔案的 X60 密文，以 Vault Key 解密並驗證 EXEFS2 封裝。');
   jplopsoft_cmdWrite('    Binary 另驗證 Base64 與原始 byte length；只檢查、不修改檔案。');
-  jplopsoft_cmdWrite('    不掃描歷史版本與垃圾桶內容。');
+  jplopsoft_cmdWrite('    不掃描垃圾桶內容。');
   jplopsoft_cmdWrite('');
   jplopsoft_cmdWrite('TREE [path] [/F] [/A]');
   jplopsoft_cmdWrite('    以樹狀方式列出指定資料夾以下的全部資料夾與檔案。');
@@ -2062,7 +2060,6 @@ function jplopsoft_cmdHelp(){
   jplopsoft_cmdWrite('    支援萬用字元檔案來源，例如 COPY *.ico C:\\123123\\');
   jplopsoft_cmdWrite('    萬用字元支援 * 與 ?，只匹配來源目錄中的檔案，不遞迴。');
   jplopsoft_cmdWrite('    萬用字元 COPY 的目的地必須是已存在的資料夾；同名檔案會略過。');
-  jplopsoft_cmdWrite('    檔案副本從獨立 Version 1 開始，不複製舊版本歷史。');
   jplopsoft_cmdWrite('');
   jplopsoft_cmdWrite('MOVE source destination');
   jplopsoft_cmdWrite('    移動檔案或資料夾，可同時改名；不搬動實體 .x6f。');
@@ -2104,12 +2101,6 @@ function jplopsoft_cmdHelp(){
   jplopsoft_cmdWrite('    五者相同：讀取指定文字/HTML 文件，在 CMD 顯示完整原始文字內容。');
   jplopsoft_cmdWrite('    內容使用 Chunked Read 取回並在瀏覽器端 EXES 解密，不會執行 HTML。');
   jplopsoft_cmdWrite('');
-  jplopsoft_cmdWrite('OLD filename');
-  jplopsoft_cmdWrite('FILEVER filename');
-  jplopsoft_cmdWrite('FV filename');
-  jplopsoft_cmdWrite('OL filename');
-  jplopsoft_cmdWrite('    顯示指定檔案的版本歷史清單，只讀 metadata，不讀舊版本內容。');
-  jplopsoft_cmdWrite('');
   jplopsoft_cmdWrite('TOUCH filename');
   jplopsoft_cmdWrite('    建立新的空白 TXT 文件並回到 UI；只允許 .txt。');
   jplopsoft_cmdWrite('    省略副檔名時自動補上 .txt。');
@@ -2135,7 +2126,7 @@ function jplopsoft_cmdHelp(){
   jplopsoft_cmdWrite('直接執行檔案限制：');
   jplopsoft_cmdWrite('    *.EXE / *.COM / *.BAT 直接當指令執行時一律拒絕。');
   jplopsoft_cmdWrite('    相對路徑、絕對路徑、含空白的雙引號路徑也相同。');
-  jplopsoft_cmdWrite('    TYPE / DL / COPY / OLD 等一般檔案操作不受此限制。');
+  jplopsoft_cmdWrite('    TYPE / DL / COPY 等一般檔案操作不受此限制。');
   jplopsoft_cmdWrite('');
   jplopsoft_cmdWrite('系統稽核紀錄：');
   jplopsoft_cmdWrite('    C:\\logs\\sys.log');
@@ -2691,7 +2682,6 @@ function jplopsoft_cmdCheckDisk(argLine){
 
   jplopsoft_cmdWrite('EXES CHKDSK - Decryption Integrity Scan','info');
   jplopsoft_cmdWrite('Scanning current files with each file-specific FEK.');
-  jplopsoft_cmdWrite('Historical versions and Recycle Bin items are not scanned.');
   jplopsoft_cmdWrite('');
   jplopsoft_cmdWrite('Files to scan: '+files.length);
 
@@ -5113,7 +5103,7 @@ function jplopsoft_buildVolume3D(){
      * Root Metadata branch.
      */
     metaFiles=[
-      ['_MFT.x6f','Master File Table：nodes、versions、Trash index。'],
+      ['_MFT.x6f','Master File Table：nodes、Trash index。'],
       ['_MFTMirr.x6f','_MFT.x6f mirror / fallback。'],
       ['_LogFile.x6f','Metadata flock + PREPARE / COMMIT journal。'],
       ['_Volume.x6f','Volume label、serial、commit/statistics。'],
@@ -6048,7 +6038,6 @@ function jplopsoft_cmdHelpCanonical(name){
   if(n==='move')return 'move';
   if(n==='dir'||n==='ls'||n==='find')return 'dir';
   if(n==='del'||n==='delete'||n==='erase')return 'del';
-  if(n==='old'||n==='filever'||n==='fv'||n==='ol')return 'old';
   if(n==='touch')return 'touch';
 
   if(
@@ -6227,11 +6216,6 @@ function jplopsoft_cmdHelpForCommand(name){
       jplopsoft_cmdWrite('    支援相對/絕對路徑與 * ? 萬用字元。');
       break;
 
-    case 'old':
-      jplopsoft_cmdWrite('OLD / FILEVER / FV / OL filename','info');
-      jplopsoft_cmdWrite('    顯示指定檔案的版本歷史 metadata。');
-      jplopsoft_cmdWrite('    不讀取或解密歷史版本內容。');
-      break;
 
     case 'touch':
       jplopsoft_cmdWrite('TOUCH [path\\]filename.txt','info');
@@ -6265,7 +6249,6 @@ function jplopsoft_cmdHelpForCommand(name){
       jplopsoft_cmdWrite('CHKDSK / SCANDISK / SFC','info');
       jplopsoft_cmdWrite('    逐一解密目前版本檔案並驗證 EXEFS2 內容封裝。');
       jplopsoft_cmdWrite('    Binary 另驗證 Base64 與 byte length。');
-      jplopsoft_cmdWrite('    只讀、不修復；不掃垃圾桶與歷史版本。');
       break;
 
     case 'tree':
@@ -7094,91 +7077,6 @@ function jplopsoft_cmdMoveItem(argLine){
     jplopsoft_cmdSetBusy(false);
     jplopsoft_cmdWrite('MOVE failed: '+e.message,'error');
   }
-}
-
-function jplopsoft_cmdListFileVersions(path){
-  var arg=jplopsoft_cmdUnquote(path),n,name;
-
-  if(!arg){
-    jplopsoft_cmdWrite('The syntax of the command is incorrect.','error');
-    jplopsoft_cmdWrite('Usage: OLD filename');
-    return;
-  }
-
-  if(state.currentFolder===0&&jplopsoft_cmdIsVirtualSystemFolderAtRoot(0,arg)){
-    jplopsoft_cmdVirtualAccessDenied(arg);
-    return;
-  }
-
-  n=jplopsoft_cmdResolveNode(arg);
-
-  if(!n){
-    if(jplopsoft_cmdReportLastPathDenied())return;
-    jplopsoft_cmdWrite('The system cannot find the file specified.','error');
-    return;
-  }
-
-  if(n.type!=='file'){
-    jplopsoft_cmdWrite('OLD requires a file, not a directory.','error');
-    return;
-  }
-
-  name=jplopsoft_decName(n)||arg;
-
-  if(state.cmdBusy){
-    jplopsoft_cmdWrite('Another command is still running.','error');
-    return;
-  }
-
-  jplopsoft_cmdSetBusy(true);
-  jplopsoft_cmdWrite('Version history for '+jplopsoft_cmdNodeFullPath(n));
-  jplopsoft_cmdWrite('');
-
-  jplopsoft_cmdApi(
-    'versions',
-    'POST',
-    {id:n.id},
-    true,
-    function(err,out){
-      var a,i,v,sizeText,currentNo,line,dateText;
-
-      jplopsoft_cmdSetBusy(false);
-
-      if(err){
-        jplopsoft_cmdWrite('OLD failed: '+err.message,'error');
-        return;
-      }
-
-      a=out.versions||[];
-      currentNo=parseInt(out.current_version,10)||0;
-
-      if(!a.length){
-        jplopsoft_cmdWrite('No version history found.','info');
-        return;
-      }
-
-      jplopsoft_cmdWrite('Version     Date / Time                     Encrypted Size     Status');
-      jplopsoft_cmdWrite('-------     -----------------------------   --------------     --------');
-
-      for(i=0;i<a.length;i++){
-        v=a[i];
-        sizeText=jplopsoft_cmdBytesText(parseInt(v.cipher_size,10)||0);
-        dateText=jplopsoft_fmtDate(v.created_at);
-
-        line=
-          jplopsoft_cmdPadLeft('v'+v.version_no,7)+'     '+
-          (dateText+'                             ').substring(0,29)+'   '+
-          jplopsoft_cmdPadLeft(sizeText,14)+'     '+
-          (parseInt(v.version_no,10)===currentNo?'CURRENT':'');
-
-        jplopsoft_cmdWrite(line);
-      }
-
-      jplopsoft_cmdWrite('');
-      jplopsoft_cmdWrite(a.length+' version(s).','success');
-      jplopsoft_cmdScrollBottom();
-    }
-  );
 }
 
 function jplopsoft_cmdTouchFile(rawName){
@@ -8751,15 +8649,6 @@ function jplopsoft_cmdExecute(raw){
     return;
   }
 
-  if(
-    lower==='old'||
-    lower==='filever'||
-    lower==='fv'||
-    lower==='ol'
-  ){
-    jplopsoft_cmdListFileVersions(arg);
-    return;
-  }
 
   if(lower==='touch'){
     jplopsoft_cmdTouchFile(arg);
@@ -8986,7 +8875,7 @@ function jplopsoft_multiEditorSave(rec){
   jplopsoft_saveNodeCipher(rec.nodeId,cipher,plainSize,function(err,out){
     if(err)return jplopsoft_exosMessage(err.message);
     jplopsoft_multiEditorMarkDirty(rec,false);
-    jplopsoft_reloadNodes(function(){jplopsoft_setStatus('「'+rec.name+'」已保存為版本 v'+out.version_no+'。');});
+    jplopsoft_reloadNodes(function(){jplopsoft_setStatus('「'+rec.name+'」已安全儲存。');});
   });
 }
 
@@ -11322,7 +11211,7 @@ function jplopsoft_shiftSelectTo(id){
 }
 function jplopsoft_galleryIds(){
   var list=jplopsoft_sortFileNodes(jplopsoft_childrenOf(state.currentFolder)),out=[],i,n,name,fmt;
-  for(i=0;i<list.length;i++){n=list[i];if(n.type!=='file')continue;name=jplopsoft_decName(n)||'';fmt=jplopsoft_fileFormatFromName(name);if(fmt==='image'||fmt==='audio'||fmt==='video'||fmt==='rawvideo')out.push(n.id);}
+  for(i=0;i<list.length;i++){n=list[i];if(n.type!=='file')continue;name=jplopsoft_decName(n)||'';fmt=jplopsoft_fileFormatFromName(name);if(fmt==='image'||fmt==='video'||fmt==='rawvideo')out.push(n.id);}
   return out;
 }
 function jplopsoft_galleryNavigate(delta){
@@ -11346,7 +11235,7 @@ function jplopsoft_bindGlobalHotkeys(){
   document.addEventListener('keydown',function(e){var k,modalVisible,target,ctrl;e=e||window.event;k=e.keyCode||e.which;target=e.target||e.srcElement;ctrl=!!(e.ctrlKey||e.metaKey);modalVisible=jplopsoft_el('jplopsoft_modalBackdrop')&&jplopsoft_el('jplopsoft_modalBackdrop').style.display!=='none'&&jplopsoft_el('jplopsoft_modalBackdrop').offsetWidth>0;
     if(!!e.ctrlKey&&!!e.shiftKey&&k===27&&state.samAuthenticated&&state.vaultKey){if(e.preventDefault)e.preventDefault();e.returnValue=false;jplopsoft_openTaskManager(true);return false;}
     if(ctrl&&k===70){if(e.preventDefault)e.preventDefault();if(jplopsoft_el('jplopsoft_fileSearchInput')){jplopsoft_el('jplopsoft_fileSearchInput').focus();try{jplopsoft_el('jplopsoft_fileSearchInput').select();}catch(ignore){}}return false;}
-    if(modalVisible&&(state.openFormat==='image'||state.openFormat==='audio'||state.openFormat==='video'||state.openFormat==='rawvideo')&&(k===37||k===39)){if(e.preventDefault)e.preventDefault();jplopsoft_galleryNavigate(k===37?-1:1);return false;}
+    if(modalVisible&&(state.openFormat==='image'||state.openFormat==='video'||state.openFormat==='rawvideo')&&(k===37||k===39)){if(e.preventDefault)e.preventDefault();jplopsoft_galleryNavigate(k===37?-1:1);return false;}
     if(jplopsoft_isTypingTarget(target)||state.cmdMode||modalVisible||state.securityScreenOpen||state.passwordDialogOpen)return;
     if(ctrl&&k===67){if(e.preventDefault)e.preventDefault();e.returnValue=false;jplopsoft_setVirtualClipboard('copy');return false;}
     if(ctrl&&k===88){if(e.preventDefault)e.preventDefault();e.returnValue=false;jplopsoft_setVirtualClipboard('cut');return false;}
@@ -12936,7 +12825,7 @@ function jplopsoft_showRichTab(){
 }
 function jplopsoft_showPreview(src){if(state.openFormat!=='html')return; if(state.editorMode==='rich')jplopsoft_syncRichToSource();state.editorMode='preview';jplopsoft_el('jplopsoft_tabEdit').className='jplopsoft_tabbtn';jplopsoft_el('jplopsoft_tabRich').className='jplopsoft_tabbtn';jplopsoft_el('jplopsoft_tabPreview').className='jplopsoft_tabbtn jplopsoft_active';jplopsoft_el('jplopsoft_htmlEditor').className='jplopsoft_editor jplopsoft_hidden';jplopsoft_el('jplopsoft_richPane').className='jplopsoft_rich-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_csvPane').className='jplopsoft_csv-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_imagePreviewPane').className='jplopsoft_image-preview-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_mediaPreviewPane').className='jplopsoft_media-preview-pane jplopsoft_hidden';jplopsoft_revokeImagePreview();jplopsoft_revokeMediaPreview();if(jplopsoft_isIE11Browser()){jplopsoft_el('jplopsoft_htmlPreview').className='jplopsoft_preview jplopsoft_hidden';jplopsoft_el('jplopsoft_htmlPreviewIE11').className='jplopsoft_ie11-html-preview';}else{jplopsoft_el('jplopsoft_htmlPreviewIE11').className='jplopsoft_ie11-html-preview jplopsoft_hidden';jplopsoft_el('jplopsoft_htmlPreview').className='jplopsoft_preview';}jplopsoft_renderPreview(src===undefined?jplopsoft_el('jplopsoft_htmlEditor').value:src);}
 function jplopsoft_revokeImagePreview(){if(state.imagePreviewUrl){try{(window.URL||window.webkitURL).revokeObjectURL(state.imagePreviewUrl);}catch(e){}state.imagePreviewUrl=null;}var img=jplopsoft_el('jplopsoft_imagePreviewImage');if(img)img.removeAttribute('src');}
-function jplopsoft_revokeMediaPreview(){var a=jplopsoft_el('jplopsoft_audioPreview'),v=jplopsoft_el('jplopsoft_videoPreview');if(a){try{a.pause();}catch(e1){}a.removeAttribute('src');try{a.load();}catch(e2){}}if(v){try{v.pause();}catch(e3){}v.removeAttribute('src');try{v.load();}catch(e4){}}if(state.mediaPreviewUrl){try{(window.URL||window.webkitURL).revokeObjectURL(state.mediaPreviewUrl);}catch(e5){}state.mediaPreviewUrl=null;}}
+function jplopsoft_revokeMediaPreview(){var v=jplopsoft_el('jplopsoft_videoPreview');if(v){try{v.pause();}catch(e3){}v.removeAttribute('src');try{v.load();}catch(e4){}}if(state.mediaPreviewUrl){try{(window.URL||window.webkitURL).revokeObjectURL(state.mediaPreviewUrl);}catch(e5){}state.mediaPreviewUrl=null;}}
 function jplopsoft_hideDocumentPanes(){jplopsoft_el('jplopsoft_htmlEditor').className='jplopsoft_editor jplopsoft_hidden';jplopsoft_el('jplopsoft_richPane').className='jplopsoft_rich-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_htmlPreview').className='jplopsoft_preview jplopsoft_hidden';jplopsoft_el('jplopsoft_htmlPreviewIE11').className='jplopsoft_ie11-html-preview jplopsoft_hidden';jplopsoft_el('jplopsoft_csvPane').className='jplopsoft_csv-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_imagePreviewPane').className='jplopsoft_image-preview-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_mediaPreviewPane').className='jplopsoft_media-preview-pane jplopsoft_hidden';jplopsoft_revokePreview();jplopsoft_revokeImagePreview();jplopsoft_revokeMediaPreview();}
 function jplopsoft_openImagePreview(id){var n=jplopsoft_resolveClientNode(id),name=n?jplopsoft_decName(n):'';if(!n||n.type!=='file'||jplopsoft_fileFormatFromName(name)!=='image')return;jplopsoft_launchSystemXshApp('image_viewer',[jplopsoft_cmdNodeFullPath(n)]);}
 function jplopsoft_binaryBytesToUint8(bytes){
@@ -13283,7 +13172,7 @@ function jplopsoft_openMediaPreview(id){
   if(
     !n||
     n.type!=='file'||
-    (fmt!=='audio'&&fmt!=='video'&&fmt!=='rawvideo')
+    (fmt!=='video'&&fmt!=='rawvideo')
   ){
     return;
   }
@@ -13334,18 +13223,11 @@ function jplopsoft_openMediaPreview(id){
 
       jplopsoft_el('jplopsoft_mediaPreviewPane').className='jplopsoft_media-preview-pane';
       jplopsoft_el('jplopsoft_mediaPreviewIcon').textContent=
-        jplopsoft_isIE11Browser()?'':((mime.indexOf('audio/')===0)?'🎵':'🎬');
+        jplopsoft_isIE11Browser()?'':'🎬';
       jplopsoft_el('jplopsoft_mediaPreviewName').textContent=name||('#'+id);
 
-      if(mime.indexOf('audio/')===0){
-        media=jplopsoft_el('jplopsoft_audioPreview');
-        media.className='';
-        jplopsoft_el('jplopsoft_videoPreview').className='jplopsoft_hidden';
-      }else{
-        media=jplopsoft_el('jplopsoft_videoPreview');
-        media.className='';
-        jplopsoft_el('jplopsoft_audioPreview').className='jplopsoft_hidden';
-      }
+      media=jplopsoft_el('jplopsoft_videoPreview');
+      media.className='';
 
       try{
         if(media.canPlayType){
@@ -13613,7 +13495,11 @@ function jplopsoft_openView(id,routeInternal){
   if(jplopsoft_nodeIsLargeFile(n))return jplopsoft_exosMessage(jplopsoft_largeFileDownloadOnlyMessage(name,n.original_size));
   if(!jplopsoft_nodeOnlinePreviewable(n,name))return jplopsoft_exosMessage('此檔案超過線上預覽安全上限，只允許下載。');
   if(fmt==='image')return jplopsoft_exosMessage('此圖片缺少必要的 JPEG128_V1 加密縮圖，因此不允許載入原圖預覽。');
-  if(fmt==='audio'||fmt==='video'||fmt==='rawvideo')return jplopsoft_openMediaPreview(id);
+  if(fmt==='audio'){
+    jplopsoft_runBuiltinXsh('audio_preview',[jplopsoft_cmdNodeFullPath(n)],null,{integrity:n.has_motw?'LOW':'MEDIUM',protection:n.has_motw?'Sandbox+MOTW':'Sandbox'}).catch(function(e){jplopsoft_exosMessage('音訊預覽啟動失敗：'+String(e&&e.message?e.message:e));});
+    return;
+  }
+  if(fmt==='video'||fmt==='rawvideo')return jplopsoft_openMediaPreview(id);
   if(fmt==='binary')return jplopsoft_exosMessage('此 Binary 檔案不提供內容預覽，請使用下載。');
   jplopsoft_setStatus('正在載入「'+jplopsoft_htmlEscape(name||('#'+id))+'」的加密內容…');
   jplopsoft_fetchNodeContent(id,function(err,out){
@@ -13635,143 +13521,7 @@ function jplopsoft_openView(id,routeInternal){
   });
 }
 
-function jplopsoft_saveDocument(){if(!state.editId)return;if(state.editorMode==='rich'&&state.openFormat==='html')jplopsoft_syncRichToSource();var src=state.openFormat==='csv'?jplopsoft_csvCurrentSource():jplopsoft_el('jplopsoft_htmlEditor').value,plainSize=jplopsoft_utf8ByteLength(src);if(plainSize>jplopsoft_TEXT_ONLINE_EDIT_MAX)return jplopsoft_exosMessage('線上編輯內容超過 18 MiB。請改用大型檔案上傳模式；大型 TXT / HTML / CSV 僅允許下載。');try{var cipher=jplopsoft_encContent(src,jplopsoft_nodeFekById(state.editId));jplopsoft_saveNodeCipher(state.editId,cipher,plainSize,function(err,out){if(err)return jplopsoft_exosMessage(err.message);jplopsoft_closeModal();jplopsoft_reloadNodes(function(){jplopsoft_setStatus('文件已以原檔 FEK 加密保存為版本 v'+out.version_no+'。');});});}catch(e){jplopsoft_exosMessage(e.message);}}
-
-function jplopsoft_revokeVersionPreview(){if(state.versionPreviewUrl){try{(window.URL||window.webkitURL).revokeObjectURL(state.versionPreviewUrl);}catch(e){}state.versionPreviewUrl=null;}if(jplopsoft_isIE11Browser()){var f=jplopsoft_el('jplopsoft_versionHtmlPreview'),p=jplopsoft_el('jplopsoft_versionHtmlPreviewIE11');if(f){try{f.onload=null;f.src='about:blank';}catch(ignoreIEVersionPreviewReset){}}if(p){try{p.innerHTML='';}catch(ignoreIEVersionPreviewClear){}}}}
-
-function jplopsoft_versionWindowSetMaximized(on){
-  jplopsoft_wmSetOverlayMaximized('jplopsoft_versionWindow',!!on);
-}
-
-function jplopsoft_versionWindowToggleMax(){
-  jplopsoft_wmToggleOverlayMax('jplopsoft_versionWindow');
-  jplopsoft_wmActivateOverlay(
-    'jplopsoft_versionBackdrop',
-    'jplopsoft_versionWindow',
-    'versions'
-  );
-}
-
-function jplopsoft_versionWindowMinimize(){
-  jplopsoft_wmOverlayMinimize(
-    'jplopsoft_versionBackdrop',
-    'jplopsoft_versionWindow',
-    'versions'
-  );
-}
-
-function jplopsoft_versionWindowRestore(){
-  jplopsoft_wmOverlayRestore(
-    'jplopsoft_versionBackdrop',
-    'jplopsoft_versionWindow',
-    'versions'
-  );
-}
-
-function jplopsoft_closeVersions(){
-  var b=jplopsoft_el('jplopsoft_versionBackdrop');
-
-  if(b)b.style.display='none';
-
-  jplopsoft_versionWindowSetMaximized(false);
-  jplopsoft_taskbarRemoveApp('versions');
-
-  state.versionList=[];
-  state.versionCurrentNo=0;
-
-  jplopsoft_revokeVersionPreview();
-
-  jplopsoft_el('jplopsoft_versionRows').innerHTML='';
-  jplopsoft_el('jplopsoft_versionTextPreview').className=
-    'jplopsoft_version-text jplopsoft_hidden';
-  jplopsoft_el('jplopsoft_versionHtmlPreview').className=
-    'jplopsoft_preview jplopsoft_hidden';
-  jplopsoft_el('jplopsoft_versionHtmlPreviewIE11').className=
-    'jplopsoft_ie11-html-preview jplopsoft_hidden';
-  jplopsoft_el('jplopsoft_versionImagePreview').className=
-    'jplopsoft_version-image jplopsoft_hidden';
-  jplopsoft_el('jplopsoft_versionImagePreview').removeAttribute('src');
-  jplopsoft_el('jplopsoft_versionPreviewEmpty').className=
-    'jplopsoft_version-empty';
-  jplopsoft_el('jplopsoft_versionPreviewTitle').textContent=
-    '選擇一個版本即可檢視。';
-}
-function jplopsoft_versionDownloadName(name,no){name=String(name||'document');var dot=name.lastIndexOf('.');if(dot>0)return name.substring(0,dot)+'.v'+no+name.substring(dot);return name+'.v'+no;}
-function jplopsoft_fetchVersion(versionId,cb){if(!state.openId)return cb(new Error('目前沒有開啟文件。'));jplopsoft_api('version_get','POST',{id:state.openId,version_id:versionId},true,function(err,out){if(err)return cb(err);var v=out.version||{},payload,fek;try{fek=jplopsoft_nodeFekById(state.openId);payload=jplopsoft_binaryFormat(state.openFormat)?jplopsoft_decBinaryCipher(v.content_enc,fek):jplopsoft_decContentCipher(v.content_enc,fek);}catch(e){return cb(e);}if(payload===null)return cb(new Error('版本內容無法解密。'));cb(null,v,payload);});}
-function jplopsoft_renderVersionPreview(versionNo,src){jplopsoft_revokeVersionPreview();jplopsoft_el('jplopsoft_versionPreviewEmpty').className='jplopsoft_version-empty jplopsoft_hidden';jplopsoft_el('jplopsoft_versionTextPreview').className='jplopsoft_version-text jplopsoft_hidden';jplopsoft_el('jplopsoft_versionHtmlPreview').className='jplopsoft_preview jplopsoft_hidden';jplopsoft_el('jplopsoft_versionHtmlPreviewIE11').className='jplopsoft_ie11-html-preview jplopsoft_hidden';jplopsoft_el('jplopsoft_versionImagePreview').className='jplopsoft_version-image jplopsoft_hidden';jplopsoft_el('jplopsoft_versionImagePreview').removeAttribute('src');if(state.openFormat==='image'){var n=jplopsoft_findNode(state.openId),name=n?jplopsoft_decName(n):'image',URLObj=window.URL||window.webkitURL,blob;jplopsoft_el('jplopsoft_versionPreviewTitle').textContent='版本 v'+versionNo+' ｜ 圖片預覽';try{blob=new Blob([(typeof Uint8Array!=='undefined')?new Uint8Array(src):src],{type:jplopsoft_mimeForName(name)});state.versionPreviewUrl=URLObj.createObjectURL(blob);jplopsoft_el('jplopsoft_versionImagePreview').src=state.versionPreviewUrl;jplopsoft_el('jplopsoft_versionImagePreview').className='jplopsoft_version-image';}catch(e){jplopsoft_el('jplopsoft_versionPreviewTitle').textContent='版本 v'+versionNo+' ｜ 圖片預覽失敗';}return;}if(state.openFormat==='audio'||state.openFormat==='video'||state.openFormat==='rawvideo'||state.openFormat==='binary'){jplopsoft_el('jplopsoft_versionPreviewTitle').textContent='版本 v'+versionNo+' ｜ Binary / 影音版本';jplopsoft_el('jplopsoft_versionPreviewEmpty').className='jplopsoft_version-empty';jplopsoft_el('jplopsoft_versionPreviewEmpty').textContent='此版本目前提供下載；主文件影音預覽請關閉版本視窗後使用「預覽」。';return;}jplopsoft_el('jplopsoft_versionPreviewTitle').textContent='版本 v'+versionNo+' ｜ '+(state.openFormat==='html'?'安全預覽':'唯讀純文字');if(state.openFormat==='html'){var frame=jplopsoft_el('jplopsoft_versionHtmlPreview'),safe='',URLObj2=window.URL||window.webkitURL;if(jplopsoft_isIE11Browser()){jplopsoft_el('jplopsoft_versionHtmlPreview').className='jplopsoft_preview jplopsoft_hidden';jplopsoft_el('jplopsoft_versionHtmlPreviewIE11').className='jplopsoft_ie11-html-preview';if(jplopsoft_renderIE11HtmlPreview(src,'jplopsoft_versionHtmlPreviewIE11')){jplopsoft_el('jplopsoft_versionPreviewTitle').textContent='版本 v'+versionNo+' ｜ IE11 安全預覽';}else{jplopsoft_el('jplopsoft_versionPreviewTitle').textContent='版本 v'+versionNo+' ｜ IE11 HTML 預覽失敗';}return;}jplopsoft_el('jplopsoft_versionHtmlPreviewIE11').className='jplopsoft_ie11-html-preview jplopsoft_hidden';jplopsoft_el('jplopsoft_versionHtmlPreview').className='jplopsoft_preview';safe=jplopsoft_sanitizeHtml(src);try{if(URLObj2&&window.Blob){var blob2=new Blob([safe],{type:'text/html;charset=utf-8'});state.versionPreviewUrl=URLObj2.createObjectURL(blob2);frame.src=state.versionPreviewUrl;return;}}catch(e2){}try{frame.src='about:blank';var vd=frame.contentWindow.document;vd.open();vd.write(safe);vd.close();}catch(e3){frame.src='data:text/html;charset=utf-8,'+encodeURIComponent(safe);}}else{jplopsoft_el('jplopsoft_versionTextPreview').className='jplopsoft_version-text';jplopsoft_el('jplopsoft_versionTextPreview').value=src;}}
-function jplopsoft_viewVersion(versionId,versionNo){if(state.openFormat==='image')return jplopsoft_exosMessage('圖片版本不直接解密原圖預覽；請使用主畫面的 128 × 128 加密縮圖。版本原圖仍可使用「下載」。');jplopsoft_fetchVersion(versionId,function(err,v,src){if(err)return jplopsoft_exosMessage(err.message);jplopsoft_renderVersionPreview(versionNo,src);});}
-function jplopsoft_downloadVersion(versionId,versionNo){jplopsoft_fetchVersion(versionId,function(err,v,src){if(err)return jplopsoft_exosMessage(err.message);var n=jplopsoft_findNode(state.openId),name=n?jplopsoft_decName(n):'document',vn=jplopsoft_versionDownloadName(name||'document',versionNo),fmt=jplopsoft_fileFormatFromName(name||'');if(jplopsoft_binaryFormat(fmt))jplopsoft_saveBinaryBlob(vn,src);else jplopsoft_saveFileBlob(vn,src);});}
-async function jplopsoft_restoreVersion(versionId,versionNo){if(jplopsoft_binaryFormat(state.openFormat))return jplopsoft_exosMessage('Binary / 圖片 / 影音版本目前不提供文字內容還原。');if(!state.editId)return jplopsoft_exosMessage('請用「編輯」模式開啟文件後再還原版本。');if(!await jplopsoft_exosConfirm('確定把版本 v'+versionNo+' 還原成目前內容嗎？\\n\\n還原本身會再建立一個新的版本，因此原歷史不會消失。'))return;var nodeId=state.openId;jplopsoft_fetchVersion(versionId,function(err,v,src){if(err)return jplopsoft_exosMessage(err.message);var cipher;try{cipher=jplopsoft_encContent(src,jplopsoft_nodeFekById(nodeId));}catch(e){return jplopsoft_exosMessage(e.message);}jplopsoft_saveNodeCipher(nodeId,cipher,jplopsoft_utf8ByteLength(src),function(err2,out){if(err2)return jplopsoft_exosMessage(err2.message);jplopsoft_closeVersions();jplopsoft_reloadNodes(function(){jplopsoft_openEditor(nodeId);jplopsoft_setStatus('已將 v'+versionNo+' 還原並以原檔 FEK 另存為新版本 v'+out.version_no+'。');});});});}
-function jplopsoft_renderVersions(){var body=jplopsoft_el('jplopsoft_versionRows'),a=state.versionList||[],i,v,tr,td,b;body.innerHTML='';jplopsoft_el('jplopsoft_versionEmpty').className=a.length?'jplopsoft_version-empty jplopsoft_hidden':'jplopsoft_version-empty';for(i=0;i<a.length;i++){v=a[i];tr=document.createElement('tr');td=document.createElement('td');td.innerHTML='v'+v.version_no+(v.version_no===state.versionCurrentNo?' <span class="jplopsoft_version-current">目前</span>':'');tr.appendChild(td);td=document.createElement('td');td.textContent=jplopsoft_fmtDate(v.created_at);tr.appendChild(td);td=document.createElement('td');td.textContent=v.cipher_size?Math.ceil(v.cipher_size/1024)+' KB':'-';tr.appendChild(td);td=document.createElement('td');td.className='jplopsoft_actions';b=document.createElement('button');b.className='jplopsoft_btn jplopsoft_small';b.textContent='檢視';(function(id,no,btn){btn.onclick=function(){jplopsoft_viewVersion(id,no);};})(v.id,v.version_no,b);td.appendChild(b);td.appendChild(document.createTextNode(' '));b=document.createElement('button');b.className='jplopsoft_btn jplopsoft_small';b.textContent='下載';(function(id,no,btn){btn.onclick=function(){jplopsoft_downloadVersion(id,no);};})(v.id,v.version_no,b);td.appendChild(b);if(v.version_no!==state.versionCurrentNo&&!jplopsoft_binaryFormat(state.openFormat)){td.appendChild(document.createTextNode(' '));b=document.createElement('button');b.className='jplopsoft_btn jplopsoft_small jplopsoft_primary';b.textContent='還原';b.disabled=!state.editId;(function(id,no,btn){btn.onclick=function(){jplopsoft_restoreVersion(id,no);};})(v.id,v.version_no,b);td.appendChild(b);}tr.appendChild(td);body.appendChild(tr);}}
-function jplopsoft_openVersions(){
-  var n,name;
-
-  if(!state.openId)return jplopsoft_exosMessage('請先打開文件。');
-
-  n=jplopsoft_findNode(state.openId);
-  name=n?jplopsoft_decName(n):'';
-
-  if(
-    n&&
-    jplopsoft_nodeIsLargeFile(n)&&
-    jplopsoft_fileFormatFromName(name)!=='image'
-  ){
-    return jplopsoft_exosMessage(
-      '大型 CHUNKED_V1 檔案不提供線上內容版本預覽；'+
-      '可重新命名、移動、複製、刪除與下載。'
-    );
-  }
-
-  jplopsoft_el('jplopsoft_versionTitle').textContent=
-    '版本紀錄：'+(name||('#'+state.openId));
-
-  jplopsoft_el('jplopsoft_versionBackdrop').style.display='flex';
-  jplopsoft_versionWindowSetMaximized(false);
-
-  jplopsoft_taskbarEnsureApp(
-    'versions',
-    'history',
-    '版本紀錄'
-  );
-
-  jplopsoft_wmActivateOverlay(
-    'jplopsoft_versionBackdrop',
-    'jplopsoft_versionWindow',
-    'versions'
-  );
-
-  jplopsoft_el('jplopsoft_versionRows').innerHTML='';
-  jplopsoft_el('jplopsoft_versionEmpty').className=
-    'jplopsoft_version-empty';
-  jplopsoft_el('jplopsoft_versionPreviewEmpty').className=
-    'jplopsoft_version-empty';
-  jplopsoft_el('jplopsoft_versionTextPreview').className=
-    'jplopsoft_version-text jplopsoft_hidden';
-  jplopsoft_el('jplopsoft_versionHtmlPreview').className=
-    'jplopsoft_preview jplopsoft_hidden';
-  jplopsoft_el('jplopsoft_versionImagePreview').className=
-    'jplopsoft_version-image jplopsoft_hidden';
-  jplopsoft_el('jplopsoft_versionImagePreview').removeAttribute('src');
-
-  jplopsoft_revokeVersionPreview();
-
-  jplopsoft_api(
-    'versions',
-    'POST',
-    {id:state.openId},
-    true,
-    function(err,out){
-      if(err){
-        jplopsoft_closeVersions();
-        return jplopsoft_exosMessage(err.message);
-      }
-
-      state.versionList=out.versions||[];
-      state.versionCurrentNo=out.current_version||0;
-      jplopsoft_renderVersions();
-    }
-  );
-}
+function jplopsoft_saveDocument(){if(!state.editId)return;if(state.editorMode==='rich'&&state.openFormat==='html')jplopsoft_syncRichToSource();var src=state.openFormat==='csv'?jplopsoft_csvCurrentSource():jplopsoft_el('jplopsoft_htmlEditor').value,plainSize=jplopsoft_utf8ByteLength(src);if(plainSize>jplopsoft_TEXT_ONLINE_EDIT_MAX)return jplopsoft_exosMessage('線上編輯內容超過 18 MiB。請改用大型檔案上傳模式；大型 TXT / HTML / CSV 僅允許下載。');try{var cipher=jplopsoft_encContent(src,jplopsoft_nodeFekById(state.editId));jplopsoft_saveNodeCipher(state.editId,cipher,plainSize,function(err,out){if(err)return jplopsoft_exosMessage(err.message);jplopsoft_closeModal();jplopsoft_reloadNodes(function(){jplopsoft_setStatus('文件已使用原檔 FEK 加密儲存。');});});}catch(e){jplopsoft_exosMessage(e.message);}}
 
 function jplopsoft_revokePreview(){if(state.previewUrl){try{(window.URL||window.webkitURL).revokeObjectURL(state.previewUrl);}catch(e){}state.previewUrl=null;}if(jplopsoft_isIE11Browser()){var f=jplopsoft_el('jplopsoft_htmlPreview'),p=jplopsoft_el('jplopsoft_htmlPreviewIE11');if(f){try{f.onload=null;f.src='about:blank';}catch(ignoreIEPreviewReset){}}if(p){try{p.innerHTML='';}catch(ignoreIEPreviewClear){}}}}
 function jplopsoft_sanitizeHtml(source){var body=jplopsoft_sanitizeFragment(jplopsoft_bodyInnerFromSource(source));return '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data: blob:; style-src \'unsafe-inline\'; font-src data:; media-src \'none\'; connect-src \'none\'; frame-src \'none\'; object-src \'none\'"><style>body{font-family:Segoe UI,Microsoft JhengHei,sans-serif;padding:18px;line-height:1.6;word-wrap:break-word;overflow-wrap:anywhere}img{max-width:100%;height:auto}table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:6px}</style></head><body>'+body+'</body></html>';}
@@ -13967,7 +13717,7 @@ function jplopsoft_toggleMax(){
     setTimeout(jplopsoft_ie11FitDocumentModal,0);
   }
 }
-function jplopsoft_closeModal(){var ieBody,ieModal,ieCsvPane,ieCsvWrap;jplopsoft_closeVersions();jplopsoft_el('jplopsoft_modalBackdrop').style.display='none';jplopsoft_taskbarRemoveDocumentApp();if(jplopsoft_isIE11Browser()){ieModal=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal');ieBody=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal-body');ieCsvPane=jplopsoft_el('jplopsoft_csvPane');ieCsvWrap=jplopsoft_el('jplopsoft_csvSheetWrap');if(ieModal){ieModal.style.height='';ieModal.style.maxHeight='';}if(ieBody){ieBody.style.height='';ieBody.style.maxHeight='';ieBody.style.msFlex='';ieBody.style.flex='';}if(ieCsvPane){ieCsvPane.style.height='';ieCsvPane.style.maxHeight='';ieCsvPane.style.msFlex='';ieCsvPane.style.flex='';}if(ieCsvWrap){ieCsvWrap.style.height='';ieCsvWrap.style.maxHeight='';ieCsvWrap.style.msFlex='';ieCsvWrap.style.flex='';}}state.editId=0;state.openId=0;state.openFormat='html';state.editorMode='source';state.csvData=[];state.csvHadBom=false;state.csvReadOnly=false;state.csvSelectedRow=0;state.csvSelectedCol=0;jplopsoft_el('jplopsoft_saveDocBtn').className='jplopsoft_btn jplopsoft_primary';jplopsoft_el('jplopsoft_modalTabs').className='jplopsoft_modal-tabs';jplopsoft_revokePreview();jplopsoft_revokeImagePreview();jplopsoft_revokeMediaPreview();jplopsoft_el('jplopsoft_csvPane').className='jplopsoft_csv-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_imagePreviewPane').className='jplopsoft_image-preview-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_mediaPreviewPane').className='jplopsoft_media-preview-pane jplopsoft_hidden';state.maximized=false;jplopsoft_documentWindowApplyMax(false);jplopsoft_routeClearExplorerAction();}
+function jplopsoft_closeModal(){var ieBody,ieModal,ieCsvPane,ieCsvWrap;jplopsoft_el('jplopsoft_modalBackdrop').style.display='none';jplopsoft_taskbarRemoveDocumentApp();if(jplopsoft_isIE11Browser()){ieModal=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal');ieBody=document.querySelector('#jplopsoft_modalBackdrop .jplopsoft_modal-body');ieCsvPane=jplopsoft_el('jplopsoft_csvPane');ieCsvWrap=jplopsoft_el('jplopsoft_csvSheetWrap');if(ieModal){ieModal.style.height='';ieModal.style.maxHeight='';}if(ieBody){ieBody.style.height='';ieBody.style.maxHeight='';ieBody.style.msFlex='';ieBody.style.flex='';}if(ieCsvPane){ieCsvPane.style.height='';ieCsvPane.style.maxHeight='';ieCsvPane.style.msFlex='';ieCsvPane.style.flex='';}if(ieCsvWrap){ieCsvWrap.style.height='';ieCsvWrap.style.maxHeight='';ieCsvWrap.style.msFlex='';ieCsvWrap.style.flex='';}}state.editId=0;state.openId=0;state.openFormat='html';state.editorMode='source';state.csvData=[];state.csvHadBom=false;state.csvReadOnly=false;state.csvSelectedRow=0;state.csvSelectedCol=0;jplopsoft_el('jplopsoft_saveDocBtn').className='jplopsoft_btn jplopsoft_primary';jplopsoft_el('jplopsoft_modalTabs').className='jplopsoft_modal-tabs';jplopsoft_revokePreview();jplopsoft_revokeImagePreview();jplopsoft_revokeMediaPreview();jplopsoft_el('jplopsoft_csvPane').className='jplopsoft_csv-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_imagePreviewPane').className='jplopsoft_image-preview-pane jplopsoft_hidden';jplopsoft_el('jplopsoft_mediaPreviewPane').className='jplopsoft_media-preview-pane jplopsoft_hidden';state.maximized=false;jplopsoft_documentWindowApplyMax(false);jplopsoft_routeClearExplorerAction();}
 
 function jplopsoft_bindRich(){
   var tb=jplopsoft_el('jplopsoft_richToolbar'),buttons=tb?tb.getElementsByTagName('button'):[],i,imageBtn=jplopsoft_el('jplopsoft_richImage'),imageInput=jplopsoft_el('jplopsoft_richImageInput');
@@ -16688,7 +16438,6 @@ function jplopsoft_wmShowDesktop(){
 
   if(doc)jplopsoft_taskbarMinimizeDocument();
   if(jplopsoft_el(jplopsoft_taskbarAppId('control')))jplopsoft_wmOverlayMinimize('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');
-  if(jplopsoft_el(jplopsoft_taskbarAppId('versions')))jplopsoft_versionWindowMinimize();
   if(jplopsoft_el(jplopsoft_taskbarAppId('security')))jplopsoft_wmOverlayMinimize('jplopsoft_securityBackdrop','jplopsoft_securityWindow','security');
   if(jplopsoft_el(jplopsoft_taskbarAppId('trash')))jplopsoft_wmOverlayMinimize('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');
   if(jplopsoft_CALC.hwnd&&jplopsoft_user32GetRecord(jplopsoft_CALC.hwnd))jplopsoft_ShowWindow(jplopsoft_CALC.hwnd,jplopsoft_SW_MINIMIZE);
@@ -16834,17 +16583,6 @@ function jplopsoft_taskbarAppClick(appId){
   if(appId==='control'){
     if(active&&jplopsoft_wmIsDisplayed('jplopsoft_exconfigBackdrop'))jplopsoft_wmOverlayMinimize('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');
     else jplopsoft_wmOverlayRestore('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');
-    return;
-  }
-  if(appId==='versions'){
-    if(
-      active&&
-      jplopsoft_wmIsDisplayed('jplopsoft_versionBackdrop')
-    ){
-      jplopsoft_versionWindowMinimize();
-    }else{
-      jplopsoft_versionWindowRestore();
-    }
     return;
   }
   if(appId==='security'){
@@ -19626,7 +19364,7 @@ function jplopsoft_ntKernelProcessKeyForWindow(rec){
 
   if(rec&&rec.param&&rec.param.ntProcessKey)return String(rec.param.ntProcessKey);
 
-  if(app==='explorer'||app.indexOf('explorer_')===0||app==='trash'||app==='properties'||app==='document'||app==='versions'){
+  if(app==='explorer'||app.indexOf('explorer_')===0||app==='trash'||app==='properties'||app==='document'){
     return'proc:explorer';
   }
 
@@ -19638,7 +19376,7 @@ function jplopsoft_ntKernelImageForWindow(rec){
 
   if(rec&&rec.param&&rec.param.ntImageName)return String(rec.param.ntImageName);
 
-  if(app==='explorer'||app.indexOf('explorer_')===0||app==='trash'||app==='properties'||app==='document'||app==='versions')return'explorer.exe';
+  if(app==='explorer'||app.indexOf('explorer_')===0||app==='trash'||app==='properties'||app==='document')return'explorer.exe';
   if(app==='cmd'||app.indexOf('cmd_')===0)return'cmd.exe';
   if(app==='control')return'control.exe';
   if(app==='security')return'security.exe';
@@ -19655,7 +19393,7 @@ function jplopsoft_ntKernelImageForWindow(rec){
 function jplopsoft_ntKernelDescriptionForWindow(rec){
   var app=String(rec&&rec.appId||'');
   if(rec&&rec.param&&rec.param.ntDescription)return String(rec.param.ntDescription);
-  if(app==='explorer'||app.indexOf('explorer_')===0||app==='trash'||app==='properties'||app==='document'||app==='versions')return'ExOS Explorer / ExFS Shell';
+  if(app==='explorer'||app.indexOf('explorer_')===0||app==='trash'||app==='properties'||app==='document')return'ExOS Explorer / ExFS Shell';
   if(app==='cmd'||app.indexOf('cmd_')===0)return'Command Prompt';
   if(app==='control')return'Control Panel';
   if(app==='security')return'ExOS Security';
@@ -22790,7 +22528,7 @@ function jplopsoft_xshTopologySnapshot(mode){
   }
 
   out.push({id:'phys_root',parentId:'',label:'/_exfs/',kind:'root',detail:'ExFS PHP VDO backing root'});
-  out.push({id:'mft',parentId:'phys_root',label:'_MFT.x6f',kind:'metadata',detail:'Master File Table / nodes / versions'});
+  out.push({id:'mft',parentId:'phys_root',label:'_MFT.x6f',kind:'metadata',detail:'Master File Table / nodes'});
   out.push({id:'mftmirr',parentId:'phys_root',label:'_MFTMirr.x6f',kind:'metadata',detail:'MFT mirror'});
   out.push({id:'log',parentId:'phys_root',label:'_LogFile.x6f',kind:'metadata',detail:'ExFS transaction log'});
   out.push({id:'volume',parentId:'phys_root',label:'_Volume.x6f',kind:'metadata',detail:'Volume metadata'});
@@ -22996,7 +22734,16 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
     n.type='button';
     n.className=
       'jplopsoft_xsh-control jplopsoft_xsh-control-button';
-    n.textContent=String(s.text||id);
+    /*
+     * os74:
+     * An explicitly supplied empty string is meaningful (color swatches,
+     * icon-only controls).  Do not replace it with the control id.
+     */
+    n.textContent=String(
+      s.text===undefined||s.text===null
+        ?id
+        :s.text
+    );
 
     n.onclick=function(e){
       jplopsoft_xshSendEvent(
@@ -23032,10 +22779,17 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
     n.type=String(s.inputType||'text');
     n.className=
       'jplopsoft_xsh-control jplopsoft_xsh-control-input';
-    n.value=String(s.text||s.value||'');
+    n.value=String(
+      s.text!==undefined&&s.text!==null
+        ?s.text
+        :(s.value!==undefined&&s.value!==null?s.value:'')
+    );
     if(n.type==='checkbox'||n.type==='radio'){
       n.checked=!!s.checked;
     }
+    if(typeof s.min!=='undefined'&&'min' in n)n.min=String(s.min);
+    if(typeof s.max!=='undefined'&&'max' in n)n.max=String(s.max);
+    if(typeof s.step!=='undefined'&&'step' in n)n.step=String(s.step);
     n.readOnly=!!s.readOnly;
     if(typeof s.placeholder!=='undefined'){
       n.placeholder=String(s.placeholder||'');
@@ -23124,7 +22878,47 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
   if(s.trackPointer){
     (function(){
       function sendPointer(action,e){
-        var r=n.getBoundingClientRect?n.getBoundingClientRect():{left:0,top:0,width:0,height:0};
+        var r=n.getBoundingClientRect
+              ?n.getBoundingClientRect()
+              :{left:0,top:0,width:0,height:0},
+            coalesced=[],
+            samples=[],
+            i,se;
+
+        /*
+         * os74:
+         * Chromium/V8 PointerEvent.getCoalescedEvents() carries higher-rate
+         * digitizer/mouse samples that may be collapsed into one DOM
+         * pointermove.  Forward a bounded sample list to drawing XSH apps so
+         * GDI strokes do not lose intermediate coordinates.
+         */
+        if(
+          action==='pointermove'&&
+          e&&
+          typeof e.getCoalescedEvents==='function'
+        ){
+          try{
+            samples=e.getCoalescedEvents()||[];
+          }catch(ignoreCoalesced){
+            samples=[];
+          }
+
+          if(samples.length>64){
+            samples=samples.slice(samples.length-64);
+          }
+
+          for(i=0;i<samples.length;i++){
+            se=samples[i];
+            coalesced.push({
+              x:(typeof se.clientX==='number'?se.clientX:0)-r.left,
+              y:(typeof se.clientY==='number'?se.clientY:0)-r.top,
+              clientX:typeof se.clientX==='number'?se.clientX:0,
+              clientY:typeof se.clientY==='number'?se.clientY:0,
+              pressure:typeof se.pressure==='number'?se.pressure:0
+            });
+          }
+        }
+
         jplopsoft_xshSendEvent(
           ctx,
           {
@@ -23141,6 +22935,7 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
             buttons:parseInt(e.buttons,10)||0,
             pressure:typeof e.pressure==='number'?e.pressure:0,
             pointerType:String(e.pointerType||'mouse'),
+            coalesced:coalesced,
             ctrlKey:!!e.ctrlKey,
             shiftKey:!!e.shiftKey,
             altKey:!!e.altKey
@@ -23408,6 +23203,11 @@ function jplopsoft_xshSetControlProperty(ctx,id,prop,value){
     return true;
   }
 
+  if((p==='min'||p==='max'||p==='step')&&(p in n)){
+    n[p]=String(value===undefined||value===null?'':value);
+    return true;
+  }
+
   if(p==='spellcheck'&&('spellcheck' in n)){
     n.spellcheck=!!value;
     return true;
@@ -23479,6 +23279,7 @@ function jplopsoft_xshGetControlProperty(ctx,id,prop){
   if(p==='readOnly')return !!n.readOnly;
   if(p==='disabled')return !!n.disabled;
   if(p==='checked'&&('checked' in n))return !!n.checked;
+  if((p==='min'||p==='max'||p==='step')&&(p in n))return String(n[p]||'');
   if(p==='spellcheck')return !!n.spellcheck;
   if(p==='placeholder')return String(n.placeholder||'');
   if(p==='wrap'&&String(n.tagName||'').toLowerCase()==='textarea')return String(n.wrap||'soft');
@@ -24123,6 +23924,19 @@ async function jplopsoft_xshSystemOpenPath(ctx,path){
   fmt=jplopsoft_fileFormatFromName(
     jplopsoft_decName(n)||''
   );
+
+  if(fmt==='audio'){
+    child=await jplopsoft_runBuiltinXsh(
+      'audio_preview',
+      [jplopsoft_xshNodePath(n)],
+      ctx,
+      {
+        integrity:n.has_motw?'LOW':'MEDIUM',
+        protection:n.has_motw?'Sandbox+MOTW':'Sandbox'
+      }
+    );
+    return{ok:true,pid:child.pid,audioPreview:true,path:jplopsoft_xshNodePath(n)};
+  }
 
   if(fmt==='xsh'){
     child=await jplopsoft_runXshNode(
@@ -25169,8 +24983,20 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     if(method==='EnumIconResources')return jplopsoft_xshEnumIconResources(ctx,args[0]);
     if(method==='SetWindowIcon')return jplopsoft_xshSetWindowIcon(ctx,args[0],args[1]);
     if(method==='CreateControl')return jplopsoft_xshCreateControl(ctx,args[0],args[1]);
-    if(method==='SetControlText'){control=jplopsoft_xshControl(ctx,args[0]);if(!control)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Control not found.');if('value' in control)control.value=String(args[1]||'');else control.textContent=String(args[1]||'');return true;}
-    if(method==='GetControlText'){control=jplopsoft_xshControl(ctx,args[0]);if(!control)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Control not found.');return 'value' in control?String(control.value||''):String(control.textContent||'');}
+    if(method==='SetControlText'){
+      control=jplopsoft_xshControl(ctx,args[0]);
+      if(!control)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Control not found.');
+      var tagName=String(control.tagName||'').toLowerCase(),textValue=String(args[1]===undefined||args[1]===null?'':args[1]);
+      if(tagName==='input'||tagName==='textarea'||tagName==='select')control.value=textValue;
+      else control.textContent=textValue;
+      return true;
+    }
+    if(method==='GetControlText'){
+      control=jplopsoft_xshControl(ctx,args[0]);
+      if(!control)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Control not found.');
+      var getTag=String(control.tagName||'').toLowerCase();
+      return getTag==='input'||getTag==='textarea'||getTag==='select'?String(control.value||''):String(control.textContent||'');
+    }
     if(method==='AppendControlText')return jplopsoft_xshAppendControlText(ctx,args[0],args[1]);
     if(method==='SetControlProperty')return jplopsoft_xshSetControlProperty(ctx,args[0],args[1],args[2]);
     if(method==='GetControlProperty')return jplopsoft_xshGetControlProperty(ctx,args[0],args[1]);
@@ -25466,10 +25292,16 @@ function jplopsoft_xshHasBuiltin(appId){
 }
 
 function jplopsoft_xshBuiltinArgv(app,args){var a=[String(app.fileName||((app.id||'app')+'.xsh'))],i,list=args||[];for(i=0;i<list.length;i++)a.push(String(list[i]));return a;}
-async function jplopsoft_runBuiltinXsh(appId,args,parentCtx){
+async function jplopsoft_runBuiltinXsh(appId,args,parentCtx,launchOptions){
   var app=jplopsoft_xshBuiltinManifest(appId),
       existing,parent,proc,runId,ctx,imagePath,k,rec,image,
-      cwdNode=0,cwd='C:\\';
+      cwdNode=0,cwd='C:\\',
+      launchIntegrity='MEDIUM',launchProtection='Sandbox';
+
+  launchOptions=launchOptions||{};
+  launchIntegrity=String(launchOptions.integrity||'MEDIUM').toUpperCase();
+  if(launchIntegrity!=='LOW'&&launchIntegrity!=='MEDIUM')launchIntegrity='MEDIUM';
+  launchProtection=String(launchOptions.protection||(launchIntegrity==='LOW'?'Sandbox+Restricted':'Sandbox'));
 
   if(!app){
     throw new Error(
@@ -25556,8 +25388,8 @@ async function jplopsoft_runBuiltinXsh(appId,args,parentCtx){
        * Built-in SystemApps are compiled into the trusted ExOS package.
        * They are not ExFS nodes and therefore have no Zone.Identifier/MOTW.
        */
-      integrity:'MEDIUM',
-      protection:'Sandbox',
+      integrity:launchIntegrity,
+      protection:launchProtection,
       critical:false,
       systemProcess:false,
       imagePathName:imagePath,
@@ -27358,7 +27190,6 @@ function jplopsoft_diskmgmtRender(out){
     ['檔案數',out.file_count],
     ['資料夾數',out.folder_count],
     ['Reparse Points',out.reparse_count],
-    ['歷史版本',out.version_count],
     ['垃圾桶 Root',out.trash_root_count],
     ['Commit Seq',out.commit_seq]
   ].forEach(function(r){
@@ -27447,7 +27278,6 @@ function jplopsoft_taskbarCloseAppWindow(appId){
   }
 
   if(appId==='control'){jplopsoft_closeExconfig();return true;}
-  if(appId==='versions'){jplopsoft_closeVersions();return true;}
   if(appId==='security'){
     if(typeof jplopsoft_closeSecurityScreen==='function')jplopsoft_closeSecurityScreen();
     return true;
@@ -27633,39 +27463,6 @@ function jplopsoft_RegisterExFSNativeWindows(){
   }
 
 
-  if(!jplopsoft_user32GetHwndByElementId('jplopsoft_versionWindow')){
-    hwnd=jplopsoft_AdoptWindow({
-      className:'ExFS.VersionHistory',
-      overlay:true,
-      backdropId:'jplopsoft_versionBackdrop',
-      windowId:'jplopsoft_versionWindow',
-      titlebarId:'jplopsoft_versionTitlebar',
-      titleId:'jplopsoft_versionTitle',
-      clientIds:['jplopsoft_versionRows'],
-      appId:'versions',
-      icon:'history',
-      style:jplopsoft_WS_OVERLAPPEDWINDOW,
-      exStyle:jplopsoft_WS_EX_APPWINDOW,
-      minButtonId:'jplopsoft_versionMinBtn',
-      maxButtonId:'jplopsoft_versionMaxBtn',
-      closeButtonId:'jplopsoft_versionCloseTop',
-      onMinimize:function(){jplopsoft_versionWindowMinimize();},
-      onMaximize:function(){
-        jplopsoft_versionWindowSetMaximized(true);
-        jplopsoft_wmActivateOverlay(
-          'jplopsoft_versionBackdrop',
-          'jplopsoft_versionWindow',
-          'versions'
-        );
-      },
-      onRestore:function(){
-        jplopsoft_versionWindowSetMaximized(false);
-        jplopsoft_versionWindowRestore();
-      },
-      onClose:function(){jplopsoft_closeVersions();}
-    });
-  }
-
   if(!jplopsoft_user32GetHwndByElementId('jplopsoft_controlWindow')){
     hwnd=jplopsoft_AdoptWindow({
       className:'ExFS.ControlPanel',
@@ -27763,7 +27560,6 @@ function jplopsoft_bindWindowManager(){
       cmd=jplopsoft_el('jplopsoft_cmdWindow'),
       doc=jplopsoft_el('jplopsoft_documentWindow'),
       control=jplopsoft_el('jplopsoft_controlWindow'),
-      versionWin=jplopsoft_el('jplopsoft_versionWindow'),
       security=jplopsoft_el('jplopsoft_securityWindow'),
       desktopComputer=jplopsoft_el('jplopsoft_desktopComputerIcon'),
       desktopCmd=jplopsoft_el('jplopsoft_desktopCmdIcon'),
@@ -27791,19 +27587,6 @@ function jplopsoft_bindWindowManager(){
     control.onmousedown=function(){jplopsoft_wmActivateOverlay('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');};
     jplopsoft_wmMakeDraggable('jplopsoft_controlWindow','jplopsoft_controlTitlebar');
   }
-  if(versionWin){
-    versionWin.onmousedown=function(){
-      jplopsoft_wmActivateOverlay(
-        'jplopsoft_versionBackdrop',
-        'jplopsoft_versionWindow',
-        'versions'
-      );
-    };
-    jplopsoft_wmMakeDraggable(
-      'jplopsoft_versionWindow',
-      'jplopsoft_versionTitlebar'
-    );
-  }
   if(security){
     security.onmousedown=function(){jplopsoft_wmActivateOverlay('jplopsoft_securityBackdrop','jplopsoft_securityWindow','security');};
     jplopsoft_wmMakeDraggable('jplopsoft_securityWindow','jplopsoft_securityTitlebar');
@@ -27829,9 +27612,6 @@ function jplopsoft_bindWindowManager(){
 
   if(jplopsoft_el('jplopsoft_exconfigMinBtn'))jplopsoft_el('jplopsoft_exconfigMinBtn').onclick=function(){jplopsoft_wmOverlayMinimize('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');};
   if(jplopsoft_el('jplopsoft_exconfigMaxBtn'))jplopsoft_el('jplopsoft_exconfigMaxBtn').onclick=function(){jplopsoft_wmToggleOverlayMax('jplopsoft_controlWindow');jplopsoft_wmActivateOverlay('jplopsoft_exconfigBackdrop','jplopsoft_controlWindow','control');};
-  if(jplopsoft_el('jplopsoft_versionMinBtn'))jplopsoft_el('jplopsoft_versionMinBtn').onclick=jplopsoft_versionWindowMinimize;
-  if(jplopsoft_el('jplopsoft_versionMaxBtn'))jplopsoft_el('jplopsoft_versionMaxBtn').onclick=jplopsoft_versionWindowToggleMax;
-  if(jplopsoft_el('jplopsoft_versionCloseTop'))jplopsoft_el('jplopsoft_versionCloseTop').onclick=jplopsoft_closeVersions;
 
   if(jplopsoft_el('jplopsoft_securityMinBtn'))jplopsoft_el('jplopsoft_securityMinBtn').onclick=function(){jplopsoft_wmOverlayMinimize('jplopsoft_securityBackdrop','jplopsoft_securityWindow','security');};
   if(jplopsoft_el('jplopsoft_securityMaxBtn'))jplopsoft_el('jplopsoft_securityMaxBtn').onclick=function(){jplopsoft_wmToggleOverlayMax('jplopsoft_securityWindow');jplopsoft_wmActivateOverlay('jplopsoft_securityBackdrop','jplopsoft_securityWindow','security');};
@@ -27989,7 +27769,6 @@ function jplopsoft_taskbarDocumentMinimized(){
 function jplopsoft_taskbarMinimizeDocument(){
   var back=jplopsoft_el('jplopsoft_modalBackdrop');
   if(!back||!jplopsoft_taskbarDocumentButton())return false;
-  if(typeof jplopsoft_closeVersions==='function')jplopsoft_closeVersions();
   jplopsoft_documentWindowApplyMax(!!state.maximized);
   back.style.display='none';
   jplopsoft_taskbarDocumentMinimized();
@@ -28187,10 +27966,10 @@ function jplopsoft_openVolume3D(){
 }
 function jplopsoft_closeVolume3D(){jplopsoft_xshTerminateBuiltin('volume3d');return true;}
 
-function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_submitCredentialUI;jplopsoft_el('jplopsoft_loginUserInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy){try{jplopsoft_el('jplopsoft_keyInput').focus();}catch(ignoreUserEnter){}}};jplopsoft_el('jplopsoft_loginUserInput').onchange=function(){if(state.kdfBusy)return;jplopsoft_selectLogonAccount(String(this.value||state.defaultUsername||'administrator').toLowerCase(),true);};jplopsoft_el('jplopsoft_keyInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy)jplopsoft_submitCredentialUI();};jplopsoft_bindSecureDesktopUI();jplopsoft_secureDesktopBindSas();if(jplopsoft_el('jplopsoft_rememberUnlock'))jplopsoft_el('jplopsoft_rememberUnlock').onchange=jplopsoft_onRememberUnlockChanged;if(jplopsoft_el('jplopsoft_largeTransferCancelBtn'))jplopsoft_el('jplopsoft_largeTransferCancelBtn').onclick=jplopsoft_cancelLargeTransfer;if(jplopsoft_el('jplopsoft_largeTransferMinBtn'))jplopsoft_el('jplopsoft_largeTransferMinBtn').onclick=jplopsoft_toggleLargeTransferMinimized;jplopsoft_el('jplopsoft_newFolderBtn').onclick=function(){jplopsoft_createItem('folder');};jplopsoft_el('jplopsoft_newHtmlBtn').onclick=function(){jplopsoft_createItem('file','html');};jplopsoft_el('jplopsoft_newTxtBtn').onclick=function(){jplopsoft_createItem('file','txt');};jplopsoft_el('jplopsoft_newCsvBtn').onclick=function(){jplopsoft_createItem('file','csv');};jplopsoft_el('jplopsoft_newXshBtn').onclick=function(){jplopsoft_createItem('file','xsh');};jplopsoft_el('jplopsoft_downloadBtn').onclick=jplopsoft_downloadSelected;jplopsoft_el('jplopsoft_renameBtn').onclick=jplopsoft_renameSelected;jplopsoft_el('jplopsoft_moveBtn').onclick=jplopsoft_openMoveDialog;jplopsoft_el('jplopsoft_deleteBtn').onclick=function(){if(jplopsoft_isDesktopFolder()){if(state.desktopSelectedTargetId)jplopsoft_deleteDesktopShortcut(state.desktopSelectedTargetId);return;}jplopsoft_deleteSelected();};if(jplopsoft_threeFeatureAllowed()){if(jplopsoft_el('jplopsoft_volume3dBtn'))jplopsoft_el('jplopsoft_volume3dBtn').onclick=jplopsoft_openVolume3D;if(jplopsoft_el('jplopsoft_volume3dPhysicalBtn'))jplopsoft_el('jplopsoft_volume3dPhysicalBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('physical');};if(jplopsoft_el('jplopsoft_volume3dSandboxBtn'))jplopsoft_el('jplopsoft_volume3dSandboxBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('sandbox');};if(jplopsoft_el('jplopsoft_volume3dCloseBtn'))jplopsoft_el('jplopsoft_volume3dCloseBtn').onclick=jplopsoft_closeVolume3D;if(jplopsoft_el('jplopsoft_volume3dFullscreenBtn'))jplopsoft_el('jplopsoft_volume3dFullscreenBtn').onclick=jplopsoft_threeVolumeToggleFullscreen;if(jplopsoft_el('jplopsoft_volume3dResetBtn'))jplopsoft_el('jplopsoft_volume3dResetBtn').onclick=jplopsoft_threeVolumeResetView;if(jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_el('jplopsoft_volume3dBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_closeVolume3D();else jplopsoft_wmActivateOverlay('jplopsoft_volume3dBackdrop','jplopsoft_volume3dWindow','volume3d');};}jplopsoft_el('jplopsoft_modalClose').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalCloseTop').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalVersionsBtn').onclick=jplopsoft_openVersions;jplopsoft_el('jplopsoft_versionCloseTop').onclick=jplopsoft_closeVersions;jplopsoft_el('jplopsoft_versionBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_versionBackdrop'))jplopsoft_closeVersions();};jplopsoft_el('jplopsoft_moveCloseTop').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveCancelBtn').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveConfirmBtn').onclick=jplopsoft_confirmMove;jplopsoft_el('jplopsoft_moveBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_moveBackdrop'))jplopsoft_closeMoveDialog();};jplopsoft_el('jplopsoft_trashCloseTop').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashCloseBtn').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashEmptyBtn').onclick=jplopsoft_emptyTrash;jplopsoft_el('jplopsoft_trashBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_trashBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');};jplopsoft_el('jplopsoft_modalDownloadBtn').onclick=jplopsoft_downloadCurrentDocument;jplopsoft_el('jplopsoft_modalPrintBtn').onclick=jplopsoft_printCurrentDocument;jplopsoft_el('jplopsoft_modalMaxBtn').onclick=jplopsoft_toggleMax;jplopsoft_el('jplopsoft_saveDocBtn').onclick=jplopsoft_saveDocument;jplopsoft_el('jplopsoft_csvAddRowBtn').onclick=jplopsoft_csvAddRow;jplopsoft_el('jplopsoft_csvAddColBtn').onclick=jplopsoft_csvAddColumn;jplopsoft_el('jplopsoft_csvDelRowBtn').onclick=jplopsoft_csvDeleteRow;jplopsoft_el('jplopsoft_csvDelColBtn').onclick=jplopsoft_csvDeleteColumn;jplopsoft_el('jplopsoft_csvFormulaInput').oninput=function(){if(state.csvReadOnly)return;var r=state.csvSelectedRow,c=state.csvSelectedCol,input;if(!state.csvData[r])return;state.csvData[r][c]=this.value;input=jplopsoft_csvSelectedCellInput();if(input)input.value=this.value;};jplopsoft_el('jplopsoft_tabEdit').onclick=jplopsoft_showSourceTab;jplopsoft_el('jplopsoft_tabRich').onclick=jplopsoft_showRichTab;jplopsoft_el('jplopsoft_tabPreview').onclick=function(){jplopsoft_showPreview();};jplopsoft_el('jplopsoft_modalBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_modalBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_modalBackdrop','jplopsoft_documentWindow','document');};if(jplopsoft_el('jplopsoft_galleryPrevImage'))jplopsoft_el('jplopsoft_galleryPrevImage').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextImage'))jplopsoft_el('jplopsoft_galleryNextImage').onclick=function(){jplopsoft_galleryNavigate(1);};if(jplopsoft_el('jplopsoft_galleryPrevMedia'))jplopsoft_el('jplopsoft_galleryPrevMedia').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextMedia'))jplopsoft_el('jplopsoft_galleryNextMedia').onclick=function(){jplopsoft_galleryNavigate(1);};jplopsoft_bindSecurityUI();jplopsoft_bindExconfig();jplopsoft_bindProperties();jplopsoft_bindTaskbar();jplopsoft_bindWindowManager();jplopsoft_bindRich();jplopsoft_bindSortHeaders();jplopsoft_bindBulkSelection();jplopsoft_bindFileDrop();jplopsoft_bindFileSearch();jplopsoft_bindExfsContextMenu();jplopsoft_bindCmdMode();jplopsoft_bindGlobalHotkeys();jplopsoft_bindSidebarResizer();if(jplopsoft_isIE11Browser()&&window.addEventListener)window.addEventListener('resize',jplopsoft_ie11FitDocumentModal,false);}
+function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_submitCredentialUI;jplopsoft_el('jplopsoft_loginUserInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy){try{jplopsoft_el('jplopsoft_keyInput').focus();}catch(ignoreUserEnter){}}};jplopsoft_el('jplopsoft_loginUserInput').onchange=function(){if(state.kdfBusy)return;jplopsoft_selectLogonAccount(String(this.value||state.defaultUsername||'administrator').toLowerCase(),true);};jplopsoft_el('jplopsoft_keyInput').onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy)jplopsoft_submitCredentialUI();};jplopsoft_bindSecureDesktopUI();jplopsoft_secureDesktopBindSas();if(jplopsoft_el('jplopsoft_rememberUnlock'))jplopsoft_el('jplopsoft_rememberUnlock').onchange=jplopsoft_onRememberUnlockChanged;if(jplopsoft_el('jplopsoft_largeTransferCancelBtn'))jplopsoft_el('jplopsoft_largeTransferCancelBtn').onclick=jplopsoft_cancelLargeTransfer;if(jplopsoft_el('jplopsoft_largeTransferMinBtn'))jplopsoft_el('jplopsoft_largeTransferMinBtn').onclick=jplopsoft_toggleLargeTransferMinimized;jplopsoft_el('jplopsoft_newFolderBtn').onclick=function(){jplopsoft_createItem('folder');};jplopsoft_el('jplopsoft_newHtmlBtn').onclick=function(){jplopsoft_createItem('file','html');};jplopsoft_el('jplopsoft_newTxtBtn').onclick=function(){jplopsoft_createItem('file','txt');};jplopsoft_el('jplopsoft_newCsvBtn').onclick=function(){jplopsoft_createItem('file','csv');};jplopsoft_el('jplopsoft_newXshBtn').onclick=function(){jplopsoft_createItem('file','xsh');};jplopsoft_el('jplopsoft_downloadBtn').onclick=jplopsoft_downloadSelected;jplopsoft_el('jplopsoft_renameBtn').onclick=jplopsoft_renameSelected;jplopsoft_el('jplopsoft_moveBtn').onclick=jplopsoft_openMoveDialog;jplopsoft_el('jplopsoft_deleteBtn').onclick=function(){if(jplopsoft_isDesktopFolder()){if(state.desktopSelectedTargetId)jplopsoft_deleteDesktopShortcut(state.desktopSelectedTargetId);return;}jplopsoft_deleteSelected();};if(jplopsoft_threeFeatureAllowed()){if(jplopsoft_el('jplopsoft_volume3dBtn'))jplopsoft_el('jplopsoft_volume3dBtn').onclick=jplopsoft_openVolume3D;if(jplopsoft_el('jplopsoft_volume3dPhysicalBtn'))jplopsoft_el('jplopsoft_volume3dPhysicalBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('physical');};if(jplopsoft_el('jplopsoft_volume3dSandboxBtn'))jplopsoft_el('jplopsoft_volume3dSandboxBtn').onclick=function(){jplopsoft_threeVolumeSwitchTopology('sandbox');};if(jplopsoft_el('jplopsoft_volume3dCloseBtn'))jplopsoft_el('jplopsoft_volume3dCloseBtn').onclick=jplopsoft_closeVolume3D;if(jplopsoft_el('jplopsoft_volume3dFullscreenBtn'))jplopsoft_el('jplopsoft_volume3dFullscreenBtn').onclick=jplopsoft_threeVolumeToggleFullscreen;if(jplopsoft_el('jplopsoft_volume3dResetBtn'))jplopsoft_el('jplopsoft_volume3dResetBtn').onclick=jplopsoft_threeVolumeResetView;if(jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_el('jplopsoft_volume3dBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_volume3dBackdrop'))jplopsoft_closeVolume3D();else jplopsoft_wmActivateOverlay('jplopsoft_volume3dBackdrop','jplopsoft_volume3dWindow','volume3d');};}jplopsoft_el('jplopsoft_modalClose').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_modalCloseTop').onclick=jplopsoft_closeModal;jplopsoft_el('jplopsoft_moveCloseTop').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveCancelBtn').onclick=jplopsoft_closeMoveDialog;jplopsoft_el('jplopsoft_moveConfirmBtn').onclick=jplopsoft_confirmMove;jplopsoft_el('jplopsoft_moveBackdrop').onclick=function(e){if(e.target===jplopsoft_el('jplopsoft_moveBackdrop'))jplopsoft_closeMoveDialog();};jplopsoft_el('jplopsoft_trashCloseTop').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashCloseBtn').onclick=jplopsoft_closeTrash;jplopsoft_el('jplopsoft_trashEmptyBtn').onclick=jplopsoft_emptyTrash;jplopsoft_el('jplopsoft_trashBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_trashBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_trashBackdrop','jplopsoft_trashWindow','trash');};jplopsoft_el('jplopsoft_modalDownloadBtn').onclick=jplopsoft_downloadCurrentDocument;jplopsoft_el('jplopsoft_modalPrintBtn').onclick=jplopsoft_printCurrentDocument;jplopsoft_el('jplopsoft_modalMaxBtn').onclick=jplopsoft_toggleMax;jplopsoft_el('jplopsoft_saveDocBtn').onclick=jplopsoft_saveDocument;jplopsoft_el('jplopsoft_csvAddRowBtn').onclick=jplopsoft_csvAddRow;jplopsoft_el('jplopsoft_csvAddColBtn').onclick=jplopsoft_csvAddColumn;jplopsoft_el('jplopsoft_csvDelRowBtn').onclick=jplopsoft_csvDeleteRow;jplopsoft_el('jplopsoft_csvDelColBtn').onclick=jplopsoft_csvDeleteColumn;jplopsoft_el('jplopsoft_csvFormulaInput').oninput=function(){if(state.csvReadOnly)return;var r=state.csvSelectedRow,c=state.csvSelectedCol,input;if(!state.csvData[r])return;state.csvData[r][c]=this.value;input=jplopsoft_csvSelectedCellInput();if(input)input.value=this.value;};jplopsoft_el('jplopsoft_tabEdit').onclick=jplopsoft_showSourceTab;jplopsoft_el('jplopsoft_tabRich').onclick=jplopsoft_showRichTab;jplopsoft_el('jplopsoft_tabPreview').onclick=function(){jplopsoft_showPreview();};jplopsoft_el('jplopsoft_modalBackdrop').onclick=function(e){if(e.target!==jplopsoft_el('jplopsoft_modalBackdrop'))jplopsoft_wmActivateOverlay('jplopsoft_modalBackdrop','jplopsoft_documentWindow','document');};if(jplopsoft_el('jplopsoft_galleryPrevImage'))jplopsoft_el('jplopsoft_galleryPrevImage').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextImage'))jplopsoft_el('jplopsoft_galleryNextImage').onclick=function(){jplopsoft_galleryNavigate(1);};if(jplopsoft_el('jplopsoft_galleryPrevMedia'))jplopsoft_el('jplopsoft_galleryPrevMedia').onclick=function(){jplopsoft_galleryNavigate(-1);};if(jplopsoft_el('jplopsoft_galleryNextMedia'))jplopsoft_el('jplopsoft_galleryNextMedia').onclick=function(){jplopsoft_galleryNavigate(1);};jplopsoft_bindSecurityUI();jplopsoft_bindExconfig();jplopsoft_bindProperties();jplopsoft_bindTaskbar();jplopsoft_bindWindowManager();jplopsoft_bindRich();jplopsoft_bindSortHeaders();jplopsoft_bindBulkSelection();jplopsoft_bindFileDrop();jplopsoft_bindFileSearch();jplopsoft_bindExfsContextMenu();jplopsoft_bindCmdMode();jplopsoft_bindGlobalHotkeys();jplopsoft_bindSidebarResizer();if(jplopsoft_isIE11Browser()&&window.addEventListener)window.addEventListener('resize',jplopsoft_ie11FitDocumentModal,false);}
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os73',
+  version:'6.4.0-dev-os75',
   build:'external-os-comctl32-split-core-controls'
 };

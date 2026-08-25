@@ -1,5 +1,5 @@
 /* ExOS Media Foundation / Web Audio facade
- * Version: 6.4.0-dev-os73
+ * Version: 6.4.0-dev-os75
  * Model: EXOS_MEDIA_FOUNDATION_V1
  *
  * Process-isolated MediaFoundation-style audio API for XSH.  The host owns
@@ -9,7 +9,7 @@
 'use strict';
 
 var MF={
-  version:'6.4.0-dev-os73',
+  version:'6.4.0-dev-os75',
   model:'EXOS_MEDIA_FOUNDATION_V1',
   ready:true,
   maxHandlesPerProcess:512,

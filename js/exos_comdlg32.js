@@ -1,5 +1,5 @@
 /* ExOS comdlg32.dll emulation
- * Version: 6.4.0-dev-os73
+ * Version: 6.4.0-dev-os75
  * Model: EXOS_COMDLG32_V1
  * Client: V8-only browsers
  *
@@ -19,7 +19,7 @@
 'use strict';
 
 var API={
-  version:'6.4.0-dev-os73',
+  version:'6.4.0-dev-os75',
   model:'EXOS_COMDLG32_V1',
   ready:true
 };
@@ -86,7 +86,7 @@ function ensureStyle(){
   st.id='jplopsoft_exos_comdlg32_styles';st.type='text/css';
   st.textContent=
     '.exos-comdlg-backdrop{position:fixed;inset:0;z-index:2147483300;background:rgba(15,23,42,.24);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;font-family:var(--exos-ui-font,"Segoe UI",Arial,sans-serif);color:var(--exos-ui-text,#111827)}'+
-    '.exos-comdlg-window{display:flex;flex-direction:column;min-width:320px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);background:var(--exos-ui-bg,#fff);border:1px solid var(--exos-ui-border,#aeb7c2);box-shadow:0 20px 55px rgba(15,23,42,.34);border-radius:4px;overflow:hidden}'+
+    '.exos-comdlg-window{position:fixed;display:flex;flex-direction:column;min-width:320px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);background:var(--exos-ui-bg,#fff);border:1px solid var(--exos-ui-border,#aeb7c2);box-shadow:0 20px 55px rgba(15,23,42,.34);border-radius:4px;overflow:hidden}'+
     '.exos-comdlg-modeless{position:fixed;z-index:2147483290;display:flex;flex-direction:column;background:var(--exos-ui-bg,#fff);border:1px solid var(--exos-ui-border,#aeb7c2);box-shadow:0 15px 42px rgba(15,23,42,.30);border-radius:4px;overflow:hidden;font-family:var(--exos-ui-font,"Segoe UI",Arial,sans-serif);color:var(--exos-ui-text,#111827)}'+
     '.exos-comdlg-title{display:flex;align-items:center;min-height:34px;padding:0 10px;background:var(--exos-ui-surface-2,#f1f5f9);border-bottom:1px solid var(--exos-ui-border-soft,#dbe3ec);font-size:13px;font-weight:600;user-select:none;cursor:default}'+
     '.exos-comdlg-title span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.exos-comdlg-title button{width:30px;height:27px;border:0;background:transparent;font-size:18px;line-height:18px}.exos-comdlg-title button:hover{background:#fee2e2;color:#b91c1c}'+
@@ -115,24 +115,180 @@ function makeTitle(parent,title,closable,onClose){
 }
 function modal(ctx,opt,builder){
   ensureStyle();opt=opt||{};
-  if(!ownerValid(ctx,opt.hwndOwner))invalid('hwndOwner is not owned by this XSH process.');
+
+  if(!ownerValid(ctx,opt.hwndOwner)){
+    invalid('hwndOwner is not owned by this XSH process.');
+  }
+
   return new Promise(function(resolve,reject){
-    var backdrop=document.createElement('div'),win=document.createElement('div'),body=document.createElement('div'),foot=document.createElement('div'),closed=false,keydown;
-    backdrop.className='exos-comdlg-backdrop';win.className='exos-comdlg-window';win.style.width=Math.max(320,Math.min(1100,iv(opt.width,720)))+'px';if(opt.height)win.style.height=Math.max(220,Math.min(820,iv(opt.height,520)))+'px';
-    backdrop.appendChild(win);makeTitle(win,opt.title||'ExOS',true,function(){done(null);});body.className='exos-comdlg-body';foot.className='exos-comdlg-footer';win.appendChild(body);win.appendChild(foot);(document.body||document.documentElement).appendChild(backdrop);
-    function cleanup(){try{document.removeEventListener('keydown',keydown,true);}catch(ignore){}try{if(backdrop.parentNode)backdrop.parentNode.removeChild(backdrop);}catch(ignore2){}}
-    function done(value){if(closed)return;closed=true;cleanup();resolve(value);}
-    function fail(e){if(closed)return;closed=true;cleanup();reject(e);}
-    keydown=function(e){if(String(e.key||'')==='Escape'){try{e.preventDefault();}catch(ignore){}done(null);}};document.addEventListener('keydown',keydown,true);
-    Promise.resolve().then(function(){return builder({backdrop:backdrop,window:win,body:body,footer:foot,done:done,fail:fail});}).catch(fail);
+    var backdrop=document.createElement('div'),
+        win=document.createElement('div'),
+        body=document.createElement('div'),
+        foot=document.createElement('div'),
+        titlebar,
+        closed=false,
+        keydown;
+
+    backdrop.className='exos-comdlg-backdrop';
+    win.className='exos-comdlg-window';
+    win.style.width=
+      Math.max(320,Math.min(1100,iv(opt.width,720)))+'px';
+
+    if(opt.height){
+      win.style.height=
+        Math.max(220,Math.min(820,iv(opt.height,520)))+'px';
+    }
+
+    backdrop.appendChild(win);
+
+    titlebar=makeTitle(
+      win,
+      opt.title||'ExOS',
+      true,
+      function(){done(null);}
+    );
+
+    body.className='exos-comdlg-body';
+    foot.className='exos-comdlg-footer';
+    win.appendChild(body);
+    win.appendChild(foot);
+
+    (document.body||document.documentElement)
+      .appendChild(backdrop);
+
+    /*
+     * os74:
+     * Modal Common Dialogs used to be centered by the backdrop but were not
+     * attached to the drag handler.  Convert the already-rendered centered
+     * position into explicit fixed coordinates, then use the same pointer-
+     * capture drag implementation as modeless Find/Replace.
+     */
+    try{
+      var r=win.getBoundingClientRect();
+      win.style.left=
+        Math.max(0,Math.round(r.left))+'px';
+      win.style.top=
+        Math.max(0,Math.round(r.top))+'px';
+    }catch(ignoreInitialPosition){}
+
+    draggable(win,titlebar);
+
+    function cleanup(){
+      try{
+        document.removeEventListener(
+          'keydown',
+          keydown,
+          true
+        );
+      }catch(ignore){}
+
+      try{
+        if(backdrop.parentNode){
+          backdrop.parentNode.removeChild(backdrop);
+        }
+      }catch(ignore2){}
+    }
+
+    function done(value){
+      if(closed)return;
+      closed=true;
+      cleanup();
+      resolve(value);
+    }
+
+    function fail(e){
+      if(closed)return;
+      closed=true;
+      cleanup();
+      reject(e);
+    }
+
+    keydown=function(e){
+      if(String(e.key||'')==='Escape'){
+        try{e.preventDefault();}catch(ignore){}
+        done(null);
+      }
+    };
+
+    document.addEventListener(
+      'keydown',
+      keydown,
+      true
+    );
+
+    Promise.resolve()
+      .then(function(){
+        return builder({
+          backdrop:backdrop,
+          window:win,
+          titlebar:titlebar,
+          body:body,
+          footer:foot,
+          done:done,
+          fail:fail
+        });
+      })
+      .catch(fail);
   });
 }
 function draggable(win,titlebar){
   var active=false,sx=0,sy=0,sl=0,st=0;
+
   titlebar.style.cursor='move';
-  titlebar.addEventListener('pointerdown',function(e){if(e.target&&e.target.tagName==='BUTTON')return;active=true;sx=e.clientX;sy=e.clientY;var r=win.getBoundingClientRect();sl=r.left;st=r.top;try{titlebar.setPointerCapture(e.pointerId);}catch(ignore){}});
-  titlebar.addEventListener('pointermove',function(e){if(!active)return;var x=Math.max(0,Math.min(window.innerWidth-win.offsetWidth,sl+(e.clientX-sx))),y=Math.max(0,Math.min(window.innerHeight-win.offsetHeight,st+(e.clientY-sy)));win.style.left=x+'px';win.style.top=y+'px';});
-  titlebar.addEventListener('pointerup',function(){active=false;});titlebar.addEventListener('pointercancel',function(){active=false;});
+  titlebar.style.touchAction='none';
+
+  titlebar.addEventListener(
+    'pointerdown',
+    function(e){
+      if(e.target&&e.target.tagName==='BUTTON')return;
+
+      active=true;
+      sx=e.clientX;
+      sy=e.clientY;
+
+      var r=win.getBoundingClientRect();
+      sl=r.left;
+      st=r.top;
+
+      try{e.preventDefault();}catch(ignorePrevent){}
+      try{
+        titlebar.setPointerCapture(e.pointerId);
+      }catch(ignoreCapture){}
+    }
+  );
+
+  titlebar.addEventListener(
+    'pointermove',
+    function(e){
+      if(!active)return;
+
+      var maxX=Math.max(0,window.innerWidth-win.offsetWidth),
+          maxY=Math.max(0,window.innerHeight-win.offsetHeight),
+          x=Math.max(
+            0,
+            Math.min(maxX,sl+(e.clientX-sx))
+          ),
+          y=Math.max(
+            0,
+            Math.min(maxY,st+(e.clientY-sy))
+          );
+
+      win.style.left=Math.round(x)+'px';
+      win.style.top=Math.round(y)+'px';
+    }
+  );
+
+  function stop(e){
+    active=false;
+    try{
+      if(e){
+        titlebar.releasePointerCapture(e.pointerId);
+      }
+    }catch(ignoreRelease){}
+  }
+
+  titlebar.addEventListener('pointerup',stop);
+  titlebar.addEventListener('pointercancel',stop);
 }
 function parseFilters(filter){
   var out=[],a,i;
