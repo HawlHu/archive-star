@@ -1,5 +1,5 @@
 /* ExOS NT Kernel BugCheck Runtime
- * Version: 6.4.0-dev-os84
+ * Version: 6.4.0-dev-os86
  * Model: EXOS_NTOSKRNL_BUGCHECK_V1
  * Client: V8-only browsers
  *
@@ -11,7 +11,7 @@
 'use strict';
 
 var KERNEL={
-  version:'6.4.0-dev-os84',
+  version:'6.4.0-dev-os86',
   model:'EXOS_NTOSKRNL_BUGCHECK_V1',
   ready:true,
   vmm:{
@@ -265,6 +265,40 @@ function ntWait(ctx,h,timeoutMs){
     global.setTimeout(poll,1);
   });
 }
+
+function ntCanAcquire(ctx,o){
+  var pid=parseInt(ctx&&ctx.pid,10)||0;
+  if(!o)return false;
+  if(o.type==='KEVENT')return !!o.signaled;
+  if(o.type==='KSEMAPHORE')return Number(o.count)>0;
+  if(o.type==='KMUTEX')return !o.ownerPid||o.ownerPid===pid;
+  if(o.type==='KTIMER')return !!o.signaled;
+  return false;
+}
+function ntWaitMultiple(ctx,handles,waitType,timeoutMs){
+  handles=Array.isArray(handles)?handles.slice(0,64):[];
+  if(!handles.length)return Promise.resolve({status:'STATUS_INVALID_PARAMETER',signaled:false,index:-1,waitMilliseconds:0});
+  var waitAll=String(waitType||'WaitAny').toLowerCase()==='waitall'||Number(waitType)===1,timeout=timeoutMs===undefined||timeoutMs===null?0x7fffffff:Math.max(0,Number(timeoutMs)||0),start=Date.now();
+  return new Promise(function(resolve){
+    function poll(){
+      var i,o,ready=[];
+      if(!ctx||ctx.terminating){resolve({status:'STATUS_PROCESS_IS_TERMINATING',signaled:false,index:-1,waitMilliseconds:Date.now()-start});return;}
+      try{
+        for(i=0;i<handles.length;i++){o=ntObject(ctx,handles[i]);ready[i]=ntCanAcquire(ctx,o);}
+        if(waitAll){
+          if(ready.every(function(x){return !!x;})){for(i=0;i<handles.length;i++)ntTryAcquire(ctx,ntObject(ctx,handles[i]));resolve({status:'STATUS_SUCCESS',signaled:true,index:0,waitType:'WaitAll',waitMilliseconds:Date.now()-start});return;}
+        }else{
+          for(i=0;i<ready.length;i++)if(ready[i]){ntTryAcquire(ctx,ntObject(ctx,handles[i]));resolve({status:'STATUS_SUCCESS',signaled:true,index:i,waitType:'WaitAny',waitMilliseconds:Date.now()-start});return;}
+        }
+      }catch(e){resolve({status:'STATUS_INVALID_HANDLE',signaled:false,index:-1,waitMilliseconds:Date.now()-start});return;}
+      if(timeout===0||Date.now()-start>=timeout){resolve({status:'STATUS_TIMEOUT',signaled:false,index:-1,waitMilliseconds:Date.now()-start});return;}
+      global.setTimeout(poll,Math.min(8,Math.max(1,timeout-(Date.now()-start))));
+    }
+    poll();
+  });
+}
+function ntThreadId(ctx){return ((parseInt(ctx&&ctx.pid,10)||1)*4+1)>>>0;}
+
 function ntCancelTimer(o){
   if(!o)return;
   if(o.timeoutId){try{global.clearTimeout(o.timeoutId);}catch(ignore){}o.timeoutId=0;}
@@ -279,16 +313,20 @@ function ntArmTimer(o,dueMs,periodMs){
 }
 async function ntDispatch(ctx,method,args){
   args=args||[];method=String(method||'');var o,p,h,info;
-  if(method==='GetVersion')return{version:KERNEL.version,model:KERNEL.model,compatibility:'EXOS_NT_KERNEL_SEMANTIC_V2',previousMode:'UserMode',maxIrql:'PASSIVE_LEVEL'};
+  if(method==='GetVersion')return{version:KERNEL.version,model:KERNEL.model,compatibility:'EXOS_NT_KERNEL_SEMANTIC_V3',previousMode:'UserMode',maxIrql:'PASSIVE_LEVEL'};
   if(method==='QueryBugCheck')return queryBugCheck();
   if(method==='QueryVmm')return queryVmm(args[0]||ctx.pid);
   if(method==='KeQuerySystemTime'||method==='KeQuerySystemTimePrecise')return ntTime();
+  if(method==='KeQueryInterruptTime'||method==='KeQueryInterruptTimePrecise')return Math.floor((global.performance&&performance.now?performance.now():0)*10000);
   if(method==='KeQueryPerformanceCounter')return{counter:Math.floor((global.performance&&performance.now?performance.now():Date.now())*1000),frequency:1000000};
   if(method==='KeQueryTimeIncrement')return 156250;
   if(method==='KeGetCurrentIrql')return 0;
   if(method==='ExGetPreviousMode')return'UserMode';
   if(method==='PsGetCurrentProcessId')return parseInt(ctx.pid,10)||0;
   if(method==='PsGetCurrentProcess')return{pseudoHandle:-1,process:ntProcessInfo(ctx.process)};
+  if(method==='PsGetCurrentThreadId')return ntThreadId(ctx);
+  if(method==='PsGetCurrentThread')return{pseudoHandle:-2,threadId:ntThreadId(ctx),ownerPid:parseInt(ctx.pid,10)||0,previousMode:'UserMode'};
+  if(method==='PsLookupThreadByThreadId'){var tid=Number(args[0])>>>0;if(tid!==ntThreadId(ctx))throw ntError('INVALID_CID',0xC000000B,'Thread ID does not exist in this XSH process.');return{threadId:tid,ownerPid:parseInt(ctx.pid,10)||0,previousMode:'UserMode'};}
   if(method==='PsLookupProcessByProcessId'){
     p=typeof global.jplopsoft_ntKernelProcessByPid==='function'?global.jplopsoft_ntKernelProcessByPid(args[0]):null;
     if(!p)throw ntError('INVALID_CID',0xC000000B,'Process ID does not exist.');return ntProcessInfo(p);
@@ -316,6 +354,12 @@ async function ntDispatch(ctx,method,args){
   if(method==='KeCancelTimer'){o=ntObject(ctx,args[0],'KTIMER');var active=!!(o.timeoutId||o.intervalId);ntCancelTimer(o);o.signaled=false;return active;}
   if(method==='KeReadStateTimer')return ntObject(ctx,args[0],'KTIMER').signaled?1:0;
   if(method==='KeWaitForSingleObject')return await ntWait(ctx,args[0],args[1]);
+  if(method==='KeWaitForMultipleObjects')return await ntWaitMultiple(ctx,args[0],args[1],args[2]);
+  if(method==='IoCreateNotificationEvent')return ntAlloc(ctx,'KEVENT',{manualReset:true,signaled:!!args[0]});
+  if(method==='IoCreateSynchronizationEvent')return ntAlloc(ctx,'KEVENT',{manualReset:false,signaled:!!args[0]});
+  if(method==='ObGetObjectType'){var ot=ntObject(ctx,args[0]);return String(ot.type||'OBJECT');}
+  if(method==='KeMemoryBarrier'||method==='KeMemoryBarrierWithoutFence')return true;
+  if(method==='ZwYieldExecution'||method==='NtYieldExecution'){await new Promise(function(resolve){global.setTimeout(resolve,0);});return{status:'STATUS_SUCCESS'};}
   if(method==='ObReferenceObjectByHandle'){
     h=parseInt(args[0],10)||0;o=ntState(ctx).objects[String(h)];
     if(o)return{handle:h,type:o.type,ownerPid:o.ownerPid,body:Object.assign({},o,{timeoutId:undefined,intervalId:undefined})};
@@ -329,7 +373,7 @@ async function ntDispatch(ctx,method,args){
     h=parseInt(args[0],10)||0;o=ntState(ctx).objects[String(h)];if(!o)return false;if(o.type==='KTIMER')ntCancelTimer(o);delete ntState(ctx).objects[String(h)];return true;
   }
   if(method==='KeBugCheck'||method==='KeBugCheckEx')throw ntError('ACCESS_DENIED',0xC0000022,'User-mode XSH cannot invoke KeBugCheck/KeBugCheckEx.');
-  if(method==='KeRaiseIrql'||method==='KfRaiseIrql'||method==='KeAcquireSpinLock')throw ntError('NOT_SUPPORTED',0xC00000BB,'XSH executes in UserMode/PASSIVE_LEVEL; raising IRQL or acquiring a kernel spin lock is not exposed.');
+  if(method==='KeRaiseIrql'||method==='KfRaiseIrql'||method==='KeAcquireSpinLock'||method==='KeInitializeDpc'||method==='KeInsertQueueDpc'||method==='IoCreateDevice'||method==='IoDeleteDevice')throw ntError('NOT_SUPPORTED',0xC00000BB,'XSH executes in UserMode/PASSIVE_LEVEL; raising IRQL or acquiring a kernel spin lock is not exposed.');
   throw ntError('NOT_SUPPORTED',0xC00000BB,'Unsupported ntoskrnl semantic API: '+method);
 }
 function ntCleanup(ctx){

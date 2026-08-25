@@ -1,6 +1,6 @@
 /* ExOS advapi32.dll emulation
  * File: exos_advapi32.js
- * Version: 6.4.0-dev-os84
+ * Version: 6.4.0-dev-os86
  * Model: EXOS_ADVAPI32_V2
  * Client: V8-only browsers
  *
@@ -18,9 +18,10 @@
 'use strict';
 
 var ADV={
-  version:'6.4.0-dev-os84',
+  version:'6.4.0-dev-os86',
   model:'EXOS_ADVAPI32_V2',
-  ready:true
+  ready:true,
+  compatibility:'EXOS_ADVAPI32_SEMANTIC_V3'
 };
 
 var ROOTS={
@@ -366,7 +367,15 @@ async function regCopyTree(ctx,srcKey,dstKey){
   for(i=0;i<children.length;i++){childSrc=await regOpen(ctx,srcKey,children[i],0x20019,false);var cr=await regOpen(ctx,dstKey,children[i],0x20006,true);childDst=cr&&cr.hKey?cr.hKey:cr;await regCopyTree(ctx,childSrc,childDst);await regClose(ctx,childSrc);await regClose(ctx,childDst);}return true;
 }
 
+
+function initSecurityDescriptor(){return{revision:1,control:0,owner:'',group:'',daclPresent:false,dacl:null,saclPresent:false,sacl:null};}
+function sdObj(v){if(!v||typeof v!=='object')return initSecurityDescriptor();return clone(v);}
+function wellKnownSid(kind){var k=String(kind||'').toUpperCase(),m={WINWORLDSID:'S-1-1-0',WINAUTHENTICATEDUSERSID:'S-1-5-11',WINBUILTINADMINISTRATORSSID:'S-1-5-32-544',WINBUILTINUSERSSID:'S-1-5-32-545',WINLOCALSYSTEMSID:'S-1-5-18',WINLOCALSSERVICE:'S-1-5-19',WINNETWORKSERVICE:'S-1-5-20'};return m[k]||'';}
+function sidLength(s){return validSid(s)?(8+Math.max(0,String(s).split('-').length-3)*4):0;}
+
 async function dispatch(ctx,method,args){
+  args=args||[];method=String(method||'');
+  if(method==='GetVersion'||method==='QueryCapabilities')return{version:ADV.version,model:ADV.model,compatibility:ADV.compatibility,registry:true,tokens:true,acl:true,securityDescriptors:true,impersonation:true,hostRegistry:false};
   args=args||[];ensure(ctx);
   if(method==='RegOpenKeyEx')return await regOpen(ctx,args[0],args[1],args[2],false);
   if(method==='RegOpenKey'||method==='RegOpenKeyA'||method==='RegOpenKeyW')return await regOpen(ctx,args[0],args[1],'KEY_READ',false);
@@ -397,6 +406,28 @@ async function dispatch(ctx,method,args){
   if(method==='RegFlushKey')return await RegFlushKey(ctx,args[0]);
 
   if(method==='GetAclInformation'){var aa=aclArray(args[0]);return{AceCount:aa.length,AclBytesInUse:aa.length*32+8,AclRevision:2};}
+  if(method==='InitializeSecurityDescriptor')return initSecurityDescriptor();
+  if(method==='GetSecurityDescriptorControl'){var sdo=sdObj(args[0]);return{control:Number(sdo.control)||0,revision:Number(sdo.revision)||1};}
+  if(method==='SetSecurityDescriptorControl'){sdo=sdObj(args[0]);var mask=Number(args[1])>>>0,bits=Number(args[2])>>>0;sdo.control=((Number(sdo.control)||0)&~mask)|(bits&mask);return sdo;}
+  if(method==='GetSecurityDescriptorOwner'){sdo=sdObj(args[0]);return{owner:String(sdo.owner||''),defaulted:false};}
+  if(method==='SetSecurityDescriptorOwner'){sdo=sdObj(args[0]);sdo.owner=String(args[1]||'');return sdo;}
+  if(method==='GetSecurityDescriptorGroup'){sdo=sdObj(args[0]);return{group:String(sdo.group||''),defaulted:false};}
+  if(method==='SetSecurityDescriptorGroup'){sdo=sdObj(args[0]);sdo.group=String(args[1]||'');return sdo;}
+  if(method==='GetSecurityDescriptorDacl'){sdo=sdObj(args[0]);return{present:!!sdo.daclPresent,dacl:clone(sdo.dacl),defaulted:false};}
+  if(method==='SetSecurityDescriptorDacl'){sdo=sdObj(args[0]);sdo.daclPresent=!!args[1];sdo.dacl=args[1]?aclArray(args[2]):null;return sdo;}
+  if(method==='GetSecurityDescriptorSacl'){sdo=sdObj(args[0]);return{present:!!sdo.saclPresent,sacl:clone(sdo.sacl),defaulted:false};}
+  if(method==='SetSecurityDescriptorSacl'){sdo=sdObj(args[0]);sdo.saclPresent=!!args[1];sdo.sacl=args[1]?aclArray(args[2]):null;return sdo;}
+  if(method==='IsValidSecurityDescriptor'){return !!(args[0]&&typeof args[0]==='object'&&Number(args[0].revision||1)===1);}
+  if(method==='GetSecurityDescriptorLength'){var js=JSON.stringify(sdObj(args[0]));return js.length;}
+  if(method==='MakeSelfRelativeSD'||method==='MakeAbsoluteSD')return sdObj(args[0]);
+  if(method==='CreateWellKnownSid'){var ws=wellKnownSid(args[0]);if(!ws)fail(status('INVALID_PARAMETER',0xC000000D),'Unsupported WELL_KNOWN_SID_TYPE.');return ws;}
+  if(method==='IsWellKnownSid'){var expected=wellKnownSid(args[1]);return !!expected&&String(args[0]||'').toUpperCase()===expected.toUpperCase();}
+  if(method==='GetLengthSid')return sidLength(args[0]);
+  if(method==='CopySid'){var cs=String(args[0]||'');if(!validSid(cs))fail(status('INVALID_PARAMETER',0xC000000D),'Invalid SID.');return cs;}
+  if(method==='AllocateAndInitializeSid'){var auth=Number(args[0])||5,subs=Array.isArray(args[1])?args[1]:Array.prototype.slice.call(args,1),sid='S-1-'+auth;for(var sj=0;sj<subs.length&&sj<8;sj++)sid+='-'+String(Number(subs[sj])>>>0);return sid;}
+  if(method==='FreeSid')return true;
+  if(method==='BuildTrusteeWithSid')return{trusteeType:'TRUSTEE_IS_SID',sid:String(args[0]||'')};
+  if(method==='BuildTrusteeWithName')return{trusteeType:'TRUSTEE_IS_NAME',name:String(args[0]||'')};
   if(method==='GetAce'){var al=aclArray(args[0]),ix=Number(args[1])|0;if(ix<0||ix>=al.length)fail(status('INVALID_PARAMETER',0xC000000D),'ACE index out of range.');return clone(al[ix]);}
   if(method==='AddAce'){var list=aclArray(args[0]).slice(),ace=clone(args[1]||{}),pos=args[2]===undefined?list.length:Math.max(0,Math.min(list.length,Number(args[2])|0));list.splice(pos,0,ace);return list;}
   if(method==='DeleteAce'){list=aclArray(args[0]).slice();ix=Number(args[1])|0;if(ix<0||ix>=list.length)return list;list.splice(ix,1);return list;}
@@ -423,6 +454,8 @@ async function dispatch(ctx,method,args){
   if(method==='OpenProcessToken')return await OpenProcessToken(ctx,args[0],args[1]);
   if(method==='GetTokenInformation')return tokenInfo(requireTokenAccess(tokenRec(ctx,args[0]),0x0008,'TOKEN_QUERY is required.').token,args[1]);
   if(method==='DuplicateTokenEx')return await DuplicateTokenEx(ctx,args[0],args[1],args[2]);
+  if(method==='DuplicateToken')return await DuplicateTokenEx(ctx,args[0],0,args[1]||'IMPERSONATION');
+  if(method==='SetTokenInformation'){var tr=tokenRec(ctx,args[0]);if(!tr.mutable)fail(status('ACCESS_DENIED',0xC0000022),'Token is not mutable.');var cls=typeof args[1]==='number'?TOKEN_INFO[args[1]]:String(args[1]||''),val=args[2];if(cls==='TokenIntegrityLevel'){var lvl=String(val&&val.integrityLevel!==undefined?val.integrityLevel:val||'').toUpperCase(),cur=String(tr.token.integrity_level||'MEDIUM').toUpperCase();if(integrityRank(lvl)>integrityRank(cur))fail(status('ACCESS_DENIED',0xC0000022),'SetTokenInformation cannot raise integrity.');tr.token.integrity_level=lvl;return true;}if(cls==='TokenSessionId'){tr.token.session_id=Number(val)||0;return true;}fail(status('NOT_SUPPORTED',0xC00000BB),'SetTokenInformation class is not supported.');}
   if(method==='CreateRestrictedToken')return CreateRestrictedToken(ctx,args[0],args[1]);
   if(method==='CheckTokenMembership')return CheckTokenMembership(ctx,args[0],args[1]);
   if(method==='PrivilegeCheck')return PrivilegeCheck(ctx,args[0],args[1]);

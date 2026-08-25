@@ -1,5 +1,5 @@
 /* ExOS zipfldr.dll emulation
- * Version: 6.4.0-dev-os84
+ * Version: 6.4.0-dev-os86
  * Model: EXOS_ZIPFLDR_V1
  *
  * Shell Namespace Extension for .zip files stored in ExFS.
@@ -12,7 +12,7 @@
 'use strict';
 
 var ZIP={
-  version:'6.4.0-dev-os84',
+  version:'6.4.0-dev-os86',
   model:'EXOS_ZIPFLDR_V1',
   ready:true,
   nextHandle:0x7a00,

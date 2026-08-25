@@ -1,10 +1,10 @@
 /* ExOS WebView2 / shdocvw.dll emulation
- * Version: 6.4.0-dev-os84
+ * Version: 6.4.0-dev-os86
  * Model: EXOS_WEBVIEW2_V1
  * Each view is a host-owned iframe sandboxed WITHOUT allow-same-origin.
  */
 (function(global){'use strict';
-var API={version:'6.4.0-dev-os84',model:'EXOS_WEBVIEW2_V1',ready:true};
+var API={version:'6.4.0-dev-os86',model:'EXOS_WEBVIEW2_V1',ready:true};
 function exerr(s,m){if(typeof global.jplopsoft_xshError==='function')return global.jplopsoft_xshError(s,m);var e=new Error(m);e.ntstatus=s;return e;}
 function st(n,d){var k='jplopsoft_STATUS_'+n;return typeof global[k]!=='undefined'?global[k]:d;}
 function state(ctx){if(!ctx.webview2)ctx.webview2={next:0xD000,envs:{},views:{}};return ctx.webview2;}

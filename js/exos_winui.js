@@ -1,10 +1,10 @@
 /* ExOS.WinUI declarative UI host
- * Version: 6.4.0-dev-os84
- * Model: EXOS_WINUI_V2
+ * Version: 6.4.0-dev-os86
+ * Model: EXOS_WINUI_V3
  * Declarative facade over USER32 + COMCTL32. XSH never receives DOM nodes.
  */
 (function(global){'use strict';
-var WINUI={version:'6.4.0-dev-os84',model:'EXOS_WINUI_V2',ready:true,compatibility:'NT_USER32_DECLARATIVE_V2'};
+var WINUI={version:'6.4.0-dev-os86',model:'EXOS_WINUI_V3',ready:true,compatibility:'NT_USER32_DECLARATIVE_V3'};
 function arr(v){return Array.isArray(v)?v:(v==null?[]:[v]);}
 function safeType(v){return String(v||'div').toLowerCase();}
 function err(name,fallback,msg){var k='jplopsoft_STATUS_'+name,s=typeof global[k]!=='undefined'?global[k]:fallback;if(typeof global.jplopsoft_xshError==='function')return global.jplopsoft_xshError(s,msg);var e=new Error(msg);e.ntstatus=s;return e;}
@@ -49,9 +49,16 @@ async function setData(ctx,id,data){
  if(ctx.controls&&ctx.controls[String(id||'')]&&String(ctx.controls[String(id||'')].tagName||'').toLowerCase()==='select')return global.jplopsoft_xshSetControlProperty(ctx,id,'items',data||[]);
  throw err('OBJECT_NAME_NOT_FOUND',0xC0000034,'Declarative control does not expose SetData.');
 }
+
+function uiState(ctx){if(!ctx.winui)ctx.winui={resources:{},commands:{},updateDepth:0};return ctx.winui;}
+function deepClone(v){if(v===undefined||v===null)return v;try{return JSON.parse(JSON.stringify(v));}catch(ignore){return v;}}
+function childIds(ctx,id){var n=control(ctx,id),out=[],i,c;for(i=0;i<n.children.length;i++){c=n.children[i];if(c&&c.getAttribute){var cid=c.getAttribute('data-xsh-control-id')||c.getAttribute('data-exos-control-id')||c.id||'';if(cid&&ctx.controls&&ctx.controls[String(cid)])out.push(String(cid));}}return out;}
+function treeInfo(ctx,id,depth){depth=depth===undefined?8:Math.max(0,Number(depth)||0);var n=control(ctx,id),out={id:String(id),tag:String(n.tagName||'').toLowerCase(),text:getText(ctx,id),children:[]},kids,i;if(!depth)return out;kids=childIds(ctx,id);for(i=0;i<kids.length;i++)out.children.push(treeInfo(ctx,kids[i],depth-1));return out;}
+function commandId(v){v=String(v||'').trim();if(!v)throw err('INVALID_PARAMETER',0xC000000D,'Command id is required.');return v;}
+
 async function dispatch(ctx,method,args){
  args=args||[];method=String(method||'');var hwnd,root,list,ids=[],i,id,ops,out=[];
- if(method==='GetVersion'||method==='QueryCapabilities')return{version:WINUI.version,model:WINUI.model,compatibility:WINUI.compatibility,controls:['USER32','COMCTL32'],diffDomExposed:false};
+ if(method==='GetVersion'||method==='QueryCapabilities')return{version:WINUI.version,model:WINUI.model,compatibility:WINUI.compatibility,controls:['USER32','COMCTL32'],diffDomExposed:false,resources:true,commands:true,automationProperties:true};
  if(method==='Render'){hwnd=parseInt(args[0],10)||0;if(!ownWindow(ctx,hwnd))throw err('ACCESS_DENIED',0xC0000022,'HWND is not owned by this XSH process.');root=args[1]||{};return await renderNode(ctx,hwnd,root,String(root.parentId||''),'ui');}
  if(method==='RenderMany'){hwnd=parseInt(args[0],10)||0;if(!ownWindow(ctx,hwnd))throw err('ACCESS_DENIED',0xC0000022,'HWND is not owned by this XSH process.');list=arr(args[1]);for(i=0;i<list.length;i++)ids.push(await renderNode(ctx,hwnd,list[i],String(list[i]&&list[i].parentId||''),'ui_'+i));return ids;}
  if(method==='SetData')return await setData(ctx,args[0],args[1]);
@@ -65,6 +72,22 @@ async function dispatch(ctx,method,args){
  if(method==='Show'){control(ctx,args[0]);return global.jplopsoft_xshSetControlStyle(ctx,args[0],{display:args[1]===false?'none':''});}
  if(method==='Remove')return await remove(ctx,args[0]);
  if(method==='ClearChildren')return global.jplopsoft_xshClearControlChildren(ctx,args[0]);
+ if(method==='GetChildren')return childIds(ctx,args[0]);
+ if(method==='QueryTree')return treeInfo(ctx,args[0],args[1]);
+ if(method==='SetResource'){var us=uiState(ctx);us.resources[String(args[0]||'')]=deepClone(args[1]);return true;}
+ if(method==='GetResource'||method==='ResolveResource'){us=uiState(ctx);var rk=String(args[0]||'');return Object.prototype.hasOwnProperty.call(us.resources,rk)?deepClone(us.resources[rk]):(args.length>1?deepClone(args[1]):null);}
+ if(method==='MergeResources'){us=uiState(ctx);var ro=args[0]||{},rr;for(rr in ro)if(Object.prototype.hasOwnProperty.call(ro,rr))us.resources[String(rr)]=deepClone(ro[rr]);return Object.keys(us.resources).length;}
+ if(method==='RegisterCommand'){us=uiState(ctx);var cid=commandId(args[0]),co=args[1]||{};us.commands[cid]={id:cid,text:String(co.text||cid),enabled:co.enabled!==false,checked:!!co.checked,metadata:deepClone(co.metadata||null)};return deepClone(us.commands[cid]);}
+ if(method==='UnregisterCommand'){us=uiState(ctx);cid=commandId(args[0]);var existed=!!us.commands[cid];delete us.commands[cid];return existed;}
+ if(method==='SetCommandState'){us=uiState(ctx);cid=commandId(args[0]);if(!us.commands[cid])throw err('OBJECT_NAME_NOT_FOUND',0xC0000034,'WinUI command not found.');co=args[1]||{};if(co.enabled!==undefined)us.commands[cid].enabled=!!co.enabled;if(co.checked!==undefined)us.commands[cid].checked=!!co.checked;if(co.text!==undefined)us.commands[cid].text=String(co.text);return deepClone(us.commands[cid]);}
+ if(method==='QueryCommandState'){us=uiState(ctx);cid=commandId(args[0]);return us.commands[cid]?deepClone(us.commands[cid]):null;}
+ if(method==='ExecuteCommand'){us=uiState(ctx);cid=commandId(args[0]);if(!us.commands[cid])throw err('OBJECT_NAME_NOT_FOUND',0xC0000034,'WinUI command not found.');if(!us.commands[cid].enabled)return{executed:false,reason:'disabled'};if(typeof global.jplopsoft_xshSendEvent==='function')global.jplopsoft_xshSendEvent(ctx,{event:'winui',controlId:'WINUI_COMMAND:'+cid,action:'command',commandId:cid,parameter:deepClone(args[1]),state:deepClone(us.commands[cid])});return{executed:true,commandId:cid};}
+ if(method==='SetAutomationProperties'){var an=control(ctx,args[0]),ap=args[1]||{};if(ap.name!==undefined)an.setAttribute('aria-label',String(ap.name));if(ap.description!==undefined)an.setAttribute('aria-description',String(ap.description));if(ap.role!==undefined)an.setAttribute('role',String(ap.role));return true;}
+ if(method==='GetAutomationProperties'){an=control(ctx,args[0]);return{name:String(an.getAttribute('aria-label')||''),description:String(an.getAttribute('aria-description')||''),role:String(an.getAttribute('role')||'')};}
+ if(method==='SetTooltip'){return global.jplopsoft_xshSetControlProperty(ctx,args[0],'title',String(args[1]||''));}
+ if(method==='GetBounds')return global.jplopsoft_xshGetControlRect(ctx,args[0]);
+ if(method==='BeginUpdate'){uiState(ctx).updateDepth++;return uiState(ctx).updateDepth;}
+ if(method==='EndUpdate'){us=uiState(ctx);us.updateDepth=Math.max(0,us.updateDepth-1);return us.updateDepth;}
  if(method==='Batch'){
   ops=arr(args[0]);if(ops.length>256)throw err('QUOTA_EXCEEDED',0xC0000044,'WinUI Batch is limited to 256 operations.');
   for(i=0;i<ops.length;i++){var q=ops[i]||{},m=String(q.method||'');if(m==='Batch')throw err('INVALID_PARAMETER',0xC000000D,'Nested Batch is not supported.');out.push(await dispatch(ctx,m,q.args||[]));}return out;
