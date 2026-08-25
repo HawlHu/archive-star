@@ -1,5 +1,5 @@
 /* ExOS shell32.dll emulation
- * Version: 6.4.0-dev-os80
+ * Version: 6.4.0-dev-os84
  * Model: EXOS_SHELL32_V1
  *
  * Browser/XSH shell API.  The implementation is intentionally restricted to
@@ -9,7 +9,7 @@
 'use strict';
 
 var SHELL={
-  version:'6.4.0-dev-os80',
+  version:'6.4.0-dev-os84',
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -1442,6 +1442,46 @@ async function shellEmptyRecycleBin(ctx){
   return {ok:true,deleted:out&&out.deleted?parseInt(out.deleted,10)||0:0};
 }
 
+
+function shellEnv(ctx,name,def){
+  var e=ctx&&ctx.process&&ctx.process.peb&&ctx.process.peb.processParameters?ctx.process.peb.processParameters.environment:null,k=String(name||'').toUpperCase();
+  return e&&typeof e[k]!=='undefined'?String(e[k]):String(def||'');
+}
+function shellKnownFolder(ctx,id){
+  var u=shellEnv(ctx,'USERPROFILE','C:\\Users\\'+String(ctx&&ctx.username||'administrator')),
+      pub=shellEnv(ctx,'PUBLIC','C:\\Users\\Public'),win=shellEnv(ctx,'SYSTEMROOT','C:\\Windows'),
+      pf=shellEnv(ctx,'PROGRAMFILES','C:\\Program Files'),pfx=shellEnv(ctx,'PROGRAMFILES(X86)','C:\\Program Files (x86)'),
+      k=String(id===undefined?'':id).toUpperCase().replace(/[{}]/g,'');
+  var map={
+    'FOLDERID_DESKTOP':u+'\\Desktop','DESKTOP':u+'\\Desktop','0X10':u+'\\Desktop','16':u+'\\Desktop',
+    'FOLDERID_DOCUMENTS':u+'\\Documents','DOCUMENTS':u+'\\Documents','PERSONAL':u+'\\Documents','0X5':u+'\\Documents','5':u+'\\Documents',
+    'FOLDERID_DOWNLOADS':u+'\\Downloads','DOWNLOADS':u+'\\Downloads',
+    'FOLDERID_PUBLICDOCUMENTS':pub+'\\Documents','PUBLICDOCUMENTS':pub+'\\Documents','0X2E':pub+'\\Documents','46':pub+'\\Documents',
+    'FOLDERID_PUBLICDESKTOP':pub+'\\Desktop','PUBLICDESKTOP':pub+'\\Desktop','0X19':pub+'\\Desktop','25':pub+'\\Desktop',
+    'FOLDERID_WINDOWS':win,'WINDOWS':win,'0X24':win,'36':win,
+    'FOLDERID_PROGRAMFILES':pf,'PROGRAMFILES':pf,'0X26':pf,'38':pf,
+    'FOLDERID_PROGRAMFILESX86':pfx,'PROGRAMFILESX86':pfx,'0X2A':pfx,'42':pfx,
+    'FOLDERID_PROFILE':u,'PROFILE':u,'0X28':u,'40':u
+  };
+  if(Object.prototype.hasOwnProperty.call(map,k))return shellNormalizePath(map[k]);
+  throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Known Folder/CSIDL is not mapped by ExOS: '+String(id));
+}
+function shellPidl(ctx,path){
+  var p=shellNormalizePath(path),info=shellInfo(ctx,p);
+  return{pidl:'PIDL:EXFS:'+encodeURIComponent(p),parsingName:p,displayName:info.name,typeName:info.typeName,directory:info.directory,nodeId:info.nodeId,filesystem:'ExFS'};
+}
+function shellPidlPath(pidl){
+  if(pidl&&typeof pidl==='object'&&pidl.parsingName)return shellNormalizePath(pidl.parsingName);
+  var s=String(pidl||'');if(s.indexOf('PIDL:EXFS:')===0){try{return shellNormalizePath(decodeURIComponent(s.substring(10)));}catch(ignore){}}
+  return shellNormalizePath(s);
+}
+async function shellCreateDirectoryTree(ctx,path){
+  var p=shellNormalizePath(path);if(!/^C:\\/i.test(p))throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'SHCreateDirectoryEx supports ExFS C: only.');
+  var parts=p.substring(3).split('\\'),cur='C:\\',i;
+  for(i=0;i<parts.length;i++){if(!parts[i])continue;cur=cur==='C:\\'?cur+parts[i]:cur+'\\'+parts[i];if(!shellResolve(ctx,cur)){try{await global.jplopsoft_xshCreateDirectory(ctx,cur);}catch(e){if(!shellResolve(ctx,cur))throw e;}}}
+  return true;
+}
+
 async function shellDispatch(ctx,method,args){
   args=args||[];
 
@@ -1451,6 +1491,18 @@ async function shellDispatch(ctx,method,args){
       model:SHELL.model
     };
   }
+
+
+  if(method==='SHGetKnownFolderPath'||method==='SHGetKnownFolderPathA'||method==='SHGetKnownFolderPathW'||method==='SHGetFolderPath'||method==='SHGetFolderPathA'||method==='SHGetFolderPathW')return shellKnownFolder(ctx,args[0]);
+  if(method==='SHParseDisplayName')return shellPidl(ctx,args[0]);
+  if(method==='SHGetNameFromIDList'){var pp=shellPidlPath(args[0]),ii=shellInfo(ctx,pp);return String(args[1]||'SIGDN_FILESYSPATH').toUpperCase().indexOf('NORMALDISPLAY')>=0?ii.name:pp;}
+  if(method==='SHCreateItemFromParsingName')return shellInfo(ctx,args[0]);
+  if(method==='SHGetDesktopFolder')return{namespace:'Desktop',path:shellKnownFolder(ctx,'FOLDERID_DESKTOP'),pidl:shellPidl(ctx,shellKnownFolder(ctx,'FOLDERID_DESKTOP'))};
+  if(method==='SHCreateDirectoryEx'||method==='SHCreateDirectoryExA'||method==='SHCreateDirectoryExW')return await shellCreateDirectoryTree(ctx,args[0]);
+  if(method==='ShellExecuteEx'||method==='ShellExecuteExA'||method==='ShellExecuteExW'){
+    var ex=args[0]||{},res=await shellExecute(ctx,ex.file||ex.lpFile||'',ex.verb||ex.lpVerb||'open',ex.parameters||ex.lpParameters||'');return{ok:true,hInstApp:33,processId:res&&res.pid?res.pid:0,result:res};
+  }
+  if(method==='SHChangeNotify'){if(typeof global.jplopsoft_xshSendEvent==='function')global.jplopsoft_xshSendEvent(ctx,{event:'shell32',controlId:'SHELL_NOTIFY',action:'change',changeEvent:args[0],item1:args[1]||null,item2:args[2]||null});return true;}
 
   if(method==='SHGetFileAssociation'){
     return shellAssociation(

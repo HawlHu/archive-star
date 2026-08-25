@@ -1,22 +1,45 @@
 /* ExOS ws2_32.dll emulation
- * Version: 6.4.0-dev-os80
+ * Version: 6.4.0-dev-os84
  * Model: EXOS_WS2_32_V1
  * Browser limitation: WebSocket broker only; raw TCP/UDP sockets are not exposed.
  */
 (function(global){'use strict';
-var API={version:'6.4.0-dev-os80',model:'EXOS_WS2_32_V1',ready:true};
+var API={version:'6.4.0-dev-os84',model:'EXOS_WS2_32_V1',ready:true};
 function exerr(status,msg){if(typeof global.jplopsoft_xshError==='function')return global.jplopsoft_xshError(status,msg);var e=new Error(msg);e.ntstatus=status;return e;}
 function st(n,d){var k='jplopsoft_STATUS_'+n;return typeof global[k]!=='undefined'?global[k]:d;}
-function state(ctx){if(!ctx.ws2)ctx.ws2={next:0xA800,sockets:{},started:false};return ctx.ws2;}
+function state(ctx){if(!ctx.ws2)ctx.ws2={next:0xA800,sockets:{},started:false,lastError:0};return ctx.ws2;}
+function seterr(ctx,e){state(ctx).lastError=Number(e)||0;return e;}
 function rec(ctx,h){var r=state(ctx).sockets[String(parseInt(h,10)||0)];if(!r)throw exerr(st('INVALID_HANDLE',0xC0000008),'Invalid socket handle.');return r;}
 function notify(ctx,r,action,data){if(typeof global.jplopsoft_xshSendEvent==='function')global.jplopsoft_xshSendEvent(ctx,{event:'ws2_32',controlId:'WS2:'+r.handle,action:action,socket:r.handle,data:data||null});}
 function enqueue(ctx,r,msg){if(r.waiters.length){var w=r.waiters.shift();if(w.timer)clearTimeout(w.timer);w.resolve(msg);return;}r.queue.push(msg);while(r.queue.length>1024)r.queue.shift();notify(ctx,r,'message',{type:msg.type,bytes:msg.type==='binary'&&msg.data?msg.data.length:undefined});}
 function closeRec(ctx,r,code,reason){if(r.closed)return;r.closed=true;r.state='closed';r.closeCode=Number(code)||1000;r.closeReason=String(reason||'');while(r.waiters.length){var w=r.waiters.shift();if(w.timer)clearTimeout(w.timer);w.resolve(null);}notify(ctx,r,'close',{code:r.closeCode,reason:r.closeReason});}
 async function dispatch(ctx,method,args){args=args||[];method=String(method||'');var s=state(ctx),r,h,url,opt;
- if(method==='GetVersion')return{version:API.version,model:API.model,backend:'Browser WebSocket broker',rawTcp:false,udp:false};
- if(method==='WSAStartup'){s.started=true;return{version:'2.2',highVersion:'2.2',description:'ExOS WebSocket-backed Winsock facade',systemStatus:'Running'};}
+ if(method==='GetVersion')return{version:API.version,model:API.model,backend:'Browser WebSocket broker',rawTcp:false,udp:false,dnsBroker:true};
+ if(method==='WSAGetLastError')return Number(s.lastError)||0;
+ if(method==='WSAStartup'){s.started=true;s.lastError=0;return{result:0,wVersion:'2.2',wHighVersion:'2.2',version:'2.2',highVersion:'2.2',description:'ExOS WebSocket-backed Winsock facade',systemStatus:'Running',maxSockets:64};}
  if(method==='WSACleanup'){cleanup(ctx);return 0;}
- if(method==='socket'){if(!s.started)s.started=true;var type=Number(args[1])||1;if(type!==1)throw exerr(st('NOT_SUPPORTED',0xC00000BB),'SOCK_DGRAM/raw UDP is unavailable in browser ExOS.');h=s.next++;s.sockets[String(h)]={handle:h,state:'created',ws:null,queue:[],waiters:[],closed:false,protocols:[],url:'',closeCode:0,closeReason:''};return h;}
+ if(method==='gethostname'){s.lastError=0;return'EXOS-BROWSER';}
+ if(method==='gethostbyname'){
+   var hostname=String(args[0]||'').trim();
+   if(!hostname){seterr(ctx,11001);return null;} /* WSAHOST_NOT_FOUND */
+   if(typeof global.jplopsoft_xshApiPromise!=='function'){seterr(ctx,10047);return null;}
+   try{
+     var dns=await global.jplopsoft_xshApiPromise('dns_resolve','POST',{hostname:hostname});
+     s.lastError=0;
+     return{
+       h_name:String(dns.canonical_name||hostname),
+       h_aliases:[],
+       h_addrtype:2,
+       h_length:4,
+       h_addr_list:Array.isArray(dns.addresses)?dns.addresses.slice():[],
+       address:Array.isArray(dns.addresses)&&dns.addresses.length?String(dns.addresses[0]):''
+     };
+   }catch(e){
+     seterr(ctx,11001);
+     return null;
+   }
+ }
+ if(method==='socket'){if(!s.started)s.started=true;var type=Number(args[1])||1;if(type!==1){seterr(ctx,10044);throw exerr(st('NOT_SUPPORTED',0xC00000BB),'SOCK_DGRAM/raw UDP is unavailable in browser ExOS.');}h=s.next++;s.sockets[String(h)]={handle:h,state:'created',ws:null,queue:[],waiters:[],closed:false,protocols:[],url:'',closeCode:0,closeReason:''};return h;}
  if(method==='connect'||method==='WebSocketConnect'){
    r=rec(ctx,args[0]);if(r.state!=='created'&&r.state!=='closed')throw exerr(st('INVALID_PARAMETER',0xC000000D),'Socket is already connected.');
    opt=args[2]||{};url=String(typeof args[1]==='string'?args[1]:(args[1]&&args[1].url)||'');

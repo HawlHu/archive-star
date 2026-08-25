@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os80
+ * Version: 6.4.0-dev-os84
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -9082,6 +9082,43 @@ function jplopsoft_openDesktopSystemItem(key){
   if(key==='trash'){jplopsoft_openTrash();return;}
 }
 
+function jplopsoft_desktopPhysicalFolderNodes(){
+  var ctx={currentDrive:'C',currentDirectoryNodeId:0},paths=[
+        'C:\\Users\\'+String(state.samUsername||'administrator')+'\\Desktop',
+        'C:\\Users\\Public\\Desktop'
+      ],out=[],seen={},i,folder,list,j,n,name;
+  for(i=0;i<paths.length;i++){
+    try{folder=jplopsoft_xshResolveC(ctx,paths[i],false);}catch(ignoreResolve){folder=null;}
+    if(!folder||!folder.id)continue;
+    list=jplopsoft_childrenOf(folder.id)||[];
+    for(j=0;j<list.length;j++){
+      n=jplopsoft_resolveClientNode(list[j]);if(!n||seen[n.id])continue;
+      name=jplopsoft_decName(n);if(name===null)continue;
+      seen[n.id]=1;out.push({node:n,name:name,path:jplopsoft_cmdNodeFullPath(n),publicDesktop:i===1});
+    }
+  }
+  out.sort(function(a,b){if(a.node.type==='folder'&&b.node.type!=='folder')return-1;if(a.node.type!=='folder'&&b.node.type==='folder')return 1;return String(a.name).localeCompare(String(b.name),'zh-Hant');});
+  return out;
+}
+
+function jplopsoft_openPhysicalDesktopNode(id){
+  var n=jplopsoft_findNode(id),name;if(!n)return;
+  name=jplopsoft_decName(n)||'';
+  if(n.type==='folder'){jplopsoft_explorerXshLaunchPath(jplopsoft_cmdNodeFullPath(n));return;}
+  jplopsoft_openView(n.id);
+}
+
+function jplopsoft_showPhysicalDesktopContextMenu(ev,id){
+  var menu=jplopsoft_el('jplopsoft_exfsContextMenu'),n=jplopsoft_findNode(id),name;
+  if(!menu||!n)return;if(ev){if(ev.preventDefault)ev.preventDefault();if(ev.stopPropagation)ev.stopPropagation();ev.cancelBubble=true;}
+  jplopsoft_hideExfsContextMenu();name=jplopsoft_decName(n)||('#'+n.id);
+  menu.appendChild(jplopsoft_exfsContextMenuButton('📂','開啟',function(){jplopsoft_openPhysicalDesktopNode(n.id);},false,false));
+  if(n.type==='file')menu.appendChild(jplopsoft_exfsContextMenuButton('⬇','下載',function(){jplopsoft_downloadNode(n.id);},false,false));
+  menu.appendChild(jplopsoft_exfsContextMenuButton('ℹ️','內容',function(){jplopsoft_openProperties(n.id);},false,false));
+  menu.appendChild(jplopsoft_exfsContextMenuButton('📁','在檔案總管中顯示',function(){var parent=jplopsoft_findNode(n.parent_id);jplopsoft_explorerXshLaunchPath(parent?jplopsoft_cmdNodeFullPath(parent):'C:\\');},false,false));
+  jplopsoft_exfsPositionContextMenu(menu,ev&&typeof ev.clientX==='number'?ev.clientX:0,ev&&typeof ev.clientY==='number'?ev.clientY:0);
+}
+
 function jplopsoft_renderPhysicalDesktopShortcuts(){
   var host=document.querySelector?document.querySelector('.jplopsoft_desktop-icons'):null,
       old,i,list,item,n,b,icon,label,name,targetId;
@@ -9125,6 +9162,16 @@ function jplopsoft_renderPhysicalDesktopShortcuts(){
       };
     })(targetId,b);
 
+    host.appendChild(b);
+  }
+
+  list=jplopsoft_desktopPhysicalFolderNodes();
+  for(i=0;i<list.length;i++){
+    item=list[i];n=item.node;name=item.name;targetId=parseInt(n.id,10)||0;if(targetId<=0)continue;
+    b=document.createElement('button');b.type='button';b.className='jplopsoft_desktop-icon jplopsoft_desktop-physical-item';b.setAttribute('data-desktop-dynamic','1');b.setAttribute('data-desktop-physical-node',String(targetId));b.title=(item.publicDesktop?'Public Desktop ｜ ':'')+name;
+    icon=document.createElement('span');icon.className='jplopsoft_desktop-icon-glyph';icon.setAttribute('data-exfs-svg',jplopsoft_nodeSvgIconName(n,name));icon.setAttribute('data-exfs-svg-size','46');b.appendChild(icon);
+    label=document.createElement('span');label.textContent=name;b.appendChild(label);
+    (function(id,node){node.ondblclick=function(e){e=e||window.event;if(e&&e.preventDefault)e.preventDefault();jplopsoft_openPhysicalDesktopNode(id);return false;};node.oncontextmenu=function(e){jplopsoft_showPhysicalDesktopContextMenu(e,id);return false;};})(targetId,b);
     host.appendChild(b);
   }
   jplopsoft_applySvgIcons(host);
@@ -9721,14 +9768,14 @@ function jplopsoft_nodeDisplayIcon(n,name){
 }
 
 function jplopsoft_isWritableProfileFolder(folderId){
-  var id=parseInt(folderId,10)||0,root=parseInt(state.profileRootId,10)||0,n,guard=0;
-  if(id<=0||root<=0||id===parseInt(state.usersRootId,10))return false;
+  var id=parseInt(folderId,10)||0,root=parseInt(state.profileRootId,10)||0,
+      publicDocs=parseInt(state.publicDocumentsId,10)||0,
+      publicDesktop=parseInt(state.publicDesktopId,10)||0,n,guard=0,start=id;
+  if(id<=0||id===parseInt(state.usersRootId,10))return false;
   while(id>0&&guard<100000){
     guard++;
-    if(id===root)return true;
-    n=jplopsoft_findNode(id);
-    if(!n)return false;
-    id=parseInt(n.parent_id,10)||0;
+    if(id===root||id===publicDocs||id===publicDesktop)return true;
+    n=jplopsoft_findNode(id);if(!n)return false;id=parseInt(n.parent_id,10)||0;
   }
   return false;
 }
@@ -11389,6 +11436,11 @@ function jplopsoft_reloadNodes(done){
       state.usersRootId=parseInt(out.users_root_id,10)||0;
       state.profileRootId=parseInt(out.profile_root_id,10)||0;
       state.documentsNodeId=parseInt(out.documents_node_id,10)||0;
+      state.desktopNodeId=parseInt(out.desktop_node_id,10)||0;
+      state.downloadsNodeId=parseInt(out.downloads_node_id,10)||0;
+      state.publicRootId=parseInt(out.public_root_id,10)||0;
+      state.publicDocumentsId=parseInt(out.public_documents_id,10)||0;
+      state.publicDesktopId=parseInt(out.public_desktop_id,10)||0;
 
       jplopsoft_explorerRenderAllInstances();
 
@@ -11762,7 +11814,7 @@ function jplopsoft_printCurrentDocument(){
 function jplopsoft_downloadCurrentDocument(){var n=jplopsoft_findNode(state.openId),name,fmt,src;if(!n||n.type!=='file')return jplopsoft_exosMessage('目前沒有可下載的文件。');name=jplopsoft_decName(n)||('file-'+n.id);fmt=jplopsoft_fileFormatFromName(name);if(jplopsoft_binaryFormat(fmt)){jplopsoft_downloadNode(n.id);return;}try{if(state.editorMode==='rich'&&state.openFormat==='html')jplopsoft_syncRichToSource();src=fmt==='csv'?jplopsoft_csvCurrentSource():jplopsoft_el('jplopsoft_htmlEditor').value;if(src===null||src===undefined)return jplopsoft_exosMessage('文件內容尚未載入。');jplopsoft_saveFileBlob(name,src);}catch(e){jplopsoft_exosMessage(e.message);}}
 function jplopsoft_currentFolderLabel(){if(state.currentFolder===0)return '根目錄';var n=jplopsoft_findNode(state.currentFolder);return n?(jplopsoft_decName(n)||('資料夾 #'+n.id)):'根目錄';}
 function jplopsoft_hasDraggedFiles(e){var dt=e&&e.dataTransfer,t,i;if(!dt)return false;if(dt.files&&dt.files.length)return true;if(dt.types){for(i=0;i<dt.types.length;i++){t=String(dt.types[i]);if(t==='Files')return true;}}return false;}
-function jplopsoft_globalDropTargetFolder(){var id=parseInt(state.currentFolder,10)||0;if(jplopsoft_isWritableProfileFolder(id)&&id!==jplopsoft_DESKTOP_FOLDER_ID)return id;id=parseInt(state.documentsNodeId,10)||0;if(jplopsoft_isWritableProfileFolder(id))return id;id=parseInt(state.profileRootId,10)||0;if(jplopsoft_isWritableProfileFolder(id))return id;return 0;}
+function jplopsoft_globalDropTargetFolder(){var id;if(jplopsoft_isDesktopFolder()){id=parseInt(state.desktopNodeId,10)||0;if(jplopsoft_isWritableProfileFolder(id))return id;}id=parseInt(state.currentFolder,10)||0;if(jplopsoft_isWritableProfileFolder(id)&&id!==jplopsoft_DESKTOP_FOLDER_ID)return id;id=parseInt(state.documentsNodeId,10)||0;if(jplopsoft_isWritableProfileFolder(id))return id;id=parseInt(state.profileRootId,10)||0;if(jplopsoft_isWritableProfileFolder(id))return id;return 0;}
 function jplopsoft_folderLabelById(id){id=parseInt(id,10)||0;if(id===jplopsoft_DESKTOP_FOLDER_ID)return '桌面';if(id===0)return '根目錄';var n=jplopsoft_findNode(id);return n?(jplopsoft_decName(n)||('資料夾 #'+n.id)):'資料夾 #'+id;}
 function jplopsoft_showDropOverlay(){if(!state.vaultKey)return;var target=jplopsoft_globalDropTargetFolder(),label=target?jplopsoft_folderLabelById(target):'無可寫入位置';jplopsoft_el('jplopsoft_dropFolderLabel').textContent='放開滑鼠後將在瀏覽器端加密並上傳到「'+label+'」。單檔最大 1 GiB；大型檔案使用 4 MiB CHUNKED_V1 分塊。';jplopsoft_el('jplopsoft_dropOverlay').className='jplopsoft_drop-overlay';document.body.className=(document.body.className||'').replace(/\bjplopsoft_drop-active\b/g,'')+' jplopsoft_drop-active';}
 function jplopsoft_hideDropOverlay(){var o=jplopsoft_el('jplopsoft_dropOverlay');if(o)o.className='jplopsoft_drop-overlay jplopsoft_hidden';document.body.className=(document.body.className||'').replace(/\s*\bjplopsoft_drop-active\b/g,'');state.dragDepth=0;}
@@ -16682,6 +16734,12 @@ function jplopsoft_ntInitialUserEnvironment(){
   if(typeof out.USERPROFILE==='undefined')out.USERPROFILE='C:\\Users\\'+String(state.samUsername||'administrator');
   if(typeof out.HOMEDRIVE==='undefined')out.HOMEDRIVE='C:';
   if(typeof out.HOMEPATH==='undefined')out.HOMEPATH='\\Users\\'+String(state.samUsername||'administrator');
+  if(typeof out.PUBLIC==='undefined')out.PUBLIC='C:\\Users\\Public';
+  if(typeof out.SystemDrive==='undefined')out.SystemDrive='C:';
+  if(typeof out.SystemRoot==='undefined')out.SystemRoot='C:\\Windows';
+  if(typeof out.windir==='undefined')out.windir='C:\\Windows';
+  if(typeof out.ProgramFiles==='undefined')out.ProgramFiles='C:\\Program Files';
+  if(typeof out['ProgramFiles(x86)']==='undefined')out['ProgramFiles(x86)']='C:\\Program Files (x86)';
   if(typeof out.COMSPEC==='undefined')out.COMSPEC='C:\\ExOS\\SystemApps\\cmd.xsh';
   if(typeof out.PATH==='undefined')out.PATH='C:\\ExOS\\SystemApps;C:\\';
   if(typeof out.PATHEXT==='undefined')out.PATHEXT='.XBA;.XSH';
@@ -18952,6 +19010,8 @@ function jplopsoft_vmmVirtualProtect(proc,address,size,newProtect){
 }
 function jplopsoft_vmmSystemImageSize(name){
   var n=String(name||'').toLowerCase(),table={
+    'ntoskrnl.exe':768*1024,
+    'ntoskrnl.dll':768*1024,
     'ntdll.dll':384*1024,
     'kernel32.dll':512*1024,
     'user32.dll':768*1024,
@@ -18962,6 +19022,14 @@ function jplopsoft_vmmSystemImageSize(name){
     'zipfldr.dll':768*1024,
     'wininet.dll':384*1024,
     'ws2_32.dll':384*1024,
+    'wsock32.dll':384*1024,
+    'psapi.dll':192*1024,
+    'oleaut32.dll':256*1024,
+    'icmp.dll':128*1024,
+    'winmm.dll':256*1024,
+    'zlib.dll':256*1024,
+    'tapi32.dll':192*1024,
+    'urlmon.dll':256*1024,
     'ole32.dll':384*1024,
     'crypt32.dll':384*1024,
     'bcrypt.dll':384*1024,
@@ -19173,6 +19241,19 @@ function jplopsoft_ntVmFindRegion(proc,address,size,write){
 }
 
 function jplopsoft_ntProcessHandleForOwner(ownerPid,handle){
+  var raw=Number(handle);
+  if(raw===-1&&parseInt(ownerPid,10)>0){
+    return{
+      handle:-1,
+      pid:parseInt(ownerPid,10)||0,
+      targetPid:parseInt(ownerPid,10)||0,
+      ownerPid:parseInt(ownerPid,10)||0,
+      desiredAccess:0xFFFFFFFF,
+      inheritHandle:false,
+      openedAt:jplopsoft_ntKernelNow(),
+      kind:'PROCESS_PSEUDO'
+    };
+  }
   var h=jplopsoft_NT_KERNEL.processHandles[String(parseInt(handle,10)||0)];
   if(!h)return null;
   if(parseInt(ownerPid,10)>0&&parseInt(h.ownerPid,10)!==parseInt(ownerPid,10))return null;
@@ -20388,7 +20469,7 @@ async function jplopsoft_xshCreateCNode(ctx,path,type){
   name=parent.name;
   if(!jplopsoft_xshValidLeafName(name))throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Invalid file name.');
   if(jplopsoft_xshFindChild(parent.parentId,name,null))throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_COLLISION,'Object already exists.');
-  if(!jplopsoft_isWritableProfileFolder(parent.parentId))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'XSH can create objects only inside the current user profile.');
+  if(!jplopsoft_isWritableProfileFolder(parent.parentId))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'XSH can create objects only inside the current user profile or writable Public folders.');
   if(type==='file'){
     fek=jplopsoft_newFek();wrap=jplopsoft_wrapFek(fek);fmt=jplopsoft_fileFormatFromName(name);
     content=jplopsoft_binaryFormat(fmt)?jplopsoft_encBinaryBytes(new Uint8Array(0),fek):jplopsoft_encContent('',fek);
@@ -20576,7 +20657,7 @@ async function jplopsoft_xshNtCreateFile(ctx,path,desiredAccess,creationDisposit
       node=jplopsoft_xshResolveC(ctx,path,false);
       if(!node&&disp!==3&&disp!==5)node=await jplopsoft_xshCreateCNode(ctx,path,'file');
       if(!node||node.type!=='file')throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'File not found.');
-      if(access.write&&!jplopsoft_isWritableProfileFolder(node.parent_id))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Write access denied outside user profile.');
+      if(access.write&&!jplopsoft_isWritableProfileFolder(node.parent_id))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Write access denied outside writable profile/Public folders.');
       if(
         (disp===2||disp===5)&&
         access.write
@@ -20950,7 +21031,11 @@ function jplopsoft_xshListDirectory(ctx,path){
       type:String(n.type||''),
       size:parseInt(n.original_size,10)||0,
       nodeId:parseInt(n.id,10)||0,
-      modified:String(n.updated_at||'')
+      modified:String(n.updated_at||''),
+      dwFileAttributes:(
+        (Number(n.win32_attributes)||0)|
+        (n.type==='folder'?0x10:0)
+      )>>>0
     });
   }
 
@@ -20978,7 +21063,7 @@ async function jplopsoft_xshDeleteFile(ctx,path){
   if(!jplopsoft_isWritableProfileFolder(parseInt(n.parent_id,10)||0)){
     throw jplopsoft_xshError(
       jplopsoft_STATUS_ACCESS_DENIED,
-      'Delete access denied outside user profile.'
+      'Delete access denied outside writable profile/Public folders.'
     );
   }
 
@@ -21015,7 +21100,7 @@ async function jplopsoft_xshRemoveDirectory(ctx,path){
   if(!jplopsoft_isWritableProfileFolder(parseInt(n.parent_id,10)||0)){
     throw jplopsoft_xshError(
       jplopsoft_STATUS_ACCESS_DENIED,
-      'RemoveDirectory denied outside user profile.'
+      'RemoveDirectory denied outside writable profile/Public folders.'
     );
   }
 
@@ -21072,7 +21157,7 @@ async function jplopsoft_xshMoveFile(ctx,source,destination){
   ){
     throw jplopsoft_xshError(
       jplopsoft_STATUS_ACCESS_DENIED,
-      'MoveFile denied outside user profile.'
+      'MoveFile denied outside writable profile/Public folders.'
     );
   }
 
@@ -21129,7 +21214,29 @@ async function jplopsoft_xshCopyFile(ctx,source,destination,failIfExists){
   return true;
 }
 
-function jplopsoft_xshGetAttributes(ctx,path){var spec=jplopsoft_xshPathSpec(ctx,path),n;if(spec.kind!=='exfs')return null;n=jplopsoft_xshResolveC(ctx,path,false);if(!n)return null;return{exists:true,directory:n.type==='folder',size:parseInt(n.original_size,10)||0,nodeId:n.id,drive:'C',backingVdo:'PHP /_exfs/'};}
+function jplopsoft_xshGetAttributes(ctx,path){
+  var spec=jplopsoft_xshPathSpec(ctx,path),n,a=0;
+  if(spec.kind!=='exfs')return null;
+  n=jplopsoft_xshResolveC(ctx,path,false);
+  if(!n)return null;
+  a=Number(n.win32_attributes)||0;
+  if(n.type==='folder')a|=0x10;
+  if(!a)a=n.type==='folder'?0x10:0x80;
+  return{
+    exists:true,
+    directory:n.type==='folder',
+    size:parseInt(n.original_size,10)||0,
+    nodeId:n.id,
+    drive:'C',
+    backingVdo:'PHP /_exfs/',
+    dwFileAttributes:a>>>0,
+    attributes:a>>>0,
+    readOnly:!!(a&0x1),
+    hidden:!!(a&0x2),
+    system:!!(a&0x4),
+    archive:!!(a&0x20)
+  };
+}
 
 async function jplopsoft_xshReadTextFile(ctx,path){
   var o=await jplopsoft_xshNtCreateFile(ctx,path,'r','OPEN_EXISTING','ReadTextFile');
@@ -22587,7 +22694,7 @@ function jplopsoft_xshCreateHostWindow(ctx){
   return h;
 }
 
-function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH4 API\n  kernel32: CreateFile ReadFile ReadFileBuffer WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle SetStdHandle CreatePipe AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile FlushViewOfFile ReadMappedView WriteMappedView VirtualAlloc VirtualFree VirtualProtect VirtualQuery ReadVirtualMemory WriteVirtualMemory GlobalMemoryStatusEx QueryVmmStatistics CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess OpenProcess VirtualQueryEx ReadProcessMemory WriteProcessMemory CreateThread PostThreadMessage GetThreadMessage WaitForSingleObject GetExitCodeThread TerminateThread DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtAllocateVirtualMemory NtFreeVirtualMemory NtProtectVirtualMemory NtQueryVirtualMemory NtReadVirtualMemory NtWriteVirtualMemory NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow GetForegroundWindow SetForegroundWindow LoadIcon GetIconInfo EnumIconResources SetWindowIcon GetMessage PeekMessage PostMessage DispatchMessage InvalidateRect UpdateWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OpenClipboard CloseClipboard EmptyClipboard SetClipboardData GetClipboardData IsClipboardFormatAvailable EnumClipboardFormats RegisterClipboardFormat GetClipboardSequenceNumber OnControl OnWindow\n  gdi32(exos_gdi32.js): GetDC ReleaseDC BeginPaint EndPaint CreateDC CreatePrinterDC StartDoc StartPage EndPage EndDoc AbortDoc PrintImage GetPrintJobInfo CreateCompatibleDC DeleteDC CreatePen CreateSolidBrush CreateFont EnumFontFamiliesEx CreateBitmap CreateCompatibleBitmap SelectObject DeleteObject MoveToEx LineTo Rectangle Ellipse Polygon Polyline PolyBezier BitBlt TextOut ExtTextOut GetTextExtentPoint32 CreateRectRgn CreateEllipticRgn CreatePolygonRgn SelectClipRgn SetMapMode LPtoDP DPtoLP\n  d3d11(exos_d3d11.js): D3D11CreateDeviceAndSwapChain CreateBuffer CreateTexture2D CreateVertexShader CreatePixelShader CreateInputLayout IASetVertexBuffers IASetIndexBuffer IASetPrimitiveTopology VSSetShader PSSetShader OMSetRenderTargets RSSetViewports ClearRenderTargetView Draw DrawIndexed PresentTextureFrame Present\n  d3dx/three32(exos_d3dx.js + three.min.js): Scene Camera Geometry Material Mesh Light WebGLRenderer TextureLoader Clock\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  comdlg32(exos_comdlg32.js): GetOpenFileName GetSaveFileName ChooseColor ChooseFont PrintDlg PrintDlgEx PageSetupDlg FindText ReplaceText\n  zipfldr(exos_zipfldr.js): GetVersion IsCompressedFolder CreateArchive OpenArchive BindToObject CloseArchive EnumItems ListDirectory GetItemInfo ReadItem ExtractItem ExtractAll AddFile AddPath AddPickedFile DeleteItem CreateFolder MakeVirtualPath ParseVirtualPath\n  wininet: InternetOpen InternetOpenUrl HttpOpenRequest HttpAddRequestHeaders HttpSendRequest InternetReadFile InternetReadText InternetQueryInfo InternetCloseHandle QueryNetworkPolicy\n  ws2_32: WSAStartup socket connect send recv shutdown closesocket select GetSocketState (WebSocket backend; no raw TCP/UDP)\n  ole32: OleInitialize CreateDataObject SetData GetData EnumFormatEtc OleSetClipboard OleGetClipboard RegisterDragDrop DoDragDrop DragEnter DragOver Drop\n  crypt32/bcrypt: ExMd3 ExMd3N ExesEncrypt ExesDecrypt CryptProtectData CryptUnprotectData BCryptGenRandom BCryptHash BCryptDeriveKeyPBKDF2\n  riched20/msftedit: CreateRichEdit SetText GetText SetHTML GetHTML ExecCommand GetSelection SetSelection InsertText InsertImage\n  webview2/shdocvw: CreateCoreWebView2Environment CreateCoreWebView2Controller Navigate NavigateToString Reload GoBack GoForward PostWebMessageAsString\n  uxtheme: IsThemeActive OpenThemeData CloseThemeData SetWindowTheme GetThemeColor ApplyTheme\n  dwmapi: DwmIsCompositionEnabled DwmEnableBlurBehindWindow DwmExtendFrameIntoClientArea DwmSetWindowAttribute DwmGetWindowAttribute DwmFlush\n  ExOS.WinUI: Render RenderMany SetData\n  ExOS.MediaFoundation(exos_media.js): MFStartup CreateAudioSession CreateSourceFromPath Play Pause Stop Seek SetVolume SetPan SetEQ GetSpectrum GetWaveform\n  advapi32(exos_advapi32.js): RegOpenKeyEx RegCreateKeyEx RegCloseKey RegQueryValueEx RegGetValue RegSetValueEx RegEnumKeyEx RegEnumValue RegQueryInfoKey RegDeleteValue RegDeleteKey RegFlushKey ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo GetSecurityInfo SetSecurityInfo InitializeAcl SetEntriesInAcl GetExplicitEntriesFromAcl OpenProcessToken GetTokenInformation DuplicateTokenEx CreateRestrictedToken CheckTokenMembership PrivilegeCheck AdjustTokenPrivileges LookupPrivilegeValue LookupPrivilegeName GetUserName LookupAccountSid LookupAccountName ConvertSidToStringSid ConvertStringSidToSid IsValidSid EqualSid\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop SHQueryRecycleBin SHRestoreFromRecycleBin SHDeleteFromRecycleBin SHEmptyRecycleBin\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath UploadPickedFile ReleasePickedFile QuerySystemConfig QueryLocalAccounts CreateLocalAccount ResetLocalAccountPassword SetLocalAccountEnabled SetLocalAccountType DeleteLocalAccount QueryEvents QueryEventLogInfo\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
+function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH4 API\n  kernel32: CreateFile ReadFile ReadFileBuffer WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle SetStdHandle CreatePipe AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile FlushViewOfFile ReadMappedView WriteMappedView VirtualAlloc VirtualFree VirtualProtect VirtualQuery ReadVirtualMemory WriteVirtualMemory GlobalMemoryStatusEx QueryVmmStatistics CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess OpenProcess VirtualQueryEx ReadProcessMemory WriteProcessMemory CreateThread PostThreadMessage GetThreadMessage WaitForSingleObject GetExitCodeThread TerminateThread DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtAllocateVirtualMemory NtFreeVirtualMemory NtProtectVirtualMemory NtQueryVirtualMemory NtReadVirtualMemory NtWriteVirtualMemory NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow GetForegroundWindow SetForegroundWindow LoadIcon GetIconInfo EnumIconResources SetWindowIcon GetMessage PeekMessage PostMessage DispatchMessage InvalidateRect UpdateWindow CreateControl(COMBOBOX/LISTBOX/GROUPBOX/FRAME) SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren GetCursorPos ClientToScreen ScreenToClient SetCapture GetCapture ReleaseCapture MoveWindow SetWindowPos GetWindowLong SetWindowLong GetSystemMetrics RegisterHotKey UnregisterHotKey PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OpenClipboard CloseClipboard EmptyClipboard SetClipboardData GetClipboardData IsClipboardFormatAvailable EnumClipboardFormats RegisterClipboardFormat GetClipboardSequenceNumber OnControl OnWindow OnHotKey\n  gdi32(exos_gdi32.js): GetDC ReleaseDC BeginPaint EndPaint CreateDC CreatePrinterDC StartDoc StartPage EndPage EndDoc AbortDoc PrintImage GetPrintJobInfo CreateCompatibleDC DeleteDC CreatePen CreateSolidBrush CreateFont EnumFontFamiliesEx CreateBitmap CreateCompatibleBitmap SelectObject DeleteObject MoveToEx LineTo Rectangle Ellipse Polygon Polyline PolyBezier BitBlt TextOut ExtTextOut GetTextExtentPoint32 CreateRectRgn CreateEllipticRgn CreatePolygonRgn SelectClipRgn SetMapMode LPtoDP DPtoLP\n  d3d11(exos_d3d11.js): D3D11CreateDeviceAndSwapChain CreateBuffer CreateTexture2D CreateVertexShader CreatePixelShader CreateInputLayout IASetVertexBuffers IASetIndexBuffer IASetPrimitiveTopology VSSetShader PSSetShader OMSetRenderTargets RSSetViewports ClearRenderTargetView Draw DrawIndexed PresentTextureFrame Present\n  d3dx/three32(exos_d3dx.js + three.min.js): Scene Camera Geometry Material Mesh Light WebGLRenderer TextureLoader Clock\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  comdlg32(exos_comdlg32.js): GetOpenFileName GetSaveFileName ChooseColor ChooseFont PrintDlg PrintDlgEx PageSetupDlg FindText ReplaceText\n  zipfldr(exos_zipfldr.js): GetVersion IsCompressedFolder CreateArchive OpenArchive BindToObject CloseArchive EnumItems ListDirectory GetItemInfo ReadItem ExtractItem ExtractAll AddFile AddPath AddPickedFile DeleteItem CreateFolder MakeVirtualPath ParseVirtualPath\n  wininet: InternetOpen InternetOpenUrl HttpOpenRequest HttpAddRequestHeaders HttpSendRequest InternetReadFile InternetReadText InternetQueryInfo InternetCloseHandle QueryNetworkPolicy\n  ws2_32: WSAStartup socket connect send recv shutdown closesocket select GetSocketState (WebSocket backend; no raw TCP/UDP)\n  ole32: OleInitialize CreateDataObject SetData GetData EnumFormatEtc OleSetClipboard OleGetClipboard RegisterDragDrop DoDragDrop DragEnter DragOver Drop\n  crypt32/bcrypt: ExMd3 ExMd3N ExesEncrypt ExesDecrypt CryptProtectData CryptUnprotectData BCryptGenRandom BCryptHash BCryptDeriveKeyPBKDF2\n  riched20/msftedit: CreateRichEdit SetText GetText SetHTML GetHTML ExecCommand GetSelection SetSelection InsertText InsertImage\n  webview2/shdocvw: CreateCoreWebView2Environment CreateCoreWebView2Controller Navigate NavigateToString Reload GoBack GoForward PostWebMessageAsString\n  uxtheme: IsThemeActive OpenThemeData CloseThemeData SetWindowTheme GetThemeColor ApplyTheme\n  dwmapi: DwmIsCompositionEnabled DwmEnableBlurBehindWindow DwmExtendFrameIntoClientArea DwmSetWindowAttribute DwmGetWindowAttribute DwmFlush\n  ExOS.WinUI: Render RenderMany SetData\n  ExOS.MediaFoundation(exos_media.js): MFStartup CreateAudioSession CreateSourceFromPath Play Pause Stop Seek SetVolume SetPan SetEQ GetSpectrum GetWaveform\n  advapi32(exos_advapi32.js): RegOpenKeyEx RegCreateKeyEx RegCloseKey RegQueryValueEx RegGetValue RegSetValueEx RegEnumKeyEx RegEnumValue RegQueryInfoKey RegDeleteValue RegDeleteKey RegFlushKey ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo GetSecurityInfo SetSecurityInfo InitializeAcl SetEntriesInAcl GetExplicitEntriesFromAcl OpenProcessToken GetTokenInformation DuplicateTokenEx CreateRestrictedToken CheckTokenMembership PrivilegeCheck AdjustTokenPrivileges LookupPrivilegeValue LookupPrivilegeName GetUserName LookupAccountSid LookupAccountName ConvertSidToStringSid ConvertStringSidToSid IsValidSid EqualSid\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop SHQueryRecycleBin SHRestoreFromRecycleBin SHDeleteFromRecycleBin SHEmptyRecycleBin\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath UploadPickedFile ReleasePickedFile QuerySystemConfig QueryLocalAccounts CreateLocalAccount ResetLocalAccountPassword SetLocalAccountEnabled SetLocalAccountType DeleteLocalAccount QueryEvents QueryEventLogInfo\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
 function jplopsoft_xshPrintIrpTrace(ctx){
   var a=ctx.irpTrace.slice(-20),i,j,irp,s='';
   for(i=0;i<a.length;i++){
@@ -22993,6 +23100,71 @@ function jplopsoft_xshAttachRichEditEvents(ctx,id,n){
   n.onpaste=function(e){var cd=e&&e.clipboardData,html='',text='';try{if(cd){html=String(cd.getData('text/html')||'');text=String(cd.getData('text/plain')||'');}}catch(ignore){}if(!html&&!text)return;try{e.preventDefault();}catch(ignore2){}n.focus();try{if(html)document.execCommand('insertHTML',false,jplopsoft_xshSanitizeRichHtml(html));else document.execCommand('insertText',false,text);}catch(ignore3){}send('input',e);};
 }
 
+
+function jplopsoft_xshNormalizeControlItems(items){
+  var src=Array.isArray(items)?items:[],out=[],i,x;
+  for(i=0;i<src.length;i++){
+    x=src[i];
+    if(x&&typeof x==='object')out.push({
+      text:String(x.text===undefined||x.text===null?(x.label===undefined||x.label===null?(x.value===undefined||x.value===null?'':x.value):x.label):x.text),
+      value:String(x.value===undefined||x.value===null?(x.text===undefined||x.text===null?i:x.text):x.value),
+      disabled:!!x.disabled,
+      selected:!!x.selected
+    });
+    else out.push({text:String(x===undefined||x===null?'':x),value:String(x===undefined||x===null?'':x),disabled:false,selected:false});
+  }
+  return out;
+}
+
+function jplopsoft_xshSetSelectItems(n,items){
+  var list=jplopsoft_xshNormalizeControlItems(items),i,o;
+  while(n.options&&n.options.length)n.remove(0);
+  for(i=0;i<list.length;i++){
+    o=document.createElement('option');
+    o.textContent=list[i].text;
+    o.value=list[i].value;
+    o.disabled=!!list[i].disabled;
+    o.selected=!!list[i].selected;
+    n.appendChild(o);
+  }
+  return list.length;
+}
+
+function jplopsoft_xshSelectSnapshot(n){
+  var indices=[],values=[],texts=[],i,o;
+  if(!n||String(n.tagName||'').toLowerCase()!=='select')return{selectedIndex:-1,selectedIndices:[],selectedValues:[],selectedTexts:[],value:'',text:''};
+  for(i=0;i<n.options.length;i++){
+    o=n.options[i];
+    if(o.selected){indices.push(i);values.push(String(o.value||''));texts.push(String(o.textContent||''));}
+  }
+  return{
+    selectedIndex:Number(n.selectedIndex),
+    selectedIndices:indices,
+    selectedValues:values,
+    selectedTexts:texts,
+    value:String(n.value||''),
+    text:n.selectedIndex>=0&&n.options[n.selectedIndex]?String(n.options[n.selectedIndex].textContent||''):''
+  };
+}
+
+function jplopsoft_xshAttachSelectEvents(ctx,id,n){
+  function send(action,e){
+    var s=jplopsoft_xshSelectSnapshot(n);
+    jplopsoft_xshSendEvent(ctx,{
+      event:'control',controlId:id,action:action,
+      value:s.value,text:s.text,selectedIndex:s.selectedIndex,
+      selectedIndices:s.selectedIndices,selectedValues:s.selectedValues,selectedTexts:s.selectedTexts,
+      ctrlKey:!!(e&&e.ctrlKey),shiftKey:!!(e&&e.shiftKey),altKey:!!(e&&e.altKey)
+    });
+  }
+  n.onchange=function(e){send('change',e);};
+  n.oninput=function(e){send('input',e);};
+  n.ondblclick=function(e){send('dblclick',e);};
+  n.onkeydown=function(e){send('keydown',e);};
+  n.onfocus=function(e){jplopsoft_xshRememberFocus(ctx,id,n);send('focus',e);};
+  n.onblur=function(e){send('blur',e);};
+}
+
 function jplopsoft_xshCreateControl(ctx,hwnd,spec){
   var client=jplopsoft_GetClientElement(parseInt(hwnd,10)||0),
       s=spec||{},
@@ -23065,6 +23237,34 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
         }
       );
     };
+  }else if(type==='combobox'||type==='select'){
+    n=document.createElement('select');
+    n.className='jplopsoft_xsh-control jplopsoft_xsh-control-combobox';
+    n.setAttribute('data-exos-win32-class','COMBOBOX');
+    jplopsoft_xshSetSelectItems(n,s.items||[]);
+    if(typeof s.selectedIndex!=='undefined')n.selectedIndex=Math.max(-1,Math.min(n.options.length-1,parseInt(s.selectedIndex,10)||0));
+    if(typeof s.value!=='undefined')n.value=String(s.value);
+    jplopsoft_xshAttachSelectEvents(ctx,id,n);
+  }else if(type==='listbox'){
+    n=document.createElement('select');
+    n.className='jplopsoft_xsh-control jplopsoft_xsh-control-listbox';
+    n.setAttribute('data-exos-win32-class','LISTBOX');
+    n.multiple=!!s.multiple;
+    n.size=Math.max(2,Math.min(64,parseInt(s.rows||s.size,10)||6));
+    jplopsoft_xshSetSelectItems(n,s.items||[]);
+    if(Array.isArray(s.selectedIndices)){
+      for(var lsi=0;lsi<n.options.length;lsi++)n.options[lsi].selected=s.selectedIndices.indexOf(lsi)>=0;
+    }else if(typeof s.selectedIndex!=='undefined')n.selectedIndex=Math.max(-1,Math.min(n.options.length-1,parseInt(s.selectedIndex,10)||0));
+    jplopsoft_xshAttachSelectEvents(ctx,id,n);
+  }else if(type==='groupbox'||type==='frame'){
+    n=document.createElement('fieldset');
+    n.className='jplopsoft_xsh-control jplopsoft_xsh-control-groupbox';
+    n.setAttribute('data-exos-win32-class',type==='frame'?'FRAME':'BUTTON');
+    var legend=document.createElement('legend');
+    legend.className='jplopsoft_xsh-groupbox-legend';
+    legend.textContent=String(s.text||s.title||'');
+    n.appendChild(legend);
+    n._jplopsoftGroupLegend=legend;
   }else if(type==='input'){
     n=document.createElement('input');
     n.type=String(s.inputType||'text');
@@ -23275,6 +23475,7 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
   );
 
   if(s.title)n.title=String(s.title);
+  if(typeof s.disabled!=='undefined'&&'disabled' in n)n.disabled=!!s.disabled;
   n.setAttribute('data-exos-theme-role',type);
 
   jplopsoft_xshApplySafeStyle(
@@ -23612,6 +23813,22 @@ function jplopsoft_xshSetControlProperty(ctx,id,prop,value){
     return true;
   }
 
+  if(String(n.tagName||'').toLowerCase()==='select'){
+    if(p==='items')return jplopsoft_xshSetSelectItems(n,value||[]);
+    if(p==='selectedIndex'){n.selectedIndex=Math.max(-1,Math.min(n.options.length-1,Number(value)|0));return true;}
+    if(p==='selectedIndices'){
+      var sel=Array.isArray(value)?value:[],si;
+      for(si=0;si<n.options.length;si++)n.options[si].selected=sel.indexOf(si)>=0;
+      return true;
+    }
+    if(p==='multiple'){n.multiple=!!value;return true;}
+    if(p==='size'||p==='rows'){n.size=Math.max(1,Math.min(64,parseInt(value,10)||1));return true;}
+    if(p==='value'){n.value=String(value===undefined||value===null?'':value);return true;}
+  }
+  if(n._jplopsoftGroupLegend&&(p==='legend'||p==='text')){
+    n._jplopsoftGroupLegend.textContent=String(value===undefined||value===null?'':value);return true;
+  }
+
   if(n._exosTopologyState){
     if(p==='topologyMode'){
       n._exosTopologyState.mode=String(value||'physical')==='sandbox'?'sandbox':'physical';
@@ -23654,6 +23871,23 @@ function jplopsoft_xshGetControlProperty(ctx,id,prop){
   if(p==='scrollTop'&&('scrollTop' in n))return Number(n.scrollTop)||0;
   if(p==='scrollHeight'&&('scrollHeight' in n))return Number(n.scrollHeight)||0;
   if(p==='title')return String(n.title||'');
+  if(String(n.tagName||'').toLowerCase()==='select'){
+    var ss=jplopsoft_xshSelectSnapshot(n),items=[],oi;
+    if(p==='selectedIndex')return ss.selectedIndex;
+    if(p==='selectedIndices')return ss.selectedIndices;
+    if(p==='selectedValues')return ss.selectedValues;
+    if(p==='selectedTexts')return ss.selectedTexts;
+    if(p==='value')return ss.value;
+    if(p==='itemCount')return n.options.length;
+    if(p==='multiple')return !!n.multiple;
+    if(p==='size'||p==='rows')return Number(n.size)||0;
+    if(p==='items'){
+      for(oi=0;oi<n.options.length;oi++)items.push({text:String(n.options[oi].textContent||''),value:String(n.options[oi].value||''),disabled:!!n.options[oi].disabled,selected:!!n.options[oi].selected});
+      return items;
+    }
+  }
+  if(n._jplopsoftGroupLegend&&(p==='legend'||p==='text'))return String(n._jplopsoftGroupLegend.textContent||'');
+  if(p==='win32Class')return String(n.getAttribute&&n.getAttribute('data-exos-win32-class')||'');
   if(p==='src')return String(n._exosResourceToken||n.getAttribute('src')||'');
   if(n._exosTopologyState&&p==='topologyMode')return String(n._exosTopologyState.mode||'physical');
   if(n._exosTopologyState&&p==='topologyStats')return {mode:String(n._exosTopologyState.mode||'physical'),nodeCount:n._exosTopologyState.data?n._exosTopologyState.data.length:0};
@@ -24108,7 +24342,7 @@ async function jplopsoft_xshUploadPickedFile(ctx,token,path){
     throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_COLLISION,'Upload destination already exists.');
   }
   if(!jplopsoft_isWritableProfileFolder(parent.parentId)){
-    throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Upload is allowed only inside the current user profile.');
+    throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Upload is allowed only inside the current user profile or writable Public folders.');
   }
 
   /*
@@ -24382,7 +24616,7 @@ async function jplopsoft_xshSystemCreateLocalAccount(ctx,spec){
   if(password.length<8)throw new Error('密碼至少需要 8 個字元。');
   if(!state.vaultKey||!jplopsoft_validVaultKey(state.vaultKey))throw new Error('Vault Key 尚未解鎖。');
   cred=await jplopsoft_xshAccountBuildCredential(username,password,'正在建立 '+username+' 帳號');password='';
-  payload={username:username,administrator:administrator?1:0,password_salt:cred.password_salt,password_iterations:cred.password_iterations,password_verifier:cred.password_verifier,vault_key_enc:cred.vault_key_enc,profile_name_enc:jplopsoft_encRaw(jplopsoft_NAME2+username,state.vaultKey),documents_name_enc:jplopsoft_encRaw(jplopsoft_NAME2+'Documents',state.vaultKey)};
+  payload={username:username,administrator:administrator?1:0,password_salt:cred.password_salt,password_iterations:cred.password_iterations,password_verifier:cred.password_verifier,vault_key_enc:cred.vault_key_enc,profile_name_enc:jplopsoft_encRaw(jplopsoft_NAME2+username,state.vaultKey),documents_name_enc:jplopsoft_encRaw(jplopsoft_NAME2+'Documents',state.vaultKey),desktop_name_enc:jplopsoft_encRaw(jplopsoft_NAME2+'Desktop',state.vaultKey),downloads_name_enc:jplopsoft_encRaw(jplopsoft_NAME2+'Downloads',state.vaultKey)};
   return await jplopsoft_xshApiPromise('account_create','POST',payload);
 }
 async function jplopsoft_xshSystemResetLocalAccountPassword(ctx,username,password){
@@ -24887,6 +25121,1009 @@ async function jplopsoft_xshFlushMappedView(ctx,mappingOrAddress,length){
   return true;
 }
 
+
+/* =========================================================================
+ * os82 — Win32 / Windows NT compatibility surface for XSH
+ *
+ * This layer preserves the ExOS security boundary:
+ * - HWND/process/registry/file operations target ExOS objects only.
+ * - keyboard/mouse injection and hooks are confined to the caller's ExOS
+ *   foreground process; browser-host/global input is never exposed.
+ * - ICMP/TAPI/raw host facilities explicitly report NOT_SUPPORTED instead of
+ *   faking a capability that Chromium does not provide.
+ * ========================================================================= */
+
+var jplopsoft_NTCOMPAT_OS83={
+  version:'6.4.0-dev-os84',
+  model:'EXOS_WIN32_NT_COMPAT_V2',
+  input:{keys:{},cursor:{x:0,y:0},clip:null,showCount:0},
+  hookSeq:0xD100,
+  hotkeys:{},
+  capture:null
+};
+
+
+function jplopsoft_ntcompatModifierMask(e){
+  var m=0;
+  if(e&&e.altKey)m|=0x0001;
+  if(e&&e.ctrlKey)m|=0x0002;
+  if(e&&e.shiftKey)m|=0x0004;
+  if(e&&e.metaKey)m|=0x0008;
+  return m;
+}
+
+function jplopsoft_ntcompatHotkeyKey(modifiers,vk){
+  return String((Number(modifiers)||0)&0x000F)+':'+String(Number(vk)||0);
+}
+
+function jplopsoft_ntcompatDispatchHotkeys(e,keyCode){
+  var table=jplopsoft_NTCOMPAT_OS83.hotkeys,k,h,mods,ctx,rec,lParam,matched=false;
+  if(!table)return false;
+  mods=jplopsoft_ntcompatModifierMask(e);
+  for(k in table){
+    if(!table.hasOwnProperty(k))continue;
+    h=table[k];
+    if(!h)continue;
+    ctx=typeof jplopsoft_xshRunByPid==='function'?jplopsoft_xshRunByPid(h.pid):null;
+    if(!ctx||ctx.terminating){delete table[k];continue;}
+    if((Number(h.modifiers)&0x000F)!==mods||Number(h.vk)!==Number(keyCode))continue;
+    if((Number(h.modifiers)&0x4000)!==0&&e&&e.repeat)continue;
+    rec=h.hwnd?jplopsoft_user32GetRecord(h.hwnd):null;
+    if(h.hwnd&&(!rec||!ctx.windows[String(h.hwnd)])){delete table[k];continue;}
+    lParam=((Number(h.vk)&0xFFFF)<<16)|(Number(h.modifiers)&0xFFFF);
+    jplopsoft_xshPostMessage(ctx,{hwnd:h.hwnd||0,message:'WM_HOTKEY',wParam:h.id,lParam:lParam});
+    jplopsoft_xshSendEvent(ctx,{
+      event:'hotkey',
+      controlId:'HOTKEY:'+String(h.id),
+      action:'hotkey',
+      hwnd:h.hwnd||0,
+      id:h.id,
+      modifiers:Number(h.modifiers)||0,
+      vkCode:Number(h.vk)||0,
+      repeat:!!(e&&e.repeat)
+    });
+    matched=true;
+  }
+  if(matched&&e){try{e.preventDefault();}catch(ignoreHotkeyPrevent){}try{e.stopPropagation();}catch(ignoreHotkeyStop){}}
+  return matched;
+}
+
+function jplopsoft_ntcompatCaptureEvent(action,e){
+  var cap=jplopsoft_NTCOMPAT_OS83.capture,ctx,rec,client,cr,x,y;
+  if(!cap)return false;
+  ctx=typeof jplopsoft_xshRunByPid==='function'?jplopsoft_xshRunByPid(cap.pid):null;
+  rec=jplopsoft_user32GetRecord(cap.hwnd);
+  if(!ctx||ctx.terminating||!rec||!ctx.windows[String(cap.hwnd)]){
+    jplopsoft_NTCOMPAT_OS83.capture=null;
+    return false;
+  }
+  client=jplopsoft_GetClientElement(cap.hwnd);
+  cr=client&&client.getBoundingClientRect?client.getBoundingClientRect():{left:0,top:0,width:0,height:0};
+  x=(Number(e&&e.clientX)||0)-Number(cr.left||0);
+  y=(Number(e&&e.clientY)||0)-Number(cr.top||0);
+  jplopsoft_xshSendEvent(ctx,{
+    event:'window',
+    controlId:'WINDOW:'+String(cap.hwnd),
+    action:'capture-'+String(action||''),
+    hwnd:cap.hwnd,
+    x:x,y:y,
+    clientX:Number(e&&e.clientX)||0,
+    clientY:Number(e&&e.clientY)||0,
+    button:Number(e&&e.button)||0,
+    buttons:Number(e&&e.buttons)||0,
+    pointerId:Number(e&&e.pointerId)||0,
+    pointerType:String(e&&e.pointerType||'mouse'),
+    ctrlKey:!!(e&&e.ctrlKey),shiftKey:!!(e&&e.shiftKey),altKey:!!(e&&e.altKey)
+  });
+  return true;
+}
+
+(function(){
+  if(typeof document==='undefined'||jplopsoft_NTCOMPAT_OS83.input.bound)return;
+  jplopsoft_NTCOMPAT_OS83.input.bound=true;
+
+  function keyCode(e){
+    return Number(e&&(
+      e.keyCode||
+      e.which||
+      (
+        String(e.code||'').indexOf('Key')===0
+          ?String(e.code).charCodeAt(3)
+          :0
+      )
+    ))||0;
+  }
+
+  function foregroundCtx(){
+    var pid=parseInt(jplopsoft_NT_SCHEDULER.foregroundPid,10)||0;
+    return pid&&typeof jplopsoft_xshRunByPid==='function'
+      ?jplopsoft_xshRunByPid(pid)
+      :null;
+  }
+
+  function hookEvent(type,e){
+    var ctx=foregroundCtx(),hooks,k,h,match=false,payload;
+    if(!ctx||!ctx.ntcompatHooks)return;
+    hooks=ctx.ntcompatHooks;
+
+    for(k in hooks){
+      if(!hooks.hasOwnProperty(k))continue;
+      h=hooks[k];
+      if(!h)continue;
+
+      if(type==='keyboard'){
+        match=h.idHook===2||h.idHook===13;
+        payload={
+          vkCode:keyCode(e),
+          key:String(e.key||''),
+          code:String(e.code||''),
+          down:e.type==='keydown',
+          repeat:!!e.repeat,
+          ctrlKey:!!e.ctrlKey,
+          shiftKey:!!e.shiftKey,
+          altKey:!!e.altKey
+        };
+      }else{
+        match=h.idHook===7||h.idHook===14;
+        payload={
+          x:Number(e.clientX)||0,
+          y:Number(e.clientY)||0,
+          button:Number(e.button)||0,
+          buttons:Number(e.buttons)||0,
+          action:String(e.type||'')
+        };
+      }
+
+      if(match&&typeof jplopsoft_xshSendEvent==='function'){
+        jplopsoft_xshSendEvent(ctx,{
+          event:'hook',
+          controlId:'HOOK:'+String(h.handle),
+          action:type,
+          hook:h.handle,
+          code:0,
+          data:payload
+        });
+      }
+    }
+  }
+
+  document.addEventListener('keydown',function(e){
+    var c=keyCode(e);
+    if(c)jplopsoft_NTCOMPAT_OS83.input.keys[String(c)]={down:true,pressed:true};
+    hookEvent('keyboard',e);
+    if(c)jplopsoft_ntcompatDispatchHotkeys(e,c);
+  },true);
+
+  document.addEventListener('keyup',function(e){
+    var c=keyCode(e),r;
+    if(c){
+      r=jplopsoft_NTCOMPAT_OS83.input.keys[String(c)]||{};
+      r.down=false;
+      jplopsoft_NTCOMPAT_OS83.input.keys[String(c)]=r;
+    }
+    hookEvent('keyboard',e);
+  },true);
+
+  document.addEventListener('mousemove',function(e){
+    var c=jplopsoft_NTCOMPAT_OS83.input.cursor,clip=jplopsoft_NTCOMPAT_OS83.input.clip,
+        x=Number(e.clientX)||0,y=Number(e.clientY)||0;
+    if(clip){
+      x=Math.max(Number(clip.left)||0,Math.min(Number(clip.right)||window.innerWidth,x));
+      y=Math.max(Number(clip.top)||0,Math.min(Number(clip.bottom)||window.innerHeight,y));
+    }
+    c.x=x;c.y=y;
+    hookEvent('mouse',e);
+    jplopsoft_ntcompatCaptureEvent('pointermove',e);
+  },true);
+
+  document.addEventListener('mousedown',function(e){hookEvent('mouse',e);jplopsoft_ntcompatCaptureEvent('pointerdown',e);},true);
+  document.addEventListener('mouseup',function(e){hookEvent('mouse',e);jplopsoft_ntcompatCaptureEvent('pointerup',e);},true);
+  document.addEventListener('pointercancel',function(e){jplopsoft_ntcompatCaptureEvent('pointercancel',e);},true);
+})();
+
+function jplopsoft_ntcompatIntegrityRank(x){
+  x=String(x||'MEDIUM').toUpperCase();
+  return x==='LOW'?1:x==='MEDIUM'?2:x==='HIGH'?3:x==='SYSTEM'?4:2;
+}
+
+function jplopsoft_ntcompatWindowReadable(ctx,rec){
+  if(!rec)return false;
+  if(ctx&&ctx.windows&&ctx.windows[String(rec.hwnd)])return true;
+  var p=rec.ntPid?jplopsoft_ntKernelProcessByPid(rec.ntPid):null,
+      self=ctx&&ctx.process?ctx.process:null;
+  if(!p||!self)return true;
+  return String(p.username||'').toLowerCase()===String(self.username||'').toLowerCase();
+}
+
+function jplopsoft_ntcompatWindowWritable(ctx,rec){
+  if(!rec||!ctx)return false;
+  if(ctx.windows&&ctx.windows[String(rec.hwnd)])return true;
+  var p=rec.ntPid?jplopsoft_ntKernelProcessByPid(rec.ntPid):null,
+      self=ctx.process;
+  if(!p||!self)return false;
+  if(String(p.username||'').toLowerCase()!==String(self.username||'').toLowerCase())return false;
+  return jplopsoft_ntcompatIntegrityRank(p.integrity)<=jplopsoft_ntcompatIntegrityRank(self.integrity);
+}
+
+function jplopsoft_ntcompatWindowList(){
+  var out=[],k,r,w,z;
+  for(k in jplopsoft_USER32.windows){
+    if(!jplopsoft_USER32.windows.hasOwnProperty(k))continue;
+    r=jplopsoft_USER32.windows[k];
+    if(!r||r.ntTerminated)continue;
+    w=jplopsoft_GetWindowElement(r.hwnd);
+    z=0;
+    try{z=parseInt(w&&w.style?w.style.zIndex:0,10)||0;}catch(ignoreZ){}
+    out.push({rec:r,z:z});
+  }
+  out.sort(function(a,b){
+    if(a.z!==b.z)return a.z-b.z;
+    return (parseInt(a.rec.hwnd,10)||0)-(parseInt(b.rec.hwnd,10)||0);
+  });
+  return out.map(function(x){return x.rec;});
+}
+
+function jplopsoft_ntcompatFindWindow(ctx,className,title,parentHwnd,afterHwnd){
+  var list=jplopsoft_ntcompatWindowList(),i,r,start=!afterHwnd,
+      cls=className===null||typeof className==='undefined'?'':String(className),
+      txt=title===null||typeof title==='undefined'?'':String(title),
+      parent=parseInt(parentHwnd,10)||0,after=parseInt(afterHwnd,10)||0;
+
+  for(i=0;i<list.length;i++){
+    r=list[i];
+    if(!start){
+      if(parseInt(r.hwnd,10)===after)start=true;
+      continue;
+    }
+    if(parent&&(parseInt(r.parentHwnd,10)||0)!==parent)continue;
+    if(!parent&&(parseInt(r.parentHwnd,10)||0)!==0)continue;
+    if(cls&&String(r.className||'').toLowerCase()!==cls.toLowerCase())continue;
+    if(txt&&String(r.title||'')!==txt)continue;
+    if(!jplopsoft_ntcompatWindowReadable(ctx,r))continue;
+    return parseInt(r.hwnd,10)||0;
+  }
+  return 0;
+}
+
+function jplopsoft_ntcompatActiveElementHwnd(){
+  var n=document.activeElement,cur,hwnd=0;
+  while(n&&n!==document.body){
+    try{
+      cur=n.getAttribute&&n.getAttribute('data-exfs-hwnd');
+      if(cur){hwnd=parseInt(cur,10)||0;break;}
+    }catch(ignoreAttr){}
+    n=n.parentNode;
+  }
+  if(!hwnd)hwnd=parseInt(jplopsoft_NT_SCHEDULER.foregroundHwnd,10)||0;
+  return hwnd;
+}
+
+function jplopsoft_ntcompatMoveWindow(ctx,hwnd,x,y,w,h,repaint){
+  var rec=jplopsoft_user32GetRecord(hwnd),el;
+  if(!rec)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid HWND.');
+  if(!jplopsoft_ntcompatWindowWritable(ctx,rec))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Window manipulation denied by ExOS UIPI.');
+  el=jplopsoft_GetWindowElement(hwnd);
+  if(!el)return false;
+  el.style.left=Math.round(Number(x)||0)+'px';
+  el.style.top=Math.round(Number(y)||0)+'px';
+  if(Number(w)>0)el.style.width=Math.round(Number(w))+'px';
+  if(Number(h)>0)el.style.height=Math.round(Number(h))+'px';
+  if(repaint&&typeof jplopsoft_gdi32Invalidate==='function')jplopsoft_gdi32Invalidate(ctx,hwnd,null);
+  return true;
+}
+
+
+function jplopsoft_ntcompatApplyWindowStyles(rec){
+  var win=rec?jplopsoft_GetWindowElement(rec.hwnd):null,
+      titlebar=rec&&rec.titlebarId?jplopsoft_el(rec.titlebarId):null,
+      WS_CAPTION=0x00C00000,WS_THICKFRAME=0x00040000,WS_EX_TOPMOST=0x00000008;
+  if(!rec||!win)return false;
+  if(titlebar)titlebar.style.display=(Number(rec.style)&WS_CAPTION)!==0?'':'none';
+  win.style.resize=(Number(rec.style)&WS_THICKFRAME)!==0?'both':'none';
+  win.style.overflow='hidden';
+  if((Number(rec.exStyle)&WS_EX_TOPMOST)!==0){rec.topmost=true;win.style.zIndex='2147481000';}
+  else if(rec.topmost){rec.topmost=false;win.style.zIndex='';}
+  return true;
+}
+
+function jplopsoft_ntcompatSetWindowPos(ctx,hwnd,insertAfter,x,y,cx,cy,flags){
+  var SWP_NOSIZE=0x0001,SWP_NOMOVE=0x0002,SWP_NOZORDER=0x0004,SWP_SHOWWINDOW=0x0040,SWP_HIDEWINDOW=0x0080,
+      HWND_TOP=0,HWND_BOTTOM=1,HWND_TOPMOST=-1,HWND_NOTOPMOST=-2,WS_EX_TOPMOST=0x00000008,
+      rec=jplopsoft_user32GetRecord(hwnd),el,ia=parseInt(insertAfter,10);
+  if(!rec)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid HWND.');
+  if(!jplopsoft_ntcompatWindowWritable(ctx,rec))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'SetWindowPos denied by ExOS UIPI.');
+  el=jplopsoft_GetWindowElement(hwnd);if(!el)return false;flags=Number(flags)>>>0;
+  if(!(flags&SWP_NOMOVE)){el.style.left=Math.round(Number(x)||0)+'px';el.style.top=Math.round(Number(y)||0)+'px';}
+  if(!(flags&SWP_NOSIZE)){if(Number(cx)>0)el.style.width=Math.round(Number(cx))+'px';if(Number(cy)>0)el.style.height=Math.round(Number(cy))+'px';}
+  if(!(flags&SWP_NOZORDER)){
+    if(ia===HWND_TOPMOST){rec.exStyle=(Number(rec.exStyle)||0)|WS_EX_TOPMOST;rec.topmost=true;el.style.zIndex='2147481000';}
+    else if(ia===HWND_NOTOPMOST){rec.exStyle=(Number(rec.exStyle)||0)&(~WS_EX_TOPMOST);rec.topmost=false;el.style.zIndex='';jplopsoft_user32Activate(rec);}
+    else if(ia===HWND_BOTTOM){rec.topmost=false;el.style.zIndex='2';}
+    else if(ia===HWND_TOP||isNaN(ia)){jplopsoft_user32Activate(rec);}
+    else{var after=jplopsoft_GetWindowElement(ia);if(after){var az=parseInt(after.style.zIndex,10)||140;el.style.zIndex=String(az+1);}}
+  }
+  if(flags&SWP_SHOWWINDOW)jplopsoft_user32Display(rec,true);
+  if(flags&SWP_HIDEWINDOW)jplopsoft_user32Display(rec,false);
+  jplopsoft_ntcompatApplyWindowStyles(rec);
+  jplopsoft_SendMessage(rec.hwnd,jplopsoft_WM_SIZE,0,0);
+  return true;
+}
+
+function jplopsoft_ntcompatExpandEnv(ctx,text){
+  var env=ctx&&ctx.process&&ctx.process.peb&&ctx.process.peb.processParameters
+        ?ctx.process.peb.processParameters.environment:{};
+  return String(text===undefined||text===null?'':text).replace(/%([^%]+)%/g,function(all,name){
+    var key=String(name||'').toUpperCase();
+    return typeof env[key]==='undefined'?all:String(env[key]);
+  });
+}
+
+function jplopsoft_ntcompatGetCurrentProcess(ctx){
+  return ctx&&ctx.process?ctx.process:null;
+}
+
+function jplopsoft_ntcompatProcessFromHandle(ctx,h){
+  h=Number(h);
+  if(h===-1)return jplopsoft_ntcompatGetCurrentProcess(ctx);
+  var rec=jplopsoft_ntProcessHandleForOwner(ctx.pid,h);
+  return rec?jplopsoft_ntKernelProcessByPid(rec.pid):null;
+}
+
+function jplopsoft_ntcompatEmptyWorkingSet(ctx,h){
+  var p=jplopsoft_ntcompatProcessFromHandle(ctx,h),vm,i,r,k,page,count=0;
+  if(!p||!p.vm)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid process handle.');
+  vm=p.vm;
+  for(i=0;i<vm.regions.length;i++){
+    r=vm.regions[i];
+    if(!r||r.sectionObject)continue;
+    for(k in r.pages){
+      if(!r.pages.hasOwnProperty(k))continue;
+      page=r.pages[k];
+      if(page&&page.resident&&page.pinCount<=0){
+        try{if(jplopsoft_vmmPageOut(page))count++;}catch(ignoreTrim){}
+      }
+    }
+  }
+  jplopsoft_vmmKernel().stats.trims++;
+  return{ok:true,pagesTrimmed:count,workingSet:jplopsoft_vmmProcessStatus(p)};
+}
+
+function jplopsoft_ntcompatSetWorkingSet(ctx,h,minBytes,maxBytes){
+  var p=jplopsoft_ntcompatProcessFromHandle(ctx,h),max=Number(maxBytes),min=Number(minBytes),
+      status;
+  if(!p)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid process handle.');
+  if(min===-1&&max===-1)return jplopsoft_ntcompatEmptyWorkingSet(ctx,h);
+  p.workingSetMinBytes=Math.max(0,isFinite(min)?min:0);
+  p.workingSetMaxBytes=Math.max(p.workingSetMinBytes,isFinite(max)&&max>=0?max:0);
+  status=jplopsoft_vmmProcessStatus(p);
+  if(p.workingSetMaxBytes>0&&status.residentPrivateBytes>p.workingSetMaxBytes){
+    var vm=p.vm,i,r,k,page,list=[];
+    for(i=0;i<vm.regions.length;i++){
+      r=vm.regions[i];
+      if(!r||r.sectionObject)continue;
+      for(k in r.pages)if(r.pages.hasOwnProperty(k)){
+        page=r.pages[k];
+        if(page&&page.resident&&page.pinCount<=0)list.push(page);
+      }
+    }
+    list.sort(function(a,b){return(Number(a.lastAccess)||0)-(Number(b.lastAccess)||0);});
+    for(i=0;i<list.length&&jplopsoft_vmmProcessStatus(p).residentPrivateBytes>p.workingSetMaxBytes;i++){
+      try{jplopsoft_vmmPageOut(list[i]);}catch(ignoreWsTrim){}
+    }
+  }
+  return true;
+}
+
+function jplopsoft_ntcompatToolhelpSnapshot(ctx,flags,pid){
+  var rows=jplopsoft_NtQuerySystemInformation('SystemProcessInformation');
+  rows=rows&&rows.information?rows.information:[];
+  var h=jplopsoft_xshAllocateHandle(ctx,{
+    kind:'toolhelp-process',
+    rows:rows,
+    index:-1,
+    flags:Number(flags)>>>0,
+    targetPid:Number(pid)>>>0
+  });
+  return h;
+}
+
+function jplopsoft_ntcompatToolhelpNext(ctx,h,first){
+  var rec=jplopsoft_xshHandle(ctx,h),row;
+  if(!rec||rec.kind!=='toolhelp-process')throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid Toolhelp snapshot handle.');
+  rec.index=first?0:rec.index+1;
+  if(rec.index<0||rec.index>=rec.rows.length)return null;
+  row=rec.rows[rec.index];
+  return{
+    dwSize:296,
+    cntUsage:0,
+    th32ProcessID:Number(row.pid)||0,
+    th32DefaultHeapID:0,
+    th32ModuleID:0,
+    cntThreads:Number(row.logicalThreads)||1,
+    th32ParentProcessID:Number(row.ppid)||0,
+    pcPriClassBase:Number(row.basePriority)||8,
+    dwFlags:0,
+    szExeFile:String(row.imageName||'')
+  };
+}
+
+function jplopsoft_ntcompatModuleFileName(ctx,hModule){
+  var p=ctx.process,base=Number(hModule)||0,k;
+  if(!p)return'';
+  if(!base)return String(ctx.imagePath||p.imagePath||p.imageName||'');
+  if(p.vm&&p.vm.modules){
+    for(k in p.vm.modules){
+      if(p.vm.modules.hasOwnProperty(k)&&Number(p.vm.modules[k])===base){
+        return 'C:\\Windows\\System32\\'+String(k);
+      }
+    }
+  }
+  return'';
+}
+
+async function jplopsoft_ntcompatEnsureTemp(ctx){
+  var username=String(ctx&&ctx.process&&ctx.process.username||state.samUsername||'administrator'),
+      parts=['C:\\Users\\'+username+'\\AppData','C:\\Users\\'+username+'\\AppData\\Local','C:\\Users\\'+username+'\\AppData\\Local\\Temp'],
+      i,n;
+  for(i=0;i<parts.length;i++){
+    n=jplopsoft_xshResolveC(ctx,parts[i],false);
+    if(!n){
+      try{await jplopsoft_xshCreateDirectory(ctx,parts[i]);}catch(ignoreCreateTemp){}
+    }
+  }
+  if(ctx&&ctx.process){
+    jplopsoft_SetEnvironmentVariable(ctx.process,'LOCALAPPDATA','C:\\Users\\'+username+'\\AppData\\Local');
+    jplopsoft_SetEnvironmentVariable(ctx.process,'TEMP',parts[2]);
+    jplopsoft_SetEnvironmentVariable(ctx.process,'TMP',parts[2]);
+  }
+  return parts[2]+'\\';
+}
+
+function jplopsoft_ntcompatIniParse(text){
+  var sections={},section='',lines=String(text||'').split(/\r?\n/),i,line,p,key,val;
+  sections['']={};
+  for(i=0;i<lines.length;i++){
+    line=lines[i].trim();
+    if(!line||line.charAt(0)===';'||line.charAt(0)==='#')continue;
+    if(line.charAt(0)==='['&&line.charAt(line.length-1)===']'){
+      section=line.substring(1,line.length-1).trim();
+      if(!sections[section])sections[section]={};
+      continue;
+    }
+    p=line.indexOf('=');
+    if(p<0)continue;
+    key=line.substring(0,p).trim();val=line.substring(p+1).trim();
+    if(!sections[section])sections[section]={};
+    sections[section][key]=val;
+  }
+  return sections;
+}
+
+function jplopsoft_ntcompatIniFindSection(sections,name){
+  var k,want=String(name||'').toLowerCase();
+  for(k in sections)if(sections.hasOwnProperty(k)&&String(k).toLowerCase()===want)return k;
+  return null;
+}
+
+function jplopsoft_ntcompatIniFindKey(sec,name){
+  var k,want=String(name||'').toLowerCase();
+  for(k in sec)if(sec.hasOwnProperty(k)&&String(k).toLowerCase()===want)return k;
+  return null;
+}
+
+async function jplopsoft_ntcompatGetPrivateProfileString(ctx,section,key,def,file){
+  var text='',sections,sname,kname,sec;
+  try{text=await jplopsoft_xshReadTextFile(ctx,file);}catch(ignoreIniRead){text='';}
+  sections=jplopsoft_ntcompatIniParse(text);
+  if(section===null||typeof section==='undefined')return Object.keys(sections).filter(function(x){return x!=='';});
+  sname=jplopsoft_ntcompatIniFindSection(sections,section);
+  if(sname===null)return String(def===undefined||def===null?'':def);
+  sec=sections[sname];
+  if(key===null||typeof key==='undefined')return Object.keys(sec);
+  kname=jplopsoft_ntcompatIniFindKey(sec,key);
+  return kname===null?String(def===undefined||def===null?'':def):String(sec[kname]);
+}
+
+async function jplopsoft_ntcompatWritePrivateProfileString(ctx,section,key,value,file){
+  var text='',sections,sname,kname,sec,out=[],s,k;
+  try{text=await jplopsoft_xshReadTextFile(ctx,file);}catch(ignoreIniRead){text='';}
+  sections=jplopsoft_ntcompatIniParse(text);
+  sname=jplopsoft_ntcompatIniFindSection(sections,section);
+  if(sname===null){sname=String(section||'');sections[sname]={};}
+  sec=sections[sname];
+
+  if(key===null||typeof key==='undefined'){
+    delete sections[sname];
+  }else{
+    kname=jplopsoft_ntcompatIniFindKey(sec,key);
+    if(value===null||typeof value==='undefined'){
+      if(kname!==null)delete sec[kname];
+    }else{
+      sec[kname===null?String(key):kname]=String(value);
+    }
+  }
+
+  for(s in sections){
+    if(!sections.hasOwnProperty(s))continue;
+    if(s!=='')out.push('['+s+']');
+    sec=sections[s];
+    for(k in sec)if(sec.hasOwnProperty(k))out.push(k+'='+String(sec[k]));
+    out.push('');
+  }
+  await jplopsoft_xshWriteTextFile(ctx,file,out.join('\r\n'));
+  return true;
+}
+
+async function jplopsoft_ntcompatWaitProcess(ctx,h,ms){
+  var p=jplopsoft_ntcompatProcessFromHandle(ctx,h),start=Date.now(),timeout=Number(ms)>>>0;
+  if(!p)return 0;
+  if(!p.alive)return 0;
+  return await new Promise(function(resolve){
+    function poll(){
+      var q=jplopsoft_ntKernelProcessByPid(p.pid);
+      if(!q||!q.alive){resolve(0);return;}
+      if(timeout!==0xFFFFFFFF&&Date.now()-start>=timeout){resolve(0x102);return;}
+      window.setTimeout(poll,25);
+    }
+    poll();
+  });
+}
+
+function jplopsoft_ntcompatGetLastErrorState(ctx){
+  if(!ctx.ntcompat)ctx.ntcompat={lastError:0};
+  return ctx.ntcompat;
+}
+
+function jplopsoft_ntcompatSetLastError(ctx,code){
+  jplopsoft_ntcompatGetLastErrorState(ctx).lastError=Number(code)>>>0;
+  return code;
+}
+
+async function jplopsoft_ntcompatCompress(data,decompress){
+  var src=jplopsoft_xshNormalizeBytes(data),kind=decompress?'DecompressionStream':'CompressionStream',
+      C=window[kind],stream,writer,response,ab;
+  if(typeof C!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'Chromium CompressionStream API is unavailable.');
+  stream=new C('deflate');
+  writer=stream.writable.getWriter();
+  await writer.write(src);
+  await writer.close();
+  response=new Response(stream.readable);
+  ab=await response.arrayBuffer();
+  return new Uint8Array(ab);
+}
+
+async function jplopsoft_ntcompatMinorDispatch(ctx,api,method,args){
+  args=args||[];
+  if(api==='psapi'){
+    if(method==='GetVersion')return{version:'6.4.0-dev-os84',model:'EXOS_PSAPI_V1'};
+    if(method==='EmptyWorkingSet')return jplopsoft_ntcompatEmptyWorkingSet(ctx,args[0]);
+  }
+
+  if(api==='oleaut32'){
+    if(!ctx.oleaut32)ctx.oleaut32={next:0xDA00,bstr:{}};
+    if(method==='GetVersion')return{version:'6.4.0-dev-os84',model:'EXOS_OLEAUT32_V1'};
+    if(method==='SysAllocString'){
+      var bh=ctx.oleaut32.next++;
+      ctx.oleaut32.bstr[String(bh)]=String(args[0]===undefined||args[0]===null?'':args[0]);
+      return bh;
+    }
+    if(method==='SysStringLen'){
+      var bs=ctx.oleaut32.bstr[String(Number(args[0])||0)];
+      if(typeof bs==='undefined')throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid BSTR handle.');
+      return bs.length;
+    }
+    if(method==='BstrToString'){
+      var bst=ctx.oleaut32.bstr[String(Number(args[0])||0)];
+      if(typeof bst==='undefined')throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid BSTR handle.');
+      return String(bst);
+    }
+    if(method==='SysFreeString'){
+      delete ctx.oleaut32.bstr[String(Number(args[0])||0)];
+      return true;
+    }
+  }
+
+  if(api==='icmp'){
+    if(!ctx.icmp)ctx.icmp={next:0xDB00,handles:{}};
+    if(method==='GetVersion'||method==='QueryCapabilities')return{version:'6.4.0-dev-os84',rawIcmp:false,browserRestriction:true};
+    if(method==='IcmpCreateFile'){
+      var ih=ctx.icmp.next++;
+      ctx.icmp.handles[String(ih)]={handle:ih};
+      jplopsoft_ntcompatSetLastError(ctx,0);
+      return ih;
+    }
+    if(method==='IcmpCloseHandle'){
+      var ik=String(Number(args[0])||0);
+      if(!ctx.icmp.handles[ik])return false;
+      delete ctx.icmp.handles[ik];return true;
+    }
+    if(method==='IcmpSendEcho'){
+      jplopsoft_ntcompatSetLastError(ctx,50); /* ERROR_NOT_SUPPORTED */
+      return{replyCount:0,lastError:50,status:'ERROR_NOT_SUPPORTED',rawIcmp:false};
+    }
+  }
+
+  if(api==='zlib'){
+    if(method==='GetVersion')return{version:'1.2-compatible facade',backend:'CompressionStream(deflate)'};
+    if(method==='compress'){
+      var c=await jplopsoft_ntcompatCompress(args[0],false);
+      return{status:0,data:c,destLen:c.length};
+    }
+    if(method==='uncompress'){
+      var u=await jplopsoft_ntcompatCompress(args[0],true);
+      return{status:0,data:u,destLen:u.length};
+    }
+  }
+
+  if(api==='tapi32'){
+    if(method==='GetVersion'||method==='QueryCapabilities')return{telephony:false,hostDialerExposed:false};
+    if(method==='tapiRequestMakeCall'){
+      jplopsoft_ntcompatSetLastError(ctx,50);
+      return 0x80000048; /* LINEERR_OPERATIONUNAVAIL */
+    }
+  }
+
+  if(api==='urlmon'){
+    if(method==='GetVersion')return{version:'6.4.0-dev-os84',backend:'WinINet broker + ExFS'};
+    if(method==='URLDownloadToFile'){
+      if(typeof jplopsoft_wininetDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'WinINet broker unavailable.');
+      var session=await jplopsoft_wininetDispatch(ctx,'InternetOpen',['URLMON/ExOS']);
+      var hurl=0;
+      try{
+        hurl=await jplopsoft_wininetDispatch(ctx,'InternetOpenUrl',[session,args[1],{},{}]);
+        var chunks=[],total=0,r;
+        do{
+          r=await jplopsoft_wininetDispatch(ctx,'InternetReadFile',[hurl,262144]);
+          if(r&&r.data&&r.data.length){chunks.push(r.data);total+=r.data.length;}
+        }while(r&&!r.eof);
+        var all=new Uint8Array(total),off=0,i;
+        for(i=0;i<chunks.length;i++){all.set(chunks[i],off);off+=chunks[i].length;}
+        var file=jplopsoft_xshResolveC(ctx,String(args[2]||''),false);
+        if(!file)file=await jplopsoft_xshCreateCNode(ctx,String(args[2]||''),'file');
+        await jplopsoft_xshWriteNodeBytes(file,all);
+        return 0; /* S_OK */
+      }finally{
+        try{if(hurl)await jplopsoft_wininetDispatch(ctx,'InternetCloseHandle',[hurl]);}catch(ignoreUrlClose){}
+        try{await jplopsoft_wininetDispatch(ctx,'InternetCloseHandle',[session]);}catch(ignoreSessionClose){}
+      }
+    }
+  }
+
+  if(api==='winmm'){
+    if(!ctx.winmm)ctx.winmm={session:0,track:0};
+    if(method==='GetVersion')return{version:'6.4.0-dev-os84',backend:'ExOS MediaFoundation'};
+    if(method==='sndPlaySound'){
+      if(typeof jplopsoft_mediaDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'MediaFoundation unavailable.');
+      var sound=args[0],flags=Number(args[1])>>>0;
+      if(sound===null||typeof sound==='undefined'||sound===''){
+        try{if(ctx.winmm.track)await jplopsoft_mediaDispatch(ctx,'Stop',[ctx.winmm.track]);}catch(ignoreStopSound){}
+        ctx.winmm.track=0;
+        return true;
+      }
+      if(!ctx.winmm.session){
+        await jplopsoft_mediaDispatch(ctx,'MFStartup',[]);
+        var sr=await jplopsoft_mediaDispatch(ctx,'CreateAudioSession',[{}]);
+        ctx.winmm.session=sr&&sr.handle?sr.handle:sr;
+      }
+      var tr=await jplopsoft_mediaDispatch(ctx,'CreateSourceFromPath',[ctx.winmm.session,String(sound),{loop:!!(flags&0x0008)}]);
+      ctx.winmm.track=tr&&tr.handle?tr.handle:tr;
+      await jplopsoft_mediaDispatch(ctx,'Play',[ctx.winmm.track]);
+      return true;
+    }
+    if(method==='sndPlay'||method==='sndStop'){
+      return await jplopsoft_ntcompatMinorDispatch(ctx,'winmm','sndPlaySound',method==='sndStop'?[null,args[1]]:args);
+    }
+  }
+
+  throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'XSH compatibility API not supported: '+api+'.'+method);
+}
+
+async function jplopsoft_ntcompatKernel32Dispatch(ctx,method,args){
+  args=args||[];
+  if(method==='GetVersionEx'||method==='GetVersionExA'||method==='GetVersionExW'){
+    return{
+      dwOSVersionInfoSize:284,
+      dwMajorVersion:10,
+      dwMinorVersion:0,
+      dwBuildNumber:19045,
+      dwPlatformId:2,
+      szCSDVersion:'ExOS NT compatibility layer',
+      wServicePackMajor:0,
+      wServicePackMinor:0,
+      wSuiteMask:0,
+      wProductType:1,
+      exosVersion:'6.4.0-dev-os84',
+      emulated:true
+    };
+  }
+  if(method==='ExitProcess'){
+    window.setTimeout(function(){jplopsoft_xshTerminate(ctx,Number(args[0])||0,'kernel32.ExitProcess',false);},0);
+    return true;
+  }
+  if(method==='GetCurrentProcess')return -1;
+  if(method==='GetCurrentProcessId')return Number(ctx.pid)||0;
+  if(method==='GetTickCount')return ((Date.now()-jplopsoft_NT_KERNEL.bootTime)>>>0);
+  if(method==='GetTickCount64')return Math.max(0,Date.now()-jplopsoft_NT_KERNEL.bootTime);
+  if(method==='GetSystemInfo'){
+    var vs=jplopsoft_vmmGlobalStatus(ctx.process);
+    return{
+      wProcessorArchitecture:9,
+      dwPageSize:vs.pageSize,
+      lpMinimumApplicationAddress:0x10000,
+      lpMaximumApplicationAddress:Math.pow(2,47)-1,
+      dwActiveProcessorMask:0xFFFFFFFF,
+      dwNumberOfProcessors:Math.max(1,Number(navigator.hardwareConcurrency)||1),
+      dwProcessorType:8664,
+      dwAllocationGranularity:vs.allocationGranularity,
+      wProcessorLevel:6,
+      wProcessorRevision:0,
+      architecture:'AMD64-compatible ExOS V8 virtual process'
+    };
+  }
+  if(method==='GlobalMemoryStatus'){
+    var m=jplopsoft_vmmGlobalMemoryStatus(ctx.process);
+    return{
+      dwLength:32,
+      dwMemoryLoad:Number(m.dwMemoryLoad)||0,
+      dwTotalPhys:Math.min(0xFFFFFFFF,Number(m.ullTotalPhys)||0),
+      dwAvailPhys:Math.min(0xFFFFFFFF,Number(m.ullAvailPhys)||0),
+      dwTotalPageFile:Math.min(0xFFFFFFFF,Number(m.ullTotalPageFile)||0),
+      dwAvailPageFile:Math.min(0xFFFFFFFF,Number(m.ullAvailPageFile)||0),
+      dwTotalVirtual:0x7FFFFFFF,
+      dwAvailVirtual:0x7FFFFFFF
+    };
+  }
+  if(method==='SetProcessWorkingSetSize')return jplopsoft_ntcompatSetWorkingSet(ctx,args[0],args[1],args[2]);
+  if(method==='WaitForSingleObject')return await jplopsoft_ntcompatWaitProcess(ctx,args[0],args[1]);
+  if(method==='CreateToolhelp32Snapshot'||method==='CreateToolhelpSnapshot')return jplopsoft_ntcompatToolhelpSnapshot(ctx,args[0],args[1]);
+  if(method==='Process32First'||method==='ProcessFirst')return jplopsoft_ntcompatToolhelpNext(ctx,args[0],true);
+  if(method==='Process32Next'||method==='ProcessNext')return jplopsoft_ntcompatToolhelpNext(ctx,args[0],false);
+  if(method==='GetWindowsDirectory'||method==='GetWindowsDirectoryA'||method==='GetWindowsDirectoryW')return'C:\\Windows';
+  if(method==='GetSystemDirectory'||method==='GetSystemDirectoryA'||method==='GetSystemDirectoryW')return'C:\\Windows\\System32';
+  if(method==='GetTempPath'||method==='GetTempPathA'||method==='GetTempPathW')return await jplopsoft_ntcompatEnsureTemp(ctx);
+  if(method==='ExpandEnvironmentStrings'||method==='ExpandEnvironmentStringsA'||method==='ExpandEnvironmentStringsW')return jplopsoft_ntcompatExpandEnv(ctx,args[0]);
+  if(method==='GetModuleFileName'||method==='GetModuleFileNameA'||method==='GetModuleFileNameW')return jplopsoft_ntcompatModuleFileName(ctx,args[0]);
+  if(method==='GetPrivateProfileString'||method==='GetPrivateProfileStringA'||method==='GetPrivateProfileStringW')return await jplopsoft_ntcompatGetPrivateProfileString(ctx,args[0],args[1],args[2],args[3]);
+  if(method==='WritePrivateProfileString'||method==='WritePrivateProfileStringA'||method==='WritePrivateProfileStringW')return await jplopsoft_ntcompatWritePrivateProfileString(ctx,args[0],args[1],args[2],args[3]);
+  if(method==='GetVolumeInformation'||method==='GetVolumeInformationA'||method==='GetVolumeInformationW'){
+    var d=await jplopsoft_xshApiPromise('disk_info','GET',null),serial=0;
+    if(d.serial){
+      var sm=String(d.serial).replace(/[^0-9A-F]/ig,'').slice(-8);
+      serial=parseInt(sm||'0',16)>>>0;
+    }
+    return{
+      volumeName:String(d.label||'ExFS'),
+      volumeSerialNumber:serial,
+      maximumComponentLength:120,
+      fileSystemFlags:0x00000002|0x00000004|0x00040000,
+      fileSystemName:'ExFS',
+      exfsFormat:String(d.filesystem||'EXFS')
+    };
+  }
+  if(method==='SetFileAttributes'||method==='SetFileAttributesA'||method==='SetFileAttributesW'){
+    var n=jplopsoft_xshResolveC(ctx,args[0],false);
+    if(!n)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'File not found.');
+    await jplopsoft_xshApiPromise('file_set_attributes','POST',{id:Number(n.id)||0,attributes:Number(args[1])>>>0});
+    await jplopsoft_xshReloadNodes();
+    return true;
+  }
+  if(method==='RtlZeroMemory'){
+    var addr=Number(args[0]),len=Math.max(0,Math.min(64*1024*1024,Number(args[1])||0));
+    if(!isFinite(addr)||addr<=0)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_ADDRESS,'RtlZeroMemory requires an ExOS virtual address.');
+    return{bytesWritten:jplopsoft_vmmWrite(ctx.process,addr,new Uint8Array(len),true)};
+  }
+  if(method==='RtlMoveMemory'||method==='CopyMemory'||method==='CopyMemory_For_GIABHN'){
+    var dst=Number(args[0]),count=Math.max(0,Math.min(64*1024*1024,Number(args[2])||0)),src=args[1],b;
+    if(typeof src==='number')b=jplopsoft_vmmRead(ctx.process,src,count,true);
+    else b=jplopsoft_xshNormalizeBytes(src).subarray(0,count);
+    return{bytesWritten:jplopsoft_vmmWrite(ctx.process,dst,b,true)};
+  }
+  throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'Unsupported kernel32 compatibility method: '+method);
+}
+
+async function jplopsoft_ntcompatUser32Dispatch(ctx,method,args){
+  args=args||[];
+  var hwnd,rec,r,list,i,idx,cmd,w,el;
+
+  if(method==='FindWindow'||method==='FindWindowA'||method==='FindWindowW')return jplopsoft_ntcompatFindWindow(ctx,args[0],args[1],0,0);
+  if(method==='FindWindowEx'||method==='FindWindowExA'||method==='FindWindowExW')return jplopsoft_ntcompatFindWindow(ctx,args[2],args[3],args[0],args[1]);
+
+  if(method==='GetClassName'||method==='GetClassNameA'||method==='GetClassNameW'){
+    rec=jplopsoft_user32GetRecord(args[0]);return rec&&jplopsoft_ntcompatWindowReadable(ctx,rec)?String(rec.className||''):'';}
+  if(method==='GetWindowText'||method==='GetWindowTextA'||method==='GetWindowTextW'){
+    rec=jplopsoft_user32GetRecord(args[0]);return rec&&jplopsoft_ntcompatWindowReadable(ctx,rec)?String(rec.title||''):'';}
+  if(method==='GetWindowTextLength'||method==='GetWindowTextLengthA'||method==='GetWindowTextLengthW'){
+    rec=jplopsoft_user32GetRecord(args[0]);return rec&&jplopsoft_ntcompatWindowReadable(ctx,rec)?String(rec.title||'').length:0;}
+
+  if(method==='IsWindow')return !!jplopsoft_user32GetRecord(args[0]);
+  if(method==='IsWindowVisible'){rec=jplopsoft_user32GetRecord(args[0]);return !!(rec&&jplopsoft_user32DisplayIsVisible(rec));}
+  if(method==='IsWindowEnabled'){rec=jplopsoft_user32GetRecord(args[0]);if(!rec)return false;el=jplopsoft_GetWindowElement(rec.hwnd);return !(el&&el.disabled);}
+  if(method==='IsZoomed'){rec=jplopsoft_user32GetRecord(args[0]);return !!(rec&&jplopsoft_user32IsMaximized(rec));}
+  if(method==='IsIconic'){rec=jplopsoft_user32GetRecord(args[0]);return !!(rec&&String(rec.windowState||'')==='minimized');}
+  if(method==='IsChild'){rec=jplopsoft_user32GetRecord(args[1]);return !!(rec&&(parseInt(rec.parentHwnd,10)||0)===(parseInt(args[0],10)||0));}
+
+  if(method==='GetFocus')return jplopsoft_ntcompatActiveElementHwnd();
+  if(method==='GetActiveWindow'||method==='GetForegroundWindow')return parseInt(jplopsoft_NT_SCHEDULER.foregroundHwnd,10)||0;
+  if(method==='GetWindow'||method==='GetNextWindow'){
+    hwnd=parseInt(args[0],10)||0;cmd=Number(args[1])||2;list=jplopsoft_ntcompatWindowList();idx=-1;
+    for(i=0;i<list.length;i++)if(parseInt(list[i].hwnd,10)===hwnd){idx=i;break;}
+    if(cmd===0)return list.length?list[0].hwnd:0;
+    if(cmd===1)return list.length?list[list.length-1].hwnd:0;
+    if(cmd===2)return idx>=0&&idx+1<list.length?list[idx+1].hwnd:0;
+    if(cmd===3)return idx>0?list[idx-1].hwnd:0;
+    if(cmd===4){rec=jplopsoft_user32GetRecord(hwnd);return rec?(parseInt(rec.ownerHwnd,10)||0):0;}
+    if(cmd===5){for(i=0;i<list.length;i++)if((parseInt(list[i].parentHwnd,10)||0)===hwnd)return list[i].hwnd;return 0;}
+    return 0;
+  }
+
+  if(method==='MoveWindow')return jplopsoft_ntcompatMoveWindow(ctx,args[0],args[1],args[2],args[3],args[4],args[5]);
+  if(method==='SetWindowPos')return jplopsoft_ntcompatSetWindowPos(ctx,args[0],args[1],args[2],args[3],args[4],args[5],args[6]);
+  if(method==='GetWindowRect'){r=jplopsoft_GetWindowRect(args[0]);return r||null;}
+  if(method==='WindowFromPoint'){
+    var x=Number(args[0]&&typeof args[0]==='object'?args[0].x:args[0])||0,
+        y=Number(args[0]&&typeof args[0]==='object'?args[0].y:args[1])||0;
+    list=jplopsoft_ntcompatWindowList();
+    for(i=list.length-1;i>=0;i--){
+      rec=list[i];r=jplopsoft_GetWindowRect(rec.hwnd);
+      if(r&&x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom&&jplopsoft_user32DisplayIsVisible(rec))return rec.hwnd;
+    }
+    return 0;
+  }
+
+  if(method==='GetWindowThreadProcessId'){
+    rec=jplopsoft_user32GetRecord(args[0]);
+    return rec?{threadId:Number(rec.ntPid)||0,processId:Number(rec.ntPid)||0}:null;
+  }
+
+  if(method==='GetWindowLong'||method==='GetWindowLongA'||method==='GetWindowLongW'){
+    rec=jplopsoft_user32GetRecord(args[0]);if(!rec)return 0;
+    var gi=Number(args[1])|0;
+    if(gi===-16)return Number(rec.style)||0;
+    if(gi===-20)return Number(rec.exStyle)||0;
+    if(gi===-21)return Number(rec.userData)||0;
+    return 0;
+  }
+  if(method==='SetWindowLong'||method==='SetWindowLongA'||method==='SetWindowLongW'){
+    rec=jplopsoft_user32GetRecord(args[0]);if(!rec)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid HWND.');
+    if(!jplopsoft_ntcompatWindowWritable(ctx,rec))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'SetWindowLong denied by ExOS UIPI.');
+    var si=Number(args[1])|0,old=0,nv=Number(args[2])||0;
+    if(si===-16){old=Number(rec.style)||0;rec.style=nv;jplopsoft_ntcompatApplyWindowStyles(rec);}
+    else if(si===-20){old=Number(rec.exStyle)||0;rec.exStyle=nv;jplopsoft_ntcompatApplyWindowStyles(rec);}
+    else if(si===-21){old=Number(rec.userData)||0;rec.userData=nv;}
+    return old;
+  }
+
+  if(method==='SetLayeredWindowAttributes'){
+    rec=jplopsoft_user32GetRecord(args[0]);if(!rec)return false;
+    if(!jplopsoft_ntcompatWindowWritable(ctx,rec))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Layered-window update denied.');
+    el=jplopsoft_GetWindowElement(rec.hwnd);
+    if(el)el.style.opacity=String(Math.max(0,Math.min(255,Number(args[2])||255))/255);
+    return true;
+  }
+
+  if(method==='SystemParametersInfo'||method==='SystemParametersInfoA'||method==='SystemParametersInfoW'){
+    var action=typeof args[0]==='string'?String(args[0]).toUpperCase():Number(args[0]);
+    if(action===48||action==='SPI_GETWORKAREA')return{left:0,top:0,right:window.innerWidth,bottom:Math.max(0,window.innerHeight-40)};
+    if(action===0||action==='SPI_GETBEEP')return true;
+    if(action===16||action==='SPI_GETSCREENSAVEACTIVE')return false;
+    if(action===10||action==='SPI_GETKEYBOARDSPEED')return 31;
+    if(action===22||action==='SPI_GETKEYBOARDDELAY')return 1;
+    return{supported:false,action:action};
+  }
+
+  if(method==='GetAsyncKeyState'){
+    var vk=String(Number(args[0])||0),ks=jplopsoft_NTCOMPAT_OS83.input.keys[vk]||{},foreground=parseInt(jplopsoft_NT_SCHEDULER.foregroundPid,10)||0,val=0;
+    if(foreground!==parseInt(ctx.pid,10))return 0;
+    if(ks.down)val|=0x8000;
+    if(ks.pressed){val|=1;ks.pressed=false;}
+    return val;
+  }
+
+  if(method==='GetCursorPos')return{x:jplopsoft_NTCOMPAT_OS83.input.cursor.x,y:jplopsoft_NTCOMPAT_OS83.input.cursor.y};
+  if(method==='ClientToScreen'||method==='ScreenToClient'){
+    rec=jplopsoft_user32GetRecord(args[0]);
+    if(!rec||!jplopsoft_ntcompatWindowReadable(ctx,rec))throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid HWND.');
+    var client=jplopsoft_GetClientElement(rec.hwnd),br=client&&client.getBoundingClientRect?client.getBoundingClientRect():null,
+        pt=args[1]&&typeof args[1]==='object'?args[1]:{x:args[1],y:args[2]},px=Number(pt.x)||0,py=Number(pt.y)||0;
+    if(!br)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Window client area unavailable.');
+    if(method==='ClientToScreen')return{x:px+br.left,y:py+br.top};
+    return{x:px-br.left,y:py-br.top};
+  }
+  if(method==='SetCapture'){
+    hwnd=parseInt(args[0],10)||0;rec=jplopsoft_user32GetRecord(hwnd);
+    if(!rec||!ctx.windows[String(hwnd)])throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'SetCapture requires an HWND owned by the caller XSH process.');
+    var oldCap=jplopsoft_NTCOMPAT_OS83.capture?Number(jplopsoft_NTCOMPAT_OS83.capture.hwnd)||0:0;
+    jplopsoft_NTCOMPAT_OS83.capture={pid:ctx.pid,hwnd:hwnd};
+    return oldCap;
+  }
+  if(method==='GetCapture')return jplopsoft_NTCOMPAT_OS83.capture?Number(jplopsoft_NTCOMPAT_OS83.capture.hwnd)||0:0;
+  if(method==='ReleaseCapture'){
+    if(!jplopsoft_NTCOMPAT_OS83.capture)return false;
+    if(Number(jplopsoft_NTCOMPAT_OS83.capture.pid)!==Number(ctx.pid))return false;
+    jplopsoft_NTCOMPAT_OS83.capture=null;return true;
+  }
+  if(method==='GetSystemMetrics'){
+    var index=typeof args[0]==='string'?String(args[0]).toUpperCase():Number(args[0]),root=jplopsoft_rootWindowHost?jplopsoft_rootWindowHost():null,
+        rw=root&&root.getBoundingClientRect?root.getBoundingClientRect():{width:window.innerWidth,height:window.innerHeight},sw=Math.round(rw.width||window.innerWidth),sh=Math.round(rw.height||window.innerHeight),task=40;
+    var metrics={0:sw,1:sh,2:17,3:17,4:30,5:1,6:1,7:3,8:3,11:32,12:32,13:32,14:32,15:24,16:sw,17:Math.max(0,sh-task),19:1,20:17,21:17,28:160,29:38,30:30,31:30,32:4,33:4,34:120,35:60,36:4,37:4,38:75,39:75,43:3,45:2,46:2,49:16,50:16,51:22,52:22,53:22,54:18,55:18,59:sw,60:sh,61:sw,62:Math.max(0,sh-task),63:1,67:0};
+    var names={SM_CXSCREEN:0,SM_CYSCREEN:1,SM_CXVSCROLL:2,SM_CYHSCROLL:3,SM_CYCAPTION:4,SM_CXBORDER:5,SM_CYBORDER:6,SM_CXDLGFRAME:7,SM_CYDLGFRAME:8,SM_CXICON:11,SM_CYICON:12,SM_CXCURSOR:13,SM_CYCURSOR:14,SM_CYMENU:15,SM_CXFULLSCREEN:16,SM_CYFULLSCREEN:17,SM_MOUSEPRESENT:19,SM_CYVSCROLL:20,SM_CXHSCROLL:21,SM_CXMIN:28,SM_CYMIN:29,SM_CXSIZE:30,SM_CYSIZE:31,SM_CXFRAME:32,SM_CYFRAME:33,SM_CXMINTRACK:34,SM_CYMINTRACK:35,SM_CXDOUBLECLK:36,SM_CYDOUBLECLK:37,SM_CXICONSPACING:38,SM_CYICONSPACING:39,SM_CMOUSEBUTTONS:43,SM_CXEDGE:45,SM_CYEDGE:46,SM_CXSMICON:49,SM_CYSMICON:50,SM_CYSMCAPTION:51,SM_CXSMSIZE:52,SM_CYSMSIZE:53,SM_CXMENUSIZE:54,SM_CYMENUSIZE:55,SM_CXMAXTRACK:59,SM_CYMAXTRACK:60,SM_CXMAXIMIZED:61,SM_CYMAXIMIZED:62,SM_NETWORK:63,SM_CLEANBOOT:67};
+    if(typeof index==='string')index=typeof names[index]==='undefined'?-1:names[index];
+    return typeof metrics[index]==='undefined'?0:metrics[index];
+  }
+  if(method==='RegisterHotKey'){
+    hwnd=parseInt(args[0],10)||0;var hotId=Number(args[1])|0,hotMods=Number(args[2])>>>0,hotVk=Number(args[3])|0;
+    if(hwnd&&!ctx.windows[String(hwnd)])throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'RegisterHotKey HWND must belong to the caller XSH process.');
+    if(!hotId||hotVk<=0||hotVk>255)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Invalid hotkey id or virtual key.');
+    var hotKey=jplopsoft_ntcompatHotkeyKey(hotMods,hotVk),existing=jplopsoft_NTCOMPAT_OS83.hotkeys[hotKey];
+    if(existing&&!(Number(existing.pid)===Number(ctx.pid)&&Number(existing.id)===hotId))return false;
+    jplopsoft_NTCOMPAT_OS83.hotkeys[hotKey]={pid:ctx.pid,hwnd:hwnd,id:hotId,modifiers:hotMods,vk:hotVk};
+    return true;
+  }
+  if(method==='UnregisterHotKey'){
+    hwnd=parseInt(args[0],10)||0;var unId=Number(args[1])|0,hkTable=jplopsoft_NTCOMPAT_OS83.hotkeys,hkk,hv;
+    for(hkk in hkTable){if(!hkTable.hasOwnProperty(hkk))continue;hv=hkTable[hkk];if(hv&&Number(hv.pid)===Number(ctx.pid)&&Number(hv.id)===unId&&Number(hv.hwnd||0)===hwnd){delete hkTable[hkk];return true;}}
+    return false;
+  }
+  if(method==='SetCursorPos'){
+    var cx=Number(args[0])||0,cy=Number(args[1])||0,cl=jplopsoft_NTCOMPAT_OS83.input.clip;
+    if(cl){cx=Math.max(cl.left,Math.min(cl.right,cx));cy=Math.max(cl.top,Math.min(cl.bottom,cy));}
+    jplopsoft_NTCOMPAT_OS83.input.cursor={x:cx,y:cy};
+    return{ok:true,virtualOnly:true,x:cx,y:cy};
+  }
+  if(method==='ClipCursor'){jplopsoft_NTCOMPAT_OS83.input.clip=args[0]||null;return true;}
+  if(method==='ShowCursor'){
+    var show=!!args[0];jplopsoft_NTCOMPAT_OS83.input.showCount+=show?1:-1;
+    if(document&&document.documentElement)document.documentElement.style.cursor=jplopsoft_NTCOMPAT_OS83.input.showCount<0?'none':'';
+    return jplopsoft_NTCOMPAT_OS83.input.showCount;
+  }
+
+  if(method==='keybd_event'){
+    if((parseInt(jplopsoft_NT_SCHEDULER.foregroundPid,10)||0)!==parseInt(ctx.pid,10))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Synthetic keyboard input is limited to the caller foreground process.');
+    var vkCode=Number(args[0])||0,flags=Number(args[2])>>>0,isUp=!!(flags&0x0002),target=document.activeElement;
+    if(target&&target.dispatchEvent){
+      try{target.dispatchEvent(new KeyboardEvent(isUp?'keyup':'keydown',{keyCode:vkCode,which:vkCode,bubbles:true,cancelable:true}));}catch(ignoreSyntheticKey){}
+    }
+    return true;
+  }
+  if(method==='mouse_event'){
+    if((parseInt(jplopsoft_NT_SCHEDULER.foregroundPid,10)||0)!==parseInt(ctx.pid,10))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Synthetic mouse input is limited to the caller foreground process.');
+    jplopsoft_NTCOMPAT_OS83.input.cursor.x=Number(args[1])||jplopsoft_NTCOMPAT_OS83.input.cursor.x;
+    jplopsoft_NTCOMPAT_OS83.input.cursor.y=Number(args[2])||jplopsoft_NTCOMPAT_OS83.input.cursor.y;
+    return{ok:true,virtualOnly:true};
+  }
+
+  if(method==='SetWindowsHookEx'||method==='SetWindowsHookExA'||method==='SetWindowsHookExW'){
+    var hookType=Number(args[0])||0;
+    if([2,7,13,14].indexOf(hookType)<0)throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'Only keyboard/mouse ExOS process-local hooks are supported.');
+    if(!ctx.ntcompatHooks)ctx.ntcompatHooks={};
+    var hh=++jplopsoft_NTCOMPAT_OS83.hookSeq;
+    ctx.ntcompatHooks[String(hh)]={handle:hh,idHook:hookType,threadId:Number(args[3])||0};
+    return hh;
+  }
+  if(method==='UnhookWindowsHookEx'){
+    if(!ctx.ntcompatHooks)return false;
+    var hk=String(Number(args[0])||0);if(!ctx.ntcompatHooks[hk])return false;delete ctx.ntcompatHooks[hk];return true;
+  }
+  if(method==='CallNextHookEx')return true;
+
+  if(method==='SendMessage'||method==='SendMessageA'||method==='SendMessageW'){
+    rec=jplopsoft_user32GetRecord(args[0]);if(!rec)return 0;
+    if(!jplopsoft_ntcompatWindowWritable(ctx,rec))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Cross-process SendMessage denied by ExOS UIPI.');
+    return jplopsoft_SendMessage(rec.hwnd,args[1],args[2],args[3]);
+  }
+
+  if(method==='GetDC'){
+    if(typeof jplopsoft_gdi32Dispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'GDI32 unavailable.');
+    return await jplopsoft_gdi32Dispatch(ctx,'GetDC',[args[0]]);
+  }
+  if(method==='ReleaseDC'){
+    if(typeof jplopsoft_gdi32Dispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'GDI32 unavailable.');
+    return await jplopsoft_gdi32Dispatch(ctx,'ReleaseDC',[args[0],args[1]]);
+  }
+
+  throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'Unsupported user32 compatibility method: '+method);
+}
+
 async function jplopsoft_xshDispatch(ctx,api,method,args){
   var r,h,attr,path,proc,child,code,drive,v,control;
   api=String(api||'');method=String(method||'');args=args||[];
@@ -24927,7 +26164,13 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
       }
       r=await jplopsoft_xshNtWriteFile(ctx,args[0],args[1],args[2],'WriteFile');if(r.status!==jplopsoft_STATUS_SUCCESS)throw jplopsoft_xshError(r.status,r.error);return r;
     }
-    if(method==='CloseHandle'){if(jplopsoft_xshCloseHandle(ctx,args[0]))return true;if(typeof jplopsoft_advapi32CloseHandle==='function'&&jplopsoft_advapi32CloseHandle(ctx,args[0]))return true;throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid handle.');}
+    if(method==='CloseHandle'){
+      if(jplopsoft_xshCloseHandle(ctx,args[0]))return true;
+      var ph=jplopsoft_ntProcessHandleForOwner(ctx.pid,args[0]);
+      if(ph&&Number(args[0])!==-1){delete jplopsoft_NT_KERNEL.processHandles[String(parseInt(args[0],10)||0)];return true;}
+      if(typeof jplopsoft_advapi32CloseHandle==='function'&&jplopsoft_advapi32CloseHandle(ctx,args[0]))return true;
+      throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_HANDLE,'Invalid handle.');
+    }
     if(method==='GetFileSize')return jplopsoft_xshGetFileSizeByHandle(ctx,args[0]);
     if(method==='FlushFileBuffers')return await jplopsoft_xshFlushFileBuffers(ctx,args[0]);
     if(method==='ReadTextFile')return await jplopsoft_xshReadTextFile(ctx,args[0]);
@@ -25281,9 +26524,72 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     if(method==='WriteProcessMemory')return jplopsoft_xshWriteProcessMemory(ctx,args[0],args[1],args[2]);
     if(method==='VirtualQueryEx')return jplopsoft_xshVirtualQueryEx(ctx,args[0],args[1]);
     if(method==='CreateProcess'){
-      child=await jplopsoft_xshRunPath(ctx,String(args[0]||''),String(args[1]||''));return{pid:child.pid,processId:child.pid};
+      var cpSpec=args[2]&&typeof args[2]==='object'?args[2]:{},
+          cpApp=String(args[0]||''),
+          cpCmd=String(args[1]||''),
+          cpOldCwd=ctx.currentDirectory,
+          cpChildCtx,cpHandle,cpStartup=cpSpec.startupInfo||cpSpec.STARTUPINFO||{};
+      if(cpSpec.currentDirectory){
+        try{ctx.currentDirectory=String(cpSpec.currentDirectory);}catch(ignoreCpCwd){}
+      }
+      try{
+        child=await jplopsoft_xshRunPath(ctx,cpApp,cpCmd);
+      }finally{
+        ctx.currentDirectory=cpOldCwd;
+      }
+      cpChildCtx=typeof jplopsoft_xshRunByPid==='function'?jplopsoft_xshRunByPid(child.pid):null;
+      if(cpChildCtx&&cpSpec.environment&&typeof cpSpec.environment==='object'){
+        var cpek;
+        for(cpek in cpSpec.environment)if(cpSpec.environment.hasOwnProperty(cpek)){
+          jplopsoft_SetEnvironmentVariable(cpChildCtx.process,cpek,cpSpec.environment[cpek]);
+        }
+      }
+      if(
+        cpChildCtx&&
+        (cpSpec.inheritHandles||cpSpec.bInheritHandles)&&
+        (Number(cpStartup.dwFlags)||0)&0x00000100
+      ){
+        var cppp=cpChildCtx.process&&cpChildCtx.process.peb?cpChildCtx.process.peb.processParameters:null,
+            inheritFields=[
+              ['standardInputHandle',cpStartup.hStdInput],
+              ['standardOutputHandle',cpStartup.hStdOutput],
+              ['standardErrorHandle',cpStartup.hStdError]
+            ],
+            cpi,cpsrc,cphNew;
+        for(cpi=0;cpi<inheritFields.length;cpi++){
+          cpsrc=jplopsoft_xshHandle(ctx,inheritFields[cpi][1]);
+          if(cpsrc&&cppp){
+            cphNew=jplopsoft_xshAllocateHandle(cpChildCtx,{
+              kind:cpsrc.kind,
+              path:cpsrc.path,
+              access:cpsrc.access,
+              position:Number(cpsrc.position)||0,
+              nodeId:cpsrc.nodeId,
+              pipe:cpsrc.pipe||null
+            });
+            cppp[inheritFields[cpi][0]]=cphNew;
+          }else if(cppp&&[-10,-11,-12].indexOf(Number(inheritFields[cpi][1]))>=0){
+            cppp[inheritFields[cpi][0]]=Number(inheritFields[cpi][1]);
+          }
+        }
+      }
+      cpHandle=jplopsoft_xshOpenProcess(
+        ctx,
+        jplopsoft_PROCESS_QUERY_INFORMATION|jplopsoft_PROCESS_QUERY_LIMITED_INFORMATION,
+        false,
+        child.pid
+      );
+      return{
+        hProcess:cpHandle,
+        hThread:0,
+        dwProcessId:child.pid,
+        dwThreadId:0,
+        pid:child.pid,
+        processId:child.pid
+      };
     }
     if(method==='DeviceIoControl')return await jplopsoft_xshDeviceIoControl(ctx,args[0],args[1],args[2]);
+    return await jplopsoft_ntcompatKernel32Dispatch(ctx,method,args);
   }
 
   if(api==='ntdll'){
@@ -25369,7 +26675,8 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
       control=jplopsoft_xshControl(ctx,args[0]);
       if(!control)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Control not found.');
       var tagName=String(control.tagName||'').toLowerCase(),textValue=String(args[1]===undefined||args[1]===null?'':args[1]);
-      if(tagName==='input'||tagName==='textarea'||tagName==='select')control.value=textValue;
+      if(control._jplopsoftGroupLegend)control._jplopsoftGroupLegend.textContent=textValue;
+      else if(tagName==='input'||tagName==='textarea'||tagName==='select')control.value=textValue;
       else control.textContent=textValue;
       return true;
     }
@@ -25377,6 +26684,7 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
       control=jplopsoft_xshControl(ctx,args[0]);
       if(!control)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Control not found.');
       var getTag=String(control.tagName||'').toLowerCase();
+      if(control._jplopsoftGroupLegend)return String(control._jplopsoftGroupLegend.textContent||'');
       return getTag==='input'||getTag==='textarea'||getTag==='select'?String(control.value||''):String(control.textContent||'');
     }
     if(method==='AppendControlText')return jplopsoft_xshAppendControlText(ctx,args[0],args[1]);
@@ -25415,6 +26723,12 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
     if(method==='UpdateWindow'){h=parseInt(args[0],10)||0;if(!ctx.windows[String(h)])throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'HWND is not owned by this XSH process.');if(typeof jplopsoft_gdi32Invalidate==='function')jplopsoft_gdi32Invalidate(ctx,h,null);return jplopsoft_xshPostMessage(ctx,{hwnd:h,message:'WM_PAINT',wParam:0,lParam:{rect:null}});}
     if(method==='GetForegroundWindow')return jplopsoft_NT_SCHEDULER.foregroundHwnd||0;
     if(method==='SetForegroundWindow'){h=parseInt(args[0],10)||0;if(!ctx.windows[String(h)])throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'HWND is not owned by this XSH process.');return jplopsoft_user32BringToFront(h);}
+    return await jplopsoft_ntcompatUser32Dispatch(ctx,method,args);
+  }
+
+  if(api==='ntoskrnl'){
+    if(typeof jplopsoft_ntoskrnlDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_ntoskrnl.js semantic facade is not loaded.');
+    return await jplopsoft_ntoskrnlDispatch(ctx,method,args);
   }
 
   if(api==='gdi32'){
@@ -25507,6 +26821,10 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
   if(api==='bcrypt'){if(typeof jplopsoft_bcryptDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_crypt32.js is not loaded.');return await jplopsoft_bcryptDispatch(ctx,method,args);}
   if(api==='richedit'){if(typeof jplopsoft_richeditDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_richedit.js is not loaded.');return await jplopsoft_richeditDispatch(ctx,method,args);}
   if(api==='webview2'){if(typeof jplopsoft_webview2Dispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'exos_webview2.js is not loaded.');return await jplopsoft_webview2Dispatch(ctx,method,args);}
+
+  if(api==='psapi'||api==='oleaut32'||api==='icmp'||api==='zlib'||api==='tapi32'||api==='urlmon'||api==='winmm'){
+    return await jplopsoft_ntcompatMinorDispatch(ctx,api,method,args);
+  }
 
   if(api==='exes'){
     if(method==='GetStatus')return{engine:'ExES V6',vaultUnlocked:!!state.vaultKey,systemVdo:jplopsoft_xshSystemVdoInfo()};
@@ -26328,6 +27646,7 @@ async function jplopsoft_xshTerminate(ctx,exitCode,reason,skipKernel){
   if(typeof jplopsoft_zipfldrCleanup==='function'){try{jplopsoft_zipfldrCleanup(ctx);}catch(ignoreZipFldrCleanup){}}
   if(typeof jplopsoft_wininetCleanup==='function'){try{jplopsoft_wininetCleanup(ctx);}catch(ignoreWininetCleanup){}}
   if(typeof jplopsoft_ws2Cleanup==='function'){try{jplopsoft_ws2Cleanup(ctx);}catch(ignoreWs2Cleanup){}}
+  if(typeof jplopsoft_ntoskrnlCleanupContext==='function'){try{jplopsoft_ntoskrnlCleanupContext(ctx);}catch(ignoreNtCompatCleanup){}}
   if(typeof jplopsoft_ole32Cleanup==='function'){try{jplopsoft_ole32Cleanup(ctx);}catch(ignoreOleCleanup){}}
   if(typeof jplopsoft_webview2Cleanup==='function'){try{jplopsoft_webview2Cleanup(ctx);}catch(ignoreWebViewCleanup){}}
   jplopsoft_xshClipboardClose(ctx);
@@ -26348,6 +27667,13 @@ async function jplopsoft_xshTerminate(ctx,exitCode,reason,skipKernel){
   }
   if(typeof jplopsoft_mediaCleanup==='function'){
     try{jplopsoft_mediaCleanup(ctx);}catch(ignoreMediaCleanup){}
+  }
+  if(typeof jplopsoft_NTCOMPAT_OS83!=='undefined'){
+    try{
+      if(jplopsoft_NTCOMPAT_OS83.capture&&Number(jplopsoft_NTCOMPAT_OS83.capture.pid)===Number(ctx.pid))jplopsoft_NTCOMPAT_OS83.capture=null;
+      var hkClean=jplopsoft_NTCOMPAT_OS83.hotkeys,hkName;
+      for(hkName in hkClean)if(hkClean.hasOwnProperty(hkName)&&hkClean[hkName]&&Number(hkClean[hkName].pid)===Number(ctx.pid))delete hkClean[hkName];
+    }catch(ignoreNtCompatCleanup){}
   }
   for(k in ctx.handles)if(ctx.handles.hasOwnProperty(k))delete ctx.handles[k];
   for(k in jplopsoft_NT_KERNEL.processHandles){
@@ -28389,6 +29715,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os80',
+  version:'6.4.0-dev-os84',
   build:'external-os-comctl32-split-core-controls'
 };

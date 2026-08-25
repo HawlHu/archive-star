@@ -1,12 +1,12 @@
 /* ExOS shared resource image library
  * File: exos_share_res.js
- * Version: 6.4.0-dev-os80
+ * Version: 6.4.0-dev-os84
  * Model: EXOS_SHARED_RES_V1
  * V8-only client. Shared Base64 image resources for virtual NT-style resource DLLs.
  */
 (function(global){
 'use strict';
-var VERSION='6.4.0-dev-os80';
+var VERSION='6.4.0-dev-os84';
 var MODEL='EXOS_SHARED_RES_V1';
 var LIBRARIES={};
 LIBRARIES["shell32.dll"]={};

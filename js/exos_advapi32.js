@@ -1,6 +1,6 @@
 /* ExOS advapi32.dll emulation
  * File: exos_advapi32.js
- * Version: 6.4.0-dev-os80
+ * Version: 6.4.0-dev-os84
  * Model: EXOS_ADVAPI32_V2
  * Client: V8-only browsers
  *
@@ -18,7 +18,7 @@
 'use strict';
 
 var ADV={
-  version:'6.4.0-dev-os80',
+  version:'6.4.0-dev-os84',
   model:'EXOS_ADVAPI32_V2',
   ready:true
 };
@@ -69,7 +69,7 @@ function api(action,method,data){
 }
 function ensure(ctx){
   if(!ctx.advapi32){
-    ctx.advapi32={nextTokenHandle:0x7000,registryHandles:{},tokenHandles:{},primaryToken:null};
+    ctx.advapi32={nextTokenHandle:0x7000,registryHandles:{},tokenHandles:{},primaryToken:null,impersonationToken:0};
   }
   return ctx.advapi32;
 }
@@ -231,7 +231,7 @@ async function primaryToken(ctx){var st=ensure(ctx),out,t;if(st.primaryToken)ret
 function allocToken(ctx,t,access,mutable){var st=ensure(ctx),h=st.nextTokenHandle++;st.tokenHandles[String(h)]={handle:h,token:clone(t),access:Number(access)>>>0,mutable:!!mutable};return h;}
 function tokenRec(ctx,h){var r=ensure(ctx).tokenHandles[String(Number(h)||0)];if(!r)fail(status('INVALID_HANDLE',0xC0000008),'Invalid access token handle.');return r;}
 function requireTokenAccess(r,mask,message){if(((Number(r.access)>>>0)&(Number(mask)>>>0))!==(Number(mask)>>>0))fail(status('ACCESS_DENIED',0xC0000022),message||'Token handle access denied.');return r;}
-async function OpenProcessToken(ctx,pid,desired){pid=Number(pid)||Number(ctx.pid)||0;if(pid!==Number(ctx.pid)){
+async function OpenProcessToken(ctx,pid,desired){pid=Number(pid);if(!pid||pid===-1)pid=Number(ctx.pid)||0;if(pid!==Number(ctx.pid)){
     var p=typeof global.jplopsoft_ntKernelProcessByPid==='function'?global.jplopsoft_ntKernelProcessByPid(pid):null;if(!p)fail(status('INVALID_CID',0xC000000B),'Target process does not exist.');if(String(p.username||'').toLowerCase()!==String(ctx.process&&ctx.process.username||'').toLowerCase())fail(status('ACCESS_DENIED',0xC0000022),'Cross-user process token access is denied.');
   }
   var t=await primaryToken(ctx);if(pid!==Number(ctx.pid)){var p2=global.jplopsoft_ntKernelProcessByPid(pid);if(p2)t.integrity_level=String(p2.integrity||t.integrity_level||'MEDIUM').toUpperCase();}
@@ -262,19 +262,153 @@ function LookupPrivilegeValue(name){var i=PRIVILEGES.indexOf(String(name||''));i
 function LookupPrivilegeName(luid){var i=Number(luid&&luid.LowPart!==undefined?luid.LowPart:luid)-1;return i>=0&&i<PRIVILEGES.length?PRIVILEGES[i]:'';}
 function validSid(s){return /^S-[0-9]+(?:-[0-9]+)+$/i.test(String(s||''));}
 
+
+function deriveSamKey(username,password,prep){
+  return new Promise(function(resolve,reject){
+    if(typeof global.jplopsoft_derivePasswordKeyAsync!=='function'){
+      reject(new Error('SAM KDF is unavailable.'));
+      return;
+    }
+    global.jplopsoft_derivePasswordKeyAsync(
+      String(password||''),
+      {
+        username:String(username||'').toLowerCase(),
+        salt:String(prep.password_salt||''),
+        iterations:Number(prep.password_iterations)||20000,
+        title:'LogonUser',
+        detail:'ADVAPI32 brokered credential validation'
+      },
+      function(err,key){
+        if(err)reject(err);
+        else resolve(String(key||''));
+      }
+    );
+  });
+}
+async function LogonUser(ctx,username,domain,password,logonType,provider){
+  username=String(username||'').trim().toLowerCase();
+  if(!username)fail(status('INVALID_PARAMETER',0xC000000D),'LogonUser username is required.');
+  if(String(domain||'')&&String(domain||'')!=='.'&&String(domain||'').toUpperCase()!=='EXOS'){
+    fail(status('NOT_SUPPORTED',0xC00000BB),'ExOS LogonUser supports local SAM accounts only.');
+  }
+  var prep=await api('sam_prepare','POST',{username:username}),
+      key='',verifier='',proof='',result;
+  try{
+    key=await deriveSamKey(username,password,prep);
+    if(typeof global.jplopsoft_samVerifier!=='function'||typeof global.jplopsoft_samProof!=='function'){
+      fail(status('NOT_SUPPORTED',0xC00000BB),'SAM proof helpers are unavailable.');
+    }
+    verifier=global.jplopsoft_samVerifier(key);
+    proof=global.jplopsoft_samProof(String(prep.challenge||''),verifier);
+  }finally{
+    key='';
+  }
+  result=await api('sam_validate_credentials','POST',{
+    username:username,
+    challenge_id:String(prep.challenge_id||''),
+    proof:proof
+  });
+  var admin=String(result.account_type||'').toUpperCase()==='LOCAL_ADMINISTRATOR',
+      t={
+        token_id:'LOGONUSER-'+String(ctx.pid||0)+'-'+String(Date.now()),
+        token_type:'PRIMARY',
+        username:String(result.username||username),
+        user_sid:String(result.user_sid||''),
+        primary_group_sid:String(result.primary_group_sid||''),
+        group_sids:{},
+        privileges:{SeChangeNotifyPrivilege:1},
+        integrity_level:admin?'HIGH':'MEDIUM',
+        restricted:false,
+        logon_type:Number(logonType)||2,
+        logon_provider:Number(provider)||0,
+        interactive_session_changed:false
+      };
+  if(t.primary_group_sid)t.group_sids[t.primary_group_sid]=1;
+  if(admin){
+    /* Built-in Administrators alias RID 544. Exact machine SID is not required
+       for the process-local token facade; membership APIs also see primary group. */
+    t.group_sids['S-1-5-32-544']=1;
+    t.privileges.SeBackupPrivilege=1;
+    t.privileges.SeRestorePrivilege=1;
+  }else{
+    t.group_sids['S-1-5-32-545']=1;
+  }
+  return allocToken(ctx,t,0x000F01FF,true);
+}
+
+
+function aclArray(v){if(Array.isArray(v))return v;var d=v&&typeof v==='object'?(v.dacl||v.Dacl||v.aces||v.Aces):null;return Array.isArray(d)?d:[];}
+function currentTokenRecord(ctx,h){
+  if(h)return requireTokenAccess(tokenRec(ctx,h),0x0008,'TOKEN_QUERY is required.').token;
+  var st=ensure(ctx);if(st.impersonationToken&&st.tokenHandles[String(st.impersonationToken)])return st.tokenHandles[String(st.impersonationToken)].token;
+  return st.primaryToken||null;
+}
+function tokenSids(t){var out={},i,g,k;t=t||{};if(t.sid)out[String(t.sid).toUpperCase()]=1;if(t.user_sid)out[String(t.user_sid).toUpperCase()]=1;if(t.user&&t.user.sid)out[String(t.user.sid).toUpperCase()]=1;g=t.groups||t.group_sids||[];if(Array.isArray(g)){for(i=0;i<g.length;i++){var s=typeof g[i]==='string'?g[i]:(g[i]&&g[i].sid);if(s)out[String(s).toUpperCase()]=1;}}else if(g&&typeof g==='object'){for(k in g)if(Object.prototype.hasOwnProperty.call(g,k)&&g[k])out[String(k).toUpperCase()]=1;}out['S-1-1-0']=1;return out;}
+function aceMask(ace){return Number(ace&&((ace.accessMask!==undefined?ace.accessMask:ace.mask)!==undefined?(ace.accessMask!==undefined?ace.accessMask:ace.mask):0))>>>0;}
+function aceSid(ace){return String(ace&&(ace.sid||ace.trustee||ace.Trustee||ace.account)||'').toUpperCase();}
+function accessCheckPure(sd,tok,desired){
+  var aces=aclArray(sd),sids=tokenSids(tok),want=Number(desired)>>>0,granted=0,denied=0,i,ace,sid,mask,type;
+  if(!aces.length)return{accessStatus:true,grantedAccess:want,deniedAccess:0,reason:'No DACL in facade descriptor.'};
+  for(i=0;i<aces.length;i++){ace=aces[i]||{};sid=aceSid(ace);if(sid&&sids[sid]!==1)continue;mask=aceMask(ace);type=String(ace.type||ace.accessMode||ace.mode||'ALLOW').toUpperCase();if(type.indexOf('DENY')>=0)denied|=mask;else granted|=mask;}
+  var grantedWant=(want&granted)>>>0,deniedWant=(want&denied)>>>0;return{accessStatus:(deniedWant===0&&grantedWant===want),grantedAccess:grantedWant,deniedAccess:deniedWant};
+}
+async function regDeleteTree(ctx,hKey,subKey){
+  var h=await regOpen(ctx,hKey,subKey,0x20006,false),info=await RegQueryInfoKey(ctx,h),names=[],i;
+  for(i=0;i<Number(info.subKeyCount||info.subKeys||0);i++){try{var e=await RegEnumKeyEx(ctx,h,i);if(e&&e.name)names.push(e.name);}catch(ignoreEnum){}}
+  for(i=0;i<names.length;i++)await regDeleteTree(ctx,h,names[i]);
+  var vals=[];info=await RegQueryInfoKey(ctx,h);for(i=0;i<Number(info.valueCount||info.values||0);i++){try{var v=await RegEnumValue(ctx,h,i);if(v&&v.name!==undefined)vals.push(v.name);}catch(ignoreVal){}}
+  for(i=0;i<vals.length;i++)await RegDeleteValue(ctx,h,vals[i]);await regClose(ctx,h);return await RegDeleteKey(ctx,hKey,subKey);
+}
+async function regCopyTree(ctx,srcKey,dstKey){
+  var si=await RegQueryInfoKey(ctx,srcKey),i,v,k,childSrc,childDst;
+  for(i=0;i<Number(si.valueCount||si.values||0);i++){v=await RegEnumValue(ctx,srcKey,i);if(v){var q=await RegQueryValueEx(ctx,srcKey,v.name);await RegSetValueEx(ctx,dstKey,v.name,q.type,q.data);}}
+  var children=[];for(i=0;i<Number(si.subKeyCount||si.subKeys||0);i++){k=await RegEnumKeyEx(ctx,srcKey,i);if(k&&k.name)children.push(k.name);}
+  for(i=0;i<children.length;i++){childSrc=await regOpen(ctx,srcKey,children[i],0x20019,false);var cr=await regOpen(ctx,dstKey,children[i],0x20006,true);childDst=cr&&cr.hKey?cr.hKey:cr;await regCopyTree(ctx,childSrc,childDst);await regClose(ctx,childSrc);await regClose(ctx,childDst);}return true;
+}
+
 async function dispatch(ctx,method,args){
   args=args||[];ensure(ctx);
   if(method==='RegOpenKeyEx')return await regOpen(ctx,args[0],args[1],args[2],false);
+  if(method==='RegOpenKey'||method==='RegOpenKeyA'||method==='RegOpenKeyW')return await regOpen(ctx,args[0],args[1],'KEY_READ',false);
   if(method==='RegCreateKeyEx')return await regOpen(ctx,args[0],args[1],args[2],true);
+  if(method==='RegCreateKey'||method==='RegCreateKeyA'||method==='RegCreateKeyW')return await regOpen(ctx,args[0],args[1],'KEY_ALL_ACCESS',true);
+  if(method==='RegLoadKey'||method==='RegLoadKeyA'||method==='RegLoadKeyW')fail(status('NOT_SUPPORTED',0xC00000BB),'Raw Windows registry hive loading is not supported; ExOS Registry is an authenticated ExFS hive.');
   if(method==='RegCloseKey')return await regClose(ctx,args[0]);
   if(method==='RegQueryValueEx'||method==='RegGetValue')return await RegQueryValueEx(ctx,args[0],args[1]);
+  if(method==='RegQueryValue'||method==='RegQueryValueA'||method==='RegQueryValueW'){
+    var qh=args[1]?await regOpen(ctx,args[0],args[1],'KEY_READ',false):args[0],qv;
+    try{qv=await RegQueryValueEx(ctx,qh,'');}
+    finally{if(qh!==args[0])try{await regClose(ctx,qh);}catch(ignoreLegacyQueryClose){}}
+    return qv;
+  }
   if(method==='RegSetValueEx')return await RegSetValueEx(ctx,args[0],args[1],args[2],args[3]);
+  if(method==='RegSetValue'||method==='RegSetValueA'||method==='RegSetValueW'){
+    var sh=args[1]?await regOpen(ctx,args[0],args[1],'KEY_ALL_ACCESS',true):args[0],sv;
+    try{sv=await RegSetValueEx(ctx,sh,'',args[2],args[3]);}
+    finally{if(sh!==args[0])try{await regClose(ctx,sh);}catch(ignoreLegacySetClose){}}
+    return sv;
+  }
   if(method==='RegEnumKeyEx')return await RegEnumKeyEx(ctx,args[0],args[1]);
+  if(method==='RegEnumKey'||method==='RegEnumKeyA'||method==='RegEnumKeyW'){var ek=await RegEnumKeyEx(ctx,args[0],args[1]);return ek?String(ek.name||ek.key||''):null;}
   if(method==='RegEnumValue')return await RegEnumValue(ctx,args[0],args[1]);
   if(method==='RegQueryInfoKey')return await RegQueryInfoKey(ctx,args[0]);
   if(method==='RegDeleteValue')return await RegDeleteValue(ctx,args[0],args[1]);
   if(method==='RegDeleteKey')return await RegDeleteKey(ctx,args[0],args[1]);
   if(method==='RegFlushKey')return await RegFlushKey(ctx,args[0]);
+
+  if(method==='GetAclInformation'){var aa=aclArray(args[0]);return{AceCount:aa.length,AclBytesInUse:aa.length*32+8,AclRevision:2};}
+  if(method==='GetAce'){var al=aclArray(args[0]),ix=Number(args[1])|0;if(ix<0||ix>=al.length)fail(status('INVALID_PARAMETER',0xC000000D),'ACE index out of range.');return clone(al[ix]);}
+  if(method==='AddAce'){var list=aclArray(args[0]).slice(),ace=clone(args[1]||{}),pos=args[2]===undefined?list.length:Math.max(0,Math.min(list.length,Number(args[2])|0));list.splice(pos,0,ace);return list;}
+  if(method==='DeleteAce'){list=aclArray(args[0]).slice();ix=Number(args[1])|0;if(ix<0||ix>=list.length)return list;list.splice(ix,1);return list;}
+  if(method==='AccessCheck'){var tk=args[1]?currentTokenRecord(ctx,args[1]):await primaryToken(ctx);return accessCheckPure(args[0],tk,args[2]);}
+  if(method==='OpenThreadToken'){var stt=ensure(ctx);if(!stt.impersonationToken)fail(status('NO_TOKEN',0xC000007C),'Current ExOS XSH thread is not impersonating.');return stt.impersonationToken;}
+  if(method==='SetThreadToken'){var sth=ensure(ctx);if(!args[0]){sth.impersonationToken=0;return true;}requireTokenAccess(tokenRec(ctx,args[0]),0x0004,'TOKEN_IMPERSONATE is required.');sth.impersonationToken=Number(args[0])||0;return true;}
+  if(method==='ImpersonateLoggedOnUser'){var sr=tokenRec(ctx,args[0]);requireTokenAccess(sr,0x0004,'TOKEN_IMPERSONATE is required.');ensure(ctx).impersonationToken=Number(args[0])||0;return true;}
+  if(method==='RevertToSelf'){ensure(ctx).impersonationToken=0;return true;}
+  if(method==='RegDeleteTree'||method==='RegDeleteTreeA'||method==='RegDeleteTreeW')return await regDeleteTree(ctx,args[0],args[1]);
+  if(method==='RegCopyTree'||method==='RegCopyTreeA'||method==='RegCopyTreeW')return await regCopyTree(ctx,args[0],args[1]);
+  if(method==='RegQueryMultipleValues'){var names=Array.isArray(args[1])?args[1]:[],vals={},vi;for(vi=0;vi<names.length;vi++)vals[String(names[vi])]=await RegQueryValueEx(ctx,args[0],names[vi]);return vals;}
+
   if(method==='ConvertStringSecurityDescriptorToSecurityDescriptor')return await global.jplopsoft_xshSddlCompile(ctx,args[0]);
   if(method==='ConvertSecurityDescriptorToStringSecurityDescriptor')return descriptorToSddl(args[0]);
   if(method==='GetFileSecurity')return await global.jplopsoft_xshGetFileSddl(ctx,args[0]);
@@ -296,6 +430,7 @@ async function dispatch(ctx,method,args){
   if(method==='LookupPrivilegeValue')return LookupPrivilegeValue(args[0]);
   if(method==='LookupPrivilegeName')return LookupPrivilegeName(args[0]);
   if(method==='GetUserName'){var t=await primaryToken(ctx);return String(t.username||'');}
+  if(method==='LogonUser'||method==='LogonUserA'||method==='LogonUserW')return await LogonUser(ctx,args[0],args[1],args[2],args[3],args[4]);
   if(method==='LookupAccountSid'){var lo=await api('security_lookup_account_sid','POST',{sid:String(args[0]||'')});return lo.principal||null;}
   if(method==='LookupAccountName'){var ln=await api('security_lookup_account_name','POST',{name:String(args[0]||'')});return ln.principal||null;}
   if(method==='ConvertSidToStringSid')return String(args[0]||'');
