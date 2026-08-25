@@ -1,5 +1,5 @@
 /* ExOS shell32.dll emulation
- * Version: 6.4.0-dev-os66
+ * Version: 6.4.0-dev-os67
  * Model: EXOS_SHELL32_V1
  *
  * Browser/XSH shell API.  The implementation is intentionally restricted to
@@ -9,7 +9,7 @@
 'use strict';
 
 var SHELL={
-  version:'6.4.0-dev-os66',
+  version:'6.4.0-dev-os67',
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{

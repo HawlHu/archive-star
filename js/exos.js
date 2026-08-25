@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os66
+ * Version: 6.4.0-dev-os67
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -20746,6 +20746,105 @@ async function jplopsoft_xshNtReadFile(ctx,handle,length,offset,win32Api){
   }catch(e){jplopsoft_xshCompleteIrp(irp,e.ntstatus||jplopsoft_STATUS_INVALID_PARAMETER);return{status:e.ntstatus||jplopsoft_STATUS_INVALID_PARAMETER,bytesRead:0,data:[],error:e.message};}
 }
 
+
+async function jplopsoft_xshNtReadFileBuffer(ctx,handle,length,offset,win32Api){
+  var h=jplopsoft_xshHandle(ctx,handle),irp,bytes,start,end,node,slice;
+
+  if(!h){
+    return{
+      status:jplopsoft_STATUS_INVALID_HANDLE,
+      bytesRead:0,
+      data:new Uint8Array(0)
+    };
+  }
+
+  if(!h.access||!h.access.read){
+    return{
+      status:jplopsoft_STATUS_ACCESS_DENIED,
+      bytesRead:0,
+      data:new Uint8Array(0)
+    };
+  }
+
+  length=parseInt(length,10);
+  if(!(length>=0))length=jplopsoft_XSH.maxIoBytes;
+  if(length>jplopsoft_XSH.maxIoBytes)length=jplopsoft_XSH.maxIoBytes;
+
+  start=
+    (offset===undefined||offset===null)
+      ?h.position
+      :Math.max(0,parseInt(offset,10)||0);
+
+  irp=jplopsoft_xshBeginIrp(
+    ctx,
+    win32Api||'',
+    'NtReadFile',
+    'IRP_MJ_READ',
+    h.path||'',
+    h.kind
+  );
+
+  try{
+    jplopsoft_xshTraceDownStack(irp,h.path||'','READ');
+
+    if(h.kind!=='exfs-file'){
+      throw jplopsoft_xshError(
+        jplopsoft_STATUS_NOT_SUPPORTED,
+        'Handle does not support ReadFileBuffer.'
+      );
+    }
+
+    node=jplopsoft_findNode(h.nodeId);
+
+    if(!node){
+      throw jplopsoft_xshError(
+        jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,
+        'File object disappeared.'
+      );
+    }
+
+    bytes=await jplopsoft_xshReadNodeBytes(node);
+    end=Math.min(bytes.length,start+length);
+
+    if(end<start)end=start;
+
+    slice=bytes.slice(start,end);
+    h.position=end;
+
+    jplopsoft_xshTraceReadComplete(irp,h.path||'');
+    jplopsoft_xshCompleteIrp(
+      irp,
+      jplopsoft_STATUS_SUCCESS
+    );
+
+    /*
+     * os67:
+     * Preserve Uint8Array across MessagePort structured clone.  Large
+     * binary consumers (WebAssembly, media decoders, game engines) no
+     * longer pay the memory cost of turning every byte into a JS Number.
+     */
+    return{
+      status:jplopsoft_STATUS_SUCCESS,
+      bytesRead:slice.length,
+      data:slice,
+      eof:end>=bytes.length,
+      position:h.position
+    };
+  }catch(e){
+    jplopsoft_xshCompleteIrp(
+      irp,
+      e.ntstatus||jplopsoft_STATUS_INVALID_PARAMETER
+    );
+
+    return{
+      status:e.ntstatus||jplopsoft_STATUS_INVALID_PARAMETER,
+      bytesRead:0,
+      data:new Uint8Array(0),
+      error:e.message
+    };
+  }
+}
+
 async function jplopsoft_xshNtWriteFile(ctx,handle,data,offset,win32Api){
   var h=jplopsoft_xshHandle(ctx,handle),irp,src,old,start,total,out,node;
   if(!h)return{status:jplopsoft_STATUS_INVALID_HANDLE,bytesWritten:0};
@@ -22501,7 +22600,7 @@ function jplopsoft_xshCreateHostWindow(ctx){
   return h;
 }
 
-function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH4 API\n  kernel32: CreateFile ReadFile WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile FlushViewOfFile ReadMappedView WriteMappedView VirtualAlloc VirtualFree VirtualProtect VirtualQuery ReadVirtualMemory WriteVirtualMemory GlobalMemoryStatusEx QueryVmmStatistics CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess OpenProcess VirtualQueryEx ReadProcessMemory WriteProcessMemory CreateThread PostThreadMessage GetThreadMessage WaitForSingleObject GetExitCodeThread TerminateThread DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtAllocateVirtualMemory NtFreeVirtualMemory NtProtectVirtualMemory NtQueryVirtualMemory NtReadVirtualMemory NtWriteVirtualMemory NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow GetForegroundWindow SetForegroundWindow LoadIcon GetIconInfo EnumIconResources SetWindowIcon GetMessage PeekMessage PostMessage DispatchMessage InvalidateRect UpdateWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  gdi32(exos_gdi32.js): GetDC ReleaseDC BeginPaint EndPaint CreateDC CreatePrinterDC StartDoc StartPage EndPage EndDoc AbortDoc PrintImage GetPrintJobInfo CreateCompatibleDC DeleteDC CreatePen CreateSolidBrush CreateFont CreateBitmap CreateCompatibleBitmap SelectObject DeleteObject MoveToEx LineTo Rectangle Ellipse Polygon Polyline PolyBezier BitBlt TextOut ExtTextOut GetTextExtentPoint32 CreateRectRgn CreateEllipticRgn CreatePolygonRgn SelectClipRgn SetMapMode LPtoDP DPtoLP\n  d3d11(exos_d3d11.js): D3D11CreateDeviceAndSwapChain CreateBuffer CreateTexture2D CreateVertexShader CreatePixelShader CreateInputLayout IASetVertexBuffers IASetIndexBuffer IASetPrimitiveTopology VSSetShader PSSetShader OMSetRenderTargets RSSetViewports ClearRenderTargetView Draw DrawIndexed Present\n  d3dx/three32(exos_d3dx.js + three.min.js): Scene Camera Geometry Material Mesh Light WebGLRenderer TextureLoader Clock\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  uxtheme: IsThemeActive OpenThemeData CloseThemeData SetWindowTheme GetThemeColor ApplyTheme\n  dwmapi: DwmIsCompositionEnabled DwmEnableBlurBehindWindow DwmExtendFrameIntoClientArea DwmSetWindowAttribute DwmGetWindowAttribute DwmFlush\n  ExOS.WinUI: Render RenderMany SetData\n  ExOS.MediaFoundation(exos_media.js): MFStartup CreateAudioSession CreateSourceFromPath Play Pause Stop Seek SetVolume SetPan SetEQ GetSpectrum GetWaveform\n  advapi32(exos_advapi32.js): RegOpenKeyEx RegCreateKeyEx RegCloseKey RegQueryValueEx RegGetValue RegSetValueEx RegEnumKeyEx RegEnumValue RegQueryInfoKey RegDeleteValue RegDeleteKey RegFlushKey ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo GetSecurityInfo SetSecurityInfo InitializeAcl SetEntriesInAcl GetExplicitEntriesFromAcl OpenProcessToken GetTokenInformation DuplicateTokenEx CreateRestrictedToken CheckTokenMembership PrivilegeCheck AdjustTokenPrivileges LookupPrivilegeValue LookupPrivilegeName GetUserName LookupAccountSid LookupAccountName ConvertSidToStringSid ConvertStringSidToSid IsValidSid EqualSid\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop SHQueryRecycleBin SHRestoreFromRecycleBin SHDeleteFromRecycleBin SHEmptyRecycleBin\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath UploadPickedFile ReleasePickedFile QuerySystemConfig QueryLocalAccounts CreateLocalAccount ResetLocalAccountPassword SetLocalAccountEnabled SetLocalAccountType DeleteLocalAccount QueryEvents QueryEventLogInfo\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
+function jplopsoft_xshPrintApi(ctx){jplopsoft_xshAppendConsole(ctx,'XSH4 API\n  kernel32: CreateFile ReadFile ReadFileBuffer WriteFile CloseHandle GetFileSize FlushFileBuffers ReadTextFile WriteTextFile CreateDirectory GetFileAttributes ListDirectory DeleteFile RemoveDirectory MoveFile CopyFile SetCurrentDirectory GetCurrentDirectory SetEnvironmentVariable GetEnvironmentVariable GetEnvironmentStrings GetStdHandle AllocConsole FreeConsole AttachConsole WriteConsole ReadConsole SetConsoleTitle GetConsoleTitle GetConsoleMode SetConsoleMode SetConsoleTextAttribute GetConsoleScreenBufferInfo GetConsoleCommandHistory GetConsoleCommandHistoryLength SetConsoleNumberOfCommands ExpungeConsoleCommandHistory ClearConsole GetConsoleCP GetConsoleOutputCP CreateFileMapping OpenFileMapping MapViewOfFile UnmapViewOfFile FlushViewOfFile ReadMappedView WriteMappedView VirtualAlloc VirtualFree VirtualProtect VirtualQuery ReadVirtualMemory WriteVirtualMemory GlobalMemoryStatusEx QueryVmmStatistics CreateJobObject OpenJobObject SetInformationJobObject AssignProcessToJobObject QueryInformationJobObject TerminateJobObject CreateIoCompletionPort GetQueuedCompletionStatus PostQueuedCompletionStatus ReadFileAsync WriteFileAsync CancelIoEx CreateProcess OpenProcess VirtualQueryEx ReadProcessMemory WriteProcessMemory CreateThread PostThreadMessage GetThreadMessage WaitForSingleObject GetExitCodeThread TerminateThread DeviceIoControl\n  ntdll: NtCreateFile NtReadFile NtWriteFile NtClose NtQuerySystemInformation NtDeviceIoControlFile NtAllocateVirtualMemory NtFreeVirtualMemory NtProtectVirtualMemory NtQueryVirtualMemory NtReadVirtualMemory NtWriteVirtualMemory NtCreateSection NtOpenSection NtMapViewOfSection NtUnmapViewOfSection NtQuerySection NtReadSection NtWriteSection NtCreateJobObject NtOpenJobObject NtAssignProcessToJobObject NtSetInformationJobObject NtQueryInformationJobObject NtTerminateJobObject NtCreateIoCompletion NtOpenIoCompletion NtSetIoCompletion NtRemoveIoCompletion NtCreateUserProcess\n  user32: CreateWindow SetWindowText ShowWindow DestroyWindow GetForegroundWindow SetForegroundWindow LoadIcon GetIconInfo EnumIconResources SetWindowIcon GetMessage PeekMessage PostMessage DispatchMessage InvalidateRect UpdateWindow CreateControl SetControlText GetControlText AppendControlText SetControlProperty GetControlProperty SetControlStyle InsertControlText FocusControl ClearControlChildren PickImageDataUrl PickFiles PromptBox ConfirmBox MessageBox OnControl\n  gdi32(exos_gdi32.js): GetDC ReleaseDC BeginPaint EndPaint CreateDC CreatePrinterDC StartDoc StartPage EndPage EndDoc AbortDoc PrintImage GetPrintJobInfo CreateCompatibleDC DeleteDC CreatePen CreateSolidBrush CreateFont CreateBitmap CreateCompatibleBitmap SelectObject DeleteObject MoveToEx LineTo Rectangle Ellipse Polygon Polyline PolyBezier BitBlt TextOut ExtTextOut GetTextExtentPoint32 CreateRectRgn CreateEllipticRgn CreatePolygonRgn SelectClipRgn SetMapMode LPtoDP DPtoLP\n  d3d11(exos_d3d11.js): D3D11CreateDeviceAndSwapChain CreateBuffer CreateTexture2D CreateVertexShader CreatePixelShader CreateInputLayout IASetVertexBuffers IASetIndexBuffer IASetPrimitiveTopology VSSetShader PSSetShader OMSetRenderTargets RSSetViewports ClearRenderTargetView Draw DrawIndexed Present\n  d3dx/three32(exos_d3dx.js + three.min.js): Scene Camera Geometry Material Mesh Light WebGLRenderer TextureLoader Clock\n  comctl32(exos_comctl32.js): InitCommonControlsEx GetCommonControlClasses CreateCommonControl SysListView32 SysTreeView32 SysHeader32 SysTabControl32 ToolbarWindow32 ReBarWindow32 SysPager StatusBar ProgressBar ToolTip Animate Trackbar UpDown DateTimePicker MonthCalendar IPAddress SysLink ImageList\n  uxtheme: IsThemeActive OpenThemeData CloseThemeData SetWindowTheme GetThemeColor ApplyTheme\n  dwmapi: DwmIsCompositionEnabled DwmEnableBlurBehindWindow DwmExtendFrameIntoClientArea DwmSetWindowAttribute DwmGetWindowAttribute DwmFlush\n  ExOS.WinUI: Render RenderMany SetData\n  ExOS.MediaFoundation(exos_media.js): MFStartup CreateAudioSession CreateSourceFromPath Play Pause Stop Seek SetVolume SetPan SetEQ GetSpectrum GetWaveform\n  advapi32(exos_advapi32.js): RegOpenKeyEx RegCreateKeyEx RegCloseKey RegQueryValueEx RegGetValue RegSetValueEx RegEnumKeyEx RegEnumValue RegQueryInfoKey RegDeleteValue RegDeleteKey RegFlushKey ConvertStringSecurityDescriptorToSecurityDescriptor ConvertSecurityDescriptorToStringSecurityDescriptor GetFileSecurity SetFileSecurity GetNamedSecurityInfo SetNamedSecurityInfo GetSecurityInfo SetSecurityInfo InitializeAcl SetEntriesInAcl GetExplicitEntriesFromAcl OpenProcessToken GetTokenInformation DuplicateTokenEx CreateRestrictedToken CheckTokenMembership PrivilegeCheck AdjustTokenPrivileges LookupPrivilegeValue LookupPrivilegeName GetUserName LookupAccountSid LookupAccountName ConvertSidToStringSid ConvertStringSidToSid IsValidSid EqualSid\n  shell32: SHGetFileInfo SHGetFileAssociation SHGetContextMenu TrackContextMenu ShellExecute InvokeCommand SHFileOperation DoDragDrop BeginDragDrop DragOver Drop SHQueryRecycleBin SHRestoreFromRecycleBin SHDeleteFromRecycleBin SHEmptyRecycleBin\n  ExOS: LoadLibrary LaunchSystemApp OpenPath DownloadPath UploadPickedFile ReleasePickedFile QuerySystemConfig QueryLocalAccounts CreateLocalAccount ResetLocalAccountPassword SetLocalAccountEnabled SetLocalAccountType DeleteLocalAccount QueryEvents QueryEventLogInfo\n  exes: GetStatus QuerySystemVdo QueryDosDevice GetBackingStore FlushSystemVdo\n  io: GetIrpTrace ClearIrpTrace GetDriverStack GetVdoBridge\n  hal: QueryCapabilities\n  process: pid ppid env argv imagePath cwd ExitProcess','info');}
 function jplopsoft_xshPrintIrpTrace(ctx){
   var a=ctx.irpTrace.slice(-20),i,j,irp,s='';
   for(i=0;i<a.length;i++){
@@ -23920,7 +24019,7 @@ async function jplopsoft_xshSystemOpenPath(ctx,path){
     ctx,
     String(path||''),
     false
-  );
+  ),fmt,child;
 
   if(!n){
     throw jplopsoft_xshError(
@@ -23930,7 +24029,7 @@ async function jplopsoft_xshSystemOpenPath(ctx,path){
   }
 
   if(n.type==='folder'){
-    var child=await jplopsoft_runBuiltinXsh(
+    child=await jplopsoft_runBuiltinXsh(
       'explorer',
       [jplopsoft_xshNodePath(n)||'C:\\'],
       ctx
@@ -23942,8 +24041,37 @@ async function jplopsoft_xshSystemOpenPath(ctx,path){
     };
   }
 
+  /*
+   * os67:
+   * An XSH image is an executable, not a fire-and-forget association.
+   * Await the loader so PE/header/decryption/CreateProcess failures cross
+   * shell32 RPC back to Explorer instead of becoming an invisible rejected
+   * Promise in the desktop host.
+   */
+  fmt=jplopsoft_fileFormatFromName(
+    jplopsoft_decName(n)||''
+  );
+
+  if(fmt==='xsh'){
+    child=await jplopsoft_runXshNode(
+      n.id,
+      '',
+      ctx&&ctx.process?ctx.process:null
+    );
+
+    return{
+      ok:true,
+      pid:child.pid,
+      imagePath:child.imagePath,
+      executable:true
+    };
+  }
+
   jplopsoft_openNodeByAssociation(n.id);
-  return{ok:true};
+
+  return{
+    ok:true
+  };
 }
 
 function jplopsoft_xshSystemDownloadPath(ctx,path){
@@ -24516,6 +24644,13 @@ async function jplopsoft_xshDispatch(ctx,api,method,args){
         };
       }
       r=await jplopsoft_xshNtReadFile(ctx,args[0],args[1],args[2],'ReadFile');if(r.status!==jplopsoft_STATUS_SUCCESS)throw jplopsoft_xshError(r.status,r.error);return r;
+    }
+    if(method==='ReadFileBuffer'){
+      r=await jplopsoft_xshNtReadFileBuffer(ctx,args[0],args[1],args[2],'ReadFileBuffer');
+      if(r.status!==jplopsoft_STATUS_SUCCESS){
+        throw jplopsoft_xshError(r.status,r.error);
+      }
+      return r;
     }
     if(method==='WriteFile'){
       var writeHandle=parseInt(args[0],10)||0;
@@ -25611,6 +25746,41 @@ async function jplopsoft_runXshNode(id,argLine,parentProcess){
 
   jplopsoft_xshAttachSandbox(ctx);
   return ctx;
+}
+
+
+function jplopsoft_runXshNodeSafe(id,argLine,parentProcess,origin){
+  origin=String(origin||'Shell');
+
+  return jplopsoft_runXshNode(
+    id,
+    argLine,
+    parentProcess
+  ).catch(function(e){
+    var n=jplopsoft_resolveClientNode(id),
+        name=n?String(jplopsoft_decName(n)||''):'';
+
+    try{
+      jplopsoft_exosMessage(
+        'XSH 啟動失敗'+
+        (name?'：'+name:'')+
+        '\n\n'+
+        String(e&&e.message?e.message:e)+
+        '\n\n來源：'+origin
+      );
+    }catch(ignoreXshLaunchMessage){}
+
+    try{
+      console.error(
+        '[ExOS XSH launch failure]',
+        origin,
+        name,
+        e
+      );
+    }catch(ignoreXshLaunchConsole){}
+
+    return null;
+  });
 }
 
 function jplopsoft_xshRequestAnimationFrame(ctx,id){
@@ -27915,6 +28085,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os66',
+  version:'6.4.0-dev-os67',
   build:'external-os-comctl32-split-core-controls'
 };
