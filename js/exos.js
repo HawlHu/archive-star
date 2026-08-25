@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os65
+ * Version: 6.4.0-dev-os66
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -23747,8 +23747,9 @@ async function jplopsoft_xshUploadPickedFile(ctx,token,path){
       file=rec.file,
       size=parseInt(rec.size,10)||0,
       maxLogical=1024*1024*1024,
+      singleLimit=24*1024*1024,
       parent=jplopsoft_xshResolveC(ctx,String(path||''),true),
-      name,node,createResult,handle=0,buffer,wr,fek,fekWrap,out;
+      name,node,buffer,fek='',fekWrap='',cipher='',fmt,out;
 
   if(size>maxLogical){
     throw jplopsoft_xshError(
@@ -23773,40 +23774,95 @@ async function jplopsoft_xshUploadPickedFile(ctx,token,path){
     throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Upload is allowed only inside the current user profile.');
   }
 
-  /* Ordinary XSH I/O remains efficient for smaller files. */
-  if(size<=jplopsoft_XSH.maxIoBytes){
+  /*
+   * os66:
+   * Browser-picked files must NEVER go through the generic CreateFile /
+   * WriteFile -> API [save] path.
+   *
+   * A 4 MiB binary expands after Base64 + EXES/X60 encryption. Sending the
+   * complete ciphertext as one application/x-www-form-urlencoded request can
+   * exceed PHP/Web-server post limits even though the plaintext file is small.
+   *
+   * SINGLE_V1 therefore uses the same transport-safe pipeline as the classic
+   * Explorer uploader:
+   *
+   *   browser File -> browser-side FEK encryption
+   *                -> upload_begin
+   *                -> upload_chunk (adaptive 512 KiB / 1 MiB / 2 MiB)
+   *                -> upload_finish
+   *
+   * The logical ExFS file is still SINGLE_V1. Only the HTTP transport is
+   * chunked. Files above singleLimit continue to use CHUNKED_V1 with 4 MiB
+   * plaintext blocks.
+   */
+  if(size<=singleLimit){
+    if(typeof jplopsoft_uploadCipherInChunks!=='function'){
+      throw jplopsoft_xshError(
+        jplopsoft_STATUS_NOT_SUPPORTED,
+        'ExOS SINGLE_V1 chunk upload engine is unavailable.'
+      );
+    }
+
     buffer=await jplopsoft_xshReadBrowserFile(file);
     if(buffer.byteLength!==size){
-      throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Browser file size changed while reading.');
+      throw jplopsoft_xshError(
+        jplopsoft_STATUS_INVALID_PARAMETER,
+        'Browser file size changed while reading.'
+      );
     }
-    createResult=await jplopsoft_xshNtCreateFile(ctx,path,0x40000000,2,'CreateFile');
-    if(!createResult||Number(createResult.status)!==Number(jplopsoft_STATUS_SUCCESS)||!createResult.handle){
-      throw jplopsoft_xshError(createResult&&createResult.status?createResult.status:jplopsoft_STATUS_INVALID_PARAMETER,createResult&&createResult.error?createResult.error:'CreateFile failed.');
-    }
-    handle=createResult.handle;
-    var smallWriteOk=false;
+
     try{
-      wr=await jplopsoft_xshNtWriteFile(ctx,handle,buffer,0,'WriteFile');
-      if(!wr||Number(wr.status)!==Number(jplopsoft_STATUS_SUCCESS)||Number(wr.bytesWritten)!==size){
-        throw jplopsoft_xshError(wr&&wr.status?wr.status:jplopsoft_STATUS_INVALID_PARAMETER,wr&&wr.error?wr.error:'WriteFile failed.');
+      fek=jplopsoft_newFek();
+      fekWrap=jplopsoft_wrapFek(fek);
+      fmt=jplopsoft_fileFormatFromName(name);
+
+      if(jplopsoft_binaryFormat(fmt)){
+        cipher=jplopsoft_encBinaryBytes(new Uint8Array(buffer),fek);
+      }else{
+        cipher=jplopsoft_encContent(
+          jplopsoft_xshUtf8Decode(new Uint8Array(buffer)),
+          fek
+        );
       }
-      smallWriteOk=true;
+
+      out=await new Promise(function(resolve,reject){
+        jplopsoft_uploadCipherInChunks(
+          parent.parentId,
+          name,
+          cipher,
+          size,
+          null,
+          fekWrap,
+          null,
+          function(err,result){
+            if(err)reject(err);
+            else resolve(result||{});
+          }
+        );
+      });
     }finally{
-      jplopsoft_xshCloseHandle(ctx,handle);
-      handle=0;
-      if(!smallWriteOk){
-        try{await jplopsoft_xshDeleteFile(ctx,path);}catch(ignorePartialUploadCleanup){}
-      }
+      /*
+       * FEK/cipher strings are browser-managed immutable values, so explicit
+       * clearing is best-effort only. Dropping references still shortens their
+       * lifetime and matches the existing ExOS upload model.
+       */
+      buffer=null;
+      cipher='';
+      fek='';
+      fekWrap='';
     }
+
     await jplopsoft_xshReloadNodes();
     node=jplopsoft_xshResolveC(ctx,path,false);
+
     return{
       ok:true,
       path:String(path||''),
       size:size,
-      nodeId:node&&node.id?parseInt(node.id,10)||0:0,
+      nodeId:parseInt(out&&out.id,10)||(node&&node.id?parseInt(node.id,10)||0:0),
       storageMode:'SINGLE_V1',
-      blockCount:1
+      blockCount:1,
+      transport:'UPLOAD_CHUNK'
     };
   }
 
@@ -23816,27 +23872,37 @@ async function jplopsoft_xshUploadPickedFile(ctx,token,path){
    * No request and no sandbox ArrayBuffer ever contains the whole 1 GiB file.
    */
   if(typeof jplopsoft_largeUploadFile!=='function'){
-    throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'ExOS large-file upload engine is unavailable.');
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_NOT_SUPPORTED,
+      'ExOS large-file upload engine is unavailable.'
+    );
   }
+
   fek=jplopsoft_newFek();
   fekWrap=jplopsoft_wrapFek(fek);
-  out=await new Promise(function(resolve,reject){
-    jplopsoft_largeUploadFile(
-      file,
-      name,
-      parent.parentId,
-      null,
-      fek,
-      fekWrap,
-      function(err,result){
-        if(err)reject(err);
-        else resolve(result||{});
-      }
-    );
-  });
-  fek='';
-  fekWrap='';
+
+  try{
+    out=await new Promise(function(resolve,reject){
+      jplopsoft_largeUploadFile(
+        file,
+        name,
+        parent.parentId,
+        null,
+        fek,
+        fekWrap,
+        function(err,result){
+          if(err)reject(err);
+          else resolve(result||{});
+        }
+      );
+    });
+  }finally{
+    fek='';
+    fekWrap='';
+  }
+
   await jplopsoft_xshReloadNodes();
+
   return{
     ok:true,
     path:String(path||''),
@@ -23844,7 +23910,8 @@ async function jplopsoft_xshUploadPickedFile(ctx,token,path){
     nodeId:parseInt(out.id,10)||0,
     storageMode:String(out.storage_mode||'CHUNKED_V1'),
     blockSize:parseInt(out.block_size,10)||4194304,
-    blockCount:parseInt(out.block_count,10)||Math.ceil(size/4194304)
+    blockCount:parseInt(out.block_count,10)||Math.ceil(size/4194304),
+    transport:'LARGE_UPLOAD_CHUNK'
   };
 }
 
@@ -27848,6 +27915,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os65',
+  version:'6.4.0-dev-os66',
   build:'external-os-comctl32-split-core-controls'
 };
