@@ -1,5 +1,5 @@
 /* ExOS gdi32.dll emulation
- * Version: 6.4.0-dev-os72
+ * Version: 6.4.0-dev-os73
  * Model: EXOS_GDI32_V1
  * Client: V8-only browsers
  *
@@ -10,7 +10,7 @@
 'use strict';
 
 var API={
-  version:'6.4.0-dev-os72',
+  version:'6.4.0-dev-os73',
   model:'EXOS_GDI32_V1',
   ready:true
 };
@@ -69,6 +69,24 @@ function cssColor(v,def){
   return def||'#000000';
 }
 function colorRefFromRgba(r,g,b){return rgb(r,g,b);}
+var VIRTUAL_FONT_CATALOG=[
+  {faceName:'Segoe UI',family:'UI Sans Serif',pitch:'VARIABLE'},
+  {faceName:'Microsoft JhengHei',family:'CJK Sans Serif',pitch:'VARIABLE'},
+  {faceName:'Arial',family:'Sans Serif',pitch:'VARIABLE'},
+  {faceName:'Tahoma',family:'Sans Serif',pitch:'VARIABLE'},
+  {faceName:'Verdana',family:'Sans Serif',pitch:'VARIABLE'},
+  {faceName:'Trebuchet MS',family:'Sans Serif',pitch:'VARIABLE'},
+  {faceName:'Consolas',family:'Monospace',pitch:'FIXED'},
+  {faceName:'Courier New',family:'Monospace',pitch:'FIXED'},
+  {faceName:'Times New Roman',family:'Serif',pitch:'VARIABLE'},
+  {faceName:'Georgia',family:'Serif',pitch:'VARIABLE'}
+];
+function enumFontFamiliesEx(filter){
+  filter=filter&&typeof filter==='object'?filter:{};
+  var face=String(filter.faceName||filter.lfFaceName||'').toLowerCase();
+  return VIRTUAL_FONT_CATALOG.filter(function(f){return!face||String(f.faceName).toLowerCase().indexOf(face)>=0;}).map(function(f){return{faceName:f.faceName,fullName:f.faceName,family:f.family,pitch:f.pitch,styles:['Regular','Bold','Italic','Bold Italic'],charSet:1,virtual:true};});
+}
+
 function fontCss(f){
   f=f||{};
   var px=Math.max(1,Math.abs(Number(f.height)||16));
@@ -453,6 +471,7 @@ function dispatch(ctx,method,args){
   if(method==='RestoreDC'){dc=object(ctx,args[0],TYPE.DC);idx=intv(args[1]);if(!dc.state.saved.length)return false;if(idx<0){var count=Math.min(dc.state.saved.length,Math.abs(idx));while(count-->1)dc.state.saved.pop();ret=dc.state.saved.pop();}else{if(idx<1||idx>dc.state.saved.length)return false;ret=dc.state.saved[idx-1];dc.state.saved.length=idx-1;}ret.saved=dc.state.saved;dc.state=ret;return true;}
   if(method==='CreatePen'){spec=args[0]&&typeof args[0]==='object'?args[0]:{style:args[0],width:args[1],color:args[2]};return alloc(ctx,TYPE.PEN,{style:intv(spec.style),width:Math.max(0,Number(spec.width)||1),color:typeof spec.color==='undefined'?rgb(0,0,0):spec.color});}
   if(method==='CreateSolidBrush')return alloc(ctx,TYPE.BRUSH,{style:'solid',color:args[0]});
+  if(method==='EnumFontFamiliesEx'||method==='GetFontCatalog')return enumFontFamiliesEx(args[0]);
   if(method==='CreateFont'){
     if(args[0]&&typeof args[0]==='object')spec=args[0];else spec={height:args[0],width:args[1],escapement:args[2],orientation:args[3],weight:args[4],italic:args[5],underline:args[6],strikeOut:args[7],charSet:args[8],faceName:args[13]};
     return alloc(ctx,TYPE.FONT,{height:Number(spec.height)||16,width:Number(spec.width)||0,escapement:Number(spec.escapement)||0,orientation:Number(spec.orientation)||0,weight:intv(spec.weight)||400,italic:!!spec.italic,underline:!!spec.underline,strikeOut:!!spec.strikeOut,charSet:intv(spec.charSet),faceName:String(spec.faceName||'Segoe UI')});
