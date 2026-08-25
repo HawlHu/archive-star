@@ -1,6 +1,6 @@
 /* ExOS Common Controls Host Runtime
  * File: exos_comctl32.js
- * Version: 6.4.0-dev-os68
+ * Version: 6.4.0-dev-os69
  * Model: EXOS_COMCTL32_V2
  * Client: V8-only browsers
  *
@@ -13,7 +13,7 @@
   if(
     global.jplopsoft_EXOS_COMCTL32&&
     global.jplopsoft_EXOS_COMCTL32.ready===true&&
-    String(global.jplopsoft_EXOS_COMCTL32.version||'')==='6.4.0-dev-os68'
+    String(global.jplopsoft_EXOS_COMCTL32.version||'')==='6.4.0-dev-os69'
   ){
     return;
   }
@@ -4219,7 +4219,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
     return{
       ok:true,
       model:'EXOS_COMCTL32_V2',
-      version:'6.4.0-dev-os68',
+      version:'6.4.0-dev-os69',
       classes:jplopsoft_comctlClasses()
     };
   }
@@ -4227,7 +4227,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
   if(method==='GetCommonControlsVersion'){
     return{
       model:'EXOS_COMCTL32_V2',
-      version:'6.4.0-dev-os68'
+      version:'6.4.0-dev-os69'
     };
   }
 
@@ -5095,7 +5095,7 @@ async function jplopsoft_comctlDispatch(ctx,method,args){
 
   global.jplopsoft_EXOS_COMCTL32=Object.freeze({
     ready:true,
-    version:'6.4.0-dev-os68',
+    version:'6.4.0-dev-os69',
     model:'EXOS_COMCTL32_V2',
     build:'external-comctl32-core-controls',
     classes:Object.freeze(jplopsoft_comctlClasses().slice())

@@ -1,6 +1,6 @@
 /*
  * ExOS Frontend Module
- * Version: 6.4.0-dev-os68
+ * Version: 6.4.0-dev-os69
  *
  * Stable ExOS browser-side operating-system UI functions extracted from exos.php:
  * - CMD shell / parser / commands
@@ -25482,12 +25482,12 @@ async function jplopsoft_runBuiltinXsh(appId,args,parentCtx){
       username:String(state.samUsername||'administrator'),
       sid:String(state.samSid||''),
       /*
-       * os68: a Mark-of-the-Web XSH image is allowed through the kernel image
-       * loader, but the child is created at Low Integrity.  Unmarked images
-       * retain the normal Medium Integrity XSH token.
+       * os69:
+       * Built-in SystemApps are compiled into the trusted ExOS package.
+       * They are not ExFS nodes and therefore have no Zone.Identifier/MOTW.
        */
-      integrity:n.has_motw?'LOW':'MEDIUM',
-      protection:n.has_motw?'Sandbox+MOTW':'Sandbox',
+      integrity:'MEDIUM',
+      protection:'Sandbox',
       critical:false,
       systemProcess:false,
       imagePathName:imagePath,
@@ -25528,8 +25528,8 @@ async function jplopsoft_runBuiltinXsh(appId,args,parentCtx){
     name:String(app.title||app.fileName||appId),
     imagePath:imagePath,
     image:image,
-    markOfTheWeb:!!n.has_motw,
-    zoneId:n.has_motw?3:0,
+    markOfTheWeb:false,
+    zoneId:0,
     subsystem:image.subsystem,
     subsystemName:image.subsystemName,
     source:String(image.code||''),
@@ -25667,8 +25667,14 @@ async function jplopsoft_runXshNode(id,argLine,parentProcess){
       sessionId:1,
       username:String(state.samUsername||'administrator'),
       sid:String(state.samSid||''),
-      integrity:'MEDIUM',
-      protection:'Sandbox',
+      /*
+       * os69:
+       * External ExFS XSH images retain Mark-of-the-Web semantics.
+       * The kernel loader may inspect the image with IMAGE_LOAD, but a
+       * Zone.Identifier-marked image is created as a Low Integrity XSH host.
+       */
+      integrity:n.has_motw?'LOW':'MEDIUM',
+      protection:n.has_motw?'Sandbox+MOTW':'Sandbox',
       critical:false,
       systemProcess:false,
       imagePathName:jplopsoft_cmdNodeFullPath(n),
@@ -25711,6 +25717,8 @@ async function jplopsoft_runXshNode(id,argLine,parentProcess){
     name:name,
     imagePath:jplopsoft_cmdNodeFullPath(n),
     image:image,
+    markOfTheWeb:!!n.has_motw,
+    zoneId:n.has_motw?3:0,
     subsystem:image.subsystem,
     subsystemName:image.subsystemName,
     source:String(image.code||''),
@@ -28110,6 +28118,6 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 
 window.jplopsoft_EXOS_OS={
   ready:true,
-  version:'6.4.0-dev-os68',
+  version:'6.4.0-dev-os69',
   build:'external-os-comctl32-split-core-controls'
 };
