@@ -13474,5 +13474,5 @@ function jplopsoft_bind(){
 window.jplopsoft_EXOS_OS={
   ready:true,
   version:'6.4.0-dev-os91',
-  build:'os91-hotfix28-xsh-first-cleanup-phase10-taskbar-clipboard-runtime-core'
+  build:'os91-hotfix31-phase10-taskbar-shell-contract-fix'
 };

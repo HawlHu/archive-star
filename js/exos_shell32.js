@@ -11,7 +11,8 @@
 var PROPERTY_STORES={next:0xD800,items:{}};
 var SHELL={
   version:'6.4.0-dev-os91',
-  build:'6.4.0-dev-os91-hotfix28',
+  build:'6.4.0-dev-os91-hotfix31',
+  taskbarPresentationVersion:2,
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -33,6 +34,7 @@ var SHELL={
   desktopBound:false,
   taskbarBound:false,
   clockTimer:0,
+  taskbarRetryTimer:0,
   notificationSeq:0,
   notifications:{}
 };
@@ -315,15 +317,39 @@ function shellUpdateTaskbarClock(){
   return{time:timeText,date:dateText,iso:d.toISOString()};
 }
 function shellBindTaskbarPresentation(){
-  var clock=document.getElementById('jplopsoft_taskbarClock'),start=document.getElementById('jplopsoft_startBtn'),taskbar=document.getElementById('jplopsoft_taskbar');
+  var clock=document.getElementById('jplopsoft_taskbarClock'),start=document.getElementById('jplopsoft_startBtn'),taskbar=document.getElementById('jplopsoft_taskbar'),complete=false;
   shellEnsureStyle();
-  if(!SHELL.taskbarBound){
-    if(clock)clock.onclick=function(e){e=e||window.event;if(e.stopPropagation)e.stopPropagation();e.cancelBubble=true;if(state&&state.samAuthenticated&&state.vaultKey)jplopsoft_runBuiltinXsh('calendar',[],null).catch(function(){});return false;};
-    if(start){start.onmousedown=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();if(e.stopPropagation)e.stopPropagation();e.returnValue=false;e.cancelBubble=true;return false;};start.onclick=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();if(e.stopPropagation)e.stopPropagation();e.returnValue=false;e.cancelBubble=true;return shellToggleStartMenu();};}
-    if(taskbar)taskbar.oncontextmenu=function(e){e=e||window.event;return shellTaskbarContextMenu(e,shellTaskbarTargetAppId(taskbar,e.target||e.srcElement));};
-    SHELL.taskbarBound=true;
+
+  /*
+   * Phase10 Taskbar presentation can be rebound safely.  Do not use one global
+   * boolean as the source of truth because the shell DOM can be created or
+   * replaced independently of the runtime module.  Each host node owns its
+   * own binding marker instead.
+   */
+  if(clock&&clock.__exosShell32ClockBound!==true){
+    clock.onclick=function(e){e=e||window.event;if(e.stopPropagation)e.stopPropagation();e.cancelBubble=true;if(global.state&&state.samAuthenticated&&state.vaultKey)jplopsoft_runBuiltinXsh('calendar',[],null).catch(function(){});return false;};
+    clock.__exosShell32ClockBound=true;
   }
-  shellUpdateTaskbarClock();if(SHELL.clockTimer){try{window.clearInterval(SHELL.clockTimer);}catch(ignoreTimer){}}SHELL.clockTimer=window.setInterval(shellUpdateTaskbarClock,1000);return true;
+  if(start&&start.__exosShell32StartBound!==true){
+    start.onmousedown=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();if(e.stopPropagation)e.stopPropagation();e.returnValue=false;e.cancelBubble=true;return false;};
+    start.onclick=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();if(e.stopPropagation)e.stopPropagation();e.returnValue=false;e.cancelBubble=true;return shellToggleStartMenu();};
+    start.__exosShell32StartBound=true;
+  }
+  if(taskbar&&taskbar.__exosShell32ContextBound!==true){
+    taskbar.oncontextmenu=function(e){e=e||window.event;return shellTaskbarContextMenu(e,shellTaskbarTargetAppId(taskbar,e.target||e.srcElement));};
+    taskbar.__exosShell32ContextBound=true;
+  }
+
+  complete=!!(clock&&start&&taskbar);
+  SHELL.taskbarBound=complete;
+  shellUpdateTaskbarClock();
+  if(!SHELL.clockTimer)SHELL.clockTimer=window.setInterval(shellUpdateTaskbarClock,1000);
+
+  /* A late/replaced Taskbar DOM must heal without moving presentation back to exos.js. */
+  if(!complete&&!SHELL.taskbarRetryTimer){
+    SHELL.taskbarRetryTimer=window.setTimeout(function(){SHELL.taskbarRetryTimer=0;shellBindTaskbarPresentation();},100);
+  }
+  return complete;
 }
 function shellNotificationHost(){
   var h=document.getElementById('jplopsoft_shellNotifications');if(h)return h;
