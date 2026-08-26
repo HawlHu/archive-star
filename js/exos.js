@@ -10911,7 +10911,65 @@ function jplopsoft_bindExfsContextMenu(){
       tree=jplopsoft_el('jplopsoft_folderTree'),
       menu=jplopsoft_exfsContextMenuEnsure();
 
-  if(!panel||!menu)return;
+  /*
+   * os91: the shell/desktop and XSH Explorer share the same context-menu
+   * surface, while the legacy static jplopsoft_filePanel may not exist at
+   * all.  Global dismissal therefore must be wired independently of the
+   * legacy Explorer DOM.  Otherwise a desktop right-click menu remains open
+   * forever because this binder returns before installing document mousedown.
+   */
+  if(!menu)return;
+
+  menu.oncontextmenu=function(ev){
+    ev=ev||window.event;
+    if(ev.preventDefault)ev.preventDefault();
+    ev.returnValue=false;
+    return false;
+  };
+
+  document.addEventListener(
+    'mousedown',
+    function(ev){
+      var target=ev.target||ev.srcElement,
+          activeMenu=jplopsoft_el('jplopsoft_exfsContextMenu');
+
+      if(
+        activeMenu&&
+        activeMenu.className.indexOf('jplopsoft_hidden')<0&&
+        target!==activeMenu&&
+        !activeMenu.contains(target)
+      ){
+        jplopsoft_hideExfsContextMenu();
+      }
+    },
+    true
+  );
+
+  document.addEventListener(
+    'keydown',
+    function(ev){
+      ev=ev||window.event;
+      if((ev.keyCode||ev.which)===27){
+        jplopsoft_hideExfsContextMenu();
+      }
+    },
+    true
+  );
+
+  window.addEventListener(
+    'resize',
+    jplopsoft_hideExfsContextMenu,
+    false
+  );
+
+  window.addEventListener(
+    'scroll',
+    jplopsoft_hideExfsContextMenu,
+    true
+  );
+
+  /* Legacy static Explorer is optional in os91. */
+  if(!panel)return;
 
   panel.oncontextmenu=function(ev){
     ev=ev||window.event;
@@ -11015,53 +11073,6 @@ function jplopsoft_bindExfsContextMenu(){
     };
   }
 
-  menu.oncontextmenu=function(ev){
-    ev=ev||window.event;
-    if(ev.preventDefault)ev.preventDefault();
-    ev.returnValue=false;
-    return false;
-  };
-
-  document.addEventListener(
-    'mousedown',
-    function(ev){
-      var target=ev.target||ev.srcElement,
-          activeMenu=jplopsoft_el('jplopsoft_exfsContextMenu');
-
-      if(
-        activeMenu&&
-        activeMenu.className.indexOf('jplopsoft_hidden')<0&&
-        target!==activeMenu&&
-        !activeMenu.contains(target)
-      ){
-        jplopsoft_hideExfsContextMenu();
-      }
-    },
-    true
-  );
-
-  document.addEventListener(
-    'keydown',
-    function(ev){
-      ev=ev||window.event;
-      if((ev.keyCode||ev.which)===27){
-        jplopsoft_hideExfsContextMenu();
-      }
-    },
-    true
-  );
-
-  window.addEventListener(
-    'resize',
-    jplopsoft_hideExfsContextMenu,
-    false
-  );
-
-  window.addEventListener(
-    'scroll',
-    jplopsoft_hideExfsContextMenu,
-    true
-  );
 }
 
 function jplopsoft_refreshVisibleFileRowSelection(){
