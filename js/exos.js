@@ -20046,7 +20046,7 @@ async function jplopsoft_xshCreateReparsePoint(ctx,linkPath,targetPath,tag){
 }
 
 async function jplopsoft_xshNtCreateFile(ctx,path,desiredAccess,creationDisposition,win32Api){
-  var access=jplopsoft_xshAccessFlags(desiredAccess),disp=jplopsoft_xshDisposition(creationDisposition),spec=jplopsoft_xshPathSpec(ctx,path),irp,h,node;
+  var access=jplopsoft_xshAccessFlags(desiredAccess),disp=jplopsoft_xshDisposition(creationDisposition),spec=jplopsoft_xshPathSpec(ctx,path),irp,h,node,createdNow=false;
   irp=jplopsoft_xshBeginIrp(ctx,win32Api||'', 'NtCreateFile','IRP_MJ_CREATE',String(path),spec.drive||'');
   try{
     jplopsoft_xshTraceDownStack(irp,String(path),'CREATE');
@@ -20056,10 +20056,11 @@ async function jplopsoft_xshNtCreateFile(ctx,path,desiredAccess,creationDisposit
       throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'Only C: backed by PHP /_exfs/ is exposed.');
     }else{
       node=jplopsoft_xshResolveC(ctx,path,false);
-      if(!node&&disp!==3&&disp!==5)node=await jplopsoft_xshCreateCNode(ctx,path,'file');
+      if(!node&&disp!==3&&disp!==5){node=await jplopsoft_xshCreateCNode(ctx,path,'file');createdNow=true;}
       if(!node||node.type!=='file')throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'File not found.');
       if(access.write&&!jplopsoft_isWritableProfileFolder(node.parent_id))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Write access denied outside writable profile/Public folders.');
       if(
+        !createdNow&&
         (disp===2||disp===5)&&
         access.write
       ){
