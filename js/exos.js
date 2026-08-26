@@ -871,21 +871,12 @@ function jplopsoft_renderLogonSubmitButton(){
 }
 
 function jplopsoft_secureDesktopUpdate(){
-  var shell=jplopsoft_el('jplopsoft_secureDesktopShell'),
-      logon=jplopsoft_el('jplopsoft_logonView'),
-      status=jplopsoft_el('jplopsoft_logonStatusMirror'),
+  var status=jplopsoft_el('jplopsoft_logonStatusMirror'),
       setupName=jplopsoft_el('jplopsoft_setupAccountName');
 
-  if(shell&&jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI){
-    shell.style.backgroundImage='url("'+jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI+'")';
-    shell.style.backgroundPosition='center center';
-    shell.style.backgroundSize='cover';
-  }
-
-  if(logon&&jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI){
-    logon.style.backgroundImage='url("'+jplopsoft_EXFS_DESKTOP_WALLPAPER_DATA_URI+'")';
-  }
-
+  /* Secure Desktop owns its own LogonUI/OOBE background presentation.
+     Desktop wallpaper data is owned by shell32.dll and must not be reached
+     through a legacy Host global from the Runtime. */
   if(setupName)setupName.value=String(state.defaultUsername||'administrator');
 
   jplopsoft_renderLogonAccounts();
@@ -13488,5 +13479,5 @@ function jplopsoft_bind(){
 window.jplopsoft_EXOS_OS={
   ready:true,
   version:'6.4.0-dev-os91',
-  build:'os91-hotfix34-loader-contract-oobe-icon-fix'
+  build:'os91-hotfix35-runtime-wallpaper-boundary-mirror-order-fix'
 };
