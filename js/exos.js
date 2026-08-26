@@ -6734,7 +6734,8 @@ function jplopsoft_xshNodePath(n){
 function jplopsoft_xshListDirectory(ctx,path){
   var p=String(path||ctx.currentDirectory||'C:\\'),
       folder=jplopsoft_xshResolveC(ctx,p,false),
-      parentId,a,i,n,resolved,name,out=[],directory,attrs,targetNode,targetPath;
+      logicalBase=jplopsoft_xshNormalizeSlashes(p),
+      parentId,a,i,n,resolved,name,out=[],directory,attrs,targetNode,targetPath,logicalPath;
 
   if(!folder||folder.type!=='folder'){
     throw jplopsoft_xshError(
@@ -6742,6 +6743,23 @@ function jplopsoft_xshListDirectory(ctx,path){
       'Directory not found.'
     );
   }
+
+  /* Preserve the caller-visible DOS namespace. A ListDirectory on a SUBST
+   * path such as Z:\\ must return Z:\\child paths, not backing C:\\ paths.
+   * This matches Win32 directory enumeration semantics and keeps Shell tree
+   * item identities unique across DOS device aliases. */
+  if(!/^[A-Za-z]:\\/.test(logicalBase)){
+    logicalBase=String(
+      ctx&&ctx.currentDirectory
+        ?ctx.currentDirectory
+        :(jplopsoft_xshNodePath(folder)||'C:\\')
+    );
+  }
+  logicalBase=jplopsoft_xshNormalizeSlashes(logicalBase);
+  if(/^[A-Za-z]:/.test(logicalBase)){
+    logicalBase=logicalBase.charAt(0).toUpperCase()+logicalBase.substring(1);
+  }
+  if(logicalBase.length>3)logicalBase=logicalBase.replace(/\\+$/,'');
 
   parentId=folder.root?0:(parseInt(folder.id,10)||0);
   a=jplopsoft_childrenOf(parentId);
@@ -6757,9 +6775,12 @@ function jplopsoft_xshListDirectory(ctx,path){
     if(!attrs)attrs=directory?0x10:0x80;
     targetNode=n.type==='reparse_point'?jplopsoft_findNode(parseInt(n.reparse_target,10)||0):null;
     targetPath=targetNode?jplopsoft_xshNodePath(targetNode):'';
+    logicalPath=(logicalBase.length===3&&/^[A-Za-z]:\\$/.test(logicalBase))
+      ?logicalBase+String(name)
+      :logicalBase+'\\'+String(name);
     out.push({
       name:String(name),
-      path:jplopsoft_xshNodePath(n),
+      path:logicalPath,
       directory:directory,
       reparsePoint:n.type==='reparse_point',
       reparseTag:n.type==='reparse_point'?String(n.reparse_tag||'SYMLINK'):'',
@@ -8415,7 +8436,9 @@ function jplopsoft_xshAttachTextControlEvents(ctx,id,n){
         keyCode:parseInt(e&&(e.keyCode||e.which),10)||0,
         ctrlKey:!!(e&&e.ctrlKey),
         shiftKey:!!(e&&e.shiftKey),
-        altKey:!!(e&&e.altKey)
+        altKey:!!(e&&e.altKey),
+        scrollTop:Number(n.scrollTop)||0,
+        scrollLeft:Number(n.scrollLeft)||0
       }
     );
   }
@@ -8424,12 +8447,14 @@ function jplopsoft_xshAttachTextControlEvents(ctx,id,n){
   n.onfocus=function(e){jplopsoft_xshRememberFocus(ctx,id,n);send('focus',e);};
   n.onclick=function(e){send('click',e);};
   n.onkeyup=function(e){send('keyup',e);};
+  n.onscroll=function(e){send('scroll',e);};
   n.onkeydown=function(e){
     e=e||window.event;
     var key=String(e.key||'').toLowerCase();
     if(
       (e.ctrlKey&&(key==='s'||key==='o'||key==='f'||key==='h'||key==='g'))||
-      key==='f3'||key==='f5'
+      key==='f3'||key==='f5'||
+      (key==='tab'&&n._exosAcceptTab===true)
     ){
       try{e.preventDefault();}catch(ignorePreventDefault){}
       try{e.returnValue=false;}catch(ignoreReturnValue){}
@@ -8712,7 +8737,7 @@ function jplopsoft_xshAttachRichEditEvents(ctx,id,n){
   n.onkeydown=function(e){
     e=e||window.event;
     var key=String(e&&e.key||'').toLowerCase();
-    if(e&&e.ctrlKey&&(key==='s'||key==='o')){
+    if(e&&e.ctrlKey&&(key==='s'||key==='o'||key==='n'||key==='f'||key==='h')){
       try{e.preventDefault();}catch(ignoreRichPrevent){}
       try{e.returnValue=false;}catch(ignoreRichReturn){}
     }
@@ -8910,6 +8935,7 @@ function jplopsoft_xshCreateControl(ctx,hwnd,spec){
     if(typeof s.spellcheck!=='undefined'){
       n.spellcheck=!!s.spellcheck;
     }
+    n._exosAcceptTab=!!s.acceptTab;
     jplopsoft_xshAttachTextControlEvents(ctx,id,n);
   }else if(type==='richedit'){
     n=document.createElement('div');
@@ -9411,6 +9437,11 @@ function jplopsoft_xshSetControlProperty(ctx,id,prop,value){
     return true;
   }
 
+  if(p==='acceptTab'&&String(n.tagName||'').toLowerCase()==='textarea'){
+    n._exosAcceptTab=!!value;
+    return true;
+  }
+
   if(p==='selection'&&('selectionStart' in n)){
     var range=value&&typeof value==='object'?value:{},
         len=String(n.value||'').length,
@@ -9427,6 +9458,11 @@ function jplopsoft_xshSetControlProperty(ctx,id,prop,value){
 
   if(p==='scrollTop'&&('scrollTop' in n)){
     n.scrollTop=Math.max(0,Number(value)||0);
+    return true;
+  }
+
+  if(p==='scrollLeft'&&('scrollLeft' in n)){
+    n.scrollLeft=Math.max(0,Number(value)||0);
     return true;
   }
 
@@ -9487,11 +9523,14 @@ function jplopsoft_xshGetControlProperty(ctx,id,prop){
   if(p==='spellcheck')return !!n.spellcheck;
   if(p==='placeholder')return String(n.placeholder||'');
   if(p==='wrap'&&String(n.tagName||'').toLowerCase()==='textarea')return String(n.wrap||'soft');
+  if(p==='acceptTab'&&String(n.tagName||'').toLowerCase()==='textarea')return !!n._exosAcceptTab;
   if(p==='selection'&&('selectionStart' in n))return jplopsoft_xshTextSelection(n);
   if(p==='selectionStart'&&('selectionStart' in n))return Number(n.selectionStart)||0;
   if(p==='selectionEnd'&&('selectionEnd' in n))return Number(n.selectionEnd)||0;
   if(p==='scrollTop'&&('scrollTop' in n))return Number(n.scrollTop)||0;
+  if(p==='scrollLeft'&&('scrollLeft' in n))return Number(n.scrollLeft)||0;
   if(p==='scrollHeight'&&('scrollHeight' in n))return Number(n.scrollHeight)||0;
+  if(p==='scrollWidth'&&('scrollWidth' in n))return Number(n.scrollWidth)||0;
   if(p==='title')return String(n.title||'');
   if(String(n.tagName||'').toLowerCase()==='select'){
     var ss=jplopsoft_xshSelectSnapshot(n),items=[],oi;
@@ -9666,7 +9705,7 @@ async function jplopsoft_xshConfirmBox(ctx,message,title){
 function jplopsoft_xshRegisterBrowserFiles(ctx,fileList,options){
   var opt=options||{},
       files=fileList||[],
-      hardMax=1024*1024*1024,
+      hardMax=16*1024*1024*1024,
       maxBytes=Math.max(1,Math.min(hardMax,parseInt(opt.maxBytes,10)||hardMax)),
       out=[],i,f,size,token;
 
@@ -9700,7 +9739,7 @@ if(typeof window!=='undefined')window.jplopsoft_xshRegisterDroppedFiles=jplopsof
 function jplopsoft_xshPickFiles(ctx,options){
   var opt=options||{},
       tokenMode=!!opt.returnFileToken,
-      hardMax=1024*1024*1024,
+      hardMax=16*1024*1024*1024,
       maxBytes=Math.max(
         1,
         Math.min(
@@ -9880,7 +9919,7 @@ async function jplopsoft_xshUploadPickedFile(ctx,token,path){
   var rec=jplopsoft_xshLocalFile(ctx,token),
       file=rec.file,
       size=parseInt(rec.size,10)||0,
-      maxLogical=1024*1024*1024,
+      maxLogical=16*1024*1024*1024,
       singleLimit=24*1024*1024,
       parent=jplopsoft_xshResolveC(ctx,String(path||''),true),
       name,node,buffer,fek='',fekWrap='',cipher='',fmt,out;
@@ -9888,7 +9927,7 @@ async function jplopsoft_xshUploadPickedFile(ctx,token,path){
   if(size>maxLogical){
     throw jplopsoft_xshError(
       jplopsoft_STATUS_INVALID_PARAMETER,
-      'ExOS Explorer accepts at most 1 GiB per uploaded file.'
+      'ExOS Explorer accepts at most 16 GiB per uploaded file.'
     );
   }
   if(!parent){
@@ -10003,7 +10042,7 @@ async function jplopsoft_xshUploadPickedFile(ctx,token,path){
   /*
    * Large-file path: File.slice() -> 4 MiB plaintext blocks -> browser FEK
    * encryption -> small HTTP chunks -> PHP _Uploads staging -> CHUNKED_V1.
-   * No request and no sandbox ArrayBuffer ever contains the whole 1 GiB file.
+   * No request and no sandbox ArrayBuffer ever contains the whole 16 GiB file.
    */
   if(typeof jplopsoft_largeUploadFile!=='function'){
     throw jplopsoft_xshError(
@@ -13479,5 +13518,5 @@ function jplopsoft_bind(){
 window.jplopsoft_EXOS_OS={
   ready:true,
   version:'6.4.0-dev-os91',
-  build:'os91-hotfix35-runtime-wallpaper-boundary-mirror-order-fix'
+  build:'os91-hotfix40-editor-ide-word-ribbon'
 };

@@ -11,7 +11,7 @@
 var PROPERTY_STORES={next:0xD800,items:{}};
 var SHELL={
   version:'6.4.0-dev-os91',
-  build:'6.4.0-dev-os91-hotfix37',
+  build:'6.4.0-dev-os91-hotfix39',
   taskbarPresentationVersion:4,
   model:'EXOS_SHELL32_V1',
   ready:true,
@@ -455,7 +455,7 @@ function shellRunStartupApps(){
   }
   return count;
 }
-function shellMimeForName(name){var ext=shellExtension(name),m={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',ico:'image/x-icon',webp:'image/webp',bmp:'image/bmp',zip:'application/zip','7z':'application/x-7z-compressed',rar:'application/vnd.rar',exe:'application/vnd.microsoft.portable-executable',dll:'application/octet-stream',dat:'application/octet-stream',bin:'application/octet-stream',tar:'application/x-tar',gz:'application/gzip',mp3:'audio/mpeg',mp4:'video/mp4',wav:'audio/wav',m4a:'audio/mp4',aac:'audio/aac',flac:'audio/flac',ogg:'audio/ogg',webm:'video/webm',mov:'video/quicktime',avi:'video/x-msvideo'};return m[ext]||'application/octet-stream';}
+function shellMimeForName(name){var ext=shellExtension(name),m={jpg:'image/jpeg',jpeg:'image/jpeg',jfif:'image/jpeg',png:'image/png',gif:'image/gif',ico:'image/x-icon',webp:'image/webp',bmp:'image/bmp',zip:'application/zip','7z':'application/x-7z-compressed',rar:'application/vnd.rar',exe:'application/vnd.microsoft.portable-executable',dll:'application/octet-stream',dat:'application/octet-stream',bin:'application/octet-stream',tar:'application/x-tar',gz:'application/gzip',mp3:'audio/mpeg',mp4:'video/mp4',wav:'audio/wav',m4a:'audio/mp4',aac:'audio/aac',flac:'audio/flac',ogg:'audio/ogg',webm:'video/webm',mov:'video/quicktime',avi:'video/x-msvideo'};return m[ext]||'application/octet-stream';}
 function shellSaveBlobObject(name,blob){var URLObj=window.URL||window.webkitURL,a=document.createElement('a'),url='';if(!URLObj||!URLObj.createObjectURL)throw new Error('Browser download API is unavailable.');url=URLObj.createObjectURL(blob);a.href=url;a.download=String(name||'download.bin');a.style.display='none';document.body.appendChild(a);try{a.click();}finally{window.setTimeout(function(){try{if(a.parentNode)a.parentNode.removeChild(a);}catch(ignoreA){}try{URLObj.revokeObjectURL(url);}catch(ignoreUrl){}},1200);}return true;}
 function shellDownloadNode(node){
   if(!state.vaultKey)throw new Error('Vault is locked.');if(!node||node.type!=='file')throw new Error('Download requires a file.');var name=jplopsoft_decName(node),fmt;if(name===null)throw new Error('File name cannot be decrypted.');if(jplopsoft_nodeIsLargeFile(node)){jplopsoft_downloadLargeFile(node,name);return true;}fmt=jplopsoft_fileFormatFromName(name);jplopsoft_setStatus('正在載入「'+jplopsoft_htmlEscape(name)+'」的加密內容…');jplopsoft_fetchNodeContent(node.id,function(err,out){var payload,fek,blob;if(err){jplopsoft_user32MessageBox(err.message,'ExOS Shell');return;}try{fek=jplopsoft_nodeFekById(node.id);if(jplopsoft_binaryFormat(fmt)){payload=jplopsoft_decBinaryCipher(out.content_enc,fek);if(payload===null)throw new Error('Binary 內容無法解密。');blob=new Blob([new Uint8Array(payload)],{type:shellMimeForName(name)});}else{payload=jplopsoft_decContentCipher(out.content_enc,fek);if(payload===null)throw new Error('文件內容無法解密。');blob=new Blob([String(payload||'')],{type:fmt==='html'?'text/html;charset=utf-8':fmt==='csv'?'text/csv;charset=utf-8':'text/plain;charset=utf-8'});}shellSaveBlobObject(name,blob);jplopsoft_setStatus('已下載「'+jplopsoft_htmlEscape(name)+'」。');}catch(e){jplopsoft_user32MessageBox(String(e&&e.message?e.message:e),'ExOS Shell');}},null,'DOWNLOAD');return true;
@@ -464,7 +464,7 @@ function shellDownloadPath(ctx,path){var n=shellResolve(ctx,String(path||''));if
 async function shellOpenRegisteredPath(ctx,path){
   var n=shellResolve(ctx,String(path||'')),name,ext,child,app,protection,p;if(!n)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Path not found.');p=jplopsoft_xshNodePath(n)||String(path||'');if(n.type==='folder'){child=await jplopsoft_runBuiltinXsh('explorer',[p||'C:\\'],ctx);return{ok:true,pid:child.pid,path:p};}name=String(jplopsoft_decName(n)||'');ext=shellExtension(name);
   if(ext==='xsh'){child=await jplopsoft_runXshNode(n.id,'',ctx&&ctx.process?ctx.process:null);return{ok:true,pid:child.pid,imagePath:child.imagePath,executable:true,path:p};}
-  if(ext==='html'||ext==='htm')app='htmlview';else if(['png','jpg','jpeg','gif','webp','bmp','ico'].indexOf(ext)>=0)app='image_viewer';else if(['mp3','wav','ogg','m4a','aac','flac'].indexOf(ext)>=0)app='audio_preview';else if(['mp4','webm','mov','m4v','avi','mpg','mpeg','h264','264','avc'].indexOf(ext)>=0)app='video_preview';else if(ext==='txt')app='notepad';else if(ext==='csv')app='csvedit';else if(ext==='zip')app='zipfolder';else throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'No registered XSH viewer for this file type.');
+  if(ext==='html'||ext==='htm')app='htmlview';else if(['png','jpg','jpeg','jfif','gif','webp','bmp','ico'].indexOf(ext)>=0)app='image_viewer';else if(['mp3','wav','ogg','m4a','aac','flac'].indexOf(ext)>=0)app='audio_preview';else if(['mp4','webm','mov','m4v','avi','mpg','mpeg','h264','264','avc'].indexOf(ext)>=0)app='video_preview';else if(ext==='txt')app='notepad';else if(ext==='csv')app='csvedit';else if(ext==='zip')app='zipfolder';else throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'No registered XSH viewer for this file type.');
   protection=n.has_motw?(app==='htmlview'?'Sandbox+MOTW+WebView':'Sandbox+MOTW'):(app==='htmlview'?'Sandbox+WebView':'Sandbox');child=await jplopsoft_runBuiltinXsh(app,[p],ctx,{integrity:n.has_motw?'LOW':'MEDIUM',protection:protection});return{ok:true,pid:child.pid,path:p,application:app};
 }
 async function shellOpenPath(ctx,path){return await shellExecute(ctx,String(path||''),'open','');}
@@ -558,7 +558,7 @@ function shellTypeName(path,isDirectory){
   if(ext==='html'||ext==='htm')return'HTML 文件';
   if(ext==='xsh')return'ExOS XSH 應用程式';
   if(ext==='xba')return'ExOS Batch 批次檔';
-  if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='gif'||ext==='webp'||ext==='bmp')return'圖片';
+  if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='jfif'||ext==='gif'||ext==='webp'||ext==='bmp')return'圖片';
   if(ext==='mp3'||ext==='wav'||ext==='ogg'||ext==='m4a')return'音訊';
   if(ext==='mp4'||ext==='webm'||ext==='mov')return'影片';
   if(ext==='pdf')return'PDF 文件';
@@ -580,7 +580,7 @@ function shellIconName(path,isDirectory){
   if(ext==='csv')return'csv';
   if(ext==='html'||ext==='htm')return'html';
   if(ext==='xsh'||ext==='xba')return'cmd';
-  if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='gif'||ext==='webp'||ext==='bmp')return'image';
+  if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='jfif'||ext==='gif'||ext==='webp'||ext==='bmp')return'image';
   if(ext==='mp3'||ext==='wav'||ext==='ogg'||ext==='m4a')return'media';
   if(ext==='mp4'||ext==='webm'||ext==='mov')return'media';
   if(ext==='zip')return'zipfolder';
@@ -1542,7 +1542,7 @@ async function shellExecute(ctx,path,verb,args){
 
     if(ext==='csv')app='csvedit';
     if(ext==='html'||ext==='htm')app='html_editor';
-    if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='gif'||ext==='webp'||ext==='bmp')app='paint';
+    if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='jfif'||ext==='gif'||ext==='webp'||ext==='bmp')app='paint';
 
     var editor=
       await jplopsoft_runBuiltinXsh(

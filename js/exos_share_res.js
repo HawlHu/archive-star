@@ -1,12 +1,12 @@
 /* ExOS shared resource image library
  * File: exos_share_res.js
- * Version: 6.4.0-dev-os86
+ * Version: 6.4.0-dev-os91-hotfix39
  * Model: EXOS_SHARED_RES_V1
  * V8-only client. Shared Base64 image resources for virtual NT-style resource DLLs.
  */
 (function(global){
 'use strict';
-var VERSION='6.4.0-dev-os86';
+var VERSION='6.4.0-dev-os91-hotfix39';
 var MODEL='EXOS_SHARED_RES_V1';
 var LIBRARIES={};
 LIBRARIES["shell32.dll"]={};
@@ -23,6 +23,7 @@ LIBRARIES["shell32.dll"]["csv"]={"id":10,"name":"csv","uri":"data:image/svg+xml;
 LIBRARIES["shell32.dll"]["desktop"]={"id":11,"name":"desktop","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMi41IiB5PSIzIiB3aWR0aD0iMTkiIGhlaWdodD0iMTQiIHJ4PSIxLjUiIGZpbGw9IiNkZmYzZmYiIHN0cm9rZT0iIzJiNmVhNiIvPjxwYXRoIGQ9Ik00LjUgMTQgMTAgOWwzLjIgMi44IDIuMS0yIDQuMiA0LjJ6IiBmaWxsPSIjMzlhMGQ4Ii8+PHBhdGggZD0iTTkgMjBoNm0tOCAyaDEwIiBzdHJva2U9IiNjYmQ1ZTEiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=","mime":"image/svg+xml","width":24,"height":24};
 LIBRARIES["shell32.dll"]["download"]={"id":12,"name":"download","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDN2MTFtLTQtNCA0IDQgNC00TTUgMTloMTQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzI1NjNlYiIgc3Ryb2tlLXdpZHRoPSIxLjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==","mime":"image/svg+xml","width":24,"height":24};
 LIBRARIES["shell32.dll"]["explorer"]={"id":13,"name":"explorer","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIuNSA2LjVoOGwyLTJoOXYxNWgtMTl6IiBmaWxsPSIjZmZkNDVkIiBzdHJva2U9IiNiYjhhMTEiLz48cGF0aCBkPSJNMyA5aDE4bC0xLjcgMTBINC43eiIgZmlsbD0iI2ZmZTI4YSIvPjwvc3ZnPg==","mime":"image/svg+xml","width":24,"height":24};
+LIBRARIES["shell32.dll"]["image"]={"id":52,"name":"image","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMmgxMGw0IDR2MTZINXoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzY0NzQ4YiIvPjxwYXRoIGQ9Ik0xNSAydjVoNCIgZmlsbD0iI2RiZWFmZSIvPjwvc3ZnPg==","mime":"image/svg+xml","width":24,"height":24};
 LIBRARIES["shell32.dll"]["file"]={"id":14,"name":"file","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgMmgxMGw0IDR2MTZINXoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzY0NzQ4YiIvPjxwYXRoIGQ9Ik0xNSAydjVoNCIgZmlsbD0iI2RiZWFmZSIvPjwvc3ZnPg==","mime":"image/svg+xml","width":24,"height":24};
 LIBRARIES["shell32.dll"]["folder"]={"id":15,"name":"folder","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIuNSA2aDhsMi0yaDl2MTZoLTE5eiIgZmlsbD0iI2ZmZDU1ZiIgc3Ryb2tlPSIjYjk4MjA4Ii8+PHBhdGggZD0iTTMgOWgxOCIgc3Ryb2tlPSIjZTNhZDJlIi8+PC9zdmc+","mime":"image/svg+xml","width":24,"height":24};
 LIBRARIES["shell32.dll"]["history"]={"id":16,"name":"history","uri":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTUgN1YzTDIgNmwzIDNWN2E4IDggMCAxIDEtMSA4IiBmaWxsPSJub25lIiBzdHJva2U9IiMyNTYzZWIiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNMTIgN3Y1bDMgMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+","mime":"image/svg+xml","width":24,"height":24};
