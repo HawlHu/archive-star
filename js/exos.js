@@ -846,16 +846,28 @@ function jplopsoft_submitCredentialUI(){
 
 
 function jplopsoft_renderLogonSubmitButton(){
-  var b=jplopsoft_el('jplopsoft_unlockBtn'),span;
+  var b=jplopsoft_el('jplopsoft_unlockBtn'),fallback,span,applied=false,next,nextIcon;
   if(!b)return;
   b.innerHTML='';
+  fallback=document.createElement('span');
+  fallback.className='jplopsoft_logon-submit-fallback';
+  fallback.setAttribute('aria-hidden','true');
+  fallback.textContent='→';
+  b.appendChild(fallback);
   span=document.createElement('span');
   span.setAttribute('data-exfs-svg','arrow_right');
   span.setAttribute('data-exfs-svg-size','20');
   span.setAttribute('aria-hidden','true');
   b.appendChild(span);
   b.setAttribute('aria-label','登入');
-  jplopsoft_applySvgIcons(b);
+  applied=!!jplopsoft_svgIconApply(span,'arrow_right',20);
+  if(applied)b.setAttribute('data-icon-ready','1');else b.removeAttribute('data-icon-ready');
+  next=jplopsoft_el('jplopsoft_setupNextBtn');
+  if(next){
+    nextIcon=next.querySelector?next.querySelector('.jplopsoft_oobe-next-icon'):null;
+    if(nextIcon&&jplopsoft_svgIconApply(nextIcon,'arrow_right',18))next.setAttribute('data-icon-ready','1');
+    else next.removeAttribute('data-icon-ready');
+  }
 }
 
 function jplopsoft_secureDesktopUpdate(){
@@ -13476,5 +13488,5 @@ function jplopsoft_bind(){
 window.jplopsoft_EXOS_OS={
   ready:true,
   version:'6.4.0-dev-os91',
-  build:'os91-hotfix32-phase10-taskbar-shell-self-bootstrap-fix'
+  build:'os91-hotfix33-shell-ux-startmenu-desktop-fixes'
 };

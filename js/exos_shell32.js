@@ -11,8 +11,8 @@
 var PROPERTY_STORES={next:0xD800,items:{}};
 var SHELL={
   version:'6.4.0-dev-os91',
-  build:'6.4.0-dev-os91-hotfix32',
-  taskbarPresentationVersion:3,
+  build:'6.4.0-dev-os91-hotfix33',
+  taskbarPresentationVersion:4,
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -32,6 +32,9 @@ var SHELL={
   styleReady:false,
   flyouts:{},
   desktopBound:false,
+  desktopTimer:0,
+  desktopRetryTimer:0,
+  desktopBootstrapStarted:false,
   taskbarBound:false,
   clockTimer:0,
   taskbarRetryTimer:0,
@@ -192,13 +195,43 @@ function shellRenderDesktop(){
   return true;
 }
 function shellBindDesktopSurface(){
-  var surface=document.getElementById('jplopsoft_desktopSurface');
+  var surface=document.getElementById('jplopsoft_desktopSurface'),icons=document.getElementById('jplopsoft_desktopIcons'),bound=false;
+  function backgroundHandler(ev){var t=ev&&(ev.target||ev.srcElement),cur=t;while(cur&&cur!==surface&&cur&&cur!==icons){if(cur.nodeType===1&&(' '+String(cur.className||'')+' ').indexOf(' jplopsoft_desktop-icon ')>=0)return false;cur=cur.parentNode;}return shellDesktopContextMenu('background','',ev);}
   if(!surface)return false;
-  if(!SHELL.desktopBound){
-    surface.oncontextmenu=function(ev){var t=ev&&(ev.target||ev.srcElement),cur=t;while(cur&&cur!==surface){if(cur.nodeType===1&&(' '+String(cur.className||'')+' ').indexOf(' jplopsoft_desktop-icon ')>=0)return false;cur=cur.parentNode;}return shellDesktopContextMenu('background','',ev);};
-    SHELL.desktopBound=true;
+  if(surface&&surface.__exosShell32DesktopContextBound!==true){surface.oncontextmenu=backgroundHandler;surface.__exosShell32DesktopContextBound=true;bound=true;}
+  if(icons&&icons.__exosShell32DesktopContextBound!==true){icons.oncontextmenu=backgroundHandler;icons.__exosShell32DesktopContextBound=true;bound=true;}
+  SHELL.desktopBound=!!(surface&&surface.__exosShell32DesktopContextBound===true);
+  if(!shellRenderDesktop()&&!bound)return false;
+  if(!SHELL.desktopTimer)SHELL.desktopTimer=window.setInterval(function(){
+    var s=document.getElementById('jplopsoft_desktopSurface'),i=document.getElementById('jplopsoft_desktopIcons');
+    try{
+      if(!s||s.__exosShell32DesktopContextBound!==true||!i||i.__exosShell32DesktopContextBound!==true){
+        shellBindDesktopSurface();
+      }
+    }catch(ignoreDesktopHeartbeat){}
+  },1200);
+  if((!surface||!icons)&&!SHELL.desktopRetryTimer){
+    SHELL.desktopRetryTimer=window.setTimeout(function(){SHELL.desktopRetryTimer=0;shellBindDesktopSurface();},120);
   }
-  return shellRenderDesktop();
+  return true;
+}
+function shellBootstrapDesktopPresentation(){
+  if(SHELL.desktopBootstrapStarted)return true;
+  SHELL.desktopBootstrapStarted=true;
+  function attempt(){
+    try{shellBindDesktopSurface();}
+    catch(ignoreDesktopBootstrap){
+      if(!SHELL.desktopRetryTimer){
+        SHELL.desktopRetryTimer=window.setTimeout(function(){SHELL.desktopRetryTimer=0;attempt();},120);
+      }
+    }
+  }
+  if(document.readyState==='loading'&&document.addEventListener){
+    document.addEventListener('DOMContentLoaded',function(){window.setTimeout(attempt,0);},false);
+  }else{
+    window.setTimeout(attempt,0);
+  }
+  return true;
 }
 function shellTaskbarAppDomId(appId){
   return 'jplopsoft_taskbarApp_'+String(appId||'');
@@ -2288,8 +2321,9 @@ global.jplopsoft_shell32RunStartupApps=shellRunStartupApps;
 global.jplopsoft_shell32OpenPathFromHost=shellOpenPathFromHost;
 global.jplopsoft_shell32SaveBlobObject=shellSaveBlobObject;
 
-/* SHELL32 owns Taskbar presentation lifecycle.  Bootstrap independently from
- * exos.js so unrelated host UI binding failures cannot strand Start/clock. */
+/* SHELL32 owns desktop/taskbar presentation lifecycle.  Bootstrap independently from
+ * exos.js so unrelated host UI binding failures cannot strand shell affordances. */
+shellBootstrapDesktopPresentation();
 shellBootstrapTaskbarPresentation();
 
 })(window);
