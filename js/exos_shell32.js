@@ -1,5 +1,5 @@
 /* ExOS shell32.dll emulation
- * Version: 6.4.0-dev-os88
+ * Version: 6.4.0-dev-os91
  * Model: EXOS_SHELL32_V1
  *
  * Browser/XSH shell API.  The implementation is intentionally restricted to
@@ -10,7 +10,7 @@
 
 var PROPERTY_STORES={next:0xD800,items:{}};
 var SHELL={
-  version:'6.4.0-dev-os88',
+  version:'6.4.0-dev-os91',
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -471,6 +471,38 @@ function shellTrackContextMenu(ctx,paths,x,y,options){
     window.setTimeout(function(){try{var r=menu.getBoundingClientRect();if(r.right>window.innerWidth)menu.style.left=Math.max(0,window.innerWidth-r.width-6)+'px';if(r.bottom>window.innerHeight)menu.style.top=Math.max(0,window.innerHeight-r.height-6)+'px';}catch(ignoreClamp){}},0);
     function finish(verb){if(closed)return;closed=true;removeSubmenu();try{document.removeEventListener('mousedown',clickAway,true);}catch(ignoreMouseRemove){}try{document.removeEventListener('keydown',keyDown,true);}catch(ignoreKeyRemove){}try{if(menu&&menu.parentNode)menu.parentNode.removeChild(menu);}catch(ignoreMenuRemove){}resolve(String(verb||''));}
     clickAway=function(e){if(menu&&menu.contains(e.target))return;if(subMenu&&subMenu.contains(e.target))return;finish('');};
+    keyDown=function(e){if(String(e.key||'')==='Escape')finish('');};
+    window.setTimeout(function(){document.addEventListener('mousedown',clickAway,true);document.addEventListener('keydown',keyDown,true);},0);
+  });
+}
+
+function shellTrackPopupMenu(items,x,y){
+  return new Promise(function(resolve){
+    var entries=Array.isArray(items)?items:[],menu=null,closed=false,clickAway,keyDown,left,top;
+    shellEnsureStyle();
+    function finish(verb){
+      if(closed)return;closed=true;
+      try{document.removeEventListener('mousedown',clickAway,true);}catch(ignoreMouseRemove){}
+      try{document.removeEventListener('keydown',keyDown,true);}catch(ignoreKeyRemove){}
+      try{if(menu&&menu.parentNode)menu.parentNode.removeChild(menu);}catch(ignoreMenuRemove){}
+      resolve(String(verb||''));
+    }
+    menu=document.createElement('div');menu.className='jplopsoft_shell32_menu';menu.setAttribute('data-shell-popup-id',String(++SHELL.menuSeq));
+    entries.forEach(function(entry){
+      if(!entry)return;
+      if(entry.separator){var sep=document.createElement('div');sep.className='jplopsoft_shell32_menu_sep';menu.appendChild(sep);return;}
+      var row=document.createElement('div'),icon=document.createElement('span'),label=document.createElement('span'),enabled=entry.enabled!==false;
+      row.className='jplopsoft_shell32_menu_item';row.setAttribute('data-disabled',enabled?'0':'1');row.setAttribute('data-default',entry.default?'1':'0');
+      icon.className='jplopsoft_shell32_menu_icon';
+      if(entry.icon&&typeof jplopsoft_svgIconApply==='function'){try{jplopsoft_svgIconApply(icon,entry.icon,16);}catch(ignoreIcon){}}
+      label.className='jplopsoft_shell32_menu_label';label.textContent=String(entry.text||entry.verb||'');row.appendChild(icon);row.appendChild(label);
+      row.onclick=function(e){try{e.stopPropagation();}catch(ignoreStop){}if(!enabled)return;finish(entry.verb);};
+      menu.appendChild(row);
+    });
+    document.body.appendChild(menu);
+    left=Math.max(0,parseInt(x,10)||0);top=Math.max(0,parseInt(y,10)||0);menu.style.left=left+'px';menu.style.top=top+'px';
+    window.setTimeout(function(){try{var r=menu.getBoundingClientRect();if(r.right>window.innerWidth)menu.style.left=Math.max(0,window.innerWidth-r.width-6)+'px';if(r.bottom>window.innerHeight)menu.style.top=Math.max(0,window.innerHeight-r.height-6)+'px';}catch(ignoreClamp){}},0);
+    clickAway=function(e){if(menu&&menu.contains(e.target))return;finish('');};
     keyDown=function(e){if(String(e.key||'')==='Escape')finish('');};
     window.setTimeout(function(){document.addEventListener('mousedown',clickAway,true);document.addEventListener('keydown',keyDown,true);},0);
   });
@@ -1488,6 +1520,10 @@ async function shellDispatch(ctx,method,args){
       args[2],
       args[3]
     );
+  }
+
+  if(method==='TrackPopupMenu'){
+    return await shellTrackPopupMenu(args[0],args[1],args[2]);
   }
 
   if(method==='ShellExecute'){
