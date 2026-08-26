@@ -23564,8 +23564,14 @@ async function jplopsoft_xshLaunchSystemApp(ctx,name,args){
   }
 
   if(appName==='security'){
-    jplopsoft_openSecurity();
-    return{ok:true};
+    if(typeof jplopsoft_openSecurityScreen==='function'){
+      jplopsoft_openSecurityScreen();
+      return{ok:true};
+    }
+    throw jplopsoft_xshError(
+      jplopsoft_STATUS_NOT_SUPPORTED,
+      'ExOS Security host UI is unavailable.'
+    );
   }
 
   if(appName==='volume3d'){
