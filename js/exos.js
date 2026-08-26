@@ -29216,5 +29216,5 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 window.jplopsoft_EXOS_OS={
   ready:true,
   version:'6.4.0-dev-os91',
-  build:'os91-hotfix7-desktop-system-context-menus'
+  build:'os91-hotfix8-htmlview-alpc-child'
 };
