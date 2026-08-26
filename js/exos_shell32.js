@@ -11,7 +11,7 @@
 var PROPERTY_STORES={next:0xD800,items:{}};
 var SHELL={
   version:'6.4.0-dev-os91',
-  build:'6.4.0-dev-os91-hotfix34',
+  build:'6.4.0-dev-os91-hotfix37',
   taskbarPresentationVersion:4,
   model:'EXOS_SHELL32_V1',
   ready:true,
@@ -31,6 +31,8 @@ var SHELL={
   menuSeq:0,
   styleReady:false,
   flyouts:{},
+  flyoutDismissBound:false,
+  flyoutDismissHandler:null,
   desktopBound:false,
   desktopTimer:0,
   desktopRetryTimer:0,
@@ -998,6 +1000,47 @@ function shellSetFlyoutVisual(kind,active){
   return true;
 }
 
+function shellFlyoutWindowNode(f){
+  var rec,node=null;
+  if(!f||!f.hwnd)return null;
+  try{rec=typeof global.jplopsoft_user32GetRecord==='function'?global.jplopsoft_user32GetRecord(parseInt(f.hwnd,10)||0):null;}catch(ignoreRecord){rec=null;}
+  try{if(rec&&rec.windowId)node=document.getElementById(rec.windowId);}catch(ignoreNode){node=null;}
+  return node;
+}
+function shellHasFlyouts(){
+  var k;for(k in SHELL.flyouts)if(Object.prototype.hasOwnProperty.call(SHELL.flyouts,k))return true;return false;
+}
+function shellRemoveFlyoutDismissListener(){
+  if(!SHELL.flyoutDismissBound||!SHELL.flyoutDismissHandler)return true;
+  try{document.removeEventListener('mousedown',SHELL.flyoutDismissHandler,true);}catch(ignoreRemove){}
+  SHELL.flyoutDismissBound=false;SHELL.flyoutDismissHandler=null;return true;
+}
+function shellDismissFlyoutRecord(key,f,reason){
+  var ctx=null;
+  if(!f)return false;
+  delete SHELL.flyouts[key];
+  shellSetFlyoutVisual(key,false);
+  try{ctx=typeof jplopsoft_xshRunByPid==='function'?jplopsoft_xshRunByPid(f.ownerPid):null;}catch(ignoreCtx){ctx=null;}
+  try{if(ctx&&!ctx.terminating&&typeof jplopsoft_xshTerminate==='function')jplopsoft_xshTerminate(ctx,0,String(reason||'ShellFlyoutDismissed'),false);}catch(ignoreTerminate){}
+  if(!shellHasFlyouts())shellRemoveFlyoutDismissListener();
+  return true;
+}
+function shellEnsureFlyoutDismissListener(){
+  if(SHELL.flyoutDismissBound)return true;
+  SHELL.flyoutDismissHandler=function(ev){
+    var target=ev&&(ev.target||ev.srcElement),start=document.getElementById('jplopsoft_startBtn'),k,f,node;
+    if(start&&(target===start||(start.contains&&start.contains(target))))return;
+    for(k in SHELL.flyouts){
+      if(!Object.prototype.hasOwnProperty.call(SHELL.flyouts,k))continue;
+      f=SHELL.flyouts[k];node=shellFlyoutWindowNode(f);
+      if(node&&(target===node||(node.contains&&node.contains(target))))return;
+    }
+    var keys=[];for(k in SHELL.flyouts)if(Object.prototype.hasOwnProperty.call(SHELL.flyouts,k))keys.push(k);
+    for(var i=0;i<keys.length;i++){k=keys[i];f=SHELL.flyouts[k];if(f)shellDismissFlyoutRecord(k,f,'ShellFlyoutOutsideClick');}
+  };
+  try{document.addEventListener('mousedown',SHELL.flyoutDismissHandler,true);SHELL.flyoutDismissBound=true;}catch(ignoreAdd){SHELL.flyoutDismissHandler=null;SHELL.flyoutDismissBound=false;}
+  return SHELL.flyoutDismissBound;
+}
 function shellRegisterFlyout(ctx,kind,hwnd){
   var key=String(kind||'').toLowerCase(),old,oldCtx;
   if(!key)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Flyout kind is required.');
@@ -1010,6 +1053,7 @@ function shellRegisterFlyout(ctx,kind,hwnd){
   }
   SHELL.flyouts[key]={kind:key,ownerPid:parseInt(ctx.pid,10)||0,hwnd:parseInt(hwnd,10)||0,openedAt:(new Date()).getTime()};
   shellSetFlyoutVisual(key,true);
+  shellEnsureFlyoutDismissListener();
   return{ok:true,kind:key,hwnd:parseInt(hwnd,10)||0};
 }
 
@@ -1019,6 +1063,7 @@ function shellUnregisterFlyout(ctx,kind){
   if(ctx&&parseInt(f.ownerPid,10)!==parseInt(ctx.pid,10))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Flyout is owned by another process.');
   delete SHELL.flyouts[key];
   shellSetFlyoutVisual(key,false);
+  if(!shellHasFlyouts())shellRemoveFlyoutDismissListener();
   return true;
 }
 
@@ -2293,7 +2338,7 @@ function shellDismissAllUi(){
   shellDismissNotifications();
   for(i=nodes.length-1;i>=0;i--){try{if(nodes[i]&&nodes[i].parentNode)nodes[i].parentNode.removeChild(nodes[i]);}catch(ignoreDismiss){}}
   for(k in SHELL.flyouts){if(Object.prototype.hasOwnProperty.call(SHELL.flyouts,k)){f=SHELL.flyouts[k];if(f&&f.ownerPid)pids.push(parseInt(f.ownerPid,10)||0);shellSetFlyoutVisual(k,false);}}
-  SHELL.flyouts={};
+  SHELL.flyouts={};shellRemoveFlyoutDismissListener();
   for(i=0;i<pids.length;i++){
     try{ctx=typeof jplopsoft_xshRunByPid==='function'?jplopsoft_xshRunByPid(pids[i]):null;if(ctx&&!ctx.terminating&&typeof jplopsoft_xshTerminate==='function')jplopsoft_xshTerminate(ctx,0,'ShellDismissAllUI',false);}catch(ignoreFlyoutTerminate){}
   }
