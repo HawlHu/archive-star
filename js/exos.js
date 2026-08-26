@@ -9281,26 +9281,171 @@ function jplopsoft_renderDesktopSystemRows(body){
   jplopsoft_applySvgIcons(body);
 }
 
+function jplopsoft_desktopSystemOpenProperties(key){
+  key=String(key||'');
+
+  if(key==='computer'){
+    jplopsoft_exosMessage(
+      '我的電腦\n\n'+
+      '類型：ExOS 系統資料夾\n'+
+      '主要磁碟：ExFS (C:)\n'+
+      'Shell：explorer.xsh / USER32\n'+
+      '目前使用者：'+String(state.samUsername||'administrator')
+    );
+    return;
+  }
+
+  if(key==='cmd'){
+    jplopsoft_exosMessage(
+      '指令模式\n\n'+
+      '類型：ExOS 系統應用程式\n'+
+      '映像：C:\\ExOS\\SystemApps\\cmd.xsh\n'+
+      'Runtime：XSH / V8\n'+
+      '預設完整性：MEDIUM'
+    );
+    return;
+  }
+
+  if(key==='trash'){
+    jplopsoft_api('trash_list','GET',null,true,function(err,out){
+      var count;
+      if(err)return jplopsoft_exosMessage('無法讀取資源回收桶內容：'+err.message);
+      count=out&&out.items&&typeof out.items.length==='number'?out.items.length:0;
+      jplopsoft_exosMessage(
+        '資源回收桶\n\n'+
+        '類型：ExOS 系統資料夾\n'+
+        '目前根項目：'+count+' 個\n'+
+        '刪除方式：先移入資源回收桶，可再還原'
+      );
+    });
+  }
+}
+
+async function jplopsoft_emptyTrashFromDesktop(){
+  var listOut,count,ok,emptyOut;
+
+  if(!state.samAuthenticated||!state.vaultKey){
+    jplopsoft_exosMessage('請先登入 ExOS。');
+    return false;
+  }
+
+  try{
+    listOut=await new Promise(function(resolve,reject){
+      jplopsoft_api('trash_list','GET',null,true,function(err,out){
+        if(err)reject(err);else resolve(out||{});
+      });
+    });
+
+    count=listOut&&listOut.items&&typeof listOut.items.length==='number'?listOut.items.length:0;
+
+    if(!count){
+      jplopsoft_exosMessage('資源回收桶已經是空的。');
+      return true;
+    }
+
+    ok=await jplopsoft_exosConfirm(
+      '確定要永久刪除資源回收桶中的所有項目嗎？\n\n'+
+      '目前共有 '+count+' 個根項目。此操作無法復原。'
+    );
+    if(!ok)return false;
+
+    emptyOut=await new Promise(function(resolve,reject){
+      jplopsoft_api('trash_empty','POST',{},true,function(err,out){
+        if(err)reject(err);else resolve(out||{});
+      });
+    });
+
+    jplopsoft_reloadNodes(function(){
+      jplopsoft_renderPhysicalDesktopShortcuts();
+    });
+
+    if(typeof jplopsoft_xshHasBuiltin==='function'&&jplopsoft_xshHasBuiltin('trash')){
+      jplopsoft_xshTerminateBuiltin('trash');
+      window.setTimeout(function(){jplopsoft_launchSystemXshApp('trash',[]);},0);
+    }
+
+    jplopsoft_setStatus(
+      '資源回收桶已清空，共永久刪除 '+
+      (parseInt(emptyOut&&emptyOut.deleted,10)||count)+
+      ' 個根項目。'
+    );
+    return true;
+  }catch(e){
+    jplopsoft_exosMessage(
+      '清空資源回收桶失敗：'+String(e&&e.message?e.message:e)
+    );
+    return false;
+  }
+}
+
 function jplopsoft_showDesktopSystemContextMenu(ev,key){
   var menu=jplopsoft_exfsContextMenuEnsure();
-  if(!menu)return;
+  key=String(key||'');
+  if(!menu)return false;
   if(ev){
     if(ev.preventDefault)ev.preventDefault();
     if(ev.stopPropagation)ev.stopPropagation();
+    ev.returnValue=false;
     ev.cancelBubble=true;
   }
+
   jplopsoft_hideExfsContextMenu();
   state.desktopSelectedTargetId=0;
-  state.desktopShellSelected=String(key||'');
+  state.desktopShellSelected=key;
   jplopsoft_refreshVisibleFileRowSelection();
+
   menu.appendChild(jplopsoft_exfsContextMenuButton(
-    '','開啟',function(){jplopsoft_openDesktopSystemItem(key);},false,false
+    '📂','開啟',function(){jplopsoft_openDesktopSystemItem(key);},false,false
   ));
+
+  if(key==='computer'){
+    jplopsoft_exfsContextMenuSeparator(menu);
+    menu.appendChild(jplopsoft_exfsContextMenuButton(
+      '⚙️','控制台',function(){jplopsoft_launchSystemXshApp('control',[]);},false,false
+    ));
+    menu.appendChild(jplopsoft_exfsContextMenuButton(
+      '🖥️','裝置管理員',function(){jplopsoft_launchSystemXshApp('devmgmt',[]);},false,false
+    ));
+    menu.appendChild(jplopsoft_exfsContextMenuButton(
+      '💽','磁碟管理員',function(){jplopsoft_launchSystemXshApp('diskmgmt',[]);},false,false
+    ));
+    menu.appendChild(jplopsoft_exfsContextMenuButton(
+      '📊','工作管理員',function(){jplopsoft_launchSystemXshApp('taskmgr',[]);},false,false
+    ));
+    jplopsoft_exfsContextMenuSeparator(menu);
+    menu.appendChild(jplopsoft_exfsContextMenuButton(
+      'ℹ️','內容',function(){jplopsoft_desktopSystemOpenProperties('computer');},false,false
+    ));
+  }else if(key==='cmd'){
+    menu.appendChild(jplopsoft_exfsContextMenuButton(
+      '⌨️','在桌面位置開啟',function(){
+        jplopsoft_launchSystemXshApp('cmd',[jplopsoft_desktopFolderPath()]);
+      },false,false
+    ));
+    jplopsoft_exfsContextMenuSeparator(menu);
+    menu.appendChild(jplopsoft_exfsContextMenuButton(
+      '📊','工作管理員',function(){jplopsoft_launchSystemXshApp('taskmgr',[]);},false,false
+    ));
+    jplopsoft_exfsContextMenuSeparator(menu);
+    menu.appendChild(jplopsoft_exfsContextMenuButton(
+      'ℹ️','內容',function(){jplopsoft_desktopSystemOpenProperties('cmd');},false,false
+    ));
+  }else if(key==='trash'){
+    menu.appendChild(jplopsoft_exfsContextMenuButton(
+      '🗑️','清空資源回收桶',function(){jplopsoft_emptyTrashFromDesktop();},false,true
+    ));
+    jplopsoft_exfsContextMenuSeparator(menu);
+    menu.appendChild(jplopsoft_exfsContextMenuButton(
+      'ℹ️','內容',function(){jplopsoft_desktopSystemOpenProperties('trash');},false,false
+    ));
+  }
+
   jplopsoft_exfsPositionContextMenu(
     menu,
     ev&&typeof ev.clientX==='number'?ev.clientX:0,
     ev&&typeof ev.clientY==='number'?ev.clientY:0
   );
+  return false;
 }
 
 function jplopsoft_renderAll(){
@@ -28719,9 +28864,22 @@ function jplopsoft_bindWindowManager(){
       jplopsoft_openMyComputer();
       return false;
     };
+    desktopComputer.oncontextmenu=function(e){
+      return jplopsoft_showDesktopSystemContextMenu(e||window.event,'computer');
+    };
   }
-  if(desktopCmd)desktopCmd.ondblclick=jplopsoft_wmOpenCmd;
-  if(desktopTrash)desktopTrash.ondblclick=jplopsoft_openTrash;
+  if(desktopCmd){
+    desktopCmd.ondblclick=jplopsoft_wmOpenCmd;
+    desktopCmd.oncontextmenu=function(e){
+      return jplopsoft_showDesktopSystemContextMenu(e||window.event,'cmd');
+    };
+  }
+  if(desktopTrash){
+    desktopTrash.ondblclick=jplopsoft_openTrash;
+    desktopTrash.oncontextmenu=function(e){
+      return jplopsoft_showDesktopSystemContextMenu(e||window.event,'trash');
+    };
+  }
   if(desktopSurface)desktopSurface.oncontextmenu=function(e){return jplopsoft_showDesktopSurfaceContextMenu(e||window.event);};
 
   jplopsoft_applySvgIcons(document);
@@ -29058,5 +29216,5 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 window.jplopsoft_EXOS_OS={
   ready:true,
   version:'6.4.0-dev-os91',
-  build:'external-os-comctl32-split-core-controls'
+  build:'os91-hotfix7-desktop-system-context-menus'
 };
