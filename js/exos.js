@@ -13488,5 +13488,5 @@ function jplopsoft_bind(){
 window.jplopsoft_EXOS_OS={
   ready:true,
   version:'6.4.0-dev-os91',
-  build:'os91-hotfix33-shell-ux-startmenu-desktop-fixes'
+  build:'os91-hotfix34-loader-contract-oobe-icon-fix'
 };

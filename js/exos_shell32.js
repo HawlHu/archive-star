@@ -11,7 +11,7 @@
 var PROPERTY_STORES={next:0xD800,items:{}};
 var SHELL={
   version:'6.4.0-dev-os91',
-  build:'6.4.0-dev-os91-hotfix33',
+  build:'6.4.0-dev-os91-hotfix34',
   taskbarPresentationVersion:4,
   model:'EXOS_SHELL32_V1',
   ready:true,
