@@ -16052,22 +16052,11 @@ function jplopsoft_wmAfterUnlock(){
   jplopsoft_cmdRefreshGlobalMode();
   jplopsoft_WM.active='desktop';
 
-  /* os91 hotfix: explorer.exe is now XSH/USER32-only. The old static
-   * primary Explorer DOM was removed, so explicitly create the first
-   * Explorer process/window for the interactive explorer.exe route. */
-  if(
-    typeof jplopsoft_routeIsUser==='function'&&
-    jplopsoft_routeIsUser()&&
-    typeof jplopsoft_EXE_ROUTE!=='undefined'&&
-    jplopsoft_EXE_ROUTE&&
-    jplopsoft_EXE_ROUTE.app==='explorer'&&
-    !jplopsoft_EXE_ROUTE.action&&
-    !jplopsoft_xshHasBuiltin('explorer')
-  ){
-    window.setTimeout(function(){
-      if(!jplopsoft_xshHasBuiltin('explorer'))jplopsoft_explorerXshLaunchPath('C:\\');
-    },0);
-  }
+  /* os91 hotfix13: explorer.exe is the interactive Shell process, not an
+   * instruction to open a File Explorer HWND at every logon.  The NT process
+   * is created above by jplopsoft_ntEnsureExplorerProcess(); an Explorer XSH
+   * window is created only when the user explicitly opens My Computer, a
+   * folder, or another Shell namespace location. */
 }
 
 function jplopsoft_wmPrepareLock(){
