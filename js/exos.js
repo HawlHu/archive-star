@@ -13455,6 +13455,9 @@ function jplopsoft_bindTaskbar(){
 
 function jplopsoft_bind(){
   var n;
+  /* Taskbar is a Shell lifecycle boundary. Bind it before optional host UI so
+     a later Secure Desktop/Security binding error cannot strand Start/clock. */
+  jplopsoft_bindTaskbar();
   n=jplopsoft_el('jplopsoft_unlockBtn');if(n)n.onclick=jplopsoft_submitCredentialUI;
   n=jplopsoft_el('jplopsoft_loginUserInput');if(n){
     n.onkeydown=function(e){e=e||window.event;if((e.keyCode||e.which)===13&&!state.kdfBusy){try{var p=jplopsoft_el('jplopsoft_keyInput');if(p)p.focus();}catch(ignoreUserEnter){}}};
@@ -13466,7 +13469,6 @@ function jplopsoft_bind(){
   n=jplopsoft_el('jplopsoft_largeTransferCancelBtn');if(n)n.onclick=jplopsoft_cancelLargeTransfer;
   n=jplopsoft_el('jplopsoft_largeTransferMinBtn');if(n)n.onclick=jplopsoft_toggleLargeTransferMinimized;
   jplopsoft_bindSecurityUI();
-  jplopsoft_bindTaskbar();
   jplopsoft_bindWindowManager();
   jplopsoft_bindGlobalHotkeys();
 }
@@ -13474,5 +13476,5 @@ function jplopsoft_bind(){
 window.jplopsoft_EXOS_OS={
   ready:true,
   version:'6.4.0-dev-os91',
-  build:'os91-hotfix31-phase10-taskbar-shell-contract-fix'
+  build:'os91-hotfix32-phase10-taskbar-shell-self-bootstrap-fix'
 };

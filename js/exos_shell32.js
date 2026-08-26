@@ -11,8 +11,8 @@
 var PROPERTY_STORES={next:0xD800,items:{}};
 var SHELL={
   version:'6.4.0-dev-os91',
-  build:'6.4.0-dev-os91-hotfix31',
-  taskbarPresentationVersion:2,
+  build:'6.4.0-dev-os91-hotfix32',
+  taskbarPresentationVersion:3,
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -35,6 +35,7 @@ var SHELL={
   taskbarBound:false,
   clockTimer:0,
   taskbarRetryTimer:0,
+  taskbarBootstrapStarted:false,
   notificationSeq:0,
   notifications:{}
 };
@@ -343,13 +344,40 @@ function shellBindTaskbarPresentation(){
   complete=!!(clock&&start&&taskbar);
   SHELL.taskbarBound=complete;
   shellUpdateTaskbarClock();
-  if(!SHELL.clockTimer)SHELL.clockTimer=window.setInterval(shellUpdateTaskbarClock,1000);
+  if(!SHELL.clockTimer)SHELL.clockTimer=window.setInterval(function(){
+    var c=document.getElementById('jplopsoft_taskbarClock'),s=document.getElementById('jplopsoft_startBtn'),t=document.getElementById('jplopsoft_taskbar');
+    try{
+      if(!c||!s||!t||c.__exosShell32ClockBound!==true||s.__exosShell32StartBound!==true||t.__exosShell32ContextBound!==true){
+        shellBindTaskbarPresentation();
+      }else{
+        shellUpdateTaskbarClock();
+      }
+    }catch(ignoreTaskbarHeartbeat){}
+  },1000);
 
   /* A late/replaced Taskbar DOM must heal without moving presentation back to exos.js. */
   if(!complete&&!SHELL.taskbarRetryTimer){
     SHELL.taskbarRetryTimer=window.setTimeout(function(){SHELL.taskbarRetryTimer=0;shellBindTaskbarPresentation();},100);
   }
   return complete;
+}
+function shellBootstrapTaskbarPresentation(){
+  if(SHELL.taskbarBootstrapStarted)return true;
+  SHELL.taskbarBootstrapStarted=true;
+  function attempt(){
+    try{shellBindTaskbarPresentation();}
+    catch(ignoreTaskbarBootstrap){
+      if(!SHELL.taskbarRetryTimer){
+        SHELL.taskbarRetryTimer=window.setTimeout(function(){SHELL.taskbarRetryTimer=0;attempt();},100);
+      }
+    }
+  }
+  if(document.readyState==='loading'&&document.addEventListener){
+    document.addEventListener('DOMContentLoaded',function(){window.setTimeout(attempt,0);},false);
+  }else{
+    window.setTimeout(attempt,0);
+  }
+  return true;
 }
 function shellNotificationHost(){
   var h=document.getElementById('jplopsoft_shellNotifications');if(h)return h;
@@ -2248,6 +2276,7 @@ global.jplopsoft_shell32ApplyDesktopPersonalization=shellApplyDesktopPersonaliza
 global.jplopsoft_shell32BindDesktopSurface=shellBindDesktopSurface;
 global.jplopsoft_shell32RefreshDesktop=shellRenderDesktop;
 global.jplopsoft_shell32BindTaskbarPresentation=shellBindTaskbarPresentation;
+global.jplopsoft_shell32BootstrapTaskbarPresentation=shellBootstrapTaskbarPresentation;
 global.jplopsoft_shell32TaskbarEnsureApp=shellTaskbarEnsureApp;
 global.jplopsoft_shell32TaskbarRemoveApp=shellTaskbarRemoveApp;
 global.jplopsoft_shell32TaskbarSetAppState=shellTaskbarSetAppState;
@@ -2258,5 +2287,9 @@ global.jplopsoft_shell32OnSessionReady=shellSessionReady;
 global.jplopsoft_shell32RunStartupApps=shellRunStartupApps;
 global.jplopsoft_shell32OpenPathFromHost=shellOpenPathFromHost;
 global.jplopsoft_shell32SaveBlobObject=shellSaveBlobObject;
+
+/* SHELL32 owns Taskbar presentation lifecycle.  Bootstrap independently from
+ * exos.js so unrelated host UI binding failures cannot strand Start/clock. */
+shellBootstrapTaskbarPresentation();
 
 })(window);
