@@ -20,6 +20,7 @@
 
 var API={
   version:'6.4.0-dev-os86',
+  build:'6.4.0-dev-os91-hotfix26',
   model:'EXOS_COMDLG32_V1',
   ready:true
 };
@@ -361,9 +362,9 @@ async function fileDialog(ctx,save,opt){
         var raw=String(fileBox.value||'').trim();if(!raw)return;
         var path=/^C:\\/i.test(raw)?normalizePath(raw):joinPath(current,raw);
         if(defaultExt&&!hasExtension(path))path+='.'+defaultExt;
-        var par=parentPath(path);if(!validDir(ctx,par)){if(typeof global.jplopsoft_exosMessage==='function')await global.jplopsoft_exosMessage('指定的資料夾不存在：\n'+par,'另存新檔');return;}
+        var par=parentPath(path);if(!validDir(ctx,par)){if(typeof global.jplopsoft_user32MessageBox==='function')await global.jplopsoft_user32MessageBox('指定的資料夾不存在：\n'+par,'另存新檔');return;}
         var existing=resolveNode(ctx,path);if(existing&&existing.type==='folder'){await navigate(path,true);fileBox.value='';return;}
-        if(existing&&opt.overwritePrompt!==false){var yes=typeof global.jplopsoft_exosConfirm==='function'?await global.jplopsoft_exosConfirm('「'+baseName(path)+'」已經存在。\n\n要取代它嗎？','確認另存新檔'):false;if(!yes)return;}
+        if(existing&&opt.overwritePrompt!==false){var yes=typeof global.jplopsoft_user32ConfirmBox==='function'?await global.jplopsoft_user32ConfirmBox('「'+baseName(path)+'」已經存在。\n\n要取代它嗎？','確認另存新檔'):false;if(!yes)return;}
         ui.done({ok:true,file:path,path:path,fileTitle:baseName(path),directory:parentPath(path),filterIndex:iv(filterSel.value,1),overwrite:!!existing});return;
       }
       var paths=Object.keys(selected).filter(function(k){return selected[k]&&!selected[k].directory;});

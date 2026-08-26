@@ -11,6 +11,7 @@
 
 var API={
   version:'6.4.0-dev-os86',
+  build:'6.4.0-dev-os91-hotfix27',
   model:'EXOS_GDI32_V1',
   ready:true
 };
@@ -311,6 +312,27 @@ function invalidate(ctx,hwnd,rect){
 }
 
 
+function printRemoveFrame(frame){if(!frame)return;window.setTimeout(function(){try{if(frame.parentNode)frame.parentNode.removeChild(frame);}catch(ignoreRemove){}},300);}
+function spoolPrintJob(ctx,job){
+  return new Promise(function(resolve,reject){
+    var spec=job&&typeof job==='object'?job:{},pages=Array.isArray(spec.pages)?spec.pages:[],frame,win,doc,html=[],i,p,title,widthMm,heightMm,totalChars=0,done=false,loaded=0,timer=0;
+    function fail(message){if(done)return;done=true;if(timer){try{window.clearTimeout(timer);}catch(ignoreTimer){}}if(frame)printRemoveFrame(frame);reject(err(global.jplopsoft_STATUS_INVALID_PARAMETER||0xC000000D,String(message||'Print spooler failed.')));}
+    function cleanup(){if(timer){try{window.clearTimeout(timer);}catch(ignoreTimer2){}timer=0;}if(frame)printRemoveFrame(frame);}
+    function finish(result){if(done)return;done=true;cleanup();resolve(result);}
+    if(!ctx||ctx.terminating){fail('The XSH process is not available for printing.');return;}
+    if(!pages.length||pages.length>64){fail('Print job must contain 1 to 64 raster pages.');return;}
+    for(i=0;i<pages.length;i++){p=pages[i]||{};if(!/^data:image\/(?:png|jpeg|webp);base64,/i.test(String(p.dataUrl||''))){fail('Print spool accepts PNG, JPEG or WebP Base64 image pages only.');return;}totalChars+=String(p.dataUrl||'').length;if(String(p.dataUrl||'').length>48*1024*1024){fail('A print page exceeds the 48 MiB encoded spool limit.');return;}}
+    if(totalChars>384*1024*1024){fail('Print job exceeds the 384 MiB encoded spool limit.');return;}
+    title=String(spec.title||'ExOS Print Job').substring(0,240);widthMm=Math.max(20,Math.min(500,Number(spec.widthMm)||210));heightMm=Math.max(20,Math.min(500,Number(spec.heightMm)||297));
+    frame=document.createElement('iframe');frame.setAttribute('aria-hidden','true');frame.setAttribute('title','ExOS GDI print spool buffer');frame.setAttribute('sandbox','allow-same-origin allow-modals');frame.style.cssText='position:fixed;left:-100000px;top:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';document.body.appendChild(frame);win=frame.contentWindow;doc=win&&win.document?win.document:null;if(!win||!doc){fail('Unable to create ExOS print spool buffer.');return;}
+    html.push('<!doctype html><html><head><meta charset="utf-8"><title>'+String(title).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];})+'</title><style>');html.push('@page{size:'+widthMm+'mm '+heightMm+'mm;margin:0;}html,body{margin:0;padding:0;background:#fff;color:#000}.exos-print-page{box-sizing:border-box;width:'+widthMm+'mm;height:'+heightMm+'mm;margin:0;display:flex;align-items:center;justify-content:center;overflow:hidden;page-break-after:always;break-after:page;background:#fff}.exos-print-page:last-child{page-break-after:auto;break-after:auto}.exos-print-page img{display:block;max-width:100%;max-height:100%;object-fit:contain}@media print{html,body{width:auto;height:auto}.exos-print-page{margin:0;box-shadow:none}}</style></head><body>');
+    for(i=0;i<pages.length;i++){p=pages[i]||{};html.push('<section class="exos-print-page"><img data-exos-print-page="'+(i+1)+'" alt="Print page '+(i+1)+'" src="'+String(p.dataUrl||'').replace(/"/g,'&quot;')+'"></section>');}html.push('</body></html>');
+    try{doc.open();doc.write(html.join(''));doc.close();}catch(e){fail('Unable to write print spool document: '+String(e&&e.message?e.message:e));return;}
+    function invokePrint(){if(done)return;if(timer){try{window.clearTimeout(timer);}catch(ignoreReadyTimer){}timer=0;}try{if(win.focus)win.focus();if(win.addEventListener)win.addEventListener('afterprint',function(){finish({ok:true,submitted:true,jobId:Number(spec.jobId)||0,pages:pages.length,title:title,note:'Browser print dialog closed; ExOS cannot determine whether the user printed or cancelled.'});},false);win.print();window.setTimeout(function(){finish({ok:true,submitted:true,jobId:Number(spec.jobId)||0,pages:pages.length,title:title,note:'Print job was submitted to the browser print engine.'});},250);}catch(e2){fail('Browser print engine rejected the spool job: '+String(e2&&e2.message?e2.message:e2));}}
+    var imgs=doc.getElementsByTagName('img');if(!imgs.length){fail('Print spool contains no raster pages.');return;}function oneReady(){loaded++;if(loaded>=imgs.length)window.setTimeout(invokePrint,30);}for(i=0;i<imgs.length;i++){if(imgs[i].complete&&imgs[i].naturalWidth>0){oneReady();continue;}imgs[i].onload=oneReady;imgs[i].onerror=function(){fail('A raster page failed to load into the print spool buffer.');};}timer=window.setTimeout(function(){fail('Timed out while preparing print pages.');},15000);
+  });
+}
+
 function printPaperSpec(spec){
   spec=spec&&typeof spec==='object'?spec:{};
   var paper=String(spec.paper||spec.paperSize||'A4').toUpperCase(),orientation=String(spec.orientation||'portrait').toLowerCase();
@@ -373,17 +395,15 @@ function printerEndDoc(ctx,dc){
   if(!j.active)throw unsupported('No active print document.');
   if(j.currentPage)throw unsupported('EndPage() must be called before EndDoc().');
   if(!j.pages.length)throw unsupported('Print document contains no pages.');
-  if(typeof global.jplopsoft_xshSpoolPrintJob!=='function')throw unsupported('ExOS print spooler is unavailable.');
   job={jobId:j.id,title:j.docName,paper:j.paper,orientation:j.orientation,widthMm:j.widthMm,heightMm:j.heightMm,dpi:j.dpi,pages:j.pages.map(function(p){return{dataUrl:String(p.dataUrl||''),width:Number(p.width)||0,height:Number(p.height)||0,fit:String(p.fit||'contain')};})};
-  return Promise.resolve(global.jplopsoft_xshSpoolPrintJob(ctx,job)).then(function(out){printerAbort(ctx,dc);return out;},function(e){printerAbort(ctx,dc);throw e;});
+  return Promise.resolve(spoolPrintJob(ctx,job)).then(function(out){printerAbort(ctx,dc);return out;},function(e){printerAbort(ctx,dc);throw e;});
 }
 function printImageDirect(ctx,dataUrl,spec){
   dataUrl=String(dataUrl||'');spec=spec&&typeof spec==='object'?spec:{};
   if(!/^data:image\/(?:png|jpeg|webp);base64,/i.test(dataUrl))throw unsupported('PrintImage accepts PNG, JPEG or WebP Base64 data URLs only.');
   if(dataUrl.length>32*1024*1024)throw err(global.jplopsoft_STATUS_QUOTA_EXCEEDED||0xC0000044,'PrintImage payload exceeds 32 MiB.');
-  if(typeof global.jplopsoft_xshSpoolPrintJob!=='function')throw unsupported('ExOS print spooler is unavailable.');
   var ps=printPaperSpec(spec),job={jobId:++state(ctx).printJobSeq,title:String(spec.title||'ExOS Image').substring(0,240),paper:ps.paper,orientation:ps.orientation,widthMm:ps.widthMm,heightMm:ps.heightMm,dpi:ps.dpi,pages:[{dataUrl:dataUrl,width:0,height:0,fit:String(spec.fit||'contain')} ]};
-  return global.jplopsoft_xshSpoolPrintJob(ctx,job);
+  return spoolPrintJob(ctx,job);
 }
 
 function createDc(ctx,kind,hwnd,compatibleWith){

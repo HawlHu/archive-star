@@ -11,6 +11,7 @@
 var PROPERTY_STORES={next:0xD800,items:{}};
 var SHELL={
   version:'6.4.0-dev-os91',
+  build:'6.4.0-dev-os91-hotfix28',
   model:'EXOS_SHELL32_V1',
   ready:true,
   clipboard:{
@@ -27,8 +28,358 @@ var SHELL={
     active:false
   },
   menuSeq:0,
-  styleReady:false
+  styleReady:false,
+  flyouts:{},
+  desktopBound:false,
+  taskbarBound:false,
+  clockTimer:0,
+  notificationSeq:0,
+  notifications:{}
 };
+
+var SHELL_DESKTOP_WALLPAPER_DATA_URI='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzODQwIiBoZWlnaHQ9IjIxNjAiIHZpZXdCb3g9IjAgMCAzODQwIDIxNjAiPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJiZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzBiNzZjNSIvPjxzdG9wIG9mZnNldD0iLjQ4IiBzdG9wLWNvbG9yPSIjMDc1OTk1Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDQyYTRmIi8+PC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJnbG93IiBjeD0iLjcyIiBjeT0iLjQ2IiByPSIuNTIiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzlkZTJmZiIgc3RvcC1vcGFjaXR5PSIuNDUiLz48c3RvcCBvZmZzZXQ9Ii4zOCIgc3RvcC1jb2xvcj0iIzUyYjllZiIgc3RvcC1vcGFjaXR5PSIuMTgiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMDE1MmIiIHN0b3Atb3BhY2l0eT0iMCIvPjwvcmFkaWFsR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFuZSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2U5ZjhmZiIgc3RvcC1vcGFjaXR5PSIuOSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzY2YzlmNSIgc3RvcC1vcGFjaXR5PSIuMjYiLz48L2xpbmVhckdyYWRpZW50Pgo8ZmlsdGVyIGlkPSJzb2Z0IiB4PSItNDAlIiB5PSItNDAlIiB3aWR0aD0iMTgwJSIgaGVpZ2h0PSIxODAlIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIzNCIvPjwvZmlsdGVyPgo8ZmlsdGVyIGlkPSJzaGFkb3ciIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZURyb3BTaGFkb3cgZHg9IjAiIGR5PSIyNCIgc3RkRGV2aWF0aW9uPSIzNiIgZmxvb2QtY29sb3I9IiMwMDE0MjUiIGZsb29kLW9wYWNpdHk9Ii41MiIvPjwvZmlsdGVyPgo8L2RlZnM+CjxyZWN0IHdpZHRoPSIzODQwIiBoZWlnaHQ9IjIxNjAiIGZpbGw9InVybCgjYmcpIi8+PHJlY3Qgd2lkdGg9IjM4NDAiIGhlaWdodD0iMjE2MCIgZmlsbD0idXJsKCNnbG93KSIvPgo8cGF0aCBkPSJNMCAxNzYwIEwyNzkwIDcyMCBMMzg0MCAxMDQwIEwzODQwIDIxNjAgTDAgMjE2MFoiIGZpbGw9IiMwYjgwY2MiIG9wYWNpdHk9Ii4xMSIvPgo8cGF0aCBkPSJNMCAyMDYwIEwyNjMwIDgxMCBMMzg0MCAxMjMwIiBmaWxsPSJub25lIiBzdHJva2U9IiNiY2VjZmYiIHN0cm9rZS13aWR0aD0iNCIgb3BhY2l0eT0iLjA4Ii8+CjxlbGxpcHNlIGN4PSIyODQwIiBjeT0iMTAzMCIgcng9Ijc5MCIgcnk9IjcwMCIgZmlsbD0iIzU2YzZmZiIgb3BhY2l0eT0iLjEyIiBmaWx0ZXI9InVybCgjc29mdCkiLz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCA0NjApIHNrZXdZKC01KSIgZmlsdGVyPSJ1cmwoI3NoYWRvdykiIG9wYWNpdHk9Ii43OCI+CjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI0NTAiIGhlaWdodD0iNDcwIiBmaWxsPSJ1cmwoI3BhbmUpIi8+PHJlY3QgeD0iNDgyIiB5PSIwIiB3aWR0aD0iNTIwIiBoZWlnaHQ9IjQ3MCIgZmlsbD0idXJsKCNwYW5lKSIvPgo8cmVjdCB4PSIwIiB5PSI1MDIiIHdpZHRoPSI0NTAiIGhlaWdodD0iNTEwIiBmaWxsPSJ1cmwoI3BhbmUpIi8+PHJlY3QgeD0iNDgyIiB5PSI1MDIiIHdpZHRoPSI1MjAiIGhlaWdodD0iNTEwIiBmaWxsPSJ1cmwoI3BhbmUpIi8+CjxwYXRoIGQ9Ik00NTAgMCBMNDgyIDAgTDQ4MiAxMDEyIEw0NTAgMTAxMloiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii4xNCIvPjxwYXRoIGQ9Ik0wIDQ3MCBMMTAwMiA0NzAgTDEwMDIgNTAyIEwwIDUwMloiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii4xMiIvPgo8L2c+Cjwvc3ZnPg==';
+
+function shellNormalizeDesktopPersonalization(spec){
+  var x=spec&&typeof spec==='object'?spec:{},mode=String(x.mode||'preset').toLowerCase(),preset=String(x.preset||'default').toLowerCase(),fit=String(x.fit||'cover').toLowerCase(),color=String(x.color||'#075b9e'),data=String(x.data_url||x.dataUrl||''),taskbarPosition=String(x.taskbar_position||x.taskbarPosition||'bottom').toLowerCase();
+  if(mode!=='preset'&&mode!=='solid'&&mode!=='custom')mode='preset';
+  if(['default','aurora','night','slate','sunrise'].indexOf(preset)<0)preset='default';
+  if(['cover','contain','center','tile','stretch'].indexOf(fit)<0)fit='cover';
+  if(['bottom','top','left','right'].indexOf(taskbarPosition)<0)taskbarPosition='bottom';
+  if(!/^#[0-9a-f]{6}$/i.test(color))color='#075b9e';
+  if(mode==='custom'&&!/^data:image\/(?:png|jpeg|gif|webp);base64,/i.test(data)){mode='preset';preset='default';data='';}
+  return{mode:mode,preset:preset,fit:fit,color:color,data_url:data,taskbar_position:taskbarPosition};
+}
+function shellApplyTaskbarPosition(){
+  var spec=shellNormalizeDesktopPersonalization(global.state&&state.desktopPersonalization?state.desktopPersonalization:null),body=document.body,pos=spec.taskbar_position||'bottom',names=['bottom','top','left','right'],i;
+  if(!body)return false;
+  for(i=0;i<names.length;i++)body.classList.remove('jplopsoft_taskbar-'+names[i]);
+  body.classList.add('jplopsoft_taskbar-'+pos);
+  try{body.setAttribute('data-exos-taskbar-position',pos);}catch(ignoreTaskbarAttribute){}
+  try{window.dispatchEvent(new CustomEvent('exos-taskbar-position-changed',{detail:{position:pos}}));}catch(ignoreTaskbarEvent){}
+  return true;
+}
+function shellApplyDesktopWallpaper(){
+  var d=document.getElementById('jplopsoft_desktopSurface'),spec,repeat='no-repeat',size='cover',position='center center',image='';
+  if(!d)return false;
+  spec=shellNormalizeDesktopPersonalization(global.state&&state.desktopPersonalization?state.desktopPersonalization:null);
+  if(spec.mode==='solid')d.style.background=spec.color;
+  else if(spec.mode==='custom'){
+    if(spec.fit==='contain')size='contain';
+    else if(spec.fit==='center'){size='auto';position='center center';}
+    else if(spec.fit==='tile'){size='auto';repeat='repeat';position='left top';}
+    else if(spec.fit==='stretch')size='100% 100%';
+    image='url("'+spec.data_url.replace(/["\\\r\n]/g,'')+'")';
+    d.style.background=spec.color+' '+image+' '+position+' / '+size+' '+repeat;
+  }else if(spec.preset==='aurora')d.style.background='radial-gradient(circle at 68% 35%,rgba(126,249,255,.70),transparent 31%), radial-gradient(circle at 28% 62%,rgba(91,110,255,.70),transparent 38%), linear-gradient(135deg,#07152f 0%,#0b4b72 52%,#08203e 100%)';
+  else if(spec.preset==='night')d.style.background='radial-gradient(circle at 72% 28%,rgba(93,130,255,.28),transparent 30%), linear-gradient(145deg,#050912 0%,#101b32 46%,#02050b 100%)';
+  else if(spec.preset==='slate')d.style.background='linear-gradient(135deg,#334155 0%,#64748b 48%,#1e293b 100%)';
+  else if(spec.preset==='sunrise')d.style.background='radial-gradient(circle at 70% 62%,rgba(255,244,183,.75),transparent 28%), linear-gradient(145deg,#6d28d9 0%,#db2777 43%,#f59e0b 100%)';
+  else d.style.background='#075b9e url("'+SHELL_DESKTOP_WALLPAPER_DATA_URI+'") center center / cover no-repeat';
+  d.setAttribute('data-exos-wallpaper-layers','1');
+  d.setAttribute('data-exos-wallpaper-mode',spec.mode+':'+spec.preset+':'+spec.fit);
+  return true;
+}
+function shellApplyDesktopPersonalization(){shellApplyDesktopWallpaper();shellApplyTaskbarPosition();shellPositionNotificationHost();return true;}
+function shellLoadDesktopPersonalization(cb){
+  if(!global.state||!state.samAuthenticated||!state.vaultKey){if(cb)cb(false);return false;}
+  jplopsoft_api('desktop_personalization_get','POST',{},true,function(err,out){
+    if(!err&&out&&out.personalization)state.desktopPersonalization=shellNormalizeDesktopPersonalization(out.personalization);
+    shellApplyDesktopPersonalization();
+    if(cb)cb(!err,state.desktopPersonalization,err||null);
+  });
+  return true;
+}
+function shellQueryDesktopPersonalization(){
+  return new Promise(function(resolve,reject){
+    jplopsoft_api('desktop_personalization_get','POST',{},true,function(err,out){
+      if(err){reject(err);return;}
+      state.desktopPersonalization=shellNormalizeDesktopPersonalization(out&&out.personalization?out.personalization:{});
+      shellApplyDesktopPersonalization();
+      resolve({ok:true,personalization:state.desktopPersonalization});
+    });
+  });
+}
+function shellSetDesktopPersonalization(spec){
+  spec=shellNormalizeDesktopPersonalization(spec);
+  return new Promise(function(resolve,reject){
+    jplopsoft_api('desktop_personalization_set','POST',spec,true,function(err,out){
+      if(err){reject(err);return;}
+      state.desktopPersonalization=shellNormalizeDesktopPersonalization(out&&out.personalization?out.personalization:spec);
+      shellApplyDesktopPersonalization();
+      resolve({ok:true,personalization:state.desktopPersonalization});
+    });
+  });
+}
+async function shellLaunchSystemApp(ctx,name,args){
+  var appName=String(name||'').toLowerCase(),list=args&&Object.prototype.toString.call(args)==='[object Array]'?args:[],built=jplopsoft_xshBuiltinManifest(appName),child;
+  if(built){child=await jplopsoft_runBuiltinXsh(appName,list,ctx);return{ok:true,pid:child.pid,imagePath:child.imagePath};}
+  if(appName==='security'){
+    if(typeof jplopsoft_openSecurityScreen==='function'){jplopsoft_openSecurityScreen();return{ok:true,hostSecurityBoundary:true};}
+    throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'ExOS Security host UI is unavailable.');
+  }
+  throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'Unknown ExOS system app: '+appName);
+}
+function shellHostContext(){
+  var p=typeof jplopsoft_ntKernelAliveByKey==='function'?jplopsoft_ntKernelAliveByKey('proc:explorer'):null;
+  return{pid:p?Number(p.pid)||0:0,process:p||null,currentDrive:'C',currentDirectoryNodeId:0,currentDirectory:'C:\\',builtinAppId:'shell32-host'};
+}
+function shellDesktopFolderPath(){return 'C:\\Users\\'+String(state&&state.samUsername?state.samUsername:'administrator')+'\\Desktop';}
+function shellDesktopSystemItems(){
+  return[
+    {id:'computer',label:'我的電腦',icon:'computer',title:'我的電腦'},
+    {id:'cmd',label:'指令模式',icon:'cmd',title:'指令模式'},
+    {id:'trash',label:'資源回收桶',icon:'trash',title:'資源回收桶'}
+  ];
+}
+function shellDesktopPhysicalItems(){
+  var ctx=shellHostContext(),paths=[shellDesktopFolderPath(),'C:\\Users\\Public\\Desktop'],out=[],seen={},i,folder,list,j,raw,n,name,path,key;
+  if(!global.state||!state.vaultKey)return out;
+  for(i=0;i<paths.length;i++){
+    try{folder=jplopsoft_xshResolveC(ctx,paths[i],false);}catch(ignoreResolve){folder=null;}
+    if(!folder||!folder.id)continue;
+    list=jplopsoft_childrenOf(folder.id)||[];
+    for(j=0;j<list.length;j++){
+      raw=list[j];n=jplopsoft_resolveClientNode(raw);if(!raw||!n)continue;
+      name=jplopsoft_decName(raw);if(name===null)name=jplopsoft_decName(n);if(name===null)continue;
+      key=String(raw.id);if(seen[key])continue;seen[key]=1;
+      path=jplopsoft_exfsNodeFullPath(raw);
+      out.push({id:parseInt(raw.id,10)||0,name:name,path:path,directory:n.type==='folder',shortcut:raw.type==='reparse_point',publicDesktop:i===1,icon:raw.type==='reparse_point'?'link':shellIconName(path,n.type==='folder')});
+    }
+  }
+  out.sort(function(a,b){if(a.directory&&!b.directory)return-1;if(!a.directory&&b.directory)return 1;return String(a.name).localeCompare(String(b.name),'zh-Hant');});
+  return out;
+}
+function shellDesktopItems(){return{system:shellDesktopSystemItems(),files:shellDesktopPhysicalItems(),desktopPath:shellDesktopFolderPath()};}
+function shellDesktopLaunchSystem(key){
+  key=String(key||'').toLowerCase();
+  if(key==='computer')return jplopsoft_runBuiltinXsh('explorer',['C:\\'],null);
+  if(key==='cmd')return jplopsoft_runBuiltinXsh('cmd',[shellDesktopFolderPath()],null);
+  if(key==='trash')return jplopsoft_runBuiltinXsh('trash',[],null);
+  return Promise.resolve(false);
+}
+function shellDesktopContextMenu(kind,value,ev){
+  var x=0,y=0;
+  ev=ev||window.event;
+  if(ev){try{if(ev.preventDefault)ev.preventDefault();if(ev.stopPropagation)ev.stopPropagation();}catch(ignoreEvent){}ev.returnValue=false;ev.cancelBubble=true;x=Number(ev.clientX||0)||0;y=Number(ev.clientY||0)||0;}
+  if(kind==='path')jplopsoft_launchSystemXshApp('desktop_shell_menu',['path',String(value||''),String(x),String(y),shellDesktopFolderPath()]);
+  else if(kind==='system')jplopsoft_launchSystemXshApp('desktop_shell_menu',['system',String(value||''),String(x),String(y),shellDesktopFolderPath()]);
+  else jplopsoft_launchSystemXshApp('desktop_shell_menu',['background',shellDesktopFolderPath(),String(x),String(y),shellDesktopFolderPath()]);
+  return false;
+}
+function shellRenderDesktop(){
+  var host=document.querySelector?document.querySelector('.jplopsoft_desktop-icons'):null,items=shellDesktopItems(),i,item,b,icon,label;
+  if(!host)return false;
+  while(host.firstChild)host.removeChild(host.firstChild);
+  for(i=0;i<items.system.length;i++){
+    item=items.system[i];b=document.createElement('button');b.type='button';b.id='jplopsoft_desktop'+(item.id==='computer'?'Computer':item.id==='cmd'?'Cmd':'Trash')+'Icon';b.className='jplopsoft_desktop-icon';b.title=item.title;
+    icon=document.createElement('span');icon.className='jplopsoft_desktop-icon-glyph';icon.setAttribute('data-exfs-svg',item.icon);icon.setAttribute('data-exfs-svg-size','46');b.appendChild(icon);
+    label=document.createElement('span');label.textContent=item.label;b.appendChild(label);
+    (function(k,node){node.ondblclick=function(e){if(e&&e.preventDefault)e.preventDefault();shellDesktopLaunchSystem(k);return false;};node.oncontextmenu=function(e){return shellDesktopContextMenu('system',k,e);};})(item.id,b);
+    host.appendChild(b);
+  }
+  for(i=0;i<items.files.length;i++){
+    item=items.files[i];if(!item.id)continue;
+    b=document.createElement('button');b.type='button';b.className='jplopsoft_desktop-icon jplopsoft_desktop-physical-item'+(item.shortcut?' jplopsoft_desktop-physical-shortcut':'');b.setAttribute('data-desktop-physical-node',String(item.id));b.title=(item.publicDesktop?'Public Desktop ｜ ':'')+item.name;
+    icon=document.createElement('span');icon.className='jplopsoft_desktop-icon-glyph';icon.setAttribute('data-exfs-svg',item.icon);icon.setAttribute('data-exfs-svg-size','46');b.appendChild(icon);
+    label=document.createElement('span');label.textContent=item.name+(item.shortcut?' ↗':'');b.appendChild(label);
+    (function(p,node){node.ondblclick=function(e){if(e&&e.preventDefault)e.preventDefault();shellOpenPath(shellHostContext(),p).catch(function(err){if(typeof jplopsoft_user32MessageBox==='function')jplopsoft_user32MessageBox(String(err&&err.message?err.message:err),'ExOS Shell');});return false;};node.oncontextmenu=function(e){return shellDesktopContextMenu('path',p,e);};})(item.path,b);
+    host.appendChild(b);
+  }
+  try{if(typeof jplopsoft_applySvgIcons==='function')jplopsoft_applySvgIcons(host);}catch(ignoreIcons){}
+  return true;
+}
+function shellBindDesktopSurface(){
+  var surface=document.getElementById('jplopsoft_desktopSurface');
+  if(!surface)return false;
+  if(!SHELL.desktopBound){
+    surface.oncontextmenu=function(ev){var t=ev&&(ev.target||ev.srcElement),cur=t;while(cur&&cur!==surface){if(cur.nodeType===1&&(' '+String(cur.className||'')+' ').indexOf(' jplopsoft_desktop-icon ')>=0)return false;cur=cur.parentNode;}return shellDesktopContextMenu('background','',ev);};
+    SHELL.desktopBound=true;
+  }
+  return shellRenderDesktop();
+}
+function shellTaskbarAppDomId(appId){
+  return 'jplopsoft_taskbarApp_'+String(appId||'');
+}
+function shellTaskbarIconName(icon){
+  var value=String(icon||''),r;
+  if(typeof jplopsoft_shareResResolve==='function'){
+    r=jplopsoft_shareResResolve(value,'shell32.dll');
+    if(r)return r.token;
+  }
+  return'res://shell32.dll/file';
+}
+function shellTaskbarEnsureApp(appId,icon,label){
+  var host=document.getElementById('jplopsoft_taskbarApps'),id=shellTaskbarAppDomId(appId),btn=document.getElementById(id),ic,tx;
+  shellEnsureStyle();
+  if(!host)return null;
+  if(!btn){
+    btn=document.createElement('button');btn.id=id;btn.type='button';btn.className='jplopsoft_taskbar-app';btn.setAttribute('data-app-id',String(appId||''));
+    btn.onclick=function(){return shellTaskbarToggleApp(String(this.getAttribute('data-app-id')||''));};
+    ic=document.createElement('span');ic.className='jplopsoft_taskbar-app-icon';ic.setAttribute('data-task-icon','1');btn.appendChild(ic);
+    tx=document.createElement('span');tx.className='jplopsoft_taskbar-app-text';tx.setAttribute('data-task-text','1');btn.appendChild(tx);host.appendChild(btn);
+  }
+  ic=btn.querySelector?btn.querySelector('[data-task-icon]'):null;tx=btn.querySelector?btn.querySelector('[data-task-text]'):null;
+  if(ic&&typeof jplopsoft_svgIconApply==='function')jplopsoft_svgIconApply(ic,shellTaskbarIconName(icon),18);
+  if(tx)tx.textContent=String(label||appId);btn.title=String(label||appId);btn.setAttribute('aria-label',String(label||appId));
+  return btn;
+}
+function shellTaskbarRemoveApp(appId){
+  var btn=document.getElementById(shellTaskbarAppDomId(appId));if(btn&&btn.parentNode){btn.parentNode.removeChild(btn);return true;}return false;
+}
+function shellTaskbarSetAppState(appId,stateName){
+  var btn=document.getElementById(shellTaskbarAppDomId(appId));if(!btn)return false;
+  btn.className='jplopsoft_taskbar-app'+(stateName==='active'?' jplopsoft_active':'')+(stateName==='minimized'?' jplopsoft_minimized':'');
+  btn.setAttribute('aria-pressed',stateName==='active'?'true':'false');return true;
+}
+function shellTaskbarDeactivateApps(exceptApp){
+  var host=document.getElementById('jplopsoft_taskbarApps'),buttons,i,app;if(!host)return false;
+  buttons=host.getElementsByTagName('button');for(i=0;i<buttons.length;i++){app=String(buttons[i].getAttribute('data-app-id')||'');if(app&&app!==String(exceptApp||'')&&(' '+String(buttons[i].className||'')+' ').indexOf(' jplopsoft_active ')>=0){buttons[i].className='jplopsoft_taskbar-app';buttons[i].setAttribute('aria-pressed','false');}}
+  return true;
+}
+function shellTaskbarToggleApp(appId){
+  if(typeof global.jplopsoft_user32ToggleTaskbarWindow==='function')return global.jplopsoft_user32ToggleTaskbarWindow(appId);
+  return false;
+}
+function shellTaskbarTargetAppId(taskbar,target){
+  var n=target,a='';while(n&&n!==taskbar){if(n.getAttribute){a=String(n.getAttribute('data-app-id')||'');if(a)return a;}n=n.parentNode;}return'';
+}
+function shellTaskbarWindowHwnd(appId){
+  var rec=typeof global.jplopsoft_user32FindTaskbarWindow==='function'?global.jplopsoft_user32FindTaskbarWindow(appId):null;return rec?Number(rec.hwnd)||0:0;
+}
+function shellToggleStartMenu(){
+  var c;if(!global.state||!state.samAuthenticated||!state.vaultKey||state.kdfBusy){if(typeof jplopsoft_user32MessageBox==='function')jplopsoft_user32MessageBox('請先登入 ExOS。');return false;}
+  c=typeof jplopsoft_xshLatestBuiltin==='function'?jplopsoft_xshLatestBuiltin('start_menu'):null;
+  if(c&&!c.terminating){jplopsoft_xshTerminate(c,0,'StartButtonToggle',false);return false;}
+  jplopsoft_runBuiltinXsh('start_menu',[],null).catch(function(err){if(typeof jplopsoft_user32MessageBox==='function')jplopsoft_user32MessageBox(String(err&&err.message?err.message:err),'開始');});
+  return false;
+}
+function shellTaskbarContextMenu(ev,appId){
+  var x=0,y=0,hwnd=shellTaskbarWindowHwnd(appId);ev=ev||window.event;
+  if(ev){if(ev.preventDefault)ev.preventDefault();if(ev.stopPropagation)ev.stopPropagation();ev.returnValue=false;ev.cancelBubble=true;x=Number(ev.clientX||0)||0;y=Number(ev.clientY||0)||0;}
+  jplopsoft_runBuiltinXsh('taskbar_shell_menu',[String(appId||''),String(hwnd),String(x),String(y)],null).catch(function(err){if(typeof jplopsoft_user32MessageBox==='function')jplopsoft_user32MessageBox(String(err&&err.message?err.message:err),'工作列');});
+  return false;
+}
+function shellHideClipboardMenu(menuId){
+  var n=document.getElementById(String(menuId||''));if(n&&n.parentNode){n.parentNode.removeChild(n);return true;}return false;
+}
+function shellShowClipboardMenu(menuId,anchorNode,items){
+  var id=String(menuId||('shell_clipboard_'+(++SHELL.menuSeq))),old=document.getElementById(id),menu,rect,i,row,sep,item,close;
+  shellEnsureStyle();if(old&&old.parentNode)old.parentNode.removeChild(old);
+  menu=document.createElement('div');menu.id=id;menu.className='jplopsoft_shell32_clipboard_menu';items=items||[];
+  for(i=0;i<items.length;i++){
+    item=items[i]||{};if(item.separator){sep=document.createElement('div');sep.className='jplopsoft_shell32_clipboard_sep';menu.appendChild(sep);continue;}
+    row=document.createElement('button');row.type='button';row.className='jplopsoft_shell32_clipboard_item';
+    var text=document.createElement('span'),kbd=document.createElement('kbd');text.textContent=String(item.text||'');kbd.textContent=String(item.shortcut||'');row.appendChild(text);row.appendChild(kbd);
+    (function(action){row.onclick=function(e){try{e.preventDefault();e.stopPropagation();}catch(ignoreClick){}shellHideClipboardMenu(id);if(typeof action==='function')Promise.resolve(action()).catch(function(){});};})(item.run);
+    menu.appendChild(row);
+  }
+  (document.body||document.documentElement).appendChild(menu);rect=anchorNode&&anchorNode.getBoundingClientRect?anchorNode.getBoundingClientRect():{right:window.innerWidth-20,bottom:40};
+  menu.style.left=Math.max(4,Math.min(window.innerWidth-230,rect.right-220))+'px';menu.style.top=Math.max(4,Math.min(window.innerHeight-170,rect.bottom+2))+'px';
+  close=function(e){if(menu&&menu.contains(e.target))return;shellHideClipboardMenu(id);document.removeEventListener('mousedown',close,true);};window.setTimeout(function(){document.addEventListener('mousedown',close,true);},0);return true;
+}
+function shellClipboardMenuId(hwnd){
+  return 'jplopsoft_shell32_clipboard_'+String(Number(hwnd)||0);
+}
+function shellShowStandardClipboardMenu(hwnd,anchorNode,handlers){
+  handlers=handlers||{};
+  return shellShowClipboardMenu(
+    shellClipboardMenuId(hwnd),
+    anchorNode,
+    [
+      {text:'剪下',shortcut:'Ctrl+X',run:handlers.cut},
+      {text:'複製',shortcut:'Ctrl+C',run:handlers.copy},
+      {text:'貼上',shortcut:'Ctrl+V',run:handlers.paste},
+      {separator:true},
+      {text:'全選',shortcut:'Ctrl+A',run:handlers.selectAll}
+    ]
+  );
+}
+function shellInstallClipboardPresentation(hwnd,handlers){
+  var rec=typeof global.jplopsoft_user32GetRecord==='function'?global.jplopsoft_user32GetRecord(hwnd):null,win=rec&&rec.windowId?document.getElementById(rec.windowId):null,controls=win&&win.querySelector?win.querySelector('.jplopsoft_wm-controls'):null,titleIcon=win&&win.querySelector?win.querySelector('.jplopsoft_wm-title-icon'):null,button,open;
+  shellEnsureStyle();if(!win||!controls)return false;
+  open=function(anchorNode){return shellShowStandardClipboardMenu(hwnd,anchorNode,handlers);};
+  button=document.createElement('button');button.type='button';button.className='jplopsoft_wm-control jplopsoft_shell32_clipboard_button';button.title='編輯';button.setAttribute('aria-label','編輯');button.setAttribute('data-exfs-svg','edit');button.setAttribute('data-exfs-svg-size','13');
+  button.onclick=function(e){try{e.preventDefault();e.stopPropagation();}catch(ignoreButton){}open(button);return false;};controls.insertBefore(button,controls.firstChild||null);
+  if(titleIcon){titleIcon.style.cursor='default';titleIcon.title='編輯功能表';titleIcon.onclick=function(e){try{e.preventDefault();e.stopPropagation();}catch(ignoreIcon){}open(titleIcon);return false;};}
+  try{if(typeof jplopsoft_applySvgIcons==='function')jplopsoft_applySvgIcons(win);}catch(ignoreApply){}return true;
+}
+function shellDismissClipboardPresentation(hwnd){
+  return shellHideClipboardMenu(shellClipboardMenuId(hwnd));
+}
+
+function shellPad2(n){n=parseInt(n,10)||0;return n<10?'0'+n:String(n);}
+function shellUpdateTaskbarClock(){
+  var d=new Date(),timeNode=document.getElementById('jplopsoft_taskbarTime'),dateNode=document.getElementById('jplopsoft_taskbarDate'),clock=document.getElementById('jplopsoft_taskbarClock'),timeText,dateText;
+  timeText=shellPad2(d.getHours())+':'+shellPad2(d.getMinutes());dateText=d.getFullYear()+'/'+shellPad2(d.getMonth()+1)+'/'+shellPad2(d.getDate());
+  if(timeNode)timeNode.textContent=timeText;if(dateNode)dateNode.textContent=dateText;if(clock)clock.title=dateText+' '+timeText+':'+shellPad2(d.getSeconds());
+  return{time:timeText,date:dateText,iso:d.toISOString()};
+}
+function shellBindTaskbarPresentation(){
+  var clock=document.getElementById('jplopsoft_taskbarClock'),start=document.getElementById('jplopsoft_startBtn'),taskbar=document.getElementById('jplopsoft_taskbar');
+  shellEnsureStyle();
+  if(!SHELL.taskbarBound){
+    if(clock)clock.onclick=function(e){e=e||window.event;if(e.stopPropagation)e.stopPropagation();e.cancelBubble=true;if(state&&state.samAuthenticated&&state.vaultKey)jplopsoft_runBuiltinXsh('calendar',[],null).catch(function(){});return false;};
+    if(start){start.onmousedown=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();if(e.stopPropagation)e.stopPropagation();e.returnValue=false;e.cancelBubble=true;return false;};start.onclick=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();if(e.stopPropagation)e.stopPropagation();e.returnValue=false;e.cancelBubble=true;return shellToggleStartMenu();};}
+    if(taskbar)taskbar.oncontextmenu=function(e){e=e||window.event;return shellTaskbarContextMenu(e,shellTaskbarTargetAppId(taskbar,e.target||e.srcElement));};
+    SHELL.taskbarBound=true;
+  }
+  shellUpdateTaskbarClock();if(SHELL.clockTimer){try{window.clearInterval(SHELL.clockTimer);}catch(ignoreTimer){}}SHELL.clockTimer=window.setInterval(shellUpdateTaskbarClock,1000);return true;
+}
+function shellNotificationHost(){
+  var h=document.getElementById('jplopsoft_shellNotifications');if(h)return h;
+  h=document.createElement('div');h.id='jplopsoft_shellNotifications';h.setAttribute('aria-live','polite');h.setAttribute('aria-atomic','false');h.style.cssText='position:fixed;right:12px;bottom:52px;z-index:2147483000;width:min(360px,calc(100vw - 24px));display:flex;flex-direction:column;gap:8px;pointer-events:none;font-family:Segoe UI,Microsoft JhengHei,Arial,sans-serif;';(document.body||document.documentElement).appendChild(h);return h;
+}
+function shellPositionNotificationHost(){
+  var h=document.getElementById('jplopsoft_shellNotifications'),p=shellNormalizeDesktopPersonalization(state&&state.desktopPersonalization?state.desktopPersonalization:null).taskbar_position||'bottom';if(!h)return;
+  h.style.left='';h.style.right='';h.style.top='';h.style.bottom='';
+  if(p==='top'){h.style.right='12px';h.style.top='52px';}else if(p==='left'){h.style.left='52px';h.style.bottom='12px';}else if(p==='right'){h.style.right='52px';h.style.bottom='12px';}else{h.style.right='12px';h.style.bottom='52px';}
+}
+function shellShowNotification(ctx,spec){
+  spec=spec&&typeof spec==='object'?spec:{};var h=shellNotificationHost(),id='shell_notice_'+(++SHELL.notificationSeq),card=document.createElement('div'),head=document.createElement('div'),body=document.createElement('div'),icon=document.createElement('span'),text=document.createElement('div'),title=document.createElement('div'),msg=document.createElement('div'),timeout=Math.max(1200,Math.min(30000,parseInt(spec.timeout,10)||4500));
+  shellPositionNotificationHost();card.id=id;card.style.cssText='pointer-events:auto;background:rgba(20,24,31,.97);color:#f8fafc;border:1px solid rgba(148,163,184,.45);border-radius:6px;box-shadow:0 12px 30px rgba(0,0,0,.34);overflow:hidden;cursor:default;';head.style.cssText='display:flex;gap:10px;align-items:flex-start;padding:12px 13px;';icon.style.cssText='width:28px;height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:center;';icon.setAttribute('data-exfs-svg',String(spec.icon||'info'));icon.setAttribute('data-exfs-svg-size','24');text.style.cssText='min-width:0;flex:1;';title.style.cssText='font-weight:700;font-size:13px;line-height:1.35;';title.textContent=String(spec.title||'ExOS');msg.style.cssText='margin-top:3px;font-size:12px;line-height:1.5;color:#dbeafe;white-space:pre-wrap;overflow-wrap:anywhere;';msg.textContent=String(spec.message||'');text.appendChild(title);text.appendChild(msg);head.appendChild(icon);head.appendChild(text);card.appendChild(head);h.appendChild(card);try{if(typeof jplopsoft_applySvgIcons==='function')jplopsoft_applySvgIcons(card);}catch(ignoreIcon){}
+  function remove(){try{if(card.parentNode)card.parentNode.removeChild(card);}catch(ignoreRemove){}delete SHELL.notifications[id];}
+  card.onclick=remove;SHELL.notifications[id]={node:card,timer:window.setTimeout(remove,timeout)};return{id:id,shown:true,timeout:timeout};
+}
+function shellDismissNotifications(){var k,r;for(k in SHELL.notifications)if(Object.prototype.hasOwnProperty.call(SHELL.notifications,k)){r=SHELL.notifications[k];try{if(r.timer)window.clearTimeout(r.timer);}catch(ignoreTimer){}try{if(r.node&&r.node.parentNode)r.node.parentNode.removeChild(r.node);}catch(ignoreNode){}}SHELL.notifications={};var h=document.getElementById('jplopsoft_shellNotifications');if(h&&h.parentNode)h.parentNode.removeChild(h);return true;}
+function shellSessionReady(){
+  if(!state||!state.samAuthenticated||!state.vaultKey)return false;
+  jplopsoft_runBuiltinXsh('shell_session_notify',[],null).catch(function(){});return true;
+}
+function shellRunStartupApps(){
+  var paths=[
+    'C:\\Users\\'+String(state&&state.samUsername?state.samUsername:'administrator')+'\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup',
+    'C:\\Users\\Public\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup'
+  ],i,id,nodes,j,n,path,count=0;
+  for(i=0;i<paths.length;i++){
+    try{id=jplopsoft_exfsResolveFolderId(paths[i],0);}catch(ignoreResolve){id=0;}
+    if(!(id>0))continue;
+    nodes=state&&state.nodes?state.nodes:[];
+    for(j=0;j<nodes.length;j++){
+      n=nodes[j];
+      if(parseInt(n.parent_id,10)!==parseInt(id,10)||n.type!=='file')continue;
+      try{
+        path=jplopsoft_exfsNodeFullPath(n);
+        Promise.resolve(shellOpenPathFromHost(path)).catch(function(){});
+        count++;
+      }catch(ignoreStartupItem){}
+    }
+  }
+  return count;
+}
+function shellMimeForName(name){var ext=shellExtension(name),m={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',ico:'image/x-icon',webp:'image/webp',bmp:'image/bmp',zip:'application/zip','7z':'application/x-7z-compressed',rar:'application/vnd.rar',exe:'application/vnd.microsoft.portable-executable',dll:'application/octet-stream',dat:'application/octet-stream',bin:'application/octet-stream',tar:'application/x-tar',gz:'application/gzip',mp3:'audio/mpeg',mp4:'video/mp4',wav:'audio/wav',m4a:'audio/mp4',aac:'audio/aac',flac:'audio/flac',ogg:'audio/ogg',webm:'video/webm',mov:'video/quicktime',avi:'video/x-msvideo'};return m[ext]||'application/octet-stream';}
+function shellSaveBlobObject(name,blob){var URLObj=window.URL||window.webkitURL,a=document.createElement('a'),url='';if(!URLObj||!URLObj.createObjectURL)throw new Error('Browser download API is unavailable.');url=URLObj.createObjectURL(blob);a.href=url;a.download=String(name||'download.bin');a.style.display='none';document.body.appendChild(a);try{a.click();}finally{window.setTimeout(function(){try{if(a.parentNode)a.parentNode.removeChild(a);}catch(ignoreA){}try{URLObj.revokeObjectURL(url);}catch(ignoreUrl){}},1200);}return true;}
+function shellDownloadNode(node){
+  if(!state.vaultKey)throw new Error('Vault is locked.');if(!node||node.type!=='file')throw new Error('Download requires a file.');var name=jplopsoft_decName(node),fmt;if(name===null)throw new Error('File name cannot be decrypted.');if(jplopsoft_nodeIsLargeFile(node)){jplopsoft_downloadLargeFile(node,name);return true;}fmt=jplopsoft_fileFormatFromName(name);jplopsoft_setStatus('正在載入「'+jplopsoft_htmlEscape(name)+'」的加密內容…');jplopsoft_fetchNodeContent(node.id,function(err,out){var payload,fek,blob;if(err){jplopsoft_user32MessageBox(err.message,'ExOS Shell');return;}try{fek=jplopsoft_nodeFekById(node.id);if(jplopsoft_binaryFormat(fmt)){payload=jplopsoft_decBinaryCipher(out.content_enc,fek);if(payload===null)throw new Error('Binary 內容無法解密。');blob=new Blob([new Uint8Array(payload)],{type:shellMimeForName(name)});}else{payload=jplopsoft_decContentCipher(out.content_enc,fek);if(payload===null)throw new Error('文件內容無法解密。');blob=new Blob([String(payload||'')],{type:fmt==='html'?'text/html;charset=utf-8':fmt==='csv'?'text/csv;charset=utf-8':'text/plain;charset=utf-8'});}shellSaveBlobObject(name,blob);jplopsoft_setStatus('已下載「'+jplopsoft_htmlEscape(name)+'」。');}catch(e){jplopsoft_user32MessageBox(String(e&&e.message?e.message:e),'ExOS Shell');}},null,'DOWNLOAD');return true;
+}
+function shellDownloadPath(ctx,path){var n=shellResolve(ctx,String(path||''));if(!n||n.type!=='file')throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Download file not found.');return shellDownloadNode(n);}
+async function shellOpenRegisteredPath(ctx,path){
+  var n=shellResolve(ctx,String(path||'')),name,ext,child,app,protection,p;if(!n)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Path not found.');p=jplopsoft_xshNodePath(n)||String(path||'');if(n.type==='folder'){child=await jplopsoft_runBuiltinXsh('explorer',[p||'C:\\'],ctx);return{ok:true,pid:child.pid,path:p};}name=String(jplopsoft_decName(n)||'');ext=shellExtension(name);
+  if(ext==='xsh'){child=await jplopsoft_runXshNode(n.id,'',ctx&&ctx.process?ctx.process:null);return{ok:true,pid:child.pid,imagePath:child.imagePath,executable:true,path:p};}
+  if(ext==='html'||ext==='htm')app='htmlview';else if(['png','jpg','jpeg','gif','webp','bmp','ico'].indexOf(ext)>=0)app='image_viewer';else if(['mp3','wav','ogg','m4a','aac','flac'].indexOf(ext)>=0)app='audio_preview';else if(['mp4','webm','mov','m4v','avi','mpg','mpeg','h264','264','avc'].indexOf(ext)>=0)app='video_preview';else if(ext==='txt')app='notepad';else if(ext==='csv')app='csvedit';else if(ext==='zip')app='zipfolder';else throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'No registered XSH viewer for this file type.');
+  protection=n.has_motw?(app==='htmlview'?'Sandbox+MOTW+WebView':'Sandbox+MOTW'):(app==='htmlview'?'Sandbox+WebView':'Sandbox');child=await jplopsoft_runBuiltinXsh(app,[p],ctx,{integrity:n.has_motw?'LOW':'MEDIUM',protection:protection});return{ok:true,pid:child.pid,path:p,application:app};
+}
+async function shellOpenPath(ctx,path){return await shellExecute(ctx,String(path||''),'open','');}
+function shellOpenPathFromHost(path){return shellOpenPath(shellHostContext(),String(path||''));}
 
 function shellEnsureArray(value){
   if(Object.prototype.toString.call(value)==='[object Array]'){
@@ -265,7 +616,29 @@ function shellEnsureStyle(){
     '.jplopsoft_shell32_menu_sep{height:1px;background:#e5e7eb;margin:4px 5px}'+
     '.jplopsoft_shell32_menu_icon{width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 17px}'+
     '.jplopsoft_shell32_menu_label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}'+
-    '.jplopsoft_shell32_menu_arrow{width:12px;margin-left:auto;text-align:right;color:#475569;font-size:15px}';
+    '.jplopsoft_shell32_menu_arrow{width:12px;margin-left:auto;text-align:right;color:#475569;font-size:15px}'+
+    '.jplopsoft_shell32_browse_backdrop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.28);z-index:2147483050;font:13px "Segoe UI",Arial,sans-serif;color:#111827}'+
+    '.jplopsoft_shell32_browse{width:min(620px,92vw);height:min(610px,86vh);display:flex;flex-direction:column;background:#fff;border:1px solid #94a3b8;box-shadow:0 18px 54px rgba(15,23,42,.35)}'+
+    '.jplopsoft_shell32_browse_head{padding:12px 14px 8px;font-weight:600;font-size:15px;border-bottom:1px solid #e5e7eb}'+
+    '.jplopsoft_shell32_browse_prompt{padding:8px 14px;color:#475569}'+
+    '.jplopsoft_shell32_browse_path{display:flex;gap:8px;align-items:center;padding:0 14px 10px}'+
+    '.jplopsoft_shell32_browse_path span{flex:1;min-width:0;padding:7px 9px;border:1px solid #cbd5e1;background:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+    '.jplopsoft_shell32_browse button{font:inherit;min-height:30px;padding:4px 12px;border:1px solid #aeb7c2;background:#f8fafc;cursor:default}'+
+    '.jplopsoft_shell32_browse button:hover{background:#eaf2ff}'+
+    '.jplopsoft_shell32_browse_list{flex:1;min-height:0;overflow:auto;margin:0 14px;border:1px solid #cbd5e1;background:#fff}'+
+    '.jplopsoft_shell32_browse_row{display:flex;align-items:center;gap:8px;min-height:32px;padding:5px 10px;border-bottom:1px solid #f1f5f9;cursor:default}'+
+    '.jplopsoft_shell32_browse_row:hover{background:#f8fafc}'+
+    '.jplopsoft_shell32_browse_row[data-selected="1"]{background:#dbeafe;color:#1d4ed8}'+
+    '.jplopsoft_shell32_browse_foot{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:10px 14px;border-top:1px solid #e5e7eb}'+
+    '.jplopsoft_taskbar-apps{display:flex;align-items:stretch;overflow:hidden;padding:0 2px}'+
+    '.jplopsoft_taskbar-app{position:relative;height:40px;min-width:120px;max-width:240px;border:0;border-radius:0;border-bottom:2px solid #60a5fa;background:rgba(255,255,255,.035);color:#f8fafc;padding:0 11px;display:flex;align-items:center;gap:8px;font-family:Segoe UI,Microsoft JhengHei,sans-serif;text-align:left;overflow:hidden}'+
+    '.jplopsoft_taskbar-app:hover{background:#334155}.jplopsoft_taskbar-app.jplopsoft_active{background:#475569;border-bottom-color:#93c5fd}.jplopsoft_taskbar-app.jplopsoft_minimized{background:rgba(255,255,255,.02)}'+
+    '.jplopsoft_taskbar-app-icon{width:22px;min-width:22px;text-align:center;font-family:Segoe UI Symbol,Segoe UI,Microsoft JhengHei,sans-serif;font-size:15px}.jplopsoft_taskbar-app-text{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}'+
+    'body.jplopsoft_taskbar-left .jplopsoft_taskbar-apps,body.jplopsoft_taskbar-right .jplopsoft_taskbar-apps{width:52px;min-width:52px;flex:1;flex-direction:column;align-items:stretch;padding:2px 0;overflow:hidden}'+
+    'body.jplopsoft_taskbar-left .jplopsoft_taskbar-app,body.jplopsoft_taskbar-right .jplopsoft_taskbar-app{width:52px;min-width:52px;max-width:52px;height:48px;min-height:48px;padding:0;justify-content:center;border-bottom:0;border-left:2px solid #60a5fa}body.jplopsoft_taskbar-right .jplopsoft_taskbar-app{border-left:0;border-right:2px solid #60a5fa}body.jplopsoft_taskbar-left .jplopsoft_taskbar-app-text,body.jplopsoft_taskbar-right .jplopsoft_taskbar-app-text{display:none}body.jplopsoft_taskbar-left .jplopsoft_taskbar-app-icon,body.jplopsoft_taskbar-right .jplopsoft_taskbar-app-icon{width:24px;min-width:24px}'+
+    '@media(max-width:800px){.jplopsoft_taskbar-app{min-width:46px;max-width:150px;padding:0 8px}.jplopsoft_taskbar-app-icon{width:20px;min-width:20px}}'+
+    '.jplopsoft_shell32_clipboard_menu{position:fixed;z-index:2147483200;width:220px;padding:4px 0;border:1px solid #aeb7c2;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.32);font:13px "Segoe UI","Microsoft JhengHei",sans-serif;color:#111827}'+
+    '.jplopsoft_shell32_clipboard_item{width:100%;height:30px;border:0;background:#fff;padding:0 12px;display:flex;align-items:center;justify-content:space-between;text-align:left;color:#111827}.jplopsoft_shell32_clipboard_item:hover{background:#eaf2ff}.jplopsoft_shell32_clipboard_item kbd{font:11px Consolas,monospace;color:#64748b;background:transparent}.jplopsoft_shell32_clipboard_sep{height:1px;background:#e5e7eb;margin:4px 6px}.jplopsoft_shell32_clipboard_button{background-color:transparent}';
 
   document.getElementsByTagName('head')[0]
     .appendChild(style);
@@ -336,6 +709,8 @@ function shellContextMenu(ctx,paths,options){
     );
     items.push(shellSeparator());
     items.push(shellMenuItem('cmdhere','在此開啟命令提示字元',true,{icon:'cmd'}));
+    items.push(shellSeparator());
+    items.push(shellMenuItem('personalize','個人化',true,{icon:'control'}));
 
     return{
       paths:list,
@@ -361,6 +736,9 @@ function shellContextMenu(ctx,paths,options){
       items.push(shellMenuItem('edit','編輯',true,{icon:'edit'}));
       items.push(shellMenuItem('download','下載',true,{icon:'download'}));
     }
+    if(infos[0].reparsePoint){
+      items.push(shellMenuItem('openlocation','開啟目標位置',true,{icon:'folder'}));
+    }
 
     if(infos[0].directory){
       items.push(shellMenuItem('cmdhere','在此開啟命令提示字元',true,{icon:'cmd'}));
@@ -379,6 +757,7 @@ function shellContextMenu(ctx,paths,options){
 
   items.push(shellMenuItem('cut','剪下',infos.length>0,{icon:'cut'}));
   items.push(shellMenuItem('copy','複製',infos.length>0,{icon:'copy'}));
+  items.push(shellMenuItem('move','移動到…',infos.length>0,{icon:'folder'}));
   if(infos.length===1)items.push(shellMenuItem('createshortcut','建立捷徑',true,{icon:'link'}));
   if(dirs.length===1&&infos.length===1&&!/^C:\\$/i.test(infos[0].path))items.push(shellMenuItem('compresszip','壓縮成 ZIP',true,{icon:'zipfolder'}));
   if(infos.length>0){
@@ -506,6 +885,77 @@ function shellTrackPopupMenu(items,x,y){
     keyDown=function(e){if(String(e.key||'')==='Escape')finish('');};
     window.setTimeout(function(){document.addEventListener('mousedown',clickAway,true);document.addEventListener('keydown',keyDown,true);},0);
   });
+}
+
+function shellRect(node){
+  var r;
+  try{r=node&&node.getBoundingClientRect?node.getBoundingClientRect():null;}catch(ignoreRect){r=null;}
+  if(!r)return{left:0,top:0,right:0,bottom:0,width:0,height:0};
+  return{left:Number(r.left)||0,top:Number(r.top)||0,right:Number(r.right)||0,bottom:Number(r.bottom)||0,width:Number(r.width)||0,height:Number(r.height)||0};
+}
+
+function shellTaskbarInfo(){
+  var taskbar=document.getElementById('jplopsoft_taskbar'),start=document.getElementById('jplopsoft_startBtn'),body=document.body,edge='bottom',cls=' '+String(body&&body.className||'')+' ';
+  if(cls.indexOf(' jplopsoft_taskbar-top ')>=0)edge='top';
+  else if(cls.indexOf(' jplopsoft_taskbar-left ')>=0)edge='left';
+  else if(cls.indexOf(' jplopsoft_taskbar-right ')>=0)edge='right';
+  return{edge:edge,taskbar:shellRect(taskbar),startButton:shellRect(start),viewport:{width:Number(window.innerWidth)||0,height:Number(window.innerHeight)||0}};
+}
+
+function shellSetFlyoutVisual(kind,active){
+  var key=String(kind||'').toLowerCase(),b;
+  if(key==='start'){
+    b=document.getElementById('jplopsoft_startBtn');
+    if(b){b.className='jplopsoft_start-btn'+(active?' jplopsoft_active':'');b.setAttribute('aria-expanded',active?'true':'false');}
+  }
+  return true;
+}
+
+function shellRegisterFlyout(ctx,kind,hwnd){
+  var key=String(kind||'').toLowerCase(),old,oldCtx;
+  if(!key)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Flyout kind is required.');
+  old=SHELL.flyouts[key];
+  if(old&&parseInt(old.ownerPid,10)!==parseInt(ctx.pid,10)){
+    try{
+      oldCtx=typeof jplopsoft_xshRunByPid==='function'?jplopsoft_xshRunByPid(old.ownerPid):null;
+      if(oldCtx&&!oldCtx.terminating&&typeof jplopsoft_xshTerminate==='function')jplopsoft_xshTerminate(oldCtx,0,'ShellFlyoutReplaced',false);
+    }catch(ignoreOldFlyout){}
+  }
+  SHELL.flyouts[key]={kind:key,ownerPid:parseInt(ctx.pid,10)||0,hwnd:parseInt(hwnd,10)||0,openedAt:(new Date()).getTime()};
+  shellSetFlyoutVisual(key,true);
+  return{ok:true,kind:key,hwnd:parseInt(hwnd,10)||0};
+}
+
+function shellUnregisterFlyout(ctx,kind){
+  var key=String(kind||'').toLowerCase(),f=SHELL.flyouts[key];
+  if(!f)return true;
+  if(ctx&&parseInt(f.ownerPid,10)!==parseInt(ctx.pid,10))throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'Flyout is owned by another process.');
+  delete SHELL.flyouts[key];
+  shellSetFlyoutVisual(key,false);
+  return true;
+}
+
+function shellStartMenuModel(){
+  var root=global.jplopsoft_EXOS_XSH_APPS,apps=root&&root.apps?root.apps:{},visible=[
+    'explorer','cmd','control','calc','calendar','taskmgr','regedit','accounts','eventvwr','devmgmt','diskmgmt','paint','notepad','csvedit','html_editor','xsh_editor','volume3d','winmine'
+  ],out=[],i,id,a;
+  for(i=0;i<visible.length;i++){
+    id=visible[i];a=apps[id];if(!a)continue;
+    out.push({kind:'app',id:id,appId:id,title:String(a.title||id),description:String(a.description||''),icon:String(a.icon||'app')});
+  }
+  out.sort(function(a,b){return String(a.title).localeCompare(String(b.title));});
+  return{
+    version:1,
+    pinned:[
+      {kind:'path',id:'computer',title:'我的電腦',description:'開啟 ExFS 根目錄',icon:'computer',target:'C:\\'},
+      {kind:'app',id:'explorer',appId:'explorer',title:'檔案總管',description:'瀏覽 ExFS 檔案與資料夾',icon:'explorer'},
+      {kind:'app',id:'control',appId:'control',title:'控制台',description:'ExOS 系統設定',icon:'control'},
+      {kind:'app',id:'cmd',appId:'cmd',title:'指令模式',description:'XSH 命令提示字元',icon:'cmd'},
+      {kind:'app',id:'calc',appId:'calc',title:'小算盤',description:'ExOS 小算盤',icon:'calc'},
+      {kind:'app',id:'taskmgr',appId:'taskmgr',title:'工作管理員',description:'處理程序與效能',icon:'taskmgr'}
+    ],
+    apps:out
+  };
 }
 
 function shellUniqueDestination(ctx,targetFolder,name){
@@ -683,6 +1133,70 @@ async function shellDeleteRecursive(ctx,path,depth){
   );
 
   return count;
+}
+
+function shellBrowseForFolder(ctx,options){
+  var opt=options||{},title=String(opt.title||'瀏覽資料夾'),prompt=String(opt.prompt||'選擇資料夾：'),
+      initial=shellNormalizePath(opt.initialDir||opt.initialPath||shellKnownFolder(ctx,'FOLDERID_DESKTOP')),
+      okText=String(opt.okText||'確定');
+  return new Promise(function(resolve){
+    var current=initial,selected=initial,backdrop,box,head,promptNode,pathbar,up,pathText,list,foot,cancel,ok,closed=false,keyDown;
+    shellEnsureStyle();
+    try{if(!shellResolve(ctx,current)||shellResolve(ctx,current).type!=='folder')current='C:\\';}catch(ignoreInitial){current='C:\\';}
+    selected=current;
+    function close(result){if(closed)return;closed=true;try{document.removeEventListener('keydown',keyDown,true);}catch(ignoreKey){}try{if(backdrop&&backdrop.parentNode)backdrop.parentNode.removeChild(backdrop);}catch(ignoreRemove){}resolve(result||null);}
+    function render(){
+      var rows=[],i,item,row,icon,label;
+      try{rows=jplopsoft_xshListDirectory(ctx,current)||[];}catch(e){rows=[];}
+      pathText.textContent=current;list.innerHTML='';
+      for(i=0;i<rows.length;i++){
+        item=rows[i];if(!item||!item.directory)continue;
+        row=document.createElement('div');row.className='jplopsoft_shell32_browse_row';row.setAttribute('data-selected',shellNormalizePath(selected)===shellNormalizePath(item.path)?'1':'0');
+        icon=document.createElement('span');icon.textContent='📁';label=document.createElement('span');label.textContent=String(item.name||shellBaseName(item.path));
+        row.appendChild(icon);row.appendChild(label);
+        (function(p,r){r.onclick=function(){var all=list.querySelectorAll('.jplopsoft_shell32_browse_row'),k;selected=p;for(k=0;k<all.length;k++)all[k].setAttribute('data-selected',all[k]===r?'1':'0');};r.ondblclick=function(){current=p;selected=p;render();};})(item.path,row);
+        list.appendChild(row);
+      }
+      up.disabled=/^[A-Z]:\\$/i.test(current);
+    }
+    backdrop=document.createElement('div');backdrop.className='jplopsoft_shell32_browse_backdrop';
+    box=document.createElement('div');box.className='jplopsoft_shell32_browse';backdrop.appendChild(box);
+    head=document.createElement('div');head.className='jplopsoft_shell32_browse_head';head.textContent=title;box.appendChild(head);
+    promptNode=document.createElement('div');promptNode.className='jplopsoft_shell32_browse_prompt';promptNode.textContent=prompt;box.appendChild(promptNode);
+    pathbar=document.createElement('div');pathbar.className='jplopsoft_shell32_browse_path';box.appendChild(pathbar);
+    up=document.createElement('button');up.type='button';up.textContent='上一層';pathbar.appendChild(up);
+    pathText=document.createElement('span');pathbar.appendChild(pathText);
+    list=document.createElement('div');list.className='jplopsoft_shell32_browse_list';box.appendChild(list);
+    foot=document.createElement('div');foot.className='jplopsoft_shell32_browse_foot';box.appendChild(foot);
+    cancel=document.createElement('button');cancel.type='button';cancel.textContent='取消';foot.appendChild(cancel);
+    ok=document.createElement('button');ok.type='button';ok.textContent=okText;foot.appendChild(ok);
+    up.onclick=function(){if(!/^[A-Z]:\\$/i.test(current)){current=shellParentPath(current);selected=current;render();}};
+    cancel.onclick=function(){close(null);};ok.onclick=function(){close({ok:true,path:shellNormalizePath(selected||current)});};
+    backdrop.onclick=function(e){if(e.target===backdrop)close(null);};
+    keyDown=function(e){if(String(e.key||'')==='Escape'){e.preventDefault();close(null);}else if(String(e.key||'')==='Enter'){e.preventDefault();close({ok:true,path:shellNormalizePath(selected||current)});}};
+    document.addEventListener('keydown',keyDown,true);document.body.appendChild(backdrop);render();
+  });
+}
+
+async function shellRecycleDelete(ctx,paths){
+  var list=shellEnsureArray(paths).map(shellNormalizePath).filter(function(x){return!!x;}),ids=[],i,info,out;
+  if(!list.length)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Delete requires at least one object.');
+  for(i=0;i<list.length;i++){
+    info=shellInfo(ctx,list[i]);
+    if(!info.nodeId)throw jplopsoft_xshError(jplopsoft_STATUS_ACCESS_DENIED,'The ExFS root cannot be moved to Recycle Bin.');
+    ids.push(parseInt(info.nodeId,10)||0);
+  }
+  out=await jplopsoft_xshApiPromise(ids.length>1?'delete_many':'delete','POST',ids.length>1?{ids:ids}:{id:ids[0]});
+  await shellReloadNodesPromise();
+  try{shellRenderDesktop();}catch(ignoreDesktopRefresh){}
+  return{ok:true,operation:'recycle',completed:parseInt(out&&out.trashed,10)||ids.length,trashed:parseInt(out&&out.trashed,10)||ids.length};
+}
+
+async function shellChangeNotify(ctx,eventName,item1,item2){
+  await shellReloadNodesPromise();
+  try{shellRenderDesktop();}catch(ignoreDesktop){}
+  if(typeof global.jplopsoft_xshSendEvent==='function')global.jplopsoft_xshSendEvent(ctx,{event:'shell32',controlId:'SHELL_NOTIFY',action:'change',changeEvent:eventName,item1:item1||null,item2:item2||null});
+  return true;
 }
 
 async function shellFileOperation(ctx,spec){
@@ -878,10 +1392,7 @@ async function shellExecute(ctx,path,verb,args){
       return{ok:true,verb:'open',pid:batchChild.pid,path:p,batch:true};
     }
 
-    return await jplopsoft_xshSystemOpenPath(
-      ctx,
-      p
-    );
+    return await shellOpenRegisteredPath(ctx,p);
   }
 
   if(action==='edit'){
@@ -917,10 +1428,7 @@ async function shellExecute(ctx,path,verb,args){
   }
 
   if(action==='download'){
-    return jplopsoft_xshSystemDownloadPath(
-      ctx,
-      p
-    );
+    return shellDownloadPath(ctx,p);
   }
 
   throw jplopsoft_xshError(
@@ -936,6 +1444,27 @@ async function shellInvokeCommand(ctx,verb,paths,options){
         .filter(function(x){return!!x;}),
       opt=options||{},
       i,out;
+
+  if(action==='showdesktop'){
+    if(typeof jplopsoft_wmShowDesktop!=='function'){
+      throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'Desktop Shell is unavailable.');
+    }
+    jplopsoft_wmShowDesktop();
+    return{ok:true,verb:'showdesktop'};
+  }
+
+  if(action==='personalize'){
+    var personalizeChild=await jplopsoft_runBuiltinXsh('personalization',[],ctx);
+    return{ok:true,verb:'personalize',pid:personalizeChild.pid};
+  }
+
+  if(action==='openlocation'){
+    if(list.length!==1)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Open location requires one selected object.');
+    var locationInfo=shellInfo(ctx,list[0]),locationPath=locationInfo.reparsePoint&&locationInfo.reparseTarget?locationInfo.reparseTarget:list[0];
+    try{if(!shellInfo(ctx,locationPath).directory)locationPath=shellParentPath(locationPath);}catch(ignoreLocationInfo){locationPath=shellParentPath(locationPath);}
+    var locationChild=await jplopsoft_runBuiltinXsh('explorer',[locationPath||'C:\\'],ctx);
+    return{ok:true,verb:'openlocation',pid:locationChild.pid,path:locationPath||'C:\\'};
+  }
 
   if(action==='extractall'){
     if(list.length!==1||shellExtension(list[0])!=='zip'){
@@ -1053,14 +1582,14 @@ async function shellInvokeCommand(ctx,verb,paths,options){
     return result;
   }
 
+  if(action==='move'){
+    if(!list.length)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'Move requires a selected object.');
+    var mover=await jplopsoft_runBuiltinXsh('move_items',list,ctx);
+    return{ok:true,verb:'move',pid:mover.pid,paths:list.slice()};
+  }
+
   if(action==='delete'){
-    return await shellFileOperation(
-      ctx,
-      {
-        operation:'delete',
-        sources:list
-      }
-    );
+    return await shellRecycleDelete(ctx,list);
   }
 
   if(action==='renamevolume'){
@@ -1088,21 +1617,32 @@ async function shellInvokeCommand(ctx,verb,paths,options){
   }
 
   if(action==='properties'){
+    if(!list.length){
+      throw jplopsoft_xshError(
+        jplopsoft_STATUS_INVALID_PARAMETER,
+        'Properties requires a selected object.'
+      );
+    }
+
     out=[];
 
     for(i=0;i<list.length;i++){
-      out.push(
-        shellInfo(
-          ctx,
-          list[i]
-        )
+      var propertiesChild=await jplopsoft_runBuiltinXsh(
+        'properties',
+        [list[i]],
+        ctx
       );
+
+      out.push({
+        path:list[i],
+        pid:propertiesChild.pid
+      });
     }
 
     return{
       ok:true,
       verb:'properties',
-      items:out
+      results:out
     };
   }
 
@@ -1136,11 +1676,9 @@ async function shellInvokeCommand(ctx,verb,paths,options){
   }
 
   if(action==='refresh'||action==='newfolder'||action==='newtext'||action==='newcsv'||action==='newhtml'||action==='newxsh'){
-    return{
-      ok:true,
-      verb:action,
-      hostAction:true
-    };
+    var shellTarget=String(opt.targetPath||ctx.currentDirectory||'C:\\');
+    var shellActionChild=await jplopsoft_runBuiltinXsh('shell_action',[action,shellTarget],ctx);
+    return{ok:true,verb:action,pid:shellActionChild.pid,path:shellTarget};
   }
 
   throw jplopsoft_xshError(
@@ -1484,7 +2022,21 @@ async function shellDispatch(ctx,method,args){
   if(method==='ShellExecuteEx'||method==='ShellExecuteExA'||method==='ShellExecuteExW'){
     var ex=args[0]||{},res=await shellExecute(ctx,ex.file||ex.lpFile||'',ex.verb||ex.lpVerb||'open',ex.parameters||ex.lpParameters||'');return{ok:true,hInstApp:33,processId:res&&res.pid?res.pid:0,result:res};
   }
-  if(method==='SHChangeNotify'){if(typeof global.jplopsoft_xshSendEvent==='function')global.jplopsoft_xshSendEvent(ctx,{event:'shell32',controlId:'SHELL_NOTIFY',action:'change',changeEvent:args[0],item1:args[1]||null,item2:args[2]||null});return true;}
+  if(method==='SHChangeNotify')return await shellChangeNotify(ctx,args[0],args[1],args[2]);
+  if(method==='SHBrowseForFolder')return await shellBrowseForFolder(ctx,args[0]);
+
+  if(method==='OpenPath')return await shellOpenPath(ctx,args[0]);
+  if(method==='LaunchSystemApp')return await shellLaunchSystemApp(ctx,args[0],args[1]);
+  if(method==='GetDesktopPersonalization')return await shellQueryDesktopPersonalization();
+  if(method==='SetDesktopPersonalization')return await shellSetDesktopPersonalization(args[0]||{});
+  if(method==='GetDesktopItems')return shellDesktopItems();
+  if(method==='RefreshDesktop')return shellRenderDesktop();
+  if(method==='ShowNotification')return shellShowNotification(ctx,args[0]||{});
+  if(method==='DownloadPath')return shellDownloadPath(ctx,args[0]);
+  if(method==='GetTaskbarInfo')return shellTaskbarInfo();
+  if(method==='GetStartMenuModel')return shellStartMenuModel();
+  if(method==='RegisterFlyout')return shellRegisterFlyout(ctx,args[0],args[1]);
+  if(method==='UnregisterFlyout')return shellUnregisterFlyout(ctx,args[0]);
 
   if(method==='SHGetFileAssociation'){
     return shellAssociation(
@@ -1641,11 +2193,44 @@ function shellCleanupContext(ctx){
        Windows clipboard ownership transfer semantics. Only ownership changes. */
     SHELL.clipboard.sourcePid=0;
   }
+  for(k in SHELL.flyouts){
+    if(!Object.prototype.hasOwnProperty.call(SHELL.flyouts,k))continue;
+    r=SHELL.flyouts[k];
+    if(r&&parseInt(r.ownerPid,10)===pid){delete SHELL.flyouts[k];shellSetFlyoutVisual(k,false);}
+  }
+  return true;
+}
+
+function shellDismissAllUi(){
+  var nodes=document.querySelectorAll?document.querySelectorAll('.jplopsoft_shell32_menu,.jplopsoft_shell32_browse_backdrop,.jplopsoft_shell32_clipboard_menu'):[],i,k,f,ctx,pids=[];
+  shellDismissNotifications();
+  for(i=nodes.length-1;i>=0;i--){try{if(nodes[i]&&nodes[i].parentNode)nodes[i].parentNode.removeChild(nodes[i]);}catch(ignoreDismiss){}}
+  for(k in SHELL.flyouts){if(Object.prototype.hasOwnProperty.call(SHELL.flyouts,k)){f=SHELL.flyouts[k];if(f&&f.ownerPid)pids.push(parseInt(f.ownerPid,10)||0);shellSetFlyoutVisual(k,false);}}
+  SHELL.flyouts={};
+  for(i=0;i<pids.length;i++){
+    try{ctx=typeof jplopsoft_xshRunByPid==='function'?jplopsoft_xshRunByPid(pids[i]):null;if(ctx&&!ctx.terminating&&typeof jplopsoft_xshTerminate==='function')jplopsoft_xshTerminate(ctx,0,'ShellDismissAllUI',false);}catch(ignoreFlyoutTerminate){}
+  }
   return true;
 }
 
 global.jplopsoft_SHELL32=SHELL;
 global.jplopsoft_shell32Dispatch=shellDispatch;
 global.jplopsoft_shell32CleanupContext=shellCleanupContext;
+global.jplopsoft_shell32DismissAllUI=shellDismissAllUi;
+global.jplopsoft_shell32LoadDesktopPersonalization=shellLoadDesktopPersonalization;
+global.jplopsoft_shell32ApplyDesktopPersonalization=shellApplyDesktopPersonalization;
+global.jplopsoft_shell32BindDesktopSurface=shellBindDesktopSurface;
+global.jplopsoft_shell32RefreshDesktop=shellRenderDesktop;
+global.jplopsoft_shell32BindTaskbarPresentation=shellBindTaskbarPresentation;
+global.jplopsoft_shell32TaskbarEnsureApp=shellTaskbarEnsureApp;
+global.jplopsoft_shell32TaskbarRemoveApp=shellTaskbarRemoveApp;
+global.jplopsoft_shell32TaskbarSetAppState=shellTaskbarSetAppState;
+global.jplopsoft_shell32TaskbarDeactivateApps=shellTaskbarDeactivateApps;
+global.jplopsoft_shell32InstallClipboardPresentation=shellInstallClipboardPresentation;
+global.jplopsoft_shell32DismissClipboardPresentation=shellDismissClipboardPresentation;
+global.jplopsoft_shell32OnSessionReady=shellSessionReady;
+global.jplopsoft_shell32RunStartupApps=shellRunStartupApps;
+global.jplopsoft_shell32OpenPathFromHost=shellOpenPathFromHost;
+global.jplopsoft_shell32SaveBlobObject=shellSaveBlobObject;
 
 })(window);
