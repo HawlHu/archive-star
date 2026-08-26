@@ -11521,7 +11521,7 @@ function jplopsoft_renderFiles(){
   jplopsoft_updateSelectAllBox();
 }
 function jplopsoft_reloadNodes(done){
-  var origin=String(jplopsoft_EXPLORER_ACTIVE_ID||'');
+  var origin=String(parseInt(jplopsoft_EXPLORER_ACTIVE_PID,10)||'');
 
   jplopsoft_api(
     'list',
@@ -15847,7 +15847,7 @@ function jplopsoft_wmAfterUnlock(){
 
   primary=jplopsoft_explorerRegisterPrimary();
   if(primary){
-    jplopsoft_EXPLORER_ACTIVE_ID=primary.instanceId;
+    jplopsoft_EXPLORER_ACTIVE_PID=parseInt(primary.pid||primary.instanceId,10)||0;
     primary.opened=false;
     primary.visible=false;
     primary.state.currentFolder=0;
