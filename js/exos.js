@@ -8120,9 +8120,24 @@ function jplopsoft_cmdStartNode(n){
     jplopsoft_cmdWrite('Large file is download-only. Use DOWNLOAD '+cmdQuoteArg(name),'info');
     return;
   }
+  if(fmt==='html'){
+    jplopsoft_runBuiltinXsh(
+      'htmlview',
+      [jplopsoft_cmdNodeFullPath(n)],
+      null,
+      {
+        integrity:'MEDIUM',
+        protection:n.has_motw?'Sandbox+MOTW+WebView':'Sandbox+WebView',
+        imageName:'htmlview.exe'
+      }
+    ).catch(function(e){
+      jplopsoft_exosMessage('HTML 瀏覽器啟動失敗：'+String(e&&e.message?e.message:e));
+    });
+    return;
+  }
+
   jplopsoft_cmdSetExplorerFolder(n.parent_id,n.id);
-  if(fmt==='html')jplopsoft_routeExplorerAction('htmlview',jplopsoft_cmdNodeFullPath(n));
-  else if(jplopsoft_routeIsUser()&&jplopsoft_EXE_ROUTE.app==='cmd')jplopsoft_routeExplorer(jplopsoft_EXE_ROUTE.username);
+  if(jplopsoft_routeIsUser()&&jplopsoft_EXE_ROUTE.app==='cmd')jplopsoft_routeExplorer(jplopsoft_EXE_ROUTE.username);
 
   jplopsoft_cmdSetTimeout(function(){
     if(fmt!=='binary'){
@@ -13829,10 +13844,27 @@ function jplopsoft_openView(id,routeInternal){
     return jplopsoft_openImagePreview(id);
   }
 
-  /* Active/original-content preview of MOTW files and HTML runs in a genuine
-   * LOW restricted htmlview.exe child.  The primary Explorer opens a child
-   * window so window.opener remains the EXFS_ALPC broker. */
-  if(!routeInternal&&!inLowViewer&&(n.has_motw||fmt==='html')){
+  /* os91 hotfix10: HTML opens as an ExOS USER32 application in the current
+   * desktop.  The trusted htmlview.xsh host reads the file, while untrusted
+   * document HTML runs only inside the opaque WebView2 iframe sandbox. */
+  if(!routeInternal&&fmt==='html'){
+    jplopsoft_runBuiltinXsh(
+      'htmlview',
+      [jplopsoft_cmdNodeFullPath(n)],
+      null,
+      {
+        integrity:'MEDIUM',
+        protection:n.has_motw?'Sandbox+MOTW+WebView':'Sandbox+WebView',
+        imageName:'htmlview.exe'
+      }
+    ).catch(function(e){
+      jplopsoft_exosMessage('HTML 瀏覽器啟動失敗：'+String(e&&e.message?e.message:e));
+    });
+    return;
+  }
+
+  /* Non-HTML MOTW content may still use the legacy LOW routed preview path. */
+  if(!routeInternal&&!inLowViewer&&n.has_motw){
     launch=jplopsoft_routeExplorerAction('htmlview',jplopsoft_cmdNodeFullPath(n));
     if(launch==='window'||launch==='blocked')return;
   }
@@ -24004,6 +24036,20 @@ async function jplopsoft_xshSystemOpenPath(ctx,path){
     jplopsoft_decName(n)||''
   );
 
+  if(fmt==='html'){
+    child=await jplopsoft_runBuiltinXsh(
+      'htmlview',
+      [jplopsoft_xshNodePath(n)],
+      ctx,
+      {
+        integrity:'MEDIUM',
+        protection:n.has_motw?'Sandbox+MOTW+WebView':'Sandbox+WebView',
+        imageName:'htmlview.exe'
+      }
+    );
+    return{ok:true,pid:child.pid,htmlView:true,path:jplopsoft_xshNodePath(n)};
+  }
+
   if(fmt==='audio'){
     child=await jplopsoft_runBuiltinXsh(
       'audio_preview',
@@ -29216,5 +29262,5 @@ function jplopsoft_bind(){jplopsoft_el('jplopsoft_unlockBtn').onclick=jplopsoft_
 window.jplopsoft_EXOS_OS={
   ready:true,
   version:'6.4.0-dev-os91',
-  build:'os91-hotfix8-htmlview-alpc-child'
+  build:'os91-hotfix10-htmlview-user32-webview'
 };
