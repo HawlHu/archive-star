@@ -1955,7 +1955,14 @@ function jplopsoft_dwmAttachToWindowLayer(w){
 }
 
 function jplopsoft_rootWindowHost(){
-  return document.body||document.documentElement;
+  /* Hotfix63: USER32 top-level windows belong to the DWM desktop window station,
+     not to the HTML document root. Keeping HWND surfaces inside this bounded
+     layer prevents an XSH window dragged below/right of the desktop from
+     enlarging document.scrollHeight/scrollWidth and creating browser scrollbars. */
+  return jplopsoft_dwmWindowLayer()||
+    jplopsoft_el('jplopsoft_app')||
+    (document.querySelector?document.querySelector('.jplopsoft_app'):null)||
+    document.body||document.documentElement;
 }
 
 
@@ -13531,5 +13538,5 @@ function jplopsoft_bind(){
 window.jplopsoft_EXOS_OS={
   ready:true,
   version:'6.4.0-dev-os91',
-  build:'os91-hotfix53-2dgame-sdk-v5'
+  build:'os91-hotfix63-window-root-boot-splash'
 };
