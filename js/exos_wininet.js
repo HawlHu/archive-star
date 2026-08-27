@@ -1,4 +1,4 @@
-/* ExOS wininet.dll emulation
+/* ExOS wininet.xdl emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_WININET_V1
  * Client: V8-only browsers
@@ -94,7 +94,7 @@ async function dispatch(ctx,method,args){
   if(method==='InternetReadFile'){r=get(ctx,args[0]);if(!r.response)invalid('HTTP response is not available.');var n=Math.max(1,Math.min(1024*1024,parseInt(args[1],10)||65536)),p=r.response.position,end=Math.min(r.response.data.length,p+n),data=r.response.data.slice(p,end);r.response.position=end;return{data:data,bytesRead:data.length,eof:end>=r.response.data.length};}
   if(method==='InternetReadText'){r=get(ctx,args[0]);if(!r.response)invalid('HTTP response is not available.');var remaining=r.response.data.slice(r.response.position),enc=String(args[1]||'utf-8');r.response.position=r.response.data.length;try{return new TextDecoder(enc).decode(remaining);}catch(e){return new TextDecoder('utf-8').decode(remaining);}}
   if(method==='InternetCloseHandle')return close(ctx,args[0]);
-  unsupported('Unsupported wininet.dll API: '+method);
+  unsupported('Unsupported wininet.xdl API: '+method);
 }
 function cleanup(ctx){if(ctx)ctx.wininet=null;return true;}
 global.jplopsoft_WININET=API;global.jplopsoft_wininetDispatch=dispatch;global.jplopsoft_wininetCleanup=cleanup;

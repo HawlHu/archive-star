@@ -1,4 +1,4 @@
-/* ExOS riched20.dll / msftedit.dll emulation
+/* ExOS riched20.xdl / msftedit.xdl emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_RICHEDIT_V4
  */

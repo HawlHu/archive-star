@@ -1,4 +1,4 @@
-/* ExOS dwmapi.dll emulation
+/* ExOS dwmapi.xdl emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_DWMAPI_V1
  */
@@ -15,7 +15,7 @@ function dispatch(ctx,method,args){args=args||[];var h=parseInt(args[0],10)||0,w
  if(method==='DwmExtendFrameIntoClientArea'){opt=args[1]||{};w.style.setProperty('--exos-dwm-frame-top',Math.max(0,parseInt(opt.top,10)||0)+'px');w.style.setProperty('--exos-dwm-frame-right',Math.max(0,parseInt(opt.right,10)||0)+'px');w.style.setProperty('--exos-dwm-frame-bottom',Math.max(0,parseInt(opt.bottom,10)||0)+'px');w.style.setProperty('--exos-dwm-frame-left',Math.max(0,parseInt(opt.left,10)||0)+'px');return true;}
  if(method==='DwmSetWindowAttribute'){var attr=String(args[1]||''),v=args[2];if(attr==='DWMWA_USE_IMMERSIVE_DARK_MODE'){w.setAttribute('data-exos-dwm-dark',v?'1':'0');return true;}if(attr==='DWMWA_WINDOW_CORNER_PREFERENCE'){w.style.borderRadius=v==='round'||Number(v)===2?'8px':v==='roundsmall'||Number(v)===3?'4px':'0';w.style.overflow='hidden';return true;}if(attr==='DWMWA_SYSTEMBACKDROP_TYPE'){if(v==='mica'||v===2){w.style.backdropFilter='blur(18px) saturate(1.15)';w.style.webkitBackdropFilter='blur(18px) saturate(1.15)';w.style.backgroundColor='rgba(246,246,246,.78)';}return true;}return false;}
  if(method==='DwmFlush')return new Promise(function(resolve){requestAnimationFrame(function(){resolve(true);});});
- throw global.jplopsoft_xshError(global.jplopsoft_STATUS_NOT_SUPPORTED,'Unsupported dwmapi.dll API: '+method);
+ throw global.jplopsoft_xshError(global.jplopsoft_STATUS_NOT_SUPPORTED,'Unsupported dwmapi.xdl API: '+method);
 }
 global.jplopsoft_DWMAPI=API;global.jplopsoft_dwmapiDispatch=dispatch;
 })(window);

@@ -1,4 +1,4 @@
-/* ExOS comdlg32.dll emulation
+/* ExOS comdlg32.xdl emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_COMDLG32_V1
  * Client: V8-only browsers
@@ -314,7 +314,7 @@ function wildcardRegex(pat){
 function matchPattern(name,pattern){var p=String(pattern||'*.*').split(';'),i;for(i=0;i<p.length;i++){try{if(wildcardRegex(p[i].trim()).test(String(name||'')))return true;}catch(ignore){}}return false;}
 function formatSize(n){n=Number(n)||0;if(n<1024)return n+' B';if(n<1024*1024)return(n/1024).toFixed(n<10240?1:0)+' KB';if(n<1024*1024*1024)return(n/1024/1024).toFixed(1)+' MB';return(n/1024/1024/1024).toFixed(1)+' GB';}
 async function shellInfo(ctx,path){
-  if(typeof global.jplopsoft_shell32Dispatch!=='function')unsupported('shell32.dll is required by common file dialogs.');
+  if(typeof global.jplopsoft_shell32Dispatch!=='function')unsupported('shell32.xdl is required by common file dialogs.');
   return await global.jplopsoft_shell32Dispatch(ctx,'SHGetFileInfo',[path]);
 }
 function resolveNode(ctx,path){return typeof global.jplopsoft_xshResolveC==='function'?global.jplopsoft_xshResolveC(ctx,normalizePath(path),false):null;}
@@ -350,7 +350,7 @@ async function fileDialog(ctx,save,opt){
           var nameCell=document.createElement('div');nameCell.className='exos-comdlg-namecell';var icon=document.createElement('span');icon.className='exos-comdlg-icon';var text=document.createElement('span');text.textContent=entry.name;nameCell.appendChild(icon);nameCell.appendChild(text);
           var type=document.createElement('div');type.textContent=entry.directory?'檔案資料夾':'';var size=document.createElement('div');size.textContent=entry.directory?'':formatSize(entry.size);
           row.appendChild(nameCell);row.appendChild(type);row.appendChild(size);list.appendChild(row);
-          shellInfo(ctx,entry.path).then(function(info){type.textContent=info.typeName||type.textContent;if(info.icon&&typeof global.jplopsoft_shareResApplyIcon==='function'){try{global.jplopsoft_shareResApplyIcon(icon,info.icon,18,'shell32.dll');}catch(ignore){}}}).catch(function(){});
+          shellInfo(ctx,entry.path).then(function(info){type.textContent=info.typeName||type.textContent;if(info.icon&&typeof global.jplopsoft_shareResApplyIcon==='function'){try{global.jplopsoft_shareResApplyIcon(icon,info.icon,18,'shell32.xdl');}catch(ignore){}}}).catch(function(){});
           row.onclick=function(e){selectEntry(entry,row,!!(e.ctrlKey||e.metaKey));};
           row.ondblclick=function(){if(entry.directory)navigate(entry.path,true);else{selectEntry(entry,row,false);if(!save)accept();}};
         })(currentEntries[i]);
@@ -402,7 +402,7 @@ async function chooseColor(ctx,opt){
   });
 }
 async function fontCatalog(ctx){
-  if(typeof global.jplopsoft_gdi32Dispatch!=='function')unsupported('gdi32.dll is required by ChooseFont.');
+  if(typeof global.jplopsoft_gdi32Dispatch!=='function')unsupported('gdi32.xdl is required by ChooseFont.');
   return await global.jplopsoft_gdi32Dispatch(ctx,'EnumFontFamiliesEx',[{}]);
 }
 async function chooseFont(ctx,opt){
@@ -465,7 +465,7 @@ async function dispatch(ctx,method,args){
     if(method==='ReplaceText'||method==='ReplaceTextW'||method==='ReplaceTextA')return modelessFindReplace(ctx,true,args[0]);
     if(method==='DestroyDialog')return destroyModeless(ctx,args[0],true);
     if(method==='GetDialogState')return getModelessState(ctx,args[0]);
-    throw exerr(status('NOT_SUPPORTED',0xC00000BB),'Unsupported comdlg32.dll API: '+method);
+    throw exerr(status('NOT_SUPPORTED',0xC00000BB),'Unsupported comdlg32.xdl API: '+method);
   }catch(e){state(ctx).lastError=Number(e&&e.ntstatus)||1;throw e;}
 }
 

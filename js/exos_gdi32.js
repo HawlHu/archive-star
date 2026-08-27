@@ -1,4 +1,4 @@
-/* ExOS gdi32.dll emulation
+/* ExOS gdi32.xdl emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_GDI32_V1
  * Client: V8-only browsers
@@ -578,7 +578,7 @@ function dispatch(ctx,method,args){
   if(method==='SetPixel'){dc=object(ctx,args[0],TYPE.DC);var sp=lpToDp(dc,Number(args[1])||0,Number(args[2])||0),ss=dcSize(dc),cc=ensureCanvas2d(dcCanvas(dc));cc.save();cc.setTransform(1,0,0,1,0,0);cc.fillStyle=cssColor(args[3],'#000');cc.fillRect(Math.round(sp.x*ss.dpr),Math.round(sp.y*ss.dpr),1,1);cc.restore();return args[3];}
   if(method==='GetDeviceCaps'){dc=object(ctx,args[0],TYPE.DC);idx=intv(args[1]);var ds=dcSize(dc);if(idx===8)return ds.width;if(idx===10)return ds.height;if(idx===88)return dc.dpiX||96;if(idx===90)return dc.dpiY||96;if(idx===12)return 32;if(idx===14)return 1;if(idx===2)return dc.kind==='printer'?2:1;if(idx===104)return ds.width;if(idx===106)return ds.height;if(idx===110)return ds.rawWidth;if(idx===111)return ds.rawHeight;if(idx===112||idx===113)return 0;return 0;}
   if(method==='GdiFlush')return new Promise(function(resolve){if(typeof requestAnimationFrame==='function')requestAnimationFrame(function(){resolve(true);});else setTimeout(function(){resolve(true);},0);});
-  throw unsupported('Unsupported gdi32.dll API: '+method);
+  throw unsupported('Unsupported gdi32.xdl API: '+method);
 }
 
 global.jplopsoft_GDI32=API;

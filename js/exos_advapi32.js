@@ -1,7 +1,7 @@
-/* ExOS advapi32.dll emulation
+/* ExOS advapi32.xdl emulation
  * File: exos_advapi32.js
- * Version: 6.4.0-dev-os86
- * Model: EXOS_ADVAPI32_V2
+ * Version: 6.4.0-dev-os91-hotfix69
+ * Model: EXOS_ADVAPI32_V3
  * Client: V8-only browsers
  *
  * Win32-style Advanced API facade for ExOS XSH:
@@ -18,19 +18,21 @@
 'use strict';
 
 var ADV={
-  version:'6.4.0-dev-os86',
-  model:'EXOS_ADVAPI32_V2',
+  version:'6.4.0-dev-os91-hotfix69',
+  model:'EXOS_ADVAPI32_V3',
   ready:true,
   compatibility:'EXOS_ADVAPI32_SEMANTIC_V3'
 };
 
 var ROOTS={
-  HKEY_CLASSES_ROOT:{hive:'HKLM',key:'classes'},
-  HKCR:{hive:'HKLM',key:'classes'},
+  HKEY_CLASSES_ROOT:{hive:'HKLM_SOFTWARE',key:'classes'},
+  HKCR:{hive:'HKLM_SOFTWARE',key:'classes'},
   HKEY_CURRENT_USER:{hive:'HKCU',key:''},
   HKCU:{hive:'HKCU',key:''},
-  HKEY_LOCAL_MACHINE:{hive:'HKLM',key:''},
-  HKLM:{hive:'HKLM',key:''}
+  HKEY_LOCAL_MACHINE:{machineRoot:true},
+  HKLM:{machineRoot:true},
+  HKEY_USERS:{usersRoot:true},
+  HKU:{usersRoot:true}
 };
 
 var TOKEN_INFO={
@@ -91,130 +93,53 @@ function desiredText(v){
 }
 function rootInfo(h){
   var s=String(h||'').toUpperCase(),r=ROOTS[s];
-  return r?{root:true,hive:r.hive,key:r.key,predefined:s,machineRoot:(s==='HKEY_LOCAL_MACHINE'||s==='HKLM')}:null;
+  return r?{root:true,hive:r.hive||'',key:r.key||'',predefined:s,machineRoot:!!r.machineRoot,usersRoot:!!r.usersRoot}:null;
 }
-function machineViewKey(base,subKey){
-  var k=normalizeKey(subKey);
-  if(!base||!base.machineRoot)return joinKey(base&&base.key||'',k);
-  if(k==='')return null;
-  if(k==='software')return'';
-  if(k.indexOf('software\\')===0)return k.substring(9);
-  fail(status('OBJECT_NAME_NOT_FOUND',0xC0000034),'ExOS exposes HKEY_LOCAL_MACHINE\\Software only.');
+function currentSid(ctx){return String(ctx&&ctx.process&&ctx.process.sid||'');}
+function currentUser(ctx){return String(ctx&&ctx.process&&ctx.process.username||'');}
+function machineHiveView(subKey){
+  var k=normalizeKey(subKey),p,first,rest,map={system:'HKLM_SYSTEM',software:'HKLM_SOFTWARE',sam:'HKLM_SAM',security:'HKLM_SECURITY'};
+  if(k==='')return{virtualRoot:true,hive:'',key:''};p=k.indexOf('\\');first=p<0?k:k.substring(0,p);rest=p<0?'':k.substring(p+1);if(!map[first])fail(status('OBJECT_NAME_NOT_FOUND',0xC0000034),'Registry machine hive was not found: '+first);return{hive:map[first],key:rest};
 }
-function isMachineRootHandle(h){var r=rootInfo(h);return!!(r&&r.machineRoot);}
+function usersHiveView(ctx,subKey){
+  var k=normalizeKey(subKey),p,first,rest,sid=currentSid(ctx).toLowerCase(),user=currentUser(ctx).toLowerCase();if(k==='')return{virtualRoot:true,hive:'',key:''};p=k.indexOf('\\');first=p<0?k:k.substring(0,p);rest=p<0?'':k.substring(p+1);if(first==='.default')return{hive:'HKU_DEFAULT',key:rest};if((sid&&first===sid)||(user&&first===user)||first==='currentuser')return{hive:'HKCU',key:rest};fail(status('OBJECT_NAME_NOT_FOUND',0xC0000034),'Registry user hive is not mounted: '+first);
+}
+function resolveView(ctx,base,subKey){
+  if(base.machineRoot)return machineHiveView(subKey);if(base.usersRoot)return usersHiveView(ctx,subKey);return{hive:base.hive,key:joinKey(base.key,subKey)};
+}
+function isVirtualRootHandle(h){var r=rootInfo(h);return!!(r&&(r.machineRoot||r.usersRoot));}
 function regInfo(ctx,h){
-  var r=rootInfo(h),st=ensure(ctx),rec;
-  if(r)return r;
-  rec=st.registryHandles[String(h||'')];
-  if(!rec)fail(status('INVALID_HANDLE',0xC0000008),'Invalid Registry HKEY.');
-  return rec;
+  var r=rootInfo(h),st=ensure(ctx),rec;if(r)return r;rec=st.registryHandles[String(h||'')];if(!rec)fail(status('INVALID_HANDLE',0xC0000008),'Invalid Registry HKEY.');return rec;
 }
 async function ensureServerHandle(ctx,h,write){
-  var info=regInfo(ctx,h),st=ensure(ctx),out,desired,cached;
+  var info=regInfo(ctx,h),st=ensure(ctx),out,desired,cached;if(info.machineRoot||info.usersRoot)fail(status('INVALID_HANDLE',0xC0000008),'A virtual Registry root does not have a server hive handle.');
   if(info.root){cached=st.registryHandles['@root:'+String(h).toUpperCase()];if(cached){if(write&&!cached.write){try{await api('reg_close_key','POST',{handle:cached.serverHandle});}catch(ignoreRootClose){}delete st.registryHandles['@root:'+String(h).toUpperCase()];}else return cached;}}
-  if(info.serverHandle){
-    if(write&&!info.write)fail(status('ACCESS_DENIED',0xC0000022),'Registry HKEY is not writable.');
-    return info;
-  }
-  desired=write?'KEY_WRITE':'KEY_READ';
-  out=await api('reg_open_key','POST',{hive:info.hive,key:info.key,desired_access:desired});
-  info={root:!!info.root,hive:String(out.hive||info.hive),key:normalizeKey(out.key||info.key),serverHandle:String(out.handle||''),write:write,desired:desired,predefined:info.predefined||''};
-  if(info.root){
-    st.registryHandles['@root:'+String(h).toUpperCase()]=info;
-  }
-  return info;
+  if(info.serverHandle){if(write&&!info.write)fail(status('ACCESS_DENIED',0xC0000022),'Registry HKEY is not writable.');return info;}
+  desired=write?'KEY_WRITE':'KEY_READ';out=await api('reg_open_key','POST',{hive:info.hive,key:info.key,desired_access:desired});info={root:!!info.root,hive:String(out.hive||info.hive),key:normalizeKey(out.key||info.key),serverHandle:String(out.handle||''),write:write,desired:desired,predefined:info.predefined||''};if(info.root)st.registryHandles['@root:'+String(h).toUpperCase()]=info;return info;
 }
-function trackRegistry(ctx,out,write){
-  var st=ensure(ctx),h=String(out.handle||'');
-  if(!h)fail(status('INVALID_HANDLE',0xC0000008),'Registry server returned no handle.');
-  st.registryHandles[h]={hive:String(out.hive||''),key:normalizeKey(out.key||''),serverHandle:h,write:!!write,desired:String(out.desired_access||''),created:!!out.created};
-  return h;
-}
+function trackRegistry(ctx,out,write){var st=ensure(ctx),h=String(out.handle||'');if(!h)fail(status('INVALID_HANDLE',0xC0000008),'Registry server returned no handle.');st.registryHandles[h]={hive:String(out.hive||''),key:normalizeKey(out.key||''),serverHandle:h,write:!!write,desired:String(out.desired_access||''),created:!!out.created};return h;}
 async function regOpen(ctx,hKey,subKey,samDesired,create){
-  var base=regInfo(ctx,hKey),key=base.machineRoot?machineViewKey(base,subKey):joinKey(base.key,subKey),desired=desiredText(samDesired),write=create||desired!=='KEY_READ',out,h;
-  if(base.machineRoot&&key===null){
-    if(write)fail(status('ACCESS_DENIED',0xC0000022),'HKEY_LOCAL_MACHINE root is read-only; create keys below Software.');
-    return create?{hKey:'HKEY_LOCAL_MACHINE',disposition:'REG_OPENED_EXISTING_KEY',created:false}:'HKEY_LOCAL_MACHINE';
-  }
-  if(create&&desired==='KEY_READ')desired='KEY_WRITE';
-  out=await api('reg_open_key','POST',{hive:base.hive,key:key,desired_access:desired});
-  h=trackRegistry(ctx,out,write);
-  return create?{hKey:h,disposition:out.created?'REG_CREATED_NEW_KEY':'REG_OPENED_EXISTING_KEY',created:!!out.created}:h;
+  var base=regInfo(ctx,hKey),view=resolveView(ctx,base,subKey),desired=desiredText(samDesired),write=create||desired!=='KEY_READ',out,h;if(view.virtualRoot){if(write)fail(status('ACCESS_DENIED',0xC0000022),'Predefined Registry root is read-only.');return create?{hKey:hKey,disposition:'REG_OPENED_EXISTING_KEY',created:false}:hKey;}if(create&&desired==='KEY_READ')desired='KEY_WRITE';out=await api('reg_open_key','POST',{hive:view.hive,key:view.key,desired_access:desired});h=trackRegistry(ctx,out,write);return create?{hKey:h,disposition:out.created?'REG_CREATED_NEW_KEY':'REG_OPENED_EXISTING_KEY',created:!!out.created}:h;
 }
-async function regClose(ctx,hKey){
-  var st=ensure(ctx),r=rootInfo(hKey),h=String(hKey||''),rec;
-  if(r)return true;
-  rec=st.registryHandles[h];
-  if(!rec)return false;
-  delete st.registryHandles[h];
-  if(rec.serverHandle){try{await api('reg_close_key','POST',{handle:rec.serverHandle});}catch(ignore){}}
-  return true;
-}
+async function regClose(ctx,hKey){var st=ensure(ctx),r=rootInfo(hKey),h=String(hKey||''),rec;if(r)return true;rec=st.registryHandles[h];if(!rec)return false;delete st.registryHandles[h];if(rec.serverHandle){try{await api('reg_close_key','POST',{handle:rec.serverHandle});}catch(ignore){}}return true;}
 function normalizeRegData(type,data){
-  var t=String(type||'REG_SZ').toUpperCase();
-  if(t==='4'||t==='REG_DWORD')return{type:'REG_DWORD',data:Number(data)>>>0};
-  if(t==='11'||t==='REG_QWORD')return{type:'REG_QWORD',data:String(data===undefined||data===null?'0':data)};
-  if(t==='3'||t==='REG_BINARY'){
-    if(Array.isArray(data)||ArrayBuffer.isView(data)){
-      var a=Array.prototype.slice.call(data),s='',i;for(i=0;i<a.length;i++)s+=('0'+((Number(a[i])||0)&255).toString(16)).slice(-2);return{type:'REG_BINARY',data:s.toUpperCase()};
-    }
-    return{type:'REG_BINARY',data:String(data||'').replace(/[^0-9a-f]/gi,'').toUpperCase()};
-  }
-  if(t==='7'||t==='REG_MULTI_SZ')return{type:'REG_MULTI_SZ',data:Array.isArray(data)?data.map(String).join('\u0000'):String(data||'')};
-  if(t==='2'||t==='REG_EXPAND_SZ')return{type:'REG_EXPAND_SZ',data:String(data||'')};
-  return{type:'REG_SZ',data:String(data===undefined||data===null?'':data)};
+  var t=String(type||'REG_SZ').toUpperCase();if(t==='4'||t==='REG_DWORD')return{type:'REG_DWORD',data:Number(data)>>>0};if(t==='11'||t==='REG_QWORD')return{type:'REG_QWORD',data:String(data===undefined||data===null?'0':data)};if(t==='3'||t==='REG_BINARY'){if(Array.isArray(data)||ArrayBuffer.isView(data)){var a=Array.prototype.slice.call(data),s='',i;for(i=0;i<a.length;i++)s+=('0'+((Number(a[i])||0)&255).toString(16)).slice(-2);return{type:'REG_BINARY',data:s.toUpperCase()};}return{type:'REG_BINARY',data:String(data||'').replace(/[^0-9a-f]/gi,'').toUpperCase()};}if(t==='7'||t==='REG_MULTI_SZ')return{type:'REG_MULTI_SZ',data:Array.isArray(data)?data.map(String).join('\u0000'):String(data||'')};if(t==='2'||t==='REG_EXPAND_SZ')return{type:'REG_EXPAND_SZ',data:String(data||'')};return{type:'REG_SZ',data:String(data===undefined||data===null?'':data)};
 }
-function expandRegData(rec){
-  rec=rec||{};var t=String(rec.type||'REG_SZ').toUpperCase(),d=rec.data;
-  if(t==='REG_MULTI_SZ')d=String(d||'').split('\u0000');
-  if(t==='REG_BINARY'){
-    var s=String(d||'').replace(/[^0-9a-f]/gi,''),a=[],i;for(i=0;i+1<s.length;i+=2)a.push(parseInt(s.substr(i,2),16));d=a;
-  }
-  return{name:String(rec.name||''),type:t,data:d,updatedAt:String(rec.updated_at||'')};
-}
-async function RegQueryValueEx(ctx,hKey,name){
-  if(isMachineRootHandle(hKey))fail(status('OBJECT_NAME_NOT_FOUND',0xC0000034),'HKEY_LOCAL_MACHINE root has no direct values in ExOS.');
-  var info=await ensureServerHandle(ctx,hKey,false),out=await api('reg_get_value','POST',{handle:info.serverHandle,name:String(name||'')});return expandRegData(out);
-}
-async function RegSetValueEx(ctx,hKey,name,type,data){
-  if(isMachineRootHandle(hKey))fail(status('ACCESS_DENIED',0xC0000022),'HKEY_LOCAL_MACHINE root is read-only; set values below Software.');
-  var info=await ensureServerHandle(ctx,hKey,true),v=normalizeRegData(type,data);await api('reg_set_value','POST',{handle:info.serverHandle,name:String(name||''),type:v.type,data:v.data});return true;
-}
-async function RegEnumKeyEx(ctx,hKey,index){
-  var i=Number(index)||0;if(isMachineRootHandle(hKey))return i===0?{name:'Software',class:'',last_write_time:''}:null;
-  var info=await ensureServerHandle(ctx,hKey,false),out=await api('reg_enum_keys','POST',{handle:info.serverHandle}),a=out.keys||[];return i>=0&&i<a.length?a[i]:null;
-}
-async function RegEnumValue(ctx,hKey,index){
-  if(isMachineRootHandle(hKey))return null;
-  var info=await ensureServerHandle(ctx,hKey,false),out=await api('reg_enum_values','POST',{handle:info.serverHandle}),a=out.values||[],i=Number(index)||0;return i>=0&&i<a.length?expandRegData(a[i]):null;
-}
-async function RegQueryInfoKey(ctx,hKey){
-  if(isMachineRootHandle(hKey))return{subKeyCount:1,valueCount:0,maxSubKeyNameLength:8,maxValueNameLength:0,maxValueDataLength:0,hive:'HKLM',key:'',virtualRoot:true};
-  var info=await ensureServerHandle(ctx,hKey,false),out=await api('reg_query_info_key','POST',{handle:info.serverHandle});return out.info||{};
-}
-async function RegDeleteValue(ctx,hKey,name){if(isMachineRootHandle(hKey))fail(status('ACCESS_DENIED',0xC0000022),'HKEY_LOCAL_MACHINE root is read-only.');var info=await ensureServerHandle(ctx,hKey,true);await api('reg_delete_value_handle','POST',{handle:info.serverHandle,name:String(name||'')});return true;}
-async function RegDeleteKey(ctx,hKey,subKey){
-  if(isMachineRootHandle(hKey)){
-    var k=machineViewKey(regInfo(ctx,hKey),subKey);if(k===null||k==='')fail(status('ACCESS_DENIED',0xC0000022),'The HKLM\\Software virtual root cannot be deleted.');
-    var rootOpen=await api('reg_open_key','POST',{hive:'HKLM',key:'',desired_access:'KEY_WRITE'}),tmp=trackRegistry(ctx,rootOpen,true);try{return await RegDeleteKey(ctx,tmp,k);}finally{await regClose(ctx,tmp);}
-  }
-  var info=await ensureServerHandle(ctx,hKey,true);await api('reg_delete_key_handle','POST',{handle:info.serverHandle,subkey:normalizeKey(subKey)});return true;
-}
+function expandRegData(rec){rec=rec||{};var t=String(rec.type||'REG_SZ').toUpperCase(),d=rec.data;if(t==='REG_MULTI_SZ')d=String(d||'').split('\u0000');if(t==='REG_BINARY'){var s=String(d||'').replace(/[^0-9a-f]/gi,''),a=[],i;for(i=0;i+1<s.length;i+=2)a.push(parseInt(s.substr(i,2),16));d=a;}return{name:String(rec.name||''),type:t,data:d,updatedAt:String(rec.updated_at||'')};}
+function virtualKeys(ctx,hKey){var r=rootInfo(hKey),sid=currentSid(ctx),a=[];if(r&&r.machineRoot)a=['SAM','SECURITY','SOFTWARE','SYSTEM'];else if(r&&r.usersRoot){a=['.DEFAULT'];if(sid)a.push(sid);}return a;}
+async function RegQueryValueEx(ctx,hKey,name){if(isVirtualRootHandle(hKey))fail(status('OBJECT_NAME_NOT_FOUND',0xC0000034),'Predefined Registry root has no direct values.');var info=await ensureServerHandle(ctx,hKey,false),out=await api('reg_get_value','POST',{handle:info.serverHandle,name:String(name||'')});return expandRegData(out);}
+async function RegSetValueEx(ctx,hKey,name,type,data){if(isVirtualRootHandle(hKey))fail(status('ACCESS_DENIED',0xC0000022),'Predefined Registry root is read-only.');var info=await ensureServerHandle(ctx,hKey,true),v=normalizeRegData(type,data);await api('reg_set_value','POST',{handle:info.serverHandle,name:String(name||''),type:v.type,data:v.data});return true;}
+async function RegEnumKeyEx(ctx,hKey,index){var i=Number(index)||0;if(isVirtualRootHandle(hKey)){var a=virtualKeys(ctx,hKey);return i>=0&&i<a.length?{name:a[i],class:'',last_write_time:''}:null;}var info=await ensureServerHandle(ctx,hKey,false),out=await api('reg_enum_keys','POST',{handle:info.serverHandle}),rows=out.keys||[];return i>=0&&i<rows.length?rows[i]:null;}
+async function RegEnumValue(ctx,hKey,index){if(isVirtualRootHandle(hKey))return null;var info=await ensureServerHandle(ctx,hKey,false),out=await api('reg_enum_values','POST',{handle:info.serverHandle}),a=out.values||[],i=Number(index)||0;return i>=0&&i<a.length?expandRegData(a[i]):null;}
+async function RegQueryInfoKey(ctx,hKey){if(isVirtualRootHandle(hKey)){var a=virtualKeys(ctx,hKey),m=0,i;for(i=0;i<a.length;i++)if(a[i].length>m)m=a[i].length;return{subKeyCount:a.length,valueCount:0,maxSubKeyNameLength:m,maxValueNameLength:0,maxValueDataLength:0,hive:String(hKey),key:'',virtualRoot:true};}var info=await ensureServerHandle(ctx,hKey,false),out=await api('reg_query_info_key','POST',{handle:info.serverHandle});return out.info||{};}
+async function RegDeleteValue(ctx,hKey,name){if(isVirtualRootHandle(hKey))fail(status('ACCESS_DENIED',0xC0000022),'Predefined Registry root is read-only.');var info=await ensureServerHandle(ctx,hKey,true);await api('reg_delete_value_handle','POST',{handle:info.serverHandle,name:String(name||'')});return true;}
+async function RegDeleteKey(ctx,hKey,subKey){if(isVirtualRootHandle(hKey))fail(status('ACCESS_DENIED',0xC0000022),'Mounted Registry hive roots cannot be deleted.');var info=await ensureServerHandle(ctx,hKey,true);await api('reg_delete_key_handle','POST',{handle:info.serverHandle,subkey:normalizeKey(subKey)});return true;}
 async function RegFlushKey(ctx,hKey){if(!rootInfo(hKey))await ensureServerHandle(ctx,hKey,false);return true;}
-
-function isRegistryTarget(x){return /^(?:HKEY_|HK(?:CU|LM|CR)\\?)/i.test(String(x||''));}
-function parseRegistryTarget(x){
-  var s=String(x||'').replace(/\//g,'\\'),m=s.match(/^(HKEY_CURRENT_USER|HKCU|HKEY_LOCAL_MACHINE|HKLM|HKEY_CLASSES_ROOT|HKCR)(?:\\(.*))?$/i),r,k;
-  if(!m)return null;r=rootInfo(m[1]);if(!r)return null;
-  if(r.machineRoot){k=machineViewKey(r,m[2]||'');if(k===null)k='';return{hive:'HKLM',key:k,virtualMachineRoot:true};}
-  return{hive:r.hive,key:joinKey(r.key,m[2]||'')};
+function isRegistryTarget(x){return /^(?:HKEY_|HK(?:CU|LM|CR|U)\b)/i.test(String(x||''));}
+function parseRegistryTarget(ctx,x){
+  var s=String(x||'').replace(/\//g,'\\'),m=s.match(/^(HKEY_CURRENT_USER|HKCU|HKEY_LOCAL_MACHINE|HKLM|HKEY_CLASSES_ROOT|HKCR|HKEY_USERS|HKU)(?:\\(.*))?$/i),r,v;if(!m)return null;r=rootInfo(m[1]);if(!r)return null;v=resolveView(ctx,r,m[2]||'');if(v.virtualRoot)return{virtualRoot:true,root:m[1].toUpperCase()};return{hive:v.hive,key:v.key};
 }
-async function registrySecurity(ctx,target,set,sddl){
-  var t=typeof target==='string'&&isRegistryTarget(target)?parseRegistryTarget(target):null,info;
-  if(!t){info=regInfo(ctx,target);t={hive:info.hive,key:info.key};}
-  if(set){var o=await api('reg_security_set_sddl','POST',{hive:t.hive,key:t.key,sddl:String(sddl||'')});return String(o.sddl||'');}
-  var out=await api('reg_security_get_sddl','POST',{hive:t.hive,key:t.key});return{sddl:String(out.sddl||''),descriptor:out.descriptor||{},scope:'HIVE',hive:t.hive,key:t.key};
-}
+async function registrySecurity(ctx,target,set,sddl){var t=typeof target==='string'&&isRegistryTarget(target)?parseRegistryTarget(ctx,target):null,info;if(t&&t.virtualRoot)fail(status('ACCESS_DENIED',0xC0000022),'Security descriptor for the virtual Registry root is not directly writable.');if(!t){info=regInfo(ctx,target);if(info.machineRoot||info.usersRoot)fail(status('ACCESS_DENIED',0xC0000022),'Virtual Registry root security is managed by the Configuration Manager.');t={hive:info.hive,key:info.key};}if(set){var o=await api('reg_security_set_sddl','POST',{hive:t.hive,key:t.key,sddl:String(sddl||'')});return String(o.sddl||'');}var out=await api('reg_security_get_sddl','POST',{hive:t.hive,key:t.key});return{sddl:String(out.sddl||''),descriptor:out.descriptor||{},scope:'HIVE',hive:t.hive,key:t.key};}
 
 function flagsToSddl(flags,audit){flags=Number(flags)||0;var s='';if(flags&1)s+='OI';if(flags&2)s+='CI';if(flags&4)s+='NP';if(flags&8)s+='IO';if(flags&16)s+='ID';if(audit&&flags&64)s+='SA';if(audit&&flags&128)s+='FA';return s;}
 function integritySid(level){level=String(level||'MEDIUM').toUpperCase();return level==='LOW'?'S-1-16-4096':level==='HIGH'?'S-1-16-12288':level==='SYSTEM'?'S-1-16-16384':'S-1-16-8192';}

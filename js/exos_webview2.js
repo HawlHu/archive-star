@@ -1,4 +1,4 @@
-/* ExOS webview2.dll / shdocvw.dll emulation
+/* ExOS webview2.xdl / shdocvw.xdl emulation
  * ABI Version: 6.4.0-dev-os86
  * Build: 6.4.0-dev-os91-hotfix11
  * Model: EXOS_WEBVIEW2_V1

@@ -1,4 +1,4 @@
-/* ExOS uxtheme.dll emulation
+/* ExOS uxtheme.xdl emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_UXTHEME_V1
  * Client: V8-only browsers
@@ -42,7 +42,7 @@ function dispatch(ctx,method,args){args=args||[];installStyle();
  if(method==='SetWindowTheme'){var el=windowEl(args[0]);if(!el)return false;el.setAttribute('data-exos-window-theme',String(args[1]||''));if(args[2])el.setAttribute('data-exos-window-theme-subid',String(args[2]));return true;}
  if(method==='GetThemeColor'){var key=String(args[1]||args[0]||'accent').toLowerCase(),map={accent:'--exos-ui-accent',background:'--exos-ui-bg',surface:'--exos-ui-surface',text:'--exos-ui-text',border:'--exos-ui-border',selected:'--exos-ui-selected',hover:'--exos-ui-hover'};return getComputedStyle(document.documentElement).getPropertyValue(map[key]||'--exos-ui-accent').trim();}
  if(method==='GetThemeMetric'){var m=String(args[0]||'').toLowerCase();if(m==='cornerRadius'.toLowerCase())return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--exos-ui-radius'),10)||2;if(m==='animationDuration'.toLowerCase())return 80;return 0;}
- throw global.jplopsoft_xshError(global.jplopsoft_STATUS_NOT_SUPPORTED,'Unsupported uxtheme.dll API: '+method);
+ throw global.jplopsoft_xshError(global.jplopsoft_STATUS_NOT_SUPPORTED,'Unsupported uxtheme.xdl API: '+method);
 }
 installStyle();applyTheme('windows10');
 global.jplopsoft_UXTHEME=UX;global.jplopsoft_uxthemeDispatch=dispatch;

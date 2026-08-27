@@ -1,4 +1,4 @@
-/* ExOS d3d11.dll emulation
+/* ExOS d3d11.xdl emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_D3D11_V1
  * Client: V8-only browsers
@@ -250,7 +250,7 @@ if(method==='End'){c=contextOf(ctx,args[0]);o=obj(ctx,args[1],T.QUERY);o.end=(gl
 if(method==='GetData'){o=obj(ctx,args[1],T.QUERY);return{ready:!!o.ready,type:String(o.desc.query||o.desc.type||'EVENT'),elapsedMs:o.ready?Math.max(0,o.end-o.start):0,drawCalls:o.ready?Math.max(0,o.endDraws-o.startDraws):0};}
 if(method==='CreateGeometryShader'||method==='CreateComputeShader'||method==='CreateHullShader'||method==='CreateDomainShader'||method==='CreateUnorderedAccessView'||method==='Dispatch'||method==='DispatchIndirect'||method==='FinishCommandList'||method==='ExecuteCommandList')throw unsupported(method+' is not available on the WebGL D3D11 backend; capability probing reports false.');
 
-throw unsupported('Unsupported d3d11.dll API: '+method);
+throw unsupported('Unsupported d3d11.xdl API: '+method);
 }
 
 global.jplopsoft_D3D11=API;

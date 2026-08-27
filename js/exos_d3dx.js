@@ -1,4 +1,4 @@
-/* ExOS d3dx.dll / three32.dll emulation
+/* ExOS d3dx.xdl / three32.xdl emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_D3DX_V1
  * Three.js-backed high-level 3D scene API for XSH applications.
@@ -52,7 +52,7 @@ if(method==='RendererRender'){e=entry(ctx,args[0]);var scene=entry(ctx,args[1]).
 if(method==='RendererClear'){e=entry(ctx,args[0]);e.obj.renderer.clear(args[1]!==false,args[2]!==false,!!args[3]);return true;}
 if(method==='RendererGetSize'){e=entry(ctx,args[0]);var vv=new T.Vector2();e.obj.renderer.getSize(vv);return{width:vv.x,height:vv.y,pixelRatio:e.obj.renderer.getPixelRatio()};}
 if(method==='LoadTexture'){id=key(args[0]);var url=String(args[1]||'');if(url.indexOf('data:image/')!==0||url.length>24*1024*1024)throw param('three32 TextureLoader accepts image data URLs up to 24 MiB only.');var texture=await new Promise(function(resolve,reject){new T.TextureLoader().load(url,resolve,undefined,function(er){reject(param('Texture decode failed: '+String(er&&er.message||er||'')));});});put(ctx,id,'Texture',texture);return id;}
-throw unsupported('Unsupported d3dx.dll API: '+method);
+throw unsupported('Unsupported d3dx.xdl API: '+method);
 }
 global.jplopsoft_D3DX=API;
 global.jplopsoft_d3dxDispatch=dispatch;

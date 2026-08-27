@@ -1,4 +1,4 @@
-/* ExOS ole32.dll semantic emulation
+/* ExOS ole32.xdl semantic emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_OLE32_V3
  * Process-local COM/OLE facade: apartments, GUIDs, task memory, IDataObject,
@@ -89,7 +89,7 @@ async function dispatch(ctx,method,args){
  if(method==='Drop'){if(!DRAG.active)return{effect:'none'};target=DRAG.targets[String(parseInt(args[0],10)||0)];if(!target)return{effect:'none'};var src=DRAG.active.sourceCtx,so=obj(src,DRAG.active.dataObject,'DATAOBJECT'),formats={};for(fmt in so.formats)if(Object.prototype.hasOwnProperty.call(so.formats,fmt))formats[fmt]=clone(so.formats[fmt]);var effect=String(args[1]||DRAG.active.effect||'copy');notify(target.ctx,'OLE:'+target.hwnd,'drop',{sourcePid:DRAG.active.sourcePid,effect:effect,formats:formats,point:args[2]||null});notify(src,'OLE:'+so.handle,'dragcomplete',{effect:effect,targetHwnd:target.hwnd});DRAG.active=null;return{effect:effect};}
  if(method==='CancelDragDrop'){if(DRAG.active){notify(DRAG.active.sourceCtx,'OLE:'+DRAG.active.dataObject,'dragcancel',{});DRAG.active=null;}return true;}
  if(method==='CoCreateInstance')throw exerr(st('NOT_SUPPORTED',0xC00000BB),'Host COM activation is not exposed. Use ExOS facades/data objects/streams.');
- throw exerr(st('NOT_SUPPORTED',0xC00000BB),'Unsupported ole32.dll API: '+method);
+ throw exerr(st('NOT_SUPPORTED',0xC00000BB),'Unsupported ole32.xdl API: '+method);
 }
 function cleanup(ctx){var s=ctx&&ctx.ole32,k;if(DRAG.active&&DRAG.active.sourceCtx===ctx)DRAG.active=null;for(k in DRAG.targets)if(Object.prototype.hasOwnProperty.call(DRAG.targets,k)&&DRAG.targets[k].ctx===ctx)delete DRAG.targets[k];if(s&&s.taskMem){for(k in s.taskMem)if(Object.prototype.hasOwnProperty.call(s.taskMem,k)){try{global.jplopsoft_vmmVirtualFree(ctx.process,Number(k),0,0x8000);}catch(ignoreMem){}}}if(ctx)ctx.ole32=null;return true;}
 global.jplopsoft_OLE32=API;global.jplopsoft_ole32Dispatch=dispatch;global.jplopsoft_ole32Cleanup=cleanup;

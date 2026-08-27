@@ -1,4 +1,4 @@
-/* ExOS zipfldr.dll emulation
+/* ExOS zipfldr.xdl emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_ZIPFLDR_V1
  *
@@ -209,7 +209,7 @@ async function buildArchive(items){
 
 function purpose(ctx){return ctx&&ctx.process&&String(ctx.process.integrity||'').toUpperCase()==='LOW'?'XSH_SANDBOX':'';}
 function resolveArchiveNode(ctx,path){
-  path=normExfs(path);if(ext(path)!=='zip')invalid('zipfldr.dll requires a .zip path.');
+  path=normExfs(path);if(ext(path)!=='zip')invalid('zipfldr.xdl requires a .zip path.');
   var n=global.jplopsoft_xshResolveC(ctx,path,false);if(!n||n.root||n.type!=='file')notfound('ZIP archive not found: '+path);return n;
 }
 async function loadArchive(ctx,path){var n=resolveArchiveNode(ctx,path),a=await global.jplopsoft_xshReadNodeBytes(n,purpose(ctx));return{node:n,path:normExfs(path),archive:parseArchive(a)};}
@@ -322,7 +322,7 @@ async function dispatch(ctx,method,args){
   if(method==='CreateFolder')return await createFolder(ctx,handle(ctx,args[0]),args[1]);
   if(method==='MakeVirtualPath')return makeVirtual(args[0],args[1]||'');
   if(method==='ParseVirtualPath')return parseVirtual(args[0]);
-  unsupported('zipfldr.dll method is not implemented: '+String(method||''));
+  unsupported('zipfldr.xdl method is not implemented: '+String(method||''));
 }
 
 async function listVirtual(ctx,v){var p=parseVirtual(v);if(!p)invalid('Invalid ZIP virtual path.');var r=await loadArchive(ctx,p.archivePath);return listAt(r.archive,p.innerPath).map(function(x){x.virtualPath=makeVirtual(p.archivePath,x.path);x.archivePath=p.archivePath;return x;});}

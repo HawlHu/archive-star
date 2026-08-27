@@ -1,4 +1,4 @@
-/* ExOS ws2_32.dll emulation
+/* ExOS ws2_32.xdl emulation
  * Version: 6.4.0-dev-os86
  * Model: EXOS_WS2_32_V1
  * Browser limitation: WebSocket broker only; raw TCP/UDP sockets are not exposed.
@@ -60,7 +60,7 @@ async function dispatch(ctx,method,args){args=args||[];method=String(method||'')
  if(method==='closesocket'){r=rec(ctx,args[0]);if(r.ws)try{r.ws.close(1000,'closesocket');}catch(ignore){}closeRec(ctx,r,1000,'closesocket');delete s.sockets[String(r.handle)];return 0;}
  if(method==='GetSocketState'||method==='getsockopt'){r=rec(ctx,args[0]);return{handle:r.handle,state:r.state,url:r.url,queued:r.queue.length,bufferedAmount:r.ws?Number(r.ws.bufferedAmount)||0:0,protocol:r.ws?String(r.ws.protocol||''):'',closeCode:r.closeCode,closeReason:r.closeReason};}
  if(method==='select'){var list=Array.isArray(args[0])?args[0]:[],out=[];for(var i=0;i<list.length;i++){try{r=rec(ctx,list[i]);out.push({socket:r.handle,readable:r.queue.length>0||r.closed,writable:r.state==='open'&&(!r.ws||r.ws.bufferedAmount<4*1024*1024),closed:r.closed});}catch(ignore){}}return out;}
- throw exerr(st('NOT_SUPPORTED',0xC00000BB),'Unsupported ws2_32.dll API: '+method);
+ throw exerr(st('NOT_SUPPORTED',0xC00000BB),'Unsupported ws2_32.xdl API: '+method);
 }
 function cleanup(ctx){var s=ctx&&ctx.ws2,k,r;if(!s)return true;for(k in s.sockets)if(s.sockets.hasOwnProperty(k)){r=s.sockets[k];try{if(r.ws)r.ws.close(1001,'process exit');}catch(ignore){}closeRec(ctx,r,1001,'process exit');}ctx.ws2=null;return true;}
 global.jplopsoft_WS2_32=API;global.jplopsoft_ws2Dispatch=dispatch;global.jplopsoft_ws2Cleanup=cleanup;

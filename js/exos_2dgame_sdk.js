@@ -4,7 +4,7 @@
  * Model: EXOS_2DGAME_SDK_V14
  *
  * Host-side accelerated 2D game service for sandboxed XSH applications.
- * XSH access: ExOS.LoadLibrary('game2d.dll')
+ * XSH access: ExOS.LoadLibrary('game2d.xdl')
  *
  * Design goals:
  *  - XSH never receives raw DOM / Canvas / AudioContext objects.

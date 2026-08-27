@@ -1,4 +1,4 @@
-/* ExOS shell32.dll emulation
+/* ExOS shell32.xdl emulation
  * Version: 6.4.0-dev-os91
  * Model: EXOS_SHELL32_V1
  *
@@ -11,7 +11,7 @@
 var PROPERTY_STORES={next:0xD800,items:{}};
 var SHELL={
   version:'6.4.0-dev-os91',
-  build:'6.4.0-dev-os91-hotfix39',
+  build:'6.4.0-dev-os91-hotfix64',
   taskbarPresentationVersion:4,
   model:'EXOS_SHELL32_V1',
   ready:true,
@@ -241,10 +241,10 @@ function shellTaskbarAppDomId(appId){
 function shellTaskbarIconName(icon){
   var value=String(icon||''),r;
   if(typeof jplopsoft_shareResResolve==='function'){
-    r=jplopsoft_shareResResolve(value,'shell32.dll');
+    r=jplopsoft_shareResResolve(value,'shell32.xdl');
     if(r)return r.token;
   }
-  return'res://shell32.dll/file';
+  return'res://shell32.xdl/file';
 }
 function shellTaskbarEnsureApp(appId,icon,label){
   var host=document.getElementById('jplopsoft_taskbarApps'),id=shellTaskbarAppDomId(appId),btn=document.getElementById(id),ic,tx;
@@ -464,6 +464,8 @@ function shellDownloadPath(ctx,path){var n=shellResolve(ctx,String(path||''));if
 async function shellOpenRegisteredPath(ctx,path){
   var n=shellResolve(ctx,String(path||'')),name,ext,child,app,protection,p;if(!n)throw jplopsoft_xshError(jplopsoft_STATUS_OBJECT_NAME_NOT_FOUND,'Path not found.');p=jplopsoft_xshNodePath(n)||String(path||'');if(n.type==='folder'){child=await jplopsoft_runBuiltinXsh('explorer',[p||'C:\\'],ctx);return{ok:true,pid:child.pid,path:p};}name=String(jplopsoft_decName(n)||'');ext=shellExtension(name);
   if(ext==='xsh'){child=await jplopsoft_runXshNode(n.id,'',ctx&&ctx.process?ctx.process:null);return{ok:true,pid:child.pid,imagePath:child.imagePath,executable:true,path:p};}
+  if(ext==='dll')throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_IMAGE_FORMAT,'Windows .dll files are data-only in ExOS and cannot be loaded or executed. Use Shell download.');
+  if(ext==='xdl')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'XDL modules are loaded by XSH through the ExOS loader and are not shell-executable documents.');
   if(ext==='html'||ext==='htm')app='htmlview';else if(['png','jpg','jpeg','jfif','gif','webp','bmp','ico'].indexOf(ext)>=0)app='image_viewer';else if(['mp3','wav','ogg','m4a','aac','flac'].indexOf(ext)>=0)app='audio_preview';else if(['mp4','webm','mov','m4v','avi','mpg','mpeg','h264','264','avc'].indexOf(ext)>=0)app='video_preview';else if(ext==='txt')app='notepad';else if(ext==='csv')app='csvedit';else if(ext==='zip')app='zipfolder';else throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'No registered XSH viewer for this file type.');
   protection=n.has_motw?(app==='htmlview'?'Sandbox+MOTW+WebView':'Sandbox+MOTW'):(app==='htmlview'?'Sandbox+WebView':'Sandbox');child=await jplopsoft_runBuiltinXsh(app,[p],ctx,{integrity:n.has_motw?'LOW':'MEDIUM',protection:protection});return{ok:true,pid:child.pid,path:p,application:app};
 }
@@ -558,6 +560,8 @@ function shellTypeName(path,isDirectory){
   if(ext==='html'||ext==='htm')return'HTML 文件';
   if(ext==='xsh')return'ExOS XSH 應用程式';
   if(ext==='xba')return'ExOS Batch 批次檔';
+  if(ext==='xdl')return'ExOS XDL 動態連結模組';
+  if(ext==='dll')return'Windows DLL（僅可下載）';
   if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='jfif'||ext==='gif'||ext==='webp'||ext==='bmp')return'圖片';
   if(ext==='mp3'||ext==='wav'||ext==='ogg'||ext==='m4a')return'音訊';
   if(ext==='mp4'||ext==='webm'||ext==='mov')return'影片';
@@ -580,12 +584,34 @@ function shellIconName(path,isDirectory){
   if(ext==='csv')return'csv';
   if(ext==='html'||ext==='htm')return'html';
   if(ext==='xsh'||ext==='xba')return'cmd';
+  if(ext==='xdl')return'file';
+  if(ext==='dll')return'file';
   if(ext==='png'||ext==='jpg'||ext==='jpeg'||ext==='jfif'||ext==='gif'||ext==='webp'||ext==='bmp')return'image';
   if(ext==='mp3'||ext==='wav'||ext==='ogg'||ext==='m4a')return'media';
   if(ext==='mp4'||ext==='webm'||ext==='mov')return'media';
   if(ext==='zip')return'zipfolder';
 
   return'file';
+}
+
+/* Hotfix64: NT-style Shell icon pipeline.
+ * USER32 LoadIcon resolves one module resource and is strict.  SHELL32 is the
+ * policy layer: file type/PE icon -> canonical HICON token -> stock fallback.
+ * SHGetFileInfo therefore returns a resolved icon token plus its icon location,
+ * analogous to Win32 SHGFI_ICON + icon-location metadata.
+ */
+function shellResolveIconDescriptor(value,fallbackName){
+  var r=null,f=String(fallbackName||'file');
+  try{if(typeof jplopsoft_shareResResolve==='function')r=jplopsoft_shareResResolve(value,'shell32.xdl');}catch(ignorePrimaryIcon){r=null;}
+  if(!r){try{if(typeof jplopsoft_shareResResolve==='function')r=jplopsoft_shareResResolve(f,'shell32.xdl');}catch(ignoreFallbackIcon){r=null;}}
+  if(!r&&f!=='file'){try{r=jplopsoft_shareResResolve('file','shell32.xdl');}catch(ignoreFileIcon){r=null;}}
+  if(!r)return{icon:'res://shell32.xdl/file',token:'res://shell32.xdl/file',iconName:'file',name:'file',iconModule:'shell32.xdl',dll:'shell32.xdl',iconResourceId:0,id:0,iconLocation:'shell32.xdl,file',location:'shell32.xdl,file'};
+  return{icon:String(r.token||''),token:String(r.token||''),iconName:String(r.name||''),name:String(r.name||''),iconModule:String(r.dll||r.module||'shell32.xdl'),dll:String(r.dll||r.module||'shell32.xdl'),iconResourceId:Number(r.id||r.resourceId)||0,id:Number(r.id||r.resourceId)||0,iconLocation:String(r.location||((r.dll||'shell32.xdl')+',-'+String(r.id||0))),location:String(r.location||'')};
+}
+function shellSetInfoIcon(info,value,fallbackName,source){
+  var r=shellResolveIconDescriptor(value,fallbackName);
+  info.icon=r.icon;info.hIcon=r.icon;info.iconName=r.iconName;info.iconModule=r.iconModule;info.iconResourceId=r.iconResourceId;info.iconLocation=r.iconLocation;info.iconSource=String(source||'stock');
+  return info;
 }
 
 function shellResolve(ctx,path){
@@ -596,7 +622,7 @@ function shellResolve(ctx,path){
   if(spec.kind!=='exfs'){
     throw jplopsoft_xshError(
       jplopsoft_STATUS_NOT_SUPPORTED,
-      'shell32.dll exposes ExFS volumes and active DOS-device/SUBST aliases only.'
+      'shell32.xdl exposes ExFS volumes and active DOS-device/SUBST aliases only.'
     );
   }
 
@@ -627,10 +653,17 @@ function shellAssociation(path){
       null;
   }
 
+  if(ext==='dll'){
+    return{extension:'.dll',registered:false,association:{progId:'Windows.PE.DLL',loadable:false,downloadOnly:true},defaultVerb:'download',downloadOnly:true};
+  }
+  if(ext==='xdl'){
+    return{extension:'.xdl',registered:false,association:{progId:'ExOS.XDL',loadableByXshOnly:true,registrationTool:'regxdl32.xsh',downloadOnly:true},defaultVerb:'download',downloadOnly:true};
+  }
+
   if(ext==='zip'){
     return{
       extension:'.zip',registered:true,
-      association:{progId:'CompressedFolder',handler:'zipfldr.dll',shellNamespace:true},
+      association:{progId:'CompressedFolder',handler:'zipfldr.xdl',shellNamespace:true},
       defaultVerb:'open',shellNamespace:true
     };
   }
@@ -658,11 +691,10 @@ function shellInfo(ctx,path){
   }
   logicalPath=raw.type==='reparse_point'&&targetPath?targetPath:p;
   logicalExt=directory?'':shellExtension(logicalPath);
-  return{
+  var out={
     path:p,name:name,directory:directory,size:size,
     extension:logicalExt,
     typeName:raw.type==='reparse_point'?(directory?'資料夾捷徑':'檔案捷徑'):shellTypeName(p,directory),
-    icon:raw.type==='reparse_point'?'link':shellIconName(p,directory),
     nodeId:raw.root?0:(parseInt(raw.id,10)||0),
     targetNodeId:raw.type==='reparse_point'?(parseInt(node.id,10)||0):0,
     reparsePoint:raw.type==='reparse_point',
@@ -673,16 +705,20 @@ function shellInfo(ctx,path){
     markOfTheWeb:!directory&&!!node.has_motw,blocked:!directory&&!!node.has_motw,zoneId:!directory&&node.has_motw?3:0,
     association:shellAssociation(logicalPath),compressedFolder:!directory&&logicalExt==='zip',shellNamespace:!directory&&logicalExt==='zip'?'zipfldr':''
   };
+  return shellSetInfoIcon(out,raw.type==='reparse_point'?'link':shellIconName(p,directory),raw.type==='reparse_point'?'link':'file',raw.type==='reparse_point'?'shortcut':'stock');
 }
 
 async function shellInfoWithImage(ctx,path){
-  var info=shellInfo(ctx,path),text,image;
+  var info=shellInfo(ctx,path),text,image,r;
   if(info.directory)return info;
   if(info.extension!=='xsh')return info;
   try{
     text=await jplopsoft_xshReadTextFile(ctx,info.path);
     image=jplopsoft_xshParseImage(String(text||''),info.path);
-    if(image&&image.icon)info.icon=String(image.icon);
+    if(image&&image.icon){
+      r=shellResolveIconDescriptor(String(image.icon),'cmd');
+      info.icon=r.icon;info.hIcon=r.icon;info.iconName=r.iconName;info.iconModule=r.iconModule;info.iconResourceId=r.iconResourceId;info.iconLocation=r.iconLocation;info.iconSource='pe-header';
+    }
   }catch(ignoreXshIcon){}
   return info;
 }
@@ -1118,7 +1154,7 @@ async function shellCreateShortcutAt(ctx,source,destinationFolder){
 }
 async function shellCompressToZip(ctx,list){
   if(!list.length)throw jplopsoft_xshError(jplopsoft_STATUS_INVALID_PARAMETER,'ZIP compression requires at least one object.');
-  if(typeof global.jplopsoft_zipfldrDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'zipfldr.dll is unavailable.');
+  if(typeof global.jplopsoft_zipfldrDispatch!=='function')throw jplopsoft_xshError(jplopsoft_STATUS_NOT_SUPPORTED,'zipfldr.xdl is unavailable.');
   var first=shellInfo(ctx,list[0]),parent=shellParentPath(list[0]),base=first.name.replace(/\.zip$/i,'')||'Archive',candidate=shellUniqueDestination(ctx,parent,base+'.zip'),opened=null,i;
   await global.jplopsoft_zipfldrDispatch(ctx,'CreateArchive',[candidate]);
   try{
@@ -2140,7 +2176,9 @@ async function shellDispatch(ctx,method,args){
   if(method==='SHCreateShellItem')return shellInfo(ctx,shellPidlPath(args[0]));
   if(method==='SHCreateItemInKnownFolder'){var base=shellKnownFolder(ctx,args[0]),rel=String(args[1]||'');return shellInfo(ctx,base.replace(/\\+$/,'')+(rel?'\\'+rel.replace(/^\\+/, ''):''));}
   if(method==='CommandLineToArgvW'||method==='CommandLineToArgvA')return shellCommandLineToArgv(args[0]);
-  if(method==='SHGetStockIconInfo'){var si=String(args[0]||'').toUpperCase(),map={SIID_FOLDER:'folder',SIID_DOCNOASSOC:'file',SIID_DRIVEFIXED:'drive',SIID_DELETE:'recycle',SIID_APPLICATION:'app',SIID_WARNING:'warning',SIID_INFO:'info'};return{id:si,icon:map[si]||'file',dll:'shell32.dll'};}
+  if(method==='SHGetStockIconInfo'){var si=String(args[0]||'').toUpperCase(),map={SIID_FOLDER:'folder',SIID_DOCNOASSOC:'file',SIID_DRIVEFIXED:'drive',SIID_DELETE:'recycle',SIID_APPLICATION:'app',SIID_WARNING:'warning',SIID_INFO:'info'},sd=shellResolveIconDescriptor(map[si]||'file','file');return{id:si,icon:sd.icon,hIcon:sd.icon,dll:sd.iconModule,iconLocation:sd.iconLocation,resourceId:sd.iconResourceId,name:sd.iconName};}
+  if(method==='SHGetIconLocation')return shellResolveIconDescriptor(args[0],args[1]||'file');
+  if(method==='SHResolveIcon')return shellResolveIconDescriptor(args[0],args[1]||'file').icon;
   if(method==='SHGetPropertyStoreFromParsingName'){return shellPropertyStore(ctx,args[0]);}
   if(method==='PropertyStoreGetValue'){var pr=shellPropertyRec(ctx,args[0]);return Object.prototype.hasOwnProperty.call(pr.values,String(args[1]))?pr.values[String(args[1])]:null;}
   if(method==='PropertyStoreEnum'){pr=shellPropertyRec(ctx,args[0]);return Object.keys(pr.values).map(function(k){return{key:k,value:pr.values[k]};});}
@@ -2305,7 +2343,7 @@ async function shellDispatch(ctx,method,args){
 
   throw jplopsoft_xshError(
     jplopsoft_STATUS_NOT_SUPPORTED,
-    'shell32.dll method is not implemented: '+String(method||'')
+    'shell32.xdl method is not implemented: '+String(method||'')
   );
 }
 

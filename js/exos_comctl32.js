@@ -423,7 +423,7 @@ function jplopsoft_comctlListIconNode(
     ?String(entry.icon)
     :String(iconName||'file');
 
-  if(typeof jplopsoft_shareResResolve==='function'&&jplopsoft_shareResResolve(iconName,'shell32.dll')){
+  if(typeof jplopsoft_shareResResolve==='function'&&jplopsoft_shareResResolve(iconName,'shell32.xdl')){
     jplopsoft_svgIconApply(n,iconName,parseInt(size,10)||18);
   }else{
     jplopsoft_svgIconApply(n,'file',parseInt(size,10)||18);
