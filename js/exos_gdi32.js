@@ -11,8 +11,8 @@
 
 var API={
   version:'6.4.0-dev-os86',
-  build:'6.4.0-dev-os91-hotfix47',
-  imageFilterVersion:1,
+  build:'6.4.0-dev-os91-hotfix48',
+  imageFilterVersion:2,
   model:'EXOS_GDI32_V1',
   ready:true
 };
@@ -312,6 +312,9 @@ function applyImageFilter(ctx,dc,x,y,w,h,kind,amount){
     else if(k==='invert'){nr=255-r;ng=255-g;nb=255-b;}
     else if(k==='brightness'){nr=Math.max(0,Math.min(255,r+a));ng=Math.max(0,Math.min(255,g+a));nb=Math.max(0,Math.min(255,b+a));}
     else if(k==='contrast'){var f=(259*(a+255))/(255*(259-a));nr=Math.max(0,Math.min(255,f*(r-128)+128));ng=Math.max(0,Math.min(255,f*(g-128)+128));nb=Math.max(0,Math.min(255,f*(b-128)+128));}
+    else if(k==='saturation'){gray=r*.299+g*.587+b*.114;var sf=Math.max(0,Math.min(2,1+a/100));nr=Math.max(0,Math.min(255,gray+(r-gray)*sf));ng=Math.max(0,Math.min(255,gray+(g-gray)*sf));nb=Math.max(0,Math.min(255,gray+(b-gray)*sf));}
+    else if(k==='threshold'){gray=r*.299+g*.587+b*.114;var th=Math.max(0,Math.min(255,isFinite(a)?a:128)),bw=gray>=th?255:0;nr=ng=nb=bw;}
+    else if(k==='posterize'){var levels=Math.max(2,Math.min(32,Math.round(a)||4)),step=255/(levels-1);nr=Math.round(Math.round(r/step)*step);ng=Math.round(Math.round(g/step)*step);nb=Math.round(Math.round(b/step)*step);}
     else throw unsupported('Unsupported image filter: '+kind);
     d[i]=nr;d[i+1]=ng;d[i+2]=nb;
   }
