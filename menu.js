@@ -2,9 +2,10 @@ var 								j_db_menu=[
 												[
 													"2026-02-06",
 													[
-														["teac_synth_id","分享","Google S"],
-														["teac_ex_md3","教學","EXpansio"],
+														["teac_exos","教學","ExOS R13"],
 														["teac_exes","教學","加密標準(EXE"],
+														["teac_ex_md3","教學","EXpansio"],
+														["teac_synth_id","分享","Google S"],
 														["teac_pqc_crypt","教學","PQC 技術研究"],
 														["teac_softether_apache_rproxy","教學","基於 Apach"]														
 													]
@@ -109,9 +110,9 @@ var 								j_db_menu=[
 														["info_leaked_email_account_password","資訊","已遭駭客外洩之郵"],
 														["shar_as_about","分享","歡迎來到歸檔星球"],
 														["shar_chrome_and_bank","資訊","解決CHROME"],
-														["cryp_member","機密","會員名單"],
 														["shar_peple2021","教學","人類統計2021"],
 														["shar_taiwan_boy","教學","台男悲歌2022"],
+														["cryp_member","機密","會員名單"],
 														["teac_after_inserting_many_photos_excel_becomes_very_laggy","技術","Excel插入很"],
 														["teac_online_anime","技術","N網的「神的語言"],
 														["teac_win11_desktop_crashes_right_clicked","技術","Windows "]														
@@ -227,8 +228,8 @@ var 								j_db_menu=[
 												[
 													"2007-06-01",
 													[
-														["cryp_misia_2023_data","機密","Misia Sy"],
 														["shar_dos_cmd_about","分享","DOS指令集介紹"],
+														["cryp_misia_2023_data","機密","Misia Sy"],
 														["teac_sql","分享","常用的 SQL "],
 														["teac_windows_10_vram_leak","教學","Win10的Ex"],
 														["teac_windows_home_user_access","教學","Windows "],
