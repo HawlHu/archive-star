@@ -28,7 +28,7 @@
 		</script>
 	<style>
     body { margin: 0; overflow: hidden; background-color: black; }
-    canvas { display: block; }
+    canvas { display: block; width: 100vw; height: 100vh; }
 
     /* 疊在中央的連結群組 */
     .overlay-link {
@@ -73,7 +73,7 @@
 	  </span>	
   
   <!-- 引入 Three.js CDN -->
-	  <script src="js/three.min.js"></script>
+	  <script src="js/three.min.js" onerror="this.onerror=null;this.src='./three.min.js';"></script>
 	  <script>
 	  
 	  			//判斷是否有硬體加速
@@ -127,123 +127,274 @@
 	  
 				// 建立場景
 					const scene = new THREE.Scene();
-			
+					scene.background = new THREE.Color(0x000000);
+
 				// 建立攝影機
 					const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 					camera.position.z = ((Math.random() * 1) + 2);
-			
+
 				// 建立渲染器
-					const renderer = new THREE.WebGLRenderer({ antialias: true });
+					const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 					renderer.setSize(window.innerWidth, window.innerHeight);
-					
+
 					if(f_test=='' || f_test== null){
-						renderer.setPixelRatio(0.8); // 降低畫面精度，加快速度
+						renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25)); // 日常模式兼顧星空細節與效能
 					}else{
-						renderer.setPixelRatio(f_size); // 降低畫面精度，加快速度
+						renderer.setPixelRatio(f_size); // FPS / 穩定性測試模式由 URL 控制
 					}
-					
+
 					document.body.appendChild(renderer.domElement);
-					
-			
-				// 加在 scene 建立後，讓背景變星空
-					const starTexture = new THREE.TextureLoader().load('images/milky-way-full-stars-space'+Math.round(((Math.random() * 3) + 1),0)+'.jpg');
-					scene.background = starTexture;
-			
+
+				// ==========================================================
+				// 深空星海：純黑背景 + 大量星星 + 閃爍 + 分層視差
+				// ==========================================================
+					const starVertexShader = `
+						attribute float aSize;
+						attribute float aPhase;
+						attribute float aBrightness;
+						varying float vPhase;
+						varying float vBrightness;
+
+						uniform float uTime;
+
+						void main() {
+							vPhase = aPhase;
+							vBrightness = aBrightness;
+							vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+							float pulse = 0.78 + 0.22 * sin(uTime * (0.75 + aPhase * 0.6) + aPhase * 6.28318);
+							gl_PointSize = max(1.0, aSize * pulse * (125.0 / max(1.0, -mvPosition.z)));
+							gl_Position = projectionMatrix * mvPosition;
+						}
+					`;
+
+					const starFragmentShader = `
+						varying float vPhase;
+						varying float vBrightness;
+
+						void main() {
+							vec2 uv = gl_PointCoord - 0.5;
+							float d = length(uv);
+							if (d > 0.5) discard;
+							float core = smoothstep(0.28, 0.0, d);
+							float halo = smoothstep(0.5, 0.0, d) * 0.36;
+							float alpha = (core * 0.95 + halo) * vBrightness;
+							vec3 warmWhite = mix(vec3(0.72, 0.84, 1.0), vec3(1.0), vPhase * 0.18);
+							gl_FragColor = vec4(warmWhite, alpha);
+						}
+					`;
+
+					function createStarField(count, spread, depthMin, depthMax, sizeMin, sizeMax) {
+						const positions = new Float32Array(count * 3);
+						const sizes = new Float32Array(count);
+						const phases = new Float32Array(count);
+						const brightness = new Float32Array(count);
+
+						for (let i = 0; i < count; i++) {
+							const depth = THREE.MathUtils.randFloat(depthMin, depthMax);
+							const spreadAtDepth = spread * (depth / depthMax);
+							positions[i * 3] = THREE.MathUtils.randFloatSpread(spreadAtDepth);
+							positions[i * 3 + 1] = THREE.MathUtils.randFloatSpread(spreadAtDepth * 0.72);
+							positions[i * 3 + 2] = -depth;
+							sizes[i] = THREE.MathUtils.randFloat(sizeMin, sizeMax);
+							phases[i] = Math.random();
+							brightness[i] = THREE.MathUtils.randFloat(0.45, 1.0);
+						}
+
+						const geometry = new THREE.BufferGeometry();
+						geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+						geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
+						geometry.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
+						geometry.setAttribute('aBrightness', new THREE.BufferAttribute(brightness, 1));
+
+						const material = new THREE.ShaderMaterial({
+							vertexShader: starVertexShader,
+							fragmentShader: starFragmentShader,
+							transparent: true,
+							depthWrite: false,
+							blending: THREE.AdditiveBlending,
+							uniforms: { uTime: { value: 0 } }
+						});
+
+						const points = new THREE.Points(geometry, material);
+						return { points, material };
+					}
+
+					// 一般瀏覽模式提高星海密度；FPS 測試模式維持較低數量，避免星海本身蓋過測試結果。
+					const starDensity = (f_test=='' || f_test==null) ? 1 : 0.42;
+					const nearStars = createStarField(Math.round(10000 * starDensity), 560, 6, 34, 0.52, 1.42);
+					const midStars = createStarField(Math.round(18000 * starDensity), 1080, 20, 78, 0.40, 1.12);
+					const farStars = createStarField(Math.round(28000 * starDensity), 2400, 42, 190, 0.28, 0.90);
+					scene.add(nearStars.points, midStars.points, farStars.points);
+
 				// 建立球體幾何 + 材質（星球感覺）
-					//const geometry = new THREE.SphereGeometry(1, 64, 64);
 					if(f_test=='' || f_test== null){
 						var geometry = new THREE.SphereGeometry(1, 32, 32);
 					}else{
 						var geometry = new THREE.SphereGeometry(1, f_d3d, f_d3d);
 					}
-					
+
 					if(f_test=='' || f_test== null){
 						var google_maps_id=Math.round(((Math.random() * 3) + 1),0);
 					}else{
 						var google_maps_id=f_earth;
 					}
-					
-					//修改按紐
-						document.getElementById("test_ben_func").href="./?test=1&d3d=64&size=0.9&earth="+google_maps_id ;
-					
+
+					// 修改按鈕
+					document.getElementById("test_ben_func").href="./?test=1&d3d=64&size=0.9&earth="+google_maps_id;
+
 					const texture = new THREE.TextureLoader().load('images/archive_star_earth_lights_2048'+google_maps_id+'.jpg'); // 地球圖
-					
-					const material = new THREE.MeshStandardMaterial({ map: texture });
-					//const material = new THREE.MeshBasicMaterial({ map: texture });
-					
+
+					const material = new THREE.MeshStandardMaterial({
+						map: texture,
+						roughness: 1.0,
+						metalness: 0.0
+					});
+
 					const sphere = new THREE.Mesh(geometry, material);
-					sphere.rotation.y = Math.random() * Math.PI ;  // 角度
+					sphere.rotation.y = Math.random() * Math.PI;
 					scene.add(sphere);
-			
-				// 燈光
-					const light = new THREE.DirectionalLight(0xffffff, 1);
-					//light.position.set(5, 5, 5).normalize();
-					light.position.set( ((Math.random() * 3) + 2), 
-										((Math.random() * 3) + 2), 
-										((Math.random() * 3) + 2)).normalize();
-					light.intensity = (Math.random() * 10) + 10;
+
+				// 燈光：保持星球明暗層次，同時讓背景維持純黑
+					const light = new THREE.DirectionalLight(0xffffff, 3.2);
+					light.position.set(4, 3, 5).normalize();
 					scene.add(light);
-			
-				// 自動旋轉動畫
+
+					const rimLight = new THREE.DirectionalLight(0x8ab6ff, 1.4);
+					rimLight.position.set(-4, -2, -5).normalize();
+					scene.add(rimLight);
+
+				// ----------------------------------------------------------
+				// 滑鼠視角：游標移動時，鏡頭微幅偏轉，帶來深空艦橋感
+				// ----------------------------------------------------------
+					const pointerTarget = new THREE.Vector2(0, 0);
+					const pointerSmooth = new THREE.Vector2(0, 0);
+					window.addEventListener('pointermove', (event) => {
+						pointerTarget.x = (event.clientX / window.innerWidth) * 2 - 1;
+						pointerTarget.y = (event.clientY / window.innerHeight) * 2 - 1;
+					});
+
+					// ----------------------------------------------------------
+				// 流星：偶爾從遠方高速劃過，淡入後消失
+				// ----------------------------------------------------------
+					const meteors = [];
+					const meteorGroup = new THREE.Group();
+					scene.add(meteorGroup);
+
+					function spawnMeteor() {
+						const start = new THREE.Vector3(
+							THREE.MathUtils.randFloat(12, 28),
+							THREE.MathUtils.randFloat(7, 15),
+							THREE.MathUtils.randFloat(-48, -30)
+						);
+						const velocity = new THREE.Vector3(
+							THREE.MathUtils.randFloat(-0.22, -0.13),
+							THREE.MathUtils.randFloat(-0.14, -0.08),
+							THREE.MathUtils.randFloat(0.02, 0.12)
+						);
+
+						const length = THREE.MathUtils.randFloat(2.0, 4.2);
+						const linePositions = new Float32Array(6);
+						const lineGeometry = new THREE.BufferGeometry();
+						lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+						const lineMaterial = new THREE.LineBasicMaterial({
+							color: 0xffffff,
+							transparent: true,
+							opacity: 0,
+							blending: THREE.AdditiveBlending,
+							depthWrite: false
+						});
+						const line = new THREE.Line(lineGeometry, lineMaterial);
+						meteorGroup.add(line);
+						meteors.push({
+							line,
+							position: start,
+							velocity,
+							length,
+							life: 0,
+							maxLife: THREE.MathUtils.randFloat(650, 1150)
+						});
+					}
+
+					let nextMeteorAt = performance.now() + THREE.MathUtils.randFloat(2800, 6200);
+
+					function updateMeteors(now, deltaMs) {
+						if (now >= nextMeteorAt) {
+							spawnMeteor();
+							nextMeteorAt = now + THREE.MathUtils.randFloat(3200, 7200);
+						}
+
+						for (let i = meteors.length - 1; i >= 0; i--) {
+							const meteor = meteors[i];
+							meteor.life += deltaMs;
+							meteor.position.addScaledVector(meteor.velocity, deltaMs);
+
+							const dir = meteor.velocity.clone().normalize();
+							const tail = meteor.position.clone().sub(dir.multiplyScalar(meteor.length));
+							const pos = meteor.line.geometry.attributes.position.array;
+							pos[0] = meteor.position.x;
+							pos[1] = meteor.position.y;
+							pos[2] = meteor.position.z;
+							pos[3] = tail.x;
+							pos[4] = tail.y;
+							pos[5] = tail.z;
+							meteor.line.geometry.attributes.position.needsUpdate = true;
+
+							const t = meteor.life / meteor.maxLife;
+							meteor.line.material.opacity = Math.sin(Math.min(1, t) * Math.PI) * 0.9;
+
+							if (meteor.life >= meteor.maxLife) {
+								meteorGroup.remove(meteor.line);
+								meteor.line.geometry.dispose();
+								meteor.line.material.dispose();
+								meteors.splice(i, 1);
+							}
+						}
+					}
+
+				// 自動旋轉動畫 + 視角平滑跟隨
 					let lastTime = 0;
 					function animate(time) {
-					  requestAnimationFrame(animate);
-					  const delta = time - lastTime;
-					
-					  if (delta > delta_max) { // 只跑每 ~30 FPS（1000/30 ≈ 33ms）
-						sphere.rotation.y += 0.0005;
-						renderer.render(scene, camera);
-						lastTime = time;
-					  }
+						requestAnimationFrame(animate);
+						const delta = time - lastTime;
+
+						if (delta > delta_max) {
+							const elapsed = time * 0.001;
+
+							// 星球自身緩慢旋轉
+							sphere.rotation.y += 0.0005 * Math.max(1, delta_max / 16.67);
+
+							// 鏡頭輕微俯仰 / 橫搖，避免過度晃動
+							pointerSmooth.lerp(pointerTarget, 0.055);
+							camera.rotation.y = pointerSmooth.x * 0.045;
+							camera.rotation.x = -pointerSmooth.y * 0.025;
+
+							// 分層星海反向位移，強化視差感
+							nearStars.points.rotation.y = pointerSmooth.x * 0.055;
+							nearStars.points.rotation.x = pointerSmooth.y * 0.035;
+							midStars.points.rotation.y = pointerSmooth.x * 0.028;
+							midStars.points.rotation.x = pointerSmooth.y * 0.018;
+							farStars.points.rotation.y = pointerSmooth.x * 0.012;
+							farStars.points.rotation.x = pointerSmooth.y * 0.008;
+
+							nearStars.material.uniforms.uTime.value = elapsed;
+							midStars.material.uniforms.uTime.value = elapsed * 0.82;
+							farStars.material.uniforms.uTime.value = elapsed * 0.65;
+
+
+							updateMeteors(time, delta);
+							renderer.render(scene, camera);
+							lastTime = time;
+						}
 					}
-					animate();
-			
+					animate(0);
+
 				// 畫面自動調整大小
 					window.addEventListener('resize', () => {
-					  camera.aspect = window.innerWidth / window.innerHeight;
-					  camera.updateProjectionMatrix();
-					  renderer.setSize(window.innerWidth, window.innerHeight);
+						camera.aspect = window.innerWidth / window.innerHeight;
+						camera.updateProjectionMatrix();
+						renderer.setSize(window.innerWidth, window.innerHeight);
 					});
-			
-			// =============== 點擊星球 → 跳轉 Google Map ===============
-				  const raycaster = new THREE.Raycaster();
-				  const mouse = new THREE.Vector2();
-				
-				  function getRandomLatLng() {
-					const lat = (Math.random() * 180) - 90;     // -90 ~ 90
-					const lng = (Math.random() * 360) - 180;    // -180 ~ 180
-					return { lat: lat.toFixed(6), lng: lng.toFixed(6) };
-				  }
-				
-				  function onClick(event) {
-					mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-					mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-					raycaster.setFromCamera(mouse, camera);
-					const intersects = raycaster.intersectObject(sphere);
-				
-					if (intersects.length > 0) {
-					  const pos = getRandomLatLng();
-					  
-						  //google_maps_id=1 地圖
-						  //google_maps_id=2 火星
-						  if(f_test=='' || f_test== null){
-							  if(google_maps_id==1){
-									window.location=`https://www.google.com/maps?q=${pos.lat},${pos.lng}`;
-							  }else if(google_maps_id==2){
-									window.location=`https://www.google.com/maps/space/mars/`;
-							  }else if(google_maps_id==3){
-									window.location=`https://www.google.com/maps/space/moon/`;
-							  }else{
-									window.location=`https://www.google.com/maps/space/titan/`;
-							  }
-						  }else{
-						  	  		window.location=`./`;
-						  }
-					}
-				  }
-				
-				  renderer.domElement.addEventListener('click', onClick);
-			
+
 			
 			//------------------------------------------------------------------------------------------------------------------------
 			
