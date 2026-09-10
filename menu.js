@@ -2,8 +2,8 @@ var 								j_db_menu=[
 												[
 													"2026-02-06",
 													[
-														["teac_exos","教學","ExOS R13"],
 														["teac_exes","教學","加密標準(EXE"],
+														["teac_exos","教學","ExOS R13"],
 														["teac_ex_md3","教學","EXpansio"],
 														["teac_synth_id","分享","Google S"],
 														["teac_pqc_crypt","教學","PQC 技術研究"],
@@ -239,12 +239,12 @@ var 								j_db_menu=[
 												[
 													"2006-06-05",
 													[
-														["util_port_scaner","教學","線上Port掃描"],
 														["cryp_virus_file","教學","電腦病毒收集(1"],
-														["util_mats_utility","教學","MATS顯示卡測"],
+														["util_port_scaner","教學","線上Port掃描"],
 														["shar_codeing_one_and_mut","教學","專案開發模式(單"],
 														["teac_check_urls","教學","台灣疑似已被駭客"],
-														["teac_win10_home_to_pro","教學","Windows "]														
+														["teac_win10_home_to_pro","教學","Windows "],
+														["util_mats_utility","教學","MATS顯示卡測"]														
 													]
 												],												
 												[
