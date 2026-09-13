@@ -381,6 +381,9 @@ api.selfTestStateMemory135=function(){var s=new StateMemorySystem135({size:4096,
     (function(window, globalThis, self, global, document, navigator, location, history, screen, performance, crypto, module, exports, require, define, process){
       'use strict';
 /* EXOS GSDK v1.0.125 Browser Bundle */
+/* EXOS GSDK v1.1.36 browser root bridge: historical V70+ layers expect a shared root in this wrapper. */
+var root = (typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
+
 
 /* ========================================================================
  * BEGIN MERGED FILE: jquery.min.js
@@ -10717,7 +10720,7 @@ if (typeof module !== "undefined" && module.exports) {
  * ========================================================================== */
 ;(function(root){
   root = root || (typeof globalThis !== 'undefined' ? globalThis : this);
-  if (!root.__EXOS_ISOLATED__ && root && root.jQuery && root.jQuery.fn) {
+  if (false && root && root.jQuery && root.jQuery.fn) {
 /*!
   * Bootstrap v4.3.1 (https://getbootstrap.com/)
   * Copyright 2011-2019 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
