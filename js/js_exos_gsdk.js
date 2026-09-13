@@ -40273,3 +40273,89 @@ if(typeof module==='object'&&module&&module.exports&&typeof globalThis!=='undefi
   }
 })(typeof globalThis!=='undefined'?globalThis:this);
 /* ================= END v1.1.36 Release Metadata / Certification Overlay ================= */
+
+
+/* ================= EXOS GSDK v1.1.36 canonical State Memory 158 bridge ================= */
+;(function(root){
+  'use strict';
+  var api=root&&root.Game2D_V158;
+  if(!api || !api.StateMemorySystem158) return;
+  var State=api.StateMemorySystem158;
+  var states=Object.create(null);
+  var own=Object.prototype.hasOwnProperty;
+  function fail(code,msg){throw new Error(code+': '+msg);}
+  function get(h){var s=states[String(h)];if(!s)fail('STATUS_NOT_FOUND','StateMemory handle not found: '+h);return s;}
+  function create(opts){var s=new State(opts||{});states[String(s.handle)]=s;return {handle:s.handle,mode:s.mode,size:s.capacity,capability:s.capability()};}
+  function method(name){return function(h){var s=get(h),args=Array.prototype.slice.call(arguments,1);return s[name].apply(s,args);};}
+  api.createStateMemory=create;
+  api.createStateMemory158=create;
+  api.stateMemory={
+    create:create,
+    capability:method('capability'),
+    define:method('define'),
+    get:method('get'),
+    set:method('set'),
+    inspect:method('inspect'),
+    scan:method('scan'),
+    scanStart:method('scanStart'),
+    scanRefine:method('scanRefine'),
+    scanResults:method('scanResults'),
+    scanReset:method('scanReset'),
+    scanSessions:method('scanSessionsList'),
+    scanStatus:method('scanStatus'),
+    clearScan:method('clearScan'),
+    clearAllScans:method('clearAllScans'),
+    scanBytes:method('scanBytes'),
+    readBytes:method('readBytes'),
+    memoryDump:method('memoryDump'),
+    scanRawStart:method('scanRawStart'),
+    scanRawRefine:method('scanRawRefine'),
+    rawRead:method('rawRead'),
+    rawWrite:method('rawWrite'),
+    freezeRaw:method('freezeRaw'),
+    unfreezeRaw:method('unfreezeRaw'),
+    patchRaw:method('patchRaw'),
+    unpatchRaw:method('unpatchRaw'),
+    bookmarkAddress:method('bookmarkAddress'),
+    snapshot:method('snapshot'),
+    restore:method('restore'),
+    diff:method('diff'),
+    watch:method('watch'),
+    unwatch:method('unwatch'),
+    watchList:method('watchList'),
+    freeze:method('freeze'),
+    unfreeze:method('unfreeze'),
+    patch:method('patch'),
+    unpatch:method('unpatch'),
+    step:method('step'),
+    history:function(h,f){return get(h).historyList(f);},
+    writeTrace:function(h,f){return get(h).writeTraceList(f);},
+    bookmark:method('bookmark'),
+    unbookmark:method('unbookmark'),
+    bookmarks:method('bookmarkList'),
+    stats:method('stats'),
+    destroy:function(h){var s=get(h);var ok=s.destroy();delete states[String(h)];return ok;},
+    cheatEngine:method('cheatEngine'),
+    createCheatEngine:method('cheatEngine'),
+    addCheat:method('addCheat'),
+    setCheatEnabled:method('setCheatEnabled'),
+    removeCheat:method('removeCheat'),
+    cheatList:method('cheatList'),
+    cheatSummary:method('cheatSummary'),
+    readMany:method('readMany'),
+    setAllCheatsEnabled:method('setAllCheatsEnabled'),
+    clearAllCheats:method('clearAllCheats'),
+    updateCheat:method('updateCheat'),
+    toggleCheat:method('toggleCheat'),
+    scanPage:method('scanPage'),
+    formatValue:method('formatValue'),
+    watchValue:method('watchValue'),
+    memoryCell:method('memoryCell'),
+    writeMany:method('writeMany'),
+    scanSummary:method('scanSummary')
+  };
+  api.createCheatEngine=function(h){return get(h).cheatEngine();};
+  api.__canonicalStateMemory158=true;
+  api.__canonicalStateMemory158Get=function(h){return get(h);};
+})(typeof globalThis!=='undefined'?globalThis:this);
+/* ================= END canonical State Memory 158 bridge ================= */
