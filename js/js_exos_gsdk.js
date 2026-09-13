@@ -353,6 +353,7 @@ api.selfTestStateMemory135=function(){var s=new StateMemorySystem135({size:4096,
   defineOwn('parent', sandbox);
   defineOwn('top', sandbox);
   defineOwn('opener', null);
+  defineOwn('__EXOS_ISOLATED__', true);
   if(realGlobal && realGlobal.document) defineOwn('document', realGlobal.document);
   if(realGlobal && realGlobal.navigator) defineOwn('navigator', realGlobal.navigator);
   if(realGlobal && realGlobal.location) defineOwn('location', realGlobal.location);
@@ -10716,7 +10717,7 @@ if (typeof module !== "undefined" && module.exports) {
  * ========================================================================== */
 ;(function(root){
   root = root || (typeof globalThis !== 'undefined' ? globalThis : this);
-  if (root && root.jQuery && root.jQuery.fn) {
+  if (!root.__EXOS_ISOLATED__ && root && root.jQuery && root.jQuery.fn) {
 /*!
   * Bootstrap v4.3.1 (https://getbootstrap.com/)
   * Copyright 2011-2019 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
@@ -10727,7 +10728,7 @@ if (typeof module !== "undefined" && module.exports) {
   } else {
     root.bootstrap = root.bootstrap || {};
     root.bootstrap.__exosBundled = true;
-    root.bootstrap.__exosSkipped = 'Bootstrap 4.3.1 bundled but not activated because jQuery is not present.';
+    root.bootstrap.__exosSkipped = root.__EXOS_ISOLATED__ ? 'Bootstrap 4.3.1 skipped in isolated EXOS runtime.' : 'Bootstrap 4.3.1 bundled but not activated because jQuery is not present.';
     root.bootstrap.VERSION = root.bootstrap.VERSION || '4.3.1';
   }
 })(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
