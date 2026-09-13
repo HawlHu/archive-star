@@ -34289,6 +34289,7 @@ global.jplopsoft_2dgameCleanupProcess=cleanupProcess;
     getPublicExportNames:function(){return Object.keys(V125).sort();}
   });
 
+  V125.EventEmitter=EventEmitter;
   V125.File=SafeFile;V125.MultiFile=SafeMultiFile;V125.XHRLoader=SafeXHRLoader;V125.SceneDocument=SafeSceneDocument;V125.SceneStore=SafeSceneStore;V125.LoaderPlugin=SafeLoaderPlugin;V125.TilemapFileParser=SafeTilemapFileParser;V125.TilemapLoader=SafeTilemapLoader;V125.Tilemap=SafeTilemap;V125.TextureAtlas=SafeTextureAtlas;V125.Renderer=SafeRenderer;V125.RendererFactory=SafeRendererFactory;V125.InputPlugin=SafeInputPlugin;V125.InputManager=SafeInputManager;V125.Tween=SafeTween;V125.TweenManager=SafeTweenManager;V125.AnimationState=SafeAnimationState;V125.LineShape=LineShapeV125;V125.ArcShape=ArcShapeV125;V125.CapsuleShape=CapsuleShapeV125;
   V125.auditProfile={edgeCases:true,deterministicAssetPipeline:true,headlessRendererSupported:true,browserRealGPURequired:true};
 
@@ -34379,7 +34380,7 @@ global.jplopsoft_2dgameCleanupProcess=cleanupProcess;
       down(a){return !!this.current.get(a);} pressed(a){return this.down(a)&&!this.prev.get(a);} released(a){return !this.down(a)&&!!this.prev.get(a);}
     }
 
-    class StateMachine extends EventEmitter {
+    class StateMachine extends api.EventEmitter {
       constructor(owner){super();this.owner=owner||null;this.states=new Map();this.current=null;this._transitioning=false;}
       add(name,config){this.states.set(String(name),config||{});return this;}
       has(name){return this.states.has(String(name));}
@@ -34432,7 +34433,7 @@ global.jplopsoft_2dgameCleanupProcess=cleanupProcess;
       get done(){return this.index>=this.frames.length;}
     }
 
-    class DebugConsole extends EventEmitter {
+    class DebugConsole extends api.EventEmitter {
       constructor(){super();this.commands=new Map();this.history=[];this.maxHistory=100;this.register('help',()=>Array.from(this.commands.keys()).sort());this.register('echo',(v)=>v);}
       register(name,fn,help){this.commands.set(String(name),{fn:fn,help:help||''});return this;}
       execute(line,context){var s=String(line||'').trim();if(!s)return null;this.history.push(s);if(this.history.length>this.maxHistory)this.history.shift();var p=s.split(/\s+/),n=p.shift(),c=this.commands.get(n);if(!c)throw new Error('DEBUG_COMMAND_NOT_FOUND:'+n);return c.fn.apply(context||null,p);}
@@ -34561,7 +34562,7 @@ global.jplopsoft_2dgameCleanupProcess=cleanupProcess;
     function uClone(v){try{return JSON.parse(JSON.stringify(v));}catch(_){return v;}}
     function uId(prefix){return String(prefix||'id')+'_'+Date.now().toString(36)+'_'+Math.floor(Math.random()*0xffffff).toString(36);}
 
-    class LifetimeScope extends EventEmitter {
+    class LifetimeScope extends api.EventEmitter {
       constructor(parent){super();this.parent=parent||null;this.alive=true;this.cleanups=[];if(parent&&typeof parent.defer==='function')parent.defer(this.destroy.bind(this));}
       defer(fn){if(typeof fn==='function'){if(!this.alive)fn();else this.cleanups.push(fn);}return this;}
       bind(target,event,fn,options){if(!target||typeof fn!=='function')return this;if(target.on)target.on(event,fn);else if(target.addEventListener)target.addEventListener(event,fn,options);this.defer(function(){if(target.off)target.off(event,fn);else if(target.removeEventListener)target.removeEventListener(event,fn,options);});return this;}
@@ -34570,7 +34571,7 @@ global.jplopsoft_2dgameCleanupProcess=cleanupProcess;
       destroy(){if(!this.alive)return this;this.alive=false;for(var i=this.cleanups.length-1;i>=0;i--){try{this.cleanups[i]();}catch(_){} }this.cleanups.length=0;this.emit('destroy');return this;}
     }
 
-    class AssetBundleManager extends EventEmitter {
+    class AssetBundleManager extends api.EventEmitter {
       constructor(opts){super();opts=opts||{};this.bundles=new Map();this.cache=new Map();this.refs=new Map();this.loaders=Object.assign({},opts.loaders||{});this.concurrency=Math.max(1,opts.concurrency||6);this.active=0;this.queue=[];this.retry=opts.retry==null?2:Math.max(0,opts.retry|0);}
       registerBundle(name,manifest){var n=String(name),m=manifest||{};this.bundles.set(n,{name:n,base:m.base||'',assets:Object.assign({},m.assets||{}),deps:(m.deps||[]).slice(),loaded:false});return this;}
       getBundle(name){return this.bundles.get(String(name))||null;}
@@ -34626,7 +34627,7 @@ global.jplopsoft_2dgameCleanupProcess=cleanupProcess;
       progress(){if(!this.current)return 0;var c=this.clips.get(this.current);return c.duration?uClamp(this.time/c.duration,0,1):0;}
     }
 
-    class AudioBusManager extends EventEmitter {
+    class AudioBusManager extends api.EventEmitter {
       constructor(){super();this.buses=new Map();this.muted=false;this.unlocked=false;this.master=1;this.buses.set('master',{volume:1,muted:false,parent:null,duck:1});}
       create(name,opts){this.buses.set(String(name),Object.assign({volume:1,muted:false,parent:'master',duck:1},opts||{}));return this;}
       volume(name,v){var b=this.buses.get(String(name));if(!b)return 0;if(arguments.length===1)return b.volume;b.volume=uClamp(Number(v)||0,0,1);this.emit('volume',String(name),b.volume);return b.volume;}
