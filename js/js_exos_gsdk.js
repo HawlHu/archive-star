@@ -344,13 +344,15 @@ api.selfTestStateMemory135=function(){var s=new StateMemorySystem135({size:4096,
     'SHA1','sha1','exes','EXES','ex_md3','sack','Sack','twSack'
   ];
   var sandbox = Object.create(realGlobal || null);
-  sandbox.window = sandbox;
-  sandbox.globalThis = sandbox;
-  sandbox.self = sandbox;
-  sandbox.parent = sandbox;
-  sandbox.top = sandbox;
-  sandbox.opener = null;
+  /* Modern browsers expose Window.window as an accessor-only property.
+     Do not assign to an inherited Window property; define isolated aliases as own properties. */
   function defineOwn(name, value){ try { Object.defineProperty(sandbox, name, {value:value, writable:true, configurable:true, enumerable:false}); } catch(_) { try { sandbox[name] = value; } catch(__) {} } }
+  defineOwn('window', sandbox);
+  defineOwn('globalThis', sandbox);
+  defineOwn('self', sandbox);
+  defineOwn('parent', sandbox);
+  defineOwn('top', sandbox);
+  defineOwn('opener', null);
   if(realGlobal && realGlobal.document) defineOwn('document', realGlobal.document);
   if(realGlobal && realGlobal.navigator) defineOwn('navigator', realGlobal.navigator);
   if(realGlobal && realGlobal.location) defineOwn('location', realGlobal.location);
