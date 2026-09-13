@@ -35140,8 +35140,15 @@ global.jplopsoft_2dgameCleanupProcess=cleanupProcess;
     api.foundation3={version:'1.0.130',adds:Object.keys(api.phaserCoverage130),validatedContracts:['Transform2D','Container2D','Sprite2D','Graphics2D','Text2D','Geometry2D','Actions2D','SceneManager2D','CameraEffects2D','InputManager2D','AssetStore2D','AudioBusGraph','RenderTexture2D','FilterGraph2D','Tilemap2D','CommandBus2D','RetroVideoModel']};
     api.foundation3.validatedContracts.push('Curve2D','DataStore2D','AnimationMixer2D','DragDrop2D','Layout2D','expanded Actions2D');
     api.version='1.0.132'; api.apiVersion=132; api.previousVersion='1.0.131'; api.model='EXOS_2DGAME_SDK_GAME_DEVELOPER_UNIVERSAL_DENOMINATOR_V132';
-    api.entryPoints=api.entryPoints||{}; api.entryPoints.parity='runtime/js_exos_gsdk_v1.1.34.js';
-    if(api.vendorIsolation)api.vendorIsolation.version='V130';
+    /* v1.0.129 freezes these metadata objects before the v1.0.130 extension layer runs.
+       Never mutate frozen shared metadata; copy-on-write keeps the earlier compatibility
+       contracts immutable while allowing the newer parity layer to add its own fields. */
+    api.entryPoints=Object.assign({}, api.entryPoints||{});
+    api.entryPoints.parity='runtime/js_exos_gsdk_v1.1.34.js';
+    if(api.vendorIsolation) {
+      api.vendorIsolation=Object.assign({}, api.vendorIsolation);
+      api.vendorIsolation.version='V130';
+    }
     if(api.retromodes&&api.retromodes.gba&&api.retromodes.gba.profile){api.retromodes.gba.profile.spriteLimit=128;}
   })(v127);
   /* EXOS GSDK 1.0.131 — Universal 2D Denominator / Developer Experience Layer
