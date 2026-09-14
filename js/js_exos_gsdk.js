@@ -1,4 +1,7 @@
 /* EXOS GSDK v1.1.46 Browser Bundle — vendor-global isolated; API compatibility surfaces retained internally */
+/* Authoritative release identity: all current/public version metadata must derive from this value. */
+var EXOS_GSDK_AUTHORITATIVE_VERSION = '1.1.46';
+
 /*
  * All bundled legacy/vendor scripts execute inside a private browser-like global
  * object. Their globals ($, jQuery, React, ReactDOM, THREE, bootstrap, CryptoJS,
@@ -40725,11 +40728,22 @@ if(typeof module==='object'&&module&&module.exports&&typeof globalThis!=='undefi
     api.ui.jquery=jq;
   }
 
-  /* Bootstrap is exported as the actual bundled object/namespace. */
+  /* Bootstrap is exported as a lazy namespace facade so CJS/Node loading never requires browser vendors. */
   if(!api.ui.bootstrap){
-    var bs=need('bootstrap');
-    api.ui.bootstrap=bs;
-    try{if(api.ui.bootstrap && api.ui.bootstrap.VERSION===undefined)api.ui.bootstrap.VERSION='4.3.1';}catch(_){ }
+    try{
+      Object.defineProperty(api.ui,'bootstrap',{
+        enumerable:true,
+        configurable:true,
+        get:function(){
+          var bs=need('bootstrap');
+          try{if(bs && bs.VERSION===undefined)bs.VERSION='4.3.1';}catch(_){ }
+          return bs;
+        }
+      });
+    }catch(_){
+      /* Fallback for hosts without defineProperty support on the target object. */
+      api.ui.bootstrap={get:function(){return need('bootstrap');},VERSION:'4.3.1'};
+    }
   }
 
   /* message.js becomes an explicit UI service. */
@@ -40740,27 +40754,35 @@ if(typeof module==='object'&&module&&module.exports&&typeof globalThis!=='undefi
     };
   }
 
-  /* Three.js is a graphics namespace, never a host-global application API. */
+  /* Three.js is a lazy graphics namespace, never a host-global application API. */
   if(!api.graphics.three){
-    api.graphics.three=need('THREE');
+    try{
+      Object.defineProperty(api.graphics,'three',{
+        enumerable:true,
+        configurable:true,
+        get:function(){return need('THREE');}
+      });
+    }catch(_){
+      api.graphics.three={get:function(){return need('THREE');}};
+    }
   }
   api.graphics.threeVersion=api.graphics.threeVersion||'155';
 
-  api.unifiedPublicApiVersion='1.1.46';
+  api.unifiedPublicApiVersion=EXOS_GSDK_AUTHORITATIVE_VERSION;
   api.unifiedPublicApi={
     crypto:['crypto.aes','crypto.base64','crypto.md5','crypto.sha1','crypto.exes','crypto.md3'],
     web:['web.cookie','web.sack'],
     ui:['ui.react','ui.jquery','ui.bootstrap','ui.message'],
     graphics:['graphics.three']
   };
-  api.version='1.1.46';
-  api.sdkVersion='1.1.46';
-  api.releaseVersion='1.1.46';
+  api.version=EXOS_GSDK_AUTHORITATIVE_VERSION;
+  api.sdkVersion=EXOS_GSDK_AUTHORITATIVE_VERSION;
+  api.releaseVersion=EXOS_GSDK_AUTHORITATIVE_VERSION;
   api.apiVersion=158;
   if(root.jplopsoft_EXOS_GSDK_V158){
-    root.jplopsoft_EXOS_GSDK_V158.version='1.1.46';
-    root.jplopsoft_EXOS_GSDK_V158.sdkVersion='1.1.46';
-    root.jplopsoft_EXOS_GSDK_V158.unifiedPublicApiVersion='1.1.46';
+    root.jplopsoft_EXOS_GSDK_V158.version=EXOS_GSDK_AUTHORITATIVE_VERSION;
+    root.jplopsoft_EXOS_GSDK_V158.sdkVersion=EXOS_GSDK_AUTHORITATIVE_VERSION;
+    root.jplopsoft_EXOS_GSDK_V158.unifiedPublicApiVersion=EXOS_GSDK_AUTHORITATIVE_VERSION;
   }
 })(typeof globalThis!=='undefined'?globalThis:this);
 /* ================= END EXOS GSDK v1.1.46 Unified Vendor Public API ================= */
@@ -40801,12 +40823,12 @@ if(typeof module==='object'&&module&&module.exports&&typeof globalThis!=='undefi
   }
 
   /* Unified release identity. */
-  try{ v158.version='1.1.45'; }catch(_){}
-  try{ v158.sdkVersion='1.1.45'; }catch(_){}
+  try{ v158.version=EXOS_GSDK_AUTHORITATIVE_VERSION; }catch(_){}
+  try{ v158.sdkVersion=EXOS_GSDK_AUTHORITATIVE_VERSION; }catch(_){}
   try{
     if(root.jplopsoft_EXOS_GSDK_V158){
-      root.jplopsoft_EXOS_GSDK_V158.version='1.1.45';
-      root.jplopsoft_EXOS_GSDK_V158.sdkVersion='1.1.45';
+      root.jplopsoft_EXOS_GSDK_V158.version=EXOS_GSDK_AUTHORITATIVE_VERSION;
+      root.jplopsoft_EXOS_GSDK_V158.sdkVersion=EXOS_GSDK_AUTHORITATIVE_VERSION;
       root.jplopsoft_EXOS_GSDK_V158.rootExportParity={
         root:Object.keys(root.Game2D||{}).length,
         game2d:Object.keys(v158).length,
@@ -40859,3 +40881,42 @@ if(typeof module==='object'&&module&&module.exports&&typeof globalThis!=='undefi
   }catch(_){ }
 })(typeof globalThis!=='undefined'?globalThis:this);
 /* ================= END EXOS GSDK v1.1.46 Root Export Parity + Vendor QA ================= */
+
+/* ================= EXOS GSDK v1.1.46 Authoritative Release Identity =================
+ * This is the single current release identity used by all public entry points.
+ * Historical compatibility layers may retain their historical labels internally,
+ * but they must never determine the active package version.
+ * ========================================================================== */
+;(function(root){
+  'use strict';
+  var api=root&&root.Game2D_V158;
+  if(!api) return;
+  var v=EXOS_GSDK_AUTHORITATIVE_VERSION;
+  api.version=v;
+  api.sdkVersion=v;
+  api.releaseVersion=v;
+  api.unifiedPublicApiVersion=v;
+  api.apiVersion=158;
+  if(root.jplopsoft_EXOS_GSDK_V158){
+    root.jplopsoft_EXOS_GSDK_V158.version=v;
+    root.jplopsoft_EXOS_GSDK_V158.sdkVersion=v;
+    root.jplopsoft_EXOS_GSDK_V158.unifiedPublicApiVersion=v;
+  }
+  if(typeof module==='object'&&module&&module.exports){
+    module.exports=Object.assign({},api,{
+      default:api,
+      Game2D:api,
+      Game2D_V158:api,
+      version:v,
+      sdkVersion:v,
+      releaseVersion:v,
+      unifiedPublicApiVersion:v,
+      apiVersion:158,
+      apiVersion158:158,
+      compatibilityApiVersion:158,
+      runtimeContract:'EXOS-GSDK-2D-158',
+      releaseMetadata:api.releaseMetadata
+    });
+  }
+})(typeof globalThis!=='undefined'?globalThis:this);
+/* ================= END Authoritative Release Identity ================= */
