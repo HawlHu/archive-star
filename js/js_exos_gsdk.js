@@ -11275,6 +11275,19 @@ function drawCommandWithEffects(r,c,camX,camY){
 }
 function drawCommand(r,c,camX,camY){
   if(!c||typeof c!=='object')return;
+  /* Accept both legacy PresentFrame commands ({type,...}) and the renderer-neutral
+     V36 command schema ({op,args,material}).  The showcase and newer SDK helpers
+     intentionally return the latter; PresentFrame must materialize it before draw. */
+  if(c.type===undefined&&c.op!==undefined){
+    var neutralArgs=c.args&&typeof c.args==='object'?c.args:{};
+    var neutralMaterial=c.material&&typeof c.material==='object'?c.material:{};
+    var neutral={};
+    var nk;
+    for(nk in neutralMaterial)if(Object.prototype.hasOwnProperty.call(neutralMaterial,nk))neutral[nk]=neutralMaterial[nk];
+    for(nk in neutralArgs)if(Object.prototype.hasOwnProperty.call(neutralArgs,nk))neutral[nk]=neutralArgs[nk];
+    neutral.type=String(c.op||'').toLowerCase();
+    c=neutral;
+  }
   if((c.mask!==undefined&&c.mask!==null)||(c.filterStack!==undefined&&c.filterStack!==null)||(c.filter!==undefined&&typeof c.filter!=='string')){if(drawCommandWithEffects(r,c,camX,camY))return;}
   var g=r.g,type=str(c.type).toLowerCase(),x=num(c.x)-camX,y=num(c.y)-camY,w=num(c.w),h=num(c.h),i,pts,grad,a0,a1;
   g.save();applyPaint(g,c);applyClipSpec(r,g,c);
@@ -11985,7 +11998,7 @@ function destroyFilterStack(ctx,h){var r=v15owned(SDK.filters,ctx,h,'FilterStack
 function createBitmapFont(ctx,spec){var q=spec||{},d=typeof q.fnt==='string'?q.fnt:q.data,id=++SDK.nextBitmapFont,r={handle:id,pid:Number(ctx.pid)||0,name:str(q.name,'bitmap'),lineHeight:num(q.lineHeight,16),chars:{},kernings:{},image:parseInt(q.texture,10)||0};if(r.image)assertTexture(ctx,r.image);if(typeof d==='string'){var re=/char\s+([^\n\r]+)/g,m;while((m=re.exec(d))){var line=m[1],o={},pr=/([a-zA-Z]+)=(-?\d+)/g,n;while((n=pr.exec(line)))o[n[1]]=parseInt(n[2],10);if(o.id!==undefined)r.chars[String(o.id)]={x:o.x||0,y:o.y||0,width:o.width||0,height:o.height||0,xoffset:o.xoffset||0,yoffset:o.yoffset||0,xadvance:o.xadvance||0,page:o.page||0};}var kr=/kerning\s+([^\n\r]+)/g,km;while((km=kr.exec(d))){var ko={},kp=/([a-zA-Z]+)=(-?\d+)/g,kn;while((kn=kp.exec(km[1])))ko[kn[1]]=parseInt(kn[2],10);if(ko.first!==undefined&&ko.second!==undefined)r.kernings[String(ko.first)+':'+String(ko.second)]=num(ko.amount);}var lm=/common[^\n\r]*lineHeight=(-?\d+)/.exec(d);if(lm)r.lineHeight=parseInt(lm[1],10)||r.lineHeight;}else if(d&&typeof d==='object'){r.lineHeight=num(d.common&&d.common.lineHeight,q.lineHeight||16);var ca=d.chars&&d.chars.chars?d.chars.chars:d.chars||[];for(var i=0;i<ca.length;i++){var c=ca[i]||{};if(c.id!==undefined)r.chars[String(c.id)]=v15clone(c);}var kk=d.kernings&&d.kernings.kernings?d.kernings.kernings:d.kernings||[];for(var j=0;j<kk.length;j++){var k=kk[j]||{};if(k.first!==undefined&&k.second!==undefined)r.kernings[String(k.first)+':'+String(k.second)]=num(k.amount);}}SDK.bitmapFonts[String(id)]=r;return{handle:id,lineHeight:r.lineHeight,glyphs:Object.keys(r.chars).length,kernings:Object.keys(r.kernings).length};}
 function buildBitmapText(ctx,h,text,opt){var r=v15owned(SDK.bitmapFonts,ctx,h,'BitmapFont'),q=opt||{},s=str(text),x=num(q.x),y=num(q.y),scale=num(q.scale,1)||1,cmd=[],space=r.chars['32'],prev=null;for(var i=0;i<s.length;i++){var code=s.charCodeAt(i),ch=r.chars[String(code)]||space;if(!ch){x+=r.lineHeight*.5*scale;prev=null;continue;}if(prev!==null)x+=num(r.kernings[String(prev)+':'+String(code)],0)*scale;cmd.push({type:'glyph',texture:r.image,sx:num(ch.x),sy:num(ch.y),sw:num(ch.width),sh:num(ch.height),x:x+num(ch.xoffset)*scale,y:y+num(ch.yoffset)*scale,w:num(ch.width)*scale,h:num(ch.height)*scale});x+=(num(ch.xadvance)||num(ch.width))*scale;prev=code;}return{commands:cmd,width:x-num(q.x),lineHeight:r.lineHeight*scale};}
 function destroyBitmapFont(ctx,h){var r=v15owned(SDK.bitmapFonts,ctx,h,'BitmapFont');delete SDK.bitmapFonts[String(r.handle)];return true;}
-function createDynamicTexture(ctx,surface,spec){var s=assertSurface(ctx,surface),q=spec||{},id=++SDK.nextDynamicTexture,w=Math.round(clamp(q.width===undefined?256:q.width,1,4096)),h=Math.round(clamp(q.height===undefined?256:q.height,1,4096)),cv=global.document.createElement('canvas');cv.width=w;cv.height=h;var g=cv.getContext('2d');if(!g)throw new Error('STATUS_NOT_SUPPORTED: DynamicTexture 2D context is unavailable.');g.imageSmoothingEnabled=q.imageSmoothing!==false;SDK.dynamicTextures[String(id)]={handle:id,pid:Number(ctx.pid)||0,surface:s.handle,width:w,height:h,canvas:cv,g:g,texture:0,version:1};return{handle:id,width:w,height:h};}
+function createDynamicTexture(ctx,surface,spec){var s=assertSurface(ctx,surface),q=spec||{},id=++SDK.nextDynamicTexture,w=Math.round(clamp(q.width===undefined?256:q.width,1,4096)),h=Math.round(clamp(q.height===undefined?256:q.height,1,4096)),cv=global.document.createElement('canvas');cv.width=w;cv.height=h;var g=cv.getContext('2d',{willReadFrequently:true});if(!g)throw new Error('STATUS_NOT_SUPPORTED: DynamicTexture 2D context is unavailable.');g.imageSmoothingEnabled=q.imageSmoothing!==false;SDK.dynamicTextures[String(id)]={handle:id,pid:Number(ctx.pid)||0,surface:s.handle,width:w,height:h,canvas:cv,g:g,texture:0,version:1};return{handle:id,width:w,height:h};}
 function drawDynamicTexture(ctx,h,commands){var r=v15owned(SDK.dynamicTextures,ctx,h,'DynamicTexture'),arr=Array.isArray(commands)?commands:[];for(var i=0;i<arr.length;i++)drawCommand({g:r.g,width:r.width,height:r.height,background:'#000'},arr[i],0,0);r.version++;return{handle:r.handle,version:r.version,commands:arr.length};}
 function clearDynamicTexture(ctx,h,fill){var r=v15owned(SDK.dynamicTextures,ctx,h,'DynamicTexture');r.g.save();r.g.setTransform(1,0,0,1,0,0);r.g.clearRect(0,0,r.width,r.height);if(fill!==undefined&&fill!==null){r.g.fillStyle=color(fill,'#000');r.g.fillRect(0,0,r.width,r.height);}r.g.restore();r.version++;return true;}
 function readDynamicTexturePixels(ctx,h){var r=v15owned(SDK.dynamicTextures,ctx,h,'DynamicTexture'),im=r.g.getImageData(0,0,r.width,r.height);return{width:r.width,height:r.height,pixels:Array.prototype.slice.call(im.data),version:r.version};}
@@ -13596,8 +13609,8 @@ async function dispatch(ctx,method,args){
   if(method==='CollisionEventsPoll')return collisionEventsPoll(ctx,args[0],args[1]);
   if(method==='CollisionEventsSnapshot')return collisionEventsSnapshot(ctx,args[0]);
   if(method==='DestroyCollisionEventTracker')return destroyCollisionEventTracker(ctx,args[0]);
-  if(method==='CreateRenderGraph')return createRenderGraph(ctx,args[0]);
-  if(method==='RenderGraphAddPass')return renderGraphAddPass(ctx,args[0],args[1]);
+  if(method==='CreateRenderGraph')return createRenderGraphV28(ctx,args[0]);
+  if(method==='RenderGraphAddPass')return renderGraphAddPassV28(ctx,args[0],args[1]);
   if(method==='RenderGraphSetEnabled')return renderGraphSetEnabled(ctx,args[0],args[1],args[2]);
   if(method==='RenderGraphBuild')return renderGraphBuild(ctx,args[0]);
   if(method==='RenderGraphBegin')return renderGraphBegin(ctx,args[0]);
@@ -13637,7 +13650,7 @@ async function dispatch(ctx,method,args){
   if(method==='CameraRigSetTarget')return cameraRigSetTarget(ctx,args[0],args[1]);
   if(method==='CameraRigSetBounds')return cameraRigSetBounds(ctx,args[0],args[1]);
   if(method==='CameraRigShake')return cameraRigShake(ctx,args[0],args[1],args[2],args[3]);
-  if(method==='CameraRigStep')return cameraRigStep(ctx,args[0],args[1],args[2]);
+  if(method==='CameraRigStep')return cameraRigStepV29(ctx,args[0],args[1],args[2]);
   if(method==='CameraRigWorldToScreen')return cameraRigWorldToScreen(ctx,args[0],args[1],args[2],args[3]);
   if(method==='CameraRigScreenToWorld')return cameraRigScreenToWorld(ctx,args[0],args[1],args[2],args[3]);
   if(method==='DestroyCameraRig2D')return destroyCameraRig2D(ctx,args[0]);
@@ -14580,8 +14593,8 @@ function collisionEventsSnapshot(ctx,h){var r=v28owned(SDK.collisionEvents,ctx,h
 function destroyCollisionEventTracker(ctx,h){var r=v28owned(SDK.collisionEvents,ctx,h,'CollisionEventTracker');delete SDK.collisionEvents[String(r.handle)];return true;}
 
 /* -------- Render graph: explicit passes make post-processing/capture sane - */
-function createRenderGraph(ctx,spec){var q=spec&&typeof spec==='object'?spec:{},id=++SDK.nextRenderGraph,r={handle:id,pid:Number(ctx.pid)||0,passes:{},order:[],frame:0,commands:[],target:str(q.target,'screen')};SDK.renderGraphs[String(id)]=r;return{handle:id,target:r.target};}
-function renderGraphAddPass(ctx,h,spec){var r=v28owned(SDK.renderGraphs,ctx,h,'RenderGraph'),q=spec&&typeof spec==='object'?spec:{},name=str(q.name,'pass_'+(r.order.length+1));if(!r.passes[name])r.order.push(name);r.passes[name]={name:name,enabled:q.enabled!==false,clear:q.clear!==false,blend:str(q.blend,'normal'),filter:q.filter?v28clone(q.filter):null,metadata:v28clone(q.metadata||{})};return v28clone(r.passes[name]);}
+function createRenderGraphV28(ctx,spec){var q=spec&&typeof spec==='object'?spec:{},id=++SDK.nextRenderGraph,r={handle:id,pid:Number(ctx.pid)||0,passes:{},order:[],frame:0,commands:[],target:str(q.target,'screen')};SDK.renderGraphs[String(id)]=r;return{handle:id,target:r.target};}
+function renderGraphAddPassV28(ctx,h,spec){var r=v28owned(SDK.renderGraphs,ctx,h,'RenderGraph'),q=spec&&typeof spec==='object'?spec:{},name=str(q.name,'pass_'+(r.order.length+1));if(!r.passes[name])r.order.push(name);r.passes[name]={name:name,enabled:q.enabled!==false,clear:q.clear!==false,blend:str(q.blend,'normal'),filter:q.filter?v28clone(q.filter):null,metadata:v28clone(q.metadata||{})};return v28clone(r.passes[name]);}
 function renderGraphSetEnabled(ctx,h,name,enabled){var r=v28owned(SDK.renderGraphs,ctx,h,'RenderGraph'),p=r.passes[str(name,'')];if(!p)throw new Error('STATUS_NOT_FOUND: render pass');p.enabled=!!enabled;return v28clone(p);}
 function renderGraphBuild(ctx,h){var r=v28owned(SDK.renderGraphs,ctx,h,'RenderGraph'),out=[];for(var i=0;i<r.order.length;i++){var p=r.passes[r.order[i]];if(p&&p.enabled)out.push(v28clone(p));}return{handle:r.handle,frame:r.frame,target:r.target,passes:out};}
 function renderGraphBegin(ctx,h){var r=v28owned(SDK.renderGraphs,ctx,h,'RenderGraph');r.frame++;r.commands=[];return{frame:r.frame,target:r.target,passes:renderGraphBuild(ctx,h).passes};}
@@ -14743,7 +14756,7 @@ function createCameraRig2D(ctx,spec){
 function cameraRigSetTarget(ctx,h,target){var r=v29rec(V29.cameraRigs,ctx,h,'CameraRig2D');r.target=target===null?null:v29clone(target);if(target&&typeof target==='object'){if(target.x!==undefined)r.targetX=num(target.x);if(target.y!==undefined)r.targetY=num(target.y);}return v29clone(r);}
 function cameraRigSetBounds(ctx,h,bounds){var r=v29rec(V29.cameraRigs,ctx,h,'CameraRig2D');r.bounds=bounds&&typeof bounds==='object'?{x:num(bounds.x),y:num(bounds.y),w:Math.max(0,num(bounds.w)),h:Math.max(0,num(bounds.h))}:null;return v29clone(r);}
 function cameraRigShake(ctx,h,magnitude,duration,seed){var r=v29rec(V29.cameraRigs,ctx,h,'CameraRig2D');r.shake.mag=Math.max(0,num(magnitude,6));r.shake.time=Math.max(0,num(duration,.2));r.shake.duration=r.shake.time;r.shake.seed=num(seed,r.shake.seed+1);return{handle:r.handle,magnitude:r.shake.mag,duration:r.shake.time};}
-function cameraRigStep(ctx,h,dt,target){
+function cameraRigStepV29(ctx,h,dt,target){
   var r=v29rec(V29.cameraRigs,ctx,h,'CameraRig2D'),d=clamp(num(dt,0),0,.1),t=target||r.target;
   if(t&&typeof t==='object'){r.targetX=num(t.x,r.targetX);r.targetY=num(t.y,r.targetY);}
   var a=1-Math.exp(-Math.max(0,r.followSpeed)*d),dx=r.targetX-r.x,dy=r.targetY-r.y;
@@ -15516,7 +15529,7 @@ function profilerBegin(ctx,h,name){var r=v32own(V32.profilers,ctx,h,'DevProfiler
 function profilerEnd(ctx,h,name){var r=v32own(V32.profilers,ctx,h,'DevProfiler'),now=v32now(),item=r.stack.pop();if(!item)throw new Error('STATUS_INVALID_STATE: profiler stack is empty.');if(name&&item.name!==String(name))throw new Error('STATUS_INVALID_STATE: profiler scope mismatch.');var dt=now-item.start,k=String(item.name);if(!r.counters[k])r.counters[k]={calls:0,totalMs:0,maxMs:0};r.counters[k].calls++;r.counters[k].totalMs+=dt;r.counters[k].maxMs=Math.max(r.counters[k].maxMs,dt);return{ name:k,durationMs:dt};}
 function profilerCounter(ctx,h,name,delta){var r=v32own(V32.profilers,ctx,h,'DevProfiler'),k=String(name||'counter');if(!r.counters[k])r.counters[k]={calls:0,totalMs:0,maxMs:0,value:0};r.counters[k].value=v32num(r.counters[k].value)+v32num(delta,1);return r.counters[k].value;}
 function profilerFrame(ctx,h,spec){var r=v32own(V32.profilers,ctx,h,'DevProfiler'),q=spec&&typeof spec==='object'?spec:{},f={frame:r.frame++,dtMs:Math.max(0,v32num(q.dtMs)),cpuMs:Math.max(0,v32num(q.cpuMs)),draws:Math.max(0,v32num(q.draws)),triangles:Math.max(0,v32num(q.triangles)),objects:Math.max(0,v32num(q.objects))};r.frames.push(f);while(r.frames.length>240)r.frames.shift();return f;}
-function profilerSnapshot(ctx,h){var r=v32own(V32.profilers,ctx,h,'DevProfiler');return{handle:r.handle,name:r.name,active:r.active,frames:v32clone(r.frames),counters:v32clone(r.counters),openScopes:r.stack.length};}
+function profilerSnapshotV32(ctx,h){var r=v32own(V32.profilers,ctx,h,'DevProfiler');return{handle:r.handle,name:r.name,active:r.active,frames:v32clone(r.frames),counters:v32clone(r.counters),openScopes:r.stack.length};}
 function destroyDevProfiler(ctx,h){var r=v32own(V32.profilers,ctx,h,'DevProfiler');delete V32.profilers[String(r.handle)];return true;}
 
 /* -------- Deterministic ECS / data-oriented gameplay core -------- */
@@ -15633,7 +15646,7 @@ function createCameraRig(ctx,spec){var q=spec&&typeof spec==='object'?spec:{},id
 function cameraSetTarget(ctx,h,target){var r=v32own(V32.cameraRigs,ctx,h,'CameraRig');r.target=target&&typeof target==='object'?v32clone(target):null;return v32clone(r.target);}
 function cameraSetBounds(ctx,h,bounds){var r=v32own(V32.cameraRigs,ctx,h,'CameraRig');r.bounds=bounds&&typeof bounds==='object'?v32clone(bounds):null;return v32clone(r.bounds);}
 function cameraShake(ctx,h,magnitude,duration){var r=v32own(V32.cameraRigs,ctx,h,'CameraRig');r.shake.remaining=Math.max(0,v32num(duration,.25));r.shake.magnitude=Math.max(0,v32num(magnitude,4));return v32clone(r.shake);}
-function cameraRigStep(ctx,h,dt){var r=v32own(V32.cameraRigs,ctx,h,'CameraRig'),d=Math.max(0,v32num(dt)),t=r.target;if(t){var zx=v32num(r.deadZone.x),zy=v32num(r.deadZone.y),zw=v32num(r.deadZone.w),zh=v32num(r.deadZone.h),tx=v32num(t.x),ty=v32num(t.y);if(zw&&Math.abs(tx-r.x)>zw/2)tx=r.x+(tx>r.x?zw/2:-zw/2);if(zh&&Math.abs(ty-r.y)>zh/2)ty=r.y+(ty>r.y?zh/2:-zh/2);r.x+= (tx-r.x)*r.smooth;r.y+=(ty-r.y)*r.smooth;}
+function cameraRigStepV32(ctx,h,dt){var r=v32own(V32.cameraRigs,ctx,h,'CameraRig'),d=Math.max(0,v32num(dt)),t=r.target;if(t){var zx=v32num(r.deadZone.x),zy=v32num(r.deadZone.y),zw=v32num(r.deadZone.w),zh=v32num(r.deadZone.h),tx=v32num(t.x),ty=v32num(t.y);if(zw&&Math.abs(tx-r.x)>zw/2)tx=r.x+(tx>r.x?zw/2:-zw/2);if(zh&&Math.abs(ty-r.y)>zh/2)ty=r.y+(ty>r.y?zh/2:-zh/2);r.x+= (tx-r.x)*r.smooth;r.y+=(ty-r.y)*r.smooth;}
   if(r.bounds){var b=r.bounds,hw=r.viewport.width/(2*Math.max(.001,r.zoom)),hh=r.viewport.height/(2*Math.max(.001,r.zoom));if(b.left!==undefined)r.x=Math.max(r.x,v32num(b.left)+hw);if(b.right!==undefined)r.x=Math.min(r.x,v32num(b.right)-hw);if(b.top!==undefined)r.y=Math.max(r.y,v32num(b.top)+hh);if(b.bottom!==undefined)r.y=Math.min(r.y,v32num(b.bottom)-hh);}
   if(r.shake.remaining>0){var k=Math.max(0,r.shake.remaining),m=r.shake.magnitude*Math.min(1,k/.15);r.shake.x=(Math.random()*2-1)*m;r.shake.y=(Math.random()*2-1)*m;r.shake.remaining=Math.max(0,k-d);}else{r.shake.x=0;r.shake.y=0;}r.lastDt=d;return{handle:r.handle,x:r.x+r.shake.x,y:r.y+r.shake.y,zoom:r.zoom,rotation:r.rotation,shake:v32clone(r.shake)};}
 function cameraWorldToScreen(ctx,h,p){var r=v32own(V32.cameraRigs,ctx,h,'CameraRig'),q=p||{};return{x:(v32num(q.x)-r.x)*r.zoom+r.viewport.width/2,y:(v32num(q.y)-r.y)*r.zoom+r.viewport.height/2};}
@@ -15680,7 +15693,7 @@ dispatch=function(ctx,method,args){
   if(method==='ProfilerEnd')return profilerEnd(ctx,args[0],args[1]);
   if(method==='ProfilerCounter')return profilerCounter(ctx,args[0],args[1],args[2]);
   if(method==='ProfilerFrame')return profilerFrame(ctx,args[0],args[1]);
-  if(method==='ProfilerSnapshot')return profilerSnapshot(ctx,args[0]);
+  if(method==='ProfilerSnapshot')return profilerSnapshotV32(ctx,args[0]);
   if(method==='DestroyDevProfiler')return destroyDevProfiler(ctx,args[0]);
   if(method==='CreateECSWorld')return createECSWorld(ctx,args[0]);
   if(method==='ECSSpawn')return ecsSpawn(ctx,args[0],args[1]);
@@ -15731,7 +15744,7 @@ dispatch=function(ctx,method,args){
   if(method==='CameraSetTarget')return cameraSetTarget(ctx,args[0],args[1]);
   if(method==='CameraSetBounds')return cameraSetBounds(ctx,args[0],args[1]);
   if(method==='CameraShake')return cameraShake(ctx,args[0],args[1],args[2]);
-  if(method==='CameraRigStep')return cameraRigStep(ctx,args[0],args[1]);
+  if(method==='CameraRigStepV32')return cameraRigStepV32(ctx,args[0],args[1]);
   if(method==='CameraWorldToScreen')return cameraWorldToScreen(ctx,args[0],args[1]);
   if(method==='CameraScreenToWorld')return cameraScreenToWorld(ctx,args[0],args[1]);
   if(method==='DestroyCameraRig')return destroyCameraRig(ctx,args[0]);
@@ -16062,7 +16075,7 @@ function v35NetState(r,state){r.status=state;try{if(r.onState)r.onState(state,r)
 function networkConnect(ctx,h,url){var r=v35own(V35.networks,ctx,h,'NetworkTransport');if(url!==undefined)r.url=String(url||'');if(!r.url)throw new Error('STATUS_INVALID_PARAMETER: network URL required.');if(typeof WebSocket==='undefined')return Promise.reject(new Error('STATUS_NOT_SUPPORTED: WebSocket unavailable.'));if(r.socket&&(r.socket.readyState===0||r.socket.readyState===1))return Promise.resolve({status:r.status,url:r.url});return new Promise(function(resolve,reject){var ws=new WebSocket(r.url);r.socket=ws;v35NetState(r,'connecting');ws.onopen=function(){v35NetState(r,'open');while(r.queue.length){ws.send(r.queue.shift());r.sent++;}resolve({status:r.status,url:r.url});};ws.onmessage=function(ev){r.received++;try{if(r.onMessage)r.onMessage(ev.data,ev);}catch(e){r.lastError=String(e&&e.message||e);}};ws.onerror=function(){r.lastError='WebSocket error';v35NetState(r,'error');};ws.onclose=function(){v35NetState(r,'closed');if(r.autoReconnect&&!r.reconnectTimer)r.reconnectTimer=setTimeout(function(){r.reconnectTimer=null;networkConnect(ctx,h).catch(function(){});},r.reconnectDelay);};ws.onerror=function(ev){r.lastError='WebSocket error';v35NetState(r,'error');try{reject(new Error(r.lastError));}catch(ignore){}};});}
 function networkSend(ctx,h,data){var r=v35own(V35.networks,ctx,h,'NetworkTransport'),payload=typeof data==='string'?data:JSON.stringify(data);if(r.socket&&r.socket.readyState===1){r.socket.send(payload);r.sent++;return{queued:false,sent:true};}if(r.queue.length>=r.maxQueue)r.queue.shift();r.queue.push(payload);return{queued:true,sent:false};}
 function networkClose(ctx,h){var r=v35own(V35.networks,ctx,h,'NetworkTransport');r.autoReconnect=false;if(r.reconnectTimer){clearTimeout(r.reconnectTimer);r.reconnectTimer=null;}if(r.socket)try{r.socket.close();}catch(ignore){}r.socket=null;v35NetState(r,'closed');return true;}
-function networkSnapshot(ctx,h){var r=v35own(V35.networks,ctx,h,'NetworkTransport');return{handle:r.handle,name:r.name,url:r.url,status:r.status,queued:r.queue.length,sent:r.sent,received:r.received,lastError:r.lastError};}
+function networkSnapshotV35(ctx,h){var r=v35own(V35.networks,ctx,h,'NetworkTransport');return{handle:r.handle,name:r.name,url:r.url,status:r.status,queued:r.queue.length,sent:r.sent,received:r.received,lastError:r.lastError};}
 function destroyNetworkTransport(ctx,h){var r=v35own(V35.networks,ctx,h,'NetworkTransport');try{networkClose(ctx,h);}catch(ignore){}delete V35.networks[String(r.handle)];return true;}
 
 /* Replay + time travel and input recording. */
@@ -16987,7 +17000,7 @@ var Game2D={
     ['width','height','title','background','pixelated','cursor'].forEach(function(k){if(options[k]!==undefined)ctx.defaultSurfaceSpec[k]=options[k];});
     var api={
       context:ctx,
-      dispatch:function(method){var args=Array.prototype.slice.call(arguments,1);return dispatch(ctx,method,args);},
+      dispatch:function(method,args,options){args=Array.isArray(args)?args:Array.prototype.slice.call(arguments,1);return dispatch(ctx,method,args,options);},
       cleanup:function(){var ok=cleanupV36Process(pid)&&cleanupV35Process(pid)&&cleanupProcess(pid);if(defaultGameAPI&&defaultGameAPI.context&&Number(defaultGameAPI.context.pid)===pid)defaultGameAPI=null;return ok;},
       createSurface:function(spec){var q={};Object.keys(ctx.defaultSurfaceSpec).forEach(function(k){q[k]=ctx.defaultSurfaceSpec[k];});if(spec&&typeof spec==='object')Object.keys(spec).forEach(function(k){q[k]=spec[k];});return dispatch(ctx,'CreateSurface',[null,q]);},
       createAssetManager:function(spec){return dispatch(ctx,'CreateAssetManager',[spec||{}]);},
@@ -18507,7 +18520,7 @@ function profilerBegin(ctx,h,name,time){var r=v40own(V40.prof,h);r.current={name
 function profilerEnd(ctx,h,time){var r=v40own(V40.prof,h);if(!r.current)return false;var now=v40num(time,typeof performance!=='undefined'&&performance.now?performance.now():Date.now());r.frames.push({name:r.current.name,durationMs:Math.max(0,now-r.current.start)});if(r.frames.length>r.maxFrames)r.frames.shift();r.current=null;return true;}
 function profilerReport(ctx,h){var r=v40own(V40.prof,h),agg={};r.frames.forEach(function(f){var a=agg[f.name]||(agg[f.name]={count:0,total:0,max:0});a.count++;a.total+=f.durationMs;a.max=Math.max(a.max,f.durationMs);});Object.keys(agg).forEach(function(k){agg[k].avg=agg[k].total/Math.max(1,agg[k].count);});return{frames:r.frames.length,phases:agg};}
 function profilerReset(ctx,h){var r=v40own(V40.prof,h);r.frames.length=0;return true;}
-function profilerSnapshot(ctx,h){return v40clone(v40own(V40.prof,h));}
+function profilerSnapshotV40(ctx,h){return v40clone(v40own(V40.prof,h));}
 function destroyProfilerV40(ctx,h){delete V40.prof[String(v40own(V40.prof,h).handle)];return true;}
 
 /* Crash report / breadcrumb trail */
@@ -18577,7 +18590,7 @@ case 'CreateUIFocusManager':return createUIFocusManager(ctx,args[0]);case 'Focus
 case 'CreateAudioDirector':return createAudioDirector(ctx,args[0]);case 'AudioBusSet':return audioBusSet(ctx,args[0],args[1],args[2]);case 'AudioPlayMusic':return audioPlayMusic(ctx,args[0],args[1],args[2]);case 'AudioCrossfade':return audioCrossfade(ctx,args[0],args[1],args[2]);case 'AudioStep':return audioStep(ctx,args[0],args[1]);case 'AudioSnapshot':return audioSnapshot(ctx,args[0]);case 'DestroyAudioDirector':return destroyAudioDirector(ctx,args[0]);
 case 'CreateFeatureFlags':return createFeatureFlags(ctx,args[0]);case 'FlagSet':return flagSet(ctx,args[0],args[1],args[2]);case 'FlagGet':return flagGet(ctx,args[0],args[1],args[2]);case 'ConfigPatch':return configPatch(ctx,args[0],args[1],args[2]);case 'FlagsSnapshot':return flagsSnapshot(ctx,args[0]);case 'DestroyFeatureFlags':return destroyFeatureFlags(ctx,args[0]);
 case 'CreateSnapshotInterpolator':return createSnapshotInterpolator(ctx,args[0]);case 'SnapshotPush':return snapshotPush(ctx,args[0],args[1],args[2]);case 'SnapshotSample':return snapshotSample(ctx,args[0],args[1]);case 'SnapshotInterpolatorSnapshot':return snapshotSnapshot(ctx,args[0]);case 'DestroySnapshotInterpolator':return destroySnapshotInterpolator(ctx,args[0]);
-case 'CreateProfilerV40':return createProfilerV40(ctx,args[0]);case 'ProfilerBegin':return profilerBegin(ctx,args[0],args[1],args[2]);case 'ProfilerEnd':return profilerEnd(ctx,args[0],args[1]);case 'ProfilerReport':return profilerReport(ctx,args[0]);case 'ProfilerReset':return profilerReset(ctx,args[0]);case 'ProfilerSnapshot':return profilerSnapshot(ctx,args[0]);case 'DestroyProfilerV40':return destroyProfilerV40(ctx,args[0]);
+case 'CreateProfilerV40':return createProfilerV40(ctx,args[0]);case 'ProfilerBegin':return profilerBegin(ctx,args[0],args[1],args[2]);case 'ProfilerEnd':return profilerEnd(ctx,args[0],args[1]);case 'ProfilerReport':return profilerReport(ctx,args[0]);case 'ProfilerReset':return profilerReset(ctx,args[0]);case 'ProfilerSnapshot':return profilerSnapshotV40(ctx,args[0]);case 'DestroyProfilerV40':return destroyProfilerV40(ctx,args[0]);
 case 'CreateCrashReporter':return createCrashReporter(ctx,args[0]);case 'CrashBreadcrumb':return crashBreadcrumb(ctx,args[0],args[1],args[2]);case 'CrashCapture':return crashCapture(ctx,args[0],args[1],args[2]);case 'CrashExport':return crashExport(ctx,args[0]);case 'CrashSnapshot':return crashSnapshot(ctx,args[0]);case 'DestroyCrashReporter':return destroyCrashReporter(ctx,args[0]);
 case 'CreateHotReloadRegistry':return createHotReloadRegistry(ctx,args[0]);case 'HotRegister':return hotRegister(ctx,args[0],args[1],args[2]);case 'HotCheck':return hotCheck(ctx,args[0],args[1],args[2]);case 'HotApply':return hotApply(ctx,args[0],args[1],args[2],args[3]);case 'HotSnapshot':return hotSnapshot(ctx,args[0]);case 'DestroyHotReloadRegistry':return destroyHotReloadRegistry(ctx,args[0]);
 case 'CreateDeterminismAudit':return createDeterminismAudit(ctx,args[0]);case 'DetCheck':return detCheck(ctx,args[0],args[1],args[2]);case 'DetAuditList':return detAuditList(ctx,args[0]);case 'DetSnapshot':return detSnapshot(ctx,args[0]);case 'DestroyDeterminismAudit':return destroyDeterminismAudit(ctx,args[0]);
@@ -18645,8 +18658,9 @@ function animSnapshot(ctx,h){var r=v41own(V41.anim,h);return{handle:r.handle,tim
 function destroyAnimationMixer(ctx,h){delete V41.anim[String(h)];return true;}
 
 /* Text layout: wrapping, alignment, line metrics, deterministic fallback measurement. */
-function createTextLayout(ctx,s){s=s||{};var id=v41id('text');V41.text[id]={handle:id,pid:v41pid(ctx),font:v41str(s.font,'default'),fontSize:Math.max(1,v41num(s.fontSize,16)),lineHeight:v41num(s.lineHeight,0),maxWidth:v41num(s.maxWidth,0),align:v41str(s.align,'left'),letterSpacing:v41num(s.letterSpacing,0),wrap:v41str(s.wrap,'word')};return{handle:id};}
+function createTextLayoutV41(ctx,s){s=s||{};var id=v41id('text');V41.text[id]={handle:id,pid:v41pid(ctx),font:v41str(s.font,'default'),fontSize:Math.max(1,v41num(s.fontSize,16)),lineHeight:v41num(s.lineHeight,0),maxWidth:v41num(s.maxWidth,0),align:v41str(s.align,'left'),letterSpacing:v41num(s.letterSpacing,0),wrap:v41str(s.wrap,'word')};return{handle:id};}
 function textMeasure(ctx,h,text){var r=v41own(V41.text,h),t=v41str(text,'');var width=Math.max(0,t.length*(r.fontSize*0.6+r.letterSpacing));return{width:width,height:r.lineHeight||r.fontSize,lines:1};}
+function textLayoutEllipsisV41(ctx,h,text,maxWidth,options){var r=v41own(V41.text,h),q=options&&typeof options==='object'?options:{},fs=Math.max(1,v41num(q.fontSize,r.fontSize)),suffix=v41str(q.suffix,'…'),max=Math.max(0,v41num(maxWidth,r.maxWidth)),spacing=v41num(r.letterSpacing,0),charW=function(ch){return (ch===' '?0.35:/[MW@#%]/.test(ch)?0.9:/[ilI.,'!|]/.test(ch)?0.35:0.62)*fs+spacing;},suffixW=0,i,w=0,s=v41str(text,'');for(i=0;i<suffix.length;i++)suffixW+=charW(suffix[i]);if(max<=suffixW)return suffix;for(i=0;i<s.length;i++){var cw=charW(s[i]);if(w+cw+suffixW>max)break;w+=cw;}return s.slice(0,i)+suffix;}
 function textLayout(ctx,h,text){var r=v41own(V41.text,h),raw=v41str(text,''),max=r.maxWidth;if(max<=0)return{text:raw,lines:raw.split('\n'),width:textMeasure(ctx,h,raw).width,height:(r.lineHeight||r.fontSize)*raw.split('\n').length,align:r.align};var words=r.wrap==='char'?Array.from(raw):raw.split(/(\s+)/);var lines=[],line='';function flush(){lines.push(line.replace(/\\s+$/,''));line='';}for(var i=0;i<words.length;i++){var w=words[i],test=line+w,ww=textMeasure(ctx,h,test).width;if(w==='\n'){flush();continue;}if(line&&ww>max){flush();line=w.trimStart();}else line=test;}if(line||!lines.length)flush();var maxW=0;lines.forEach(function(x){maxW=Math.max(maxW,textMeasure(ctx,h,x).width);});return{text:raw,lines:lines,width:maxW,height:(r.lineHeight||r.fontSize)*lines.length,align:r.align,lineHeight:r.lineHeight||r.fontSize};}
 function textSet(ctx,h,k,v){var r=v41own(V41.text,h);if(k==='fontSize')r.fontSize=Math.max(1,v41num(v,r.fontSize));else if(k==='lineHeight')r.lineHeight=v41num(v,r.lineHeight);else if(k==='maxWidth')r.maxWidth=Math.max(0,v41num(v,r.maxWidth));else if(k==='align')r.align=String(v||'left');else if(k==='letterSpacing')r.letterSpacing=v41num(v,0);else if(k==='wrap')r.wrap=String(v||'word');return true;}
 function textSnapshot(ctx,h){return v41clone(v41own(V41.text,h));}
@@ -18783,7 +18797,7 @@ function getAllSDKComparisonMatrixV41(){var b=getAllSDKComparisonMatrixV40();b.v
 var dispatchV40=dispatch;
 dispatch=function(ctx,method,args){args=args||[];switch(method){
 case 'CreateAnimationMixer':return createAnimationMixer(ctx,args[0]);case 'AnimRegisterClip':return animRegisterClip(ctx,args[0],args[1],args[2]);case 'AnimSetLayer':return animSetLayer(ctx,args[0],args[1],args[2],args[3]);case 'AnimStopLayer':return animStopLayer(ctx,args[0],args[1],args[2]);case 'AnimStep':return animStep(ctx,args[0],args[1]);case 'AnimPose':return animPose(ctx,args[0]);case 'AnimSnapshot':return animSnapshot(ctx,args[0]);case 'DestroyAnimationMixer':return destroyAnimationMixer(ctx,args[0]);
-case 'CreateTextLayout':return createTextLayout(ctx,args[0]);case 'TextMeasure':return textMeasure(ctx,args[0],args[1]);case 'TextLayout':return textLayout(ctx,args[0],args[1]);case 'TextSet':return textSet(ctx,args[0],args[1],args[2]);case 'TextSnapshot':return textSnapshot(ctx,args[0]);case 'DestroyTextLayout':return destroyTextLayout(ctx,args[0]);
+case 'CreateTextLayout':return createTextLayoutV41(ctx,args[0]);case 'TextMeasure':return textMeasure(ctx,args[0],args[1]);case 'TextLayout':return textLayout(ctx,args[0],args[1]);case 'TextLayoutEllipsis':return textLayoutEllipsisV41(ctx,args[0],args[1],args[2],args[3]);case 'TextSet':return textSet(ctx,args[0],args[1],args[2]);case 'TextSnapshot':return textSnapshot(ctx,args[0]);case 'DestroyTextLayout':return destroyTextLayout(ctx,args[0]);
 case 'CreateNineSlice':return createNineSlice(ctx,args[0]);case 'NineSliceSetSize':return nineSliceSetSize(ctx,args[0],args[1],args[2]);case 'NineSliceLayout':return nineSliceLayout(ctx,args[0]);case 'NineSliceSnapshot':return nineSliceSnapshot(ctx,args[0]);case 'DestroyNineSlice':return destroyNineSlice(ctx,args[0]);
 case 'CreateVirtualResolution':return createVirtualResolution(ctx,args[0]);case 'VirtualResize':return virtResize(ctx,args[0],args[1],args[2]);case 'VirtualWorldToScreen':return virtWorldToScreen(ctx,args[0],args[1],args[2],args[3]);case 'VirtualScreenToWorld':return virtScreenToWorld(ctx,args[0],args[1],args[2],args[3]);case 'VirtualSnapshot':return virtSnapshot(ctx,args[0]);case 'DestroyVirtualResolution':return destroyVirtualResolution(ctx,args[0]);
 case 'CreateCameraStack':return createCameraStack(ctx,args[0]);case 'CameraStackAdd':return cameraStackAdd(ctx,args[0],args[1],args[2],args[3]);case 'CameraStackRemove':return cameraStackRemove(ctx,args[0],args[1]);case 'CameraStackBlend':return cameraStackBlend(ctx,args[0]);case 'CameraStackSetActive':return cameraStackSetActive(ctx,args[0],args[1]);case 'CameraStackSnapshot':return cameraStackSnapshot(ctx,args[0]);case 'DestroyCameraStack':return destroyCameraStack(ctx,args[0]);
@@ -18791,7 +18805,7 @@ case 'CreateTriggerZone':return createTriggerZone(ctx,args[0]);case 'TriggerOver
 case 'CreateInputRecorder':return createInputRecorder(ctx,args[0]);case 'InputRecord':return inputRecord(ctx,args[0],args[1],args[2],args[3]);case 'InputSetMode':return inputSetMode(ctx,args[0],args[1]);case 'InputPlaybackStart':return inputPlaybackStart(ctx,args[0]);case 'InputPlaybackStep':return inputPlaybackStep(ctx,args[0],args[1]);case 'InputSnapshot':return inputSnapshot(ctx,args[0]);case 'DestroyInputRecorder':return destroyInputRecorder(ctx,args[0]);
 case 'CreateAssetLoadQueue':return createAssetLoadQueue(ctx,args[0]);case 'LoadQueueAdd':return loadQueueAdd(ctx,args[0],args[1]);case 'LoadQueueCancel':return loadQueueCancel(ctx,args[0]);case 'LoadQueueReport':return loadQueueReport(ctx,args[0]);case 'LoadQueueMark':return loadQueueMark(ctx,args[0],args[1],args[2]);case 'LoadQueueSnapshot':return loadQueueSnapshot(ctx,args[0]);case 'DestroyAssetLoadQueue':return destroyAssetLoadQueue(ctx,args[0]);
 case 'CreateSaveJournal':return createSaveJournal(ctx,args[0]);case 'SaveJournalRegisterMigration':return saveJournalRegisterMigration(ctx,args[0],args[1],args[2],args[3]);case 'SaveJournalCommit':return saveJournalCommit(ctx,args[0],args[1],args[2]);case 'SaveJournalLoad':return saveJournalLoad(ctx,args[0],args[1]);case 'SaveJournalSnapshot':return saveJournalSnapshot(ctx,args[0]);case 'DestroySaveJournal':return destroySaveJournal(ctx,args[0]);
-case 'CreateNetworkTransport':return createNetworkTransport(ctx,args[0]);case 'NetConnect':return netConnect(ctx,args[0]);case 'NetDisconnect':return netDisconnect(ctx,args[0]);case 'NetSend':return netSend(ctx,args[0],args[1],args[2]);case 'NetAck':return netAck(ctx,args[0],args[1]);case 'NetInject':return netInject(ctx,args[0],args[1]);case 'NetPoll':return netPoll(ctx,args[0]);case 'NetPending':return netPending(ctx,args[0]);case 'NetSnapshot':return netSnapshot(ctx,args[0]);case 'DestroyNetworkTransport':return destroyNetworkTransport(ctx,args[0]);
+case 'CreateNetworkTransport':return createNetworkTransport(ctx,args[0]);case 'NetConnect':return netConnect(ctx,args[0]);case 'NetDisconnect':return netDisconnect(ctx,args[0]);case 'NetSend':return netSend(ctx,args[0],args[1],args[2]);case 'NetAck':return netAck(ctx,args[0],args[1]);case 'NetInject':return netInject(ctx,args[0],args[1]);case 'NetPoll':return netPoll(ctx,args[0]);case 'NetPending':return netPending(ctx,args[0]);case 'NetSnapshot':return networkSnapshotV41(ctx,args[0]);case 'DestroyNetworkTransport':return destroyNetworkTransport(ctx,args[0]);
 case 'CreateFramePacer':return createFramePacer(ctx,args[0]);case 'FramePacerStep':return framePacerStep(ctx,args[0],args[1]);case 'FramePacerSnapshot':return framePacerSnapshot(ctx,args[0]);case 'DestroyFramePacer':return destroyFramePacer(ctx,args[0]);
 case 'CreateMemoryBudget':return createMemoryBudget(ctx,args[0]);case 'MemoryRecord':return memoryRecord(ctx,args[0],args[1],args[2]);case 'MemoryRelease':return memoryRelease(ctx,args[0],args[1],args[2]);case 'MemoryReport':return memoryReport(ctx,args[0]);case 'MemorySnapshot':return memorySnapshot(ctx,args[0]);case 'DestroyMemoryBudget':return destroyMemoryBudget(ctx,args[0]);
 case 'CreatePlatformCapabilities':return createPlatformCapabilities(ctx,args[0]);case 'CapsSet':return capsSet(ctx,args[0],args[1],args[2]);case 'CapsGet':return capsGet(ctx,args[0],args[1],args[2]);case 'CapsSnapshot':return capsSnapshot(ctx,args[0]);case 'DestroyPlatformCapabilities':return destroyPlatformCapabilities(ctx,args[0]);
@@ -18824,15 +18838,15 @@ denominatorFacade.push(
 var dispatchV41=dispatch;
 dispatch=function(ctx,method,args){args=args||[];switch(method){
 case 'CreateProjectSchema':return createProjectSchema(ctx,args[0]);case 'ProjectAsset':return projectAsset(ctx,args[0],args[1],args[2]);case 'ProjectScene':return projectScene(ctx,args[0],args[1],args[2]);case 'ProjectValidate':return projectValidate(ctx,args[0]);case 'ProjectSnapshot':return projectSnapshot(ctx,args[0]);case 'DestroyProjectSchema':return destroyProjectSchema(ctx,args[0]);
-case 'CreateSceneLifecycle':return createSceneLifecycle(ctx,args[0]);case 'SceneEnter':return sceneEnter(ctx,args[0]);case 'SceneLeave':return sceneLeave(ctx,args[0]);case 'SceneTransition':return sceneTransition(ctx,args[0],args[1],args[2]);case 'SceneCommit':return sceneCommit(ctx,args[0]);case 'SceneLifecycleSnapshot':return sceneSnapshot(ctx,args[0]);case 'DestroySceneLifecycle':return destroySceneLifecycle(ctx,args[0]);
-case 'CreatePhysicsWorldV42':return createPhysicsWorldV42(ctx,args[0]);case 'PhysicsBodyAdd':return physicsBodyAdd(ctx,args[0],args[1],args[2]);case 'PhysicsBodySet':return physicsBodySet(ctx,args[0],args[1],args[2]);case 'PhysicsStep':return physicsStep(ctx,args[0],args[1]);case 'PhysicsOverlap':return physicsOverlap(ctx,args[0],args[1],args[2]);case 'PhysicsSnapshotV42':return physicsSnapshot(ctx,args[0]);case 'DestroyPhysicsWorldV42':return destroyPhysicsWorldV42(ctx,args[0]);
+case 'CreateSceneLifecycle':return createSceneLifecycle(ctx,args[0]);case 'SceneEnter':return sceneEnter(ctx,args[0]);case 'SceneLeave':return sceneLeave(ctx,args[0]);case 'SceneTransition':return sceneTransition(ctx,args[0],args[1],args[2]);case 'SceneCommit':return sceneCommit(ctx,args[0]);case 'SceneLifecycleSnapshot':return sceneLifecycleSnapshotV42(ctx,args[0]);case 'DestroySceneLifecycle':return destroySceneLifecycle(ctx,args[0]);
+case 'CreatePhysicsWorldV42':return createPhysicsWorldV42(ctx,args[0]);case 'PhysicsBodyAdd':return physicsBodyAdd(ctx,args[0],args[1],args[2]);case 'PhysicsBodySet':return physicsBodySet(ctx,args[0],args[1],args[2]);case 'PhysicsStep':return physicsStep(ctx,args[0],args[1]);case 'PhysicsOverlap':return physicsOverlap(ctx,args[0],args[1],args[2]);case 'PhysicsSnapshotV42':return physicsSnapshotV42(ctx,args[0]);case 'DestroyPhysicsWorldV42':return destroyPhysicsWorldV42(ctx,args[0]);
 case 'CreateSpriteAtlas':return createSpriteAtlas(ctx,args[0]);case 'SpriteSetFrame':return spriteSetFrame(ctx,args[0],args[1]);case 'SpriteRegisterAnimation':return spriteRegisterAnimation(ctx,args[0],args[1],args[2],args[3],args[4]);case 'SpritePlay':return spritePlay(ctx,args[0],args[1],args[2]);case 'SpriteStep':return spriteStep(ctx,args[0],args[1]);case 'SpriteSnapshot':return spriteSnapshot(ctx,args[0]);case 'DestroySpriteAtlas':return destroySpriteAtlas(ctx,args[0]);
 case 'CreateMaterial':return createMaterial(ctx,args[0]);case 'MaterialSetUniform':return materialSetUniform(ctx,args[0],args[1],args[2]);case 'MaterialSetDefine':return materialSetDefine(ctx,args[0],args[1],args[2]);case 'MaterialSnapshot':return materialSnapshot(ctx,args[0]);case 'DestroyMaterial':return destroyMaterial(ctx,args[0]);
 case 'CreateRenderQueue':return createRenderQueue(ctx,args[0]);case 'RenderQueuePush':return renderQueuePush(ctx,args[0],args[1]);case 'RenderQueueBuild':return renderQueueBuild(ctx,args[0]);case 'RenderQueueSnapshot':return renderQueueSnapshot(ctx,args[0]);case 'DestroyRenderQueue':return destroyRenderQueue(ctx,args[0]);
-case 'CreateUILayoutV42':return createUILayoutV42(ctx,args[0]);case 'UILayoutCompute':return uiLayoutCompute(ctx,args[0],args[1]);case 'UISetSafeArea':return uiSetSafeArea(ctx,args[0],args[1]);case 'UILayoutSnapshot':return uiSnapshot(ctx,args[0]);case 'DestroyUILayoutV42':return destroyUILayoutV42(ctx,args[0]);
+case 'CreateUILayoutV42':return createUILayoutV42(ctx,args[0]);case 'UILayoutCompute':return uiLayoutCompute(ctx,args[0],args[1]);case 'UISetSafeArea':return uiSetSafeArea(ctx,args[0],args[1]);case 'UILayoutSnapshot':return uiSnapshotV42(ctx,args[0]);case 'DestroyUILayoutV42':return destroyUILayoutV42(ctx,args[0]);
 case 'CreateInputActions':return createInputActions(ctx,args[0]);case 'InputBind':return inputBind(ctx,args[0],args[1],args[2]);case 'InputFeed':return inputFeed(ctx,args[0],args[1],args[2],args[3],args[4]);case 'InputActionDown':return inputActionDown(ctx,args[0],args[1]);case 'InputActionsSnapshot':return inputSnapshot(ctx,args[0]);case 'DestroyInputActions':return destroyInputActions(ctx,args[0]);
 case 'CreateAudioBusGraph':return createAudioBusGraph(ctx,args[0]);case 'AudioBusCreate':return audioBusCreate(ctx,args[0],args[1],args[2]);case 'AudioVoicePlay':return audioVoicePlay(ctx,args[0],args[1],args[2],args[3],args[4]);case 'AudioBusDuck':return audioBusDuck(ctx,args[0],args[1],args[2]);case 'AudioBusSnapshot':return audioSnapshotV42(ctx,args[0]);case 'DestroyAudioBusGraph':return destroyAudioBusGraph(ctx,args[0]);
-case 'CreateSaveModel':return createSaveModel(ctx,args[0]);case 'SaveRegisterMigration':return saveRegisterMigration(ctx,args[0],args[1],args[2],args[3]);case 'SaveWrite':return saveWrite(ctx,args[0],args[1]);case 'SaveMigrate':return saveMigrate(ctx,args[0],args[1]);case 'SaveModelSnapshot':return saveSnapshot(ctx,args[0]);case 'DestroySaveModel':return destroySaveModel(ctx,args[0]);
+case 'CreateSaveModel':return createSaveModel(ctx,args[0]);case 'SaveRegisterMigration':return saveRegisterMigration(ctx,args[0],args[1],args[2],args[3]);case 'SaveWrite':return saveWrite(ctx,args[0],args[1]);case 'SaveMigrate':return saveMigrate(ctx,args[0],args[1]);case 'SaveModelSnapshot':return saveModelSnapshotV42(ctx,args[0]);case 'DestroySaveModel':return destroySaveModel(ctx,args[0]);
 case 'CreateTelemetry':return createTelemetry(ctx,args[0]);case 'TelemetryEvent':return telemetryEvent(ctx,args[0],args[1],args[2]);case 'TelemetryCounter':return telemetryCounter(ctx,args[0],args[1],args[2]);case 'TelemetryExport':return telemetryExport(ctx,args[0]);case 'DestroyTelemetry':return destroyTelemetry(ctx,args[0]);
 case 'CreateGameTestRunner':return createGameTestRunner(ctx,args[0]);case 'TestRegister':return testRegister(ctx,args[0],args[1],args[2]);case 'TestRecord':return testRecord(ctx,args[0],args[1],args[2],args[3]);case 'TestReport':return testReport(ctx,args[0]);case 'DestroyGameTestRunner':return destroyGameTestRunner(ctx,args[0]);
 case 'CreatePCEProfile':return createPCEProfile(ctx,args[0]);case 'PCERecord':return pceRecord(ctx,args[0],args[1],args[2]);case 'PCEBudget':return pceBudget(ctx,args[0]);case 'PCESnapshot':return pceSnapshot(ctx,args[0]);case 'DestroyPCEProfile':return destroyPCEProfile(ctx,args[0]);
@@ -18890,7 +18904,7 @@ function sceneEnter(ctx,h){var r=v42own(V42.scene,h);r.generation++;r.state='act
 function sceneLeave(ctx,h){var r=v42own(V42.scene,h);r.state='inactive';r.leave++;return{generation:r.generation,state:r.state};}
 function sceneTransition(ctx,h,target,generation){var r=v42own(V42.scene,h);if(generation!==undefined&&Number(generation)!==r.generation)return{ok:false,stale:true};r.name=v42str(target,r.name);r.generation++;r.state='transitioning';return{ok:true,generation:r.generation};}
 function sceneCommit(ctx,h){var r=v42own(V42.scene,h);r.state='active';return{generation:r.generation,state:r.state};}
-function sceneSnapshot(ctx,h){return v42clone(v42own(V42.scene,h));}
+function sceneLifecycleSnapshotV42(ctx,h){return v42clone(v42own(V42.scene,h));}
 function destroySceneLifecycle(ctx,h){delete V42.scene[String(h)];return true;}
 
 /* Physics body / deterministic broad-phase-friendly world */
@@ -18899,7 +18913,7 @@ function physicsBodyAdd(ctx,h,id,b){var r=v42own(V42.phys,h);b=b||{};r.bodies[St
 function physicsBodySet(ctx,h,id,patch){var b=v42own(V42.phys,h).bodies[String(id)];if(!b)return false;Object.keys(patch||{}).forEach(function(k){b[k]=v42clone(patch[k]);});return true;}
 function physicsStep(ctx,h,dt){var r=v42own(V42.phys,h),d=Math.max(0,v42num(dt,1/60));r.time+=d;Object.keys(r.bodies).forEach(function(k){var b=r.bodies[k];if(!b.static){b.vx+=r.gravity.x*d;b.vy+=r.gravity.y*d;b.x+=b.vx*d;b.y+=b.vy*d;}});return{time:r.time,dt:d};}
 function physicsOverlap(ctx,h,a,b){var r=v42own(V42.phys,h),A=r.bodies[String(a)],B=r.bodies[String(b)];if(!A||!B)return false;return Math.abs(A.x-B.x)*2<(A.w+B.w)&&Math.abs(A.y-B.y)*2<(A.h+B.h);}
-function physicsSnapshot(ctx,h){return v42clone(v42own(V42.phys,h));}
+function physicsSnapshotV42(ctx,h){return v42clone(v42own(V42.phys,h));}
 function destroyPhysicsWorldV42(ctx,h){delete V42.phys[String(h)];return true;}
 
 /* Sprite atlas / frame selection */
@@ -18929,7 +18943,7 @@ function destroyRenderQueue(ctx,h){delete V42.render[String(h)];return true;}
 function createUILayoutV42(ctx,s){s=s||{};var id=v42id('ui');V42.ui[id]={handle:id,pid:v42pid(ctx),parent:v42clone(s.parent||null),anchor:v42clone(s.anchor||{minX:0,minY:0,maxX:1,maxY:1}),size:{w:v42num(s.w,100),h:v42num(s.h,40)},margin:v42clone(s.margin||{l:0,t:0,r:0,b:0}),safe:v42clone(s.safe||{l:0,t:0,r:0,b:0}),rect:null};return{handle:id};}
 function uiLayoutCompute(ctx,h,viewport){var r=v42own(V42.ui,h),v=viewport||{w:1,h:1},a=r.anchor,m=r.margin,s=r.safe;r.rect={x:a.minX*v.w+m.l+s.l,y:a.minY*v.h+m.t+s.t,w:(a.maxX-a.minX)*v.w-m.l-m.r-s.l-s.r,h:(a.maxY-a.minY)*v.h-m.t-m.b-s.t-s.b};return v42clone(r.rect);}
 function uiSetSafeArea(ctx,h,safe){v42own(V42.ui,h).safe=v42clone(safe||{});return true;}
-function uiSnapshot(ctx,h){return v42clone(v42own(V42.ui,h));}
+function uiSnapshotV42(ctx,h){return v42clone(v42own(V42.ui,h));}
 function destroyUILayoutV42(ctx,h){delete V42.ui[String(h)];return true;}
 
 /* Accessibility + input action mapping */
@@ -18953,7 +18967,7 @@ function createSaveModel(ctx,s){s=s||{};var id=v42id('save');V42.save[id]={handl
 function saveRegisterMigration(ctx,h,from,to,fn){v42own(V42.save,h).migrations[String(from)+'>'+String(to)]=String(fn||'identity');return true;}
 function saveWrite(ctx,h,state){var r=v42own(V42.save,h);r.state=v42clone(state||{});r.updated++;return{updated:r.updated};}
 function saveMigrate(ctx,h,target){var r=v42own(V42.save,h);var old=r.schema;if(String(target)===old)return{from:old,to:old,changed:false};r.schema=String(target);return{from:old,to:r.schema,changed:true,plan:Object.keys(r.migrations)};}
-function saveSnapshot(ctx,h){return v42clone(v42own(V42.save,h));}
+function saveModelSnapshotV42(ctx,h){return v42clone(v42own(V42.save,h));}
 function destroySaveModel(ctx,h){delete V42.save[String(h)];return true;}
 
 /* Telemetry/diagnostics with privacy-safe local aggregation */
@@ -40321,7 +40335,7 @@ if(typeof module==='object'&&module&&module.exports&&typeof globalThis!=='undefi
     package:'jplopsoft-exos-gsdk',
     version:'1.1.36',
     apiVersion:158,
-    runtimeArtifact:'runtime/js_exos_gsdk_v1.1.36.js',
+    runtimeArtifact:'runtime/js_exos_gsdk_v1.1.44.js',
     contract:'runtime-truthful-public-api',
     evidencePolicy:'PASS, EXTERNAL_REQUIRED, DOCUMENTED and NOT_APPLICABLE are distinct evidence states',
     historicalCompatibility:'v1.0.127 through v1.1.36 implementation layers are compatibility/history, not independent current root contracts',
