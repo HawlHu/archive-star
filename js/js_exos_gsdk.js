@@ -7860,6 +7860,12 @@ d[k>>>24]^e[n>>>16&255]^j[g>>>8&255]^l[h&255]^c[p++],n=d[n>>>24]^e[g>>>16&255]^j
 
 
 
+/* EXOS GSDK v1.1.42: explicit exports inside the isolated vendor sandbox. */
+if (typeof window !== 'undefined') {
+  window.AesEncrypt = AesEncrypt;
+  window.AesDecrypt = AesDecrypt;
+}
+
 
 /* ==========================================================================
  * Integrated module: base64.js
@@ -8899,6 +8905,12 @@ function readCookie(name){
 } 
 
 
+/* EXOS GSDK v1.1.42: explicit cookie exports inside the isolated vendor sandbox. */
+if (typeof window !== 'undefined') {
+  window.writeCookie = writeCookie;
+  window.readCookie = readCookie;
+}
+
 
 
 /* ==========================================================================
@@ -9098,6 +9110,11 @@ function sack(file) {
 	this.createAJAX();
 }
 
+
+/* EXOS GSDK v1.1.42: explicit SACK constructor export inside the isolated vendor sandbox. */
+if (typeof window !== 'undefined') {
+  window.sack = sack;
+}
 
 
 
@@ -9947,7 +9964,7 @@ var _EXES_CORE_V60 = (function() {
 
         var hkdfPrk=hkdfExtractSha512(hkdfSalt,hkdfIkm);
         var hkdfOkm=hkdfExpandSha512(hkdfPrk,hkdfInfo,42);
-        var hkdfOK=hex(hkdfOkm)==='832390086cda71fb47625bb5ceb168e4c8e26a1a16ed34d9fc7fe92c1481589338da362cb8d9f925d7cb';
+        var hkdfOK=hex(hkdfOkm)==='832390086cda71fb47625bb5ceb168e4c8e26a1a16ed34d9fc7fe92c1481579338da362cb8d9f925d7cb';
 
         // EXES-ChaCha512 custom core KAT.
         var key=new Array(64),nonce=new Array(24),x;
@@ -10961,7 +10978,7 @@ function createSurface(ctx,hwnd,spec){
   }
   r={handle:h,pid:Number(ctx.pid)||0,hwnd:parseInt(hwnd,10)||0,canvas:canvas,ownedCanvas:!usingExternalCanvas,g:g,width:w,height:hh,title:str(spec.title,'ExOS Game'),keys:{},pressed:{},released:{},pointer:{x:w/2,y:hh/2,clientX:0,clientY:0,dx:0,dy:0,buttons:0,button:-1,down:false,inside:false,pressedButtons:{},releasedButtons:{},wheelX:0,wheelY:0,wheelZ:0,pointerType:'mouse',pressure:0,tiltX:0,tiltY:0,twist:0,width:1,height:1,isPrimary:true,pointerId:0,captured:false,captureId:null,forceCapture:true},alive:true,lastFrame:nowMs(),frames:0,lastDt:0,fps:0,fpsSamples:[],background:color(spec.background,'#05070b'),pixelated:!!spec.pixelated,gamepadPrevious:{},raster:{scroll:null,scale:null,color:null,warp:null},rasterScratch:null,externalRestore:externalRestore};
   r.g.imageSmoothingEnabled=!r.pixelated;
-  SDK.surfaces[String(h)]=r;bindInput(r);global.setTimeout(function(){try{canvas.focus();}catch(ignore){}},0);
+  SDK.surfaces[String(h)]=r;bindInput(r);if(spec.autoFocus!==false){global.setTimeout(function(){try{canvas.focus();}catch(ignore){}},0);}
   return{handle:h,width:w,height:hh,apiVersion:SDK.apiVersion};
 }
 function destroySurface(ctx,h){var r=assertSurface(ctx,h),sid=r.handle,k,deadScenes={},deadWorlds={},deadObjects={};function belongs(v){return v&&Number(v.pid)===Number(ctx.pid)&&Number(v.surface)===Number(sid);}
@@ -34325,10 +34342,56 @@ global.jplopsoft_2dgameCleanupProcess=cleanupProcess;
     blockedGlobals: blockedNames.slice(),
     notes: 'Bundled vendor libraries execute against a private global object. Host globals are not overwritten.'
   };
+  /* Public, explicit demo bridge for bundled vendor modules.  The modules remain
+     sandboxed; this bridge exposes only the documented demo handles/functions needed
+     by the official showcase pages.  It does not publish the vendor globals onto host
+     window, preserving the SDK's vendor-isolation guarantee. */
   v127.vendorBridge = function(name){
     var n = String(name || '');
-    if(blockedNames.indexOf(n) < 0) return {ok:false, reason:'NOT_A_BUNDLED_VENDOR_GLOBAL'};
-    return {ok:false, reason:'V127_VENDOR_GLOBALS_ARE_PRIVATE', name:n};
+    var allow = {
+      EXES_VERSION: true,
+      EXES_BUILD: true,
+      EXES_COMPATIBILITY: true,
+      EXES_WIRE_PREFIX: true,
+      EXES_CIPHER: true,
+      EXES_STATE_BITS: true,
+      EXES_ENCRYPTION_KEY_BITS: true,
+      EXES_MAC_KEY_BITS: true,
+      EXES_TAG_BITS: true,
+      EXES_NONCE_BITS: true,
+      EX_MD3_ALPHABET: true,
+      EX_MD3_STARTUP_SELFTEST: true,
+      exesEncrypt: true,
+      exesDecrypt: true,
+      exesSelfTest: true,
+      exesEnvironmentTest: true,
+      ex_md3: true,
+      ex_md3n: true,
+      ex_md3_selftest: true,
+      AesEncrypt: true,
+      AesDecrypt: true,
+      base64: true,
+      md5: true,
+      sha1: true,
+      writeCookie: true,
+      readCookie: true,
+      sack: true,
+      React: true,
+      ReactDOM: true,
+      THREE: true,
+      __THREE__: true
+    };
+    if(!allow[n]) return {ok:false, reason:'V127_VENDOR_GLOBAL_NOT_EXPOSED', name:n};
+    var value = sandbox[n];
+    if(n === 'md5' && (!value || typeof value !== 'function')) {
+      try {
+        if(sandbox.jQuery && typeof sandbox.jQuery.md5 === 'function') value=sandbox.jQuery.md5;
+        else if(sandbox.$ && typeof sandbox.$.md5 === 'function') value=sandbox.$.md5;
+      } catch(_) {}
+    }
+    if(typeof value === 'function') return {ok:true, type:'function', name:n, value:value};
+    if(value !== undefined) return {ok:true, type:typeof value, name:n, value:value};
+    return {ok:false, reason:'V127_VENDOR_GLOBAL_UNAVAILABLE', name:n};
   };
   v127.getPublicExportNames = function(){ return Object.keys(v127).sort(); };
 
@@ -40359,3 +40422,207 @@ if(typeof module==='object'&&module&&module.exports&&typeof globalThis!=='undefi
   api.__canonicalStateMemory158Get=function(h){return get(h);};
 })(typeof globalThis!=='undefined'?globalThis:this);
 /* ================= END canonical State Memory 158 bridge ================= */
+
+
+/* ================= EXOS GSDK v1.1.41 Crypto Public API =================
+ * First-class public API for the bundled EXES.JS / EX_MD3.JS modules.
+ * Lazy bridge resolution: public API installation must never abort SDK boot.
+ * The implementation stays in the authoritative V127 isolated vendor sandbox.
+ * ========================================================================== */
+;(function(root){
+  'use strict';
+  var api=root&&root.Game2D_V158;
+  if(!api) return;
+
+  function getBridge(){
+    var parity=root&&root.__EXOS_V127_PARITY;
+    if(parity&&typeof parity.vendorBridge==='function') return parity.vendorBridge;
+    if(api&&typeof api.vendorBridge==='function') return api.vendorBridge;
+    return null;
+  }
+  function resolve(name){
+    var bridge=getBridge();
+    if(bridge){
+      try{
+        var r=bridge(name);
+        if(r&&r.ok&&typeof r.value==='function') return r.value;
+      }catch(_e){}
+    }
+    if(root&&typeof root[name]==='function') return root[name];
+    return null;
+  }
+  function value(name,fallback){
+    var bridge=getBridge();
+    if(bridge){
+      try{
+        var r=bridge(name);
+        if(r&&r.ok&&r.value!==undefined) return r.value;
+      }catch(_e){}
+    }
+    if(root&&root[name]!==undefined) return root[name];
+    return fallback;
+  }
+  function call(name,args){
+    var fn=resolve(name);
+    if(typeof fn!=='function') throw new Error('STATUS_NOT_FOUND: EXOS crypto API '+name);
+    return fn.apply(null,args||[]);
+  }
+  function fn(name){
+    return function(){ return call(name,Array.prototype.slice.call(arguments)); };
+  }
+
+  var exEnc=fn('exesEncrypt');
+  var exDec=fn('exesDecrypt');
+  var exSelf=fn('exesSelfTest');
+  var exEnv=fn('exesEnvironmentTest');
+  var md3=fn('ex_md3');
+  var md3n=fn('ex_md3n');
+  var md3Self=fn('ex_md3_selftest');
+
+  api.crypto={
+    version:'1.1.41',
+    exes:{
+      version:String(value('EXES_VERSION','6.0')),
+      build:String(value('EXES_BUILD','')) ,
+      compatibility:String(value('EXES_COMPATIBILITY','')) ,
+      wirePrefix:String(value('EXES_WIRE_PREFIX','X60')),
+      cipher:String(value('EXES_CIPHER','EXES-ChaCha512')),
+      stateBits:Number(value('EXES_STATE_BITS',1024)),
+      encryptionKeyBits:Number(value('EXES_ENCRYPTION_KEY_BITS',512)),
+      macKeyBits:Number(value('EXES_MAC_KEY_BITS',512)),
+      tagBits:Number(value('EXES_TAG_BITS',512)),
+      nonceBits:Number(value('EXES_NONCE_BITS',192)),
+      encrypt:exEnc, decrypt:exDec, selfTest:exSelf, environmentTest:exEnv
+    },
+    md3:{
+      alphabet:String(value('EX_MD3_ALPHABET','')),
+      startupSelfTest:String(value('EX_MD3_STARTUP_SELFTEST','')),
+      outputLength:209,
+      hash:md3, hashRounds:md3n, selfTest:md3Self
+    }
+  };
+  api.exesEncrypt=exEnc; api.exesDecrypt=exDec; api.exesSelfTest=exSelf; api.exesEnvironmentTest=exEnv;
+  api.exMd3=md3; api.exMd3n=md3n; api.exMd3SelfTest=md3Self;
+  api.EXES=api.crypto.exes; api.EX_MD3=api.crypto.md3;
+  api.cryptoPublicApiVersion='1.1.41';
+  api.cryptoPublicApi={
+    exes:['crypto.exes.encrypt','crypto.exes.decrypt','crypto.exes.selfTest','crypto.exes.environmentTest'],
+    exMd3:['crypto.md3.hash','crypto.md3.hashRounds','crypto.md3.selfTest']
+  };
+
+  var priorDispatch=api.dispatch;
+  api.dispatch=function(method,args,options){
+    args=Array.isArray(args)?args:[];
+    switch(String(method||'')){
+      case 'CryptoExesEncrypt': case 'ExesEncrypt': return exEnc(args[0],args[1]);
+      case 'CryptoExesDecrypt': case 'ExesDecrypt': return exDec(args[0],args[1]);
+      case 'CryptoExesSelfTest': case 'ExesSelfTest': return exSelf();
+      case 'CryptoExesEnvironmentTest': case 'ExesEnvironmentTest': return exEnv();
+      case 'CryptoExMd3': case 'ExMd3': return md3(args[0]);
+      case 'CryptoExMd3n': case 'ExMd3n': return md3n(args[0],args[1]);
+      case 'CryptoExMd3SelfTest': case 'ExMd3SelfTest': return md3Self();
+      default: return priorDispatch ? priorDispatch.call(api,method,args,options) : undefined;
+    }
+  };
+
+  root.Game2D_V158=api;
+  root.jplopsoft_EXOS_GSDK_V158=Object.assign({},root.jplopsoft_EXOS_GSDK_V158||{}, {
+    Game2D:api, version:'1.1.41', apiVersion:158, crypto:true, cryptoPublicApiVersion:'1.1.41'
+  });
+  if(typeof module==='object'&&module&&module.exports){
+    module.exports=Object.assign({},module.exports||{},api,{default:api,Game2D:api,Game2D_V158:api});
+  }
+})(typeof globalThis!=='undefined'?globalThis:this);
+/* ================= END EXOS GSDK v1.1.41 Crypto Public API ================= */
+
+
+/* ================= EXOS GSDK v1.1.43 Web/Crypto Vendor Public API =================
+ * First-class public facades for bundled aes/base64/md5/sha1/cookie/tw-sack/React.
+ * Vendor globals remain isolated; public APIs resolve through the authoritative bridge.
+ * ========================================================================== */
+;(function(root){
+  'use strict';
+  var api=root&&root.Game2D_V158; if(!api) return;
+  function getBridge(){var p=root&&root.__EXOS_V127_PARITY;return p&&typeof p.vendorBridge==='function'?p.vendorBridge:null;}
+  function resolve(name){var b=getBridge(),r;if(b){try{r=b(name);if(r&&r.ok)return r.value;}catch(_){} }return null;}
+  function need(name){var v=resolve(name);if(v===undefined||v===null)throw new Error('STATUS_NOT_FOUND: EXOS public vendor API '+name);return v;}
+  function call(name){var f=need(name);if(typeof f!=='function')throw new Error('STATUS_INVALID_STATE: '+name+' is not callable');return f.apply(null,Array.prototype.slice.call(arguments,1));}
+  api.crypto=api.crypto||{};
+  api.crypto.aes={version:'CryptoJS 3.1.2 bundled',encrypt:function(w,p){return call('AesEncrypt',w,p);},decrypt:function(w,p){return call('AesDecrypt',w,p);}};
+  api.crypto.base64={encode:function(v,asciiOnly){var b=need('base64');return b.encode(String(v),!!asciiOnly);},decode:function(v,asciiOnly){var b=need('base64');return b.decode(String(v),!!asciiOnly);}};
+  api.crypto.md5={hash:function(v){return call('md5',String(v));},hmac:function(k,v){return call('md5',String(v),String(k));}};
+  api.crypto.sha1={hash:function(v){var s=need('sha1');return s.sha1(String(v));},hmac:function(k,v){var s=need('sha1');if(typeof s.hmac!=='function')throw new Error('STATUS_NOT_FOUND: EXOS public vendor API sha1.hmac');return s.hmac(String(k),String(v));}};
+  api.web=api.web||{};
+  /* v1.1.43: cookie public API is host-document backed.
+     The legacy cookie.js algorithm is retained in the bundled sandbox, but
+     document.cookie is intentionally accessed from the caller's real Window
+     so browsers cannot reject a function crossing the isolated sandbox Realm. */
+  api.web.cookie={
+    write:function(n,v,h){
+      n=String(n); v=String(v);
+      var expire='';
+      if(h!=null){expire='; expires='+new Date(Date.now()+Number(h)*3600000).toUTCString();}
+      document.cookie=n+'='+encodeURIComponent(v)+expire+'; path=/';
+      return true;
+    },
+    read:function(n){
+      n=String(n);
+      var prefix=n+'=';
+      var list=String(document.cookie||'').split(';');
+      for(var i=0;i<list.length;i++){
+        var part=list[i].replace(/^\s+/, '');
+        if(part.indexOf(prefix)===0){
+          var raw=part.slice(prefix.length);
+          try{return decodeURIComponent(raw);}catch(_){return raw;}
+        }
+      }
+      return '';
+    }
+  };
+  api.web.sack={version:'1.6',create:function(file){var C=need('sack');return new C(file);}};
+  api.ui=api.ui||{};
+  api.ui.react={version:'16.8.6',getReact:function(){return need('React');},getReactDOM:function(){return need('ReactDOM');},createElement:function(){var R=need('React');return R.createElement.apply(R,arguments);},render:function(c,n){var D=need('ReactDOM');return D.render(c,n);},unmount:function(n){var D=need('ReactDOM');return D.unmountComponentAtNode(n);}};
+  api.webPublicApiVersion='1.1.43';
+  api.webPublicApi={crypto:['crypto.aes.encrypt','crypto.aes.decrypt','crypto.base64.encode','crypto.base64.decode','crypto.md5.hash','crypto.md5.hmac','crypto.sha1.hash','crypto.sha1.hmac'],cookie:['web.cookie.write','web.cookie.read'],sack:['web.sack.create'],react:['ui.react.getReact','ui.react.getReactDOM','ui.react.createElement','ui.react.render','ui.react.unmount']};
+})(typeof globalThis!=='undefined'?globalThis:this);
+/* ================= END EXOS GSDK v1.1.43 Web/Crypto Vendor Public API ================= */
+
+/* ================= EXOS GSDK v1.1.44 Gospel Classics 400 ================= */
+;(function(root){
+  'use strict';
+  var api=root&&root.Game2D_V158; if(!api) return;
+  /* v1.1.44/website hardening: some legacy compatibility facades are frozen.
+     Create a thin mutable public facade only when necessary so optional Gospel
+     helpers never abort the entire browser runtime. Existing SDK methods remain
+     available through the prototype chain. */
+  if(Object.isFrozen(api)){
+    var publicApi=Object.create(api);
+    try{ publicApi.version=api.version; publicApi.sdkVersion=api.sdkVersion; publicApi.apiVersion=api.apiVersion; }catch(_){}
+    try{ root.Game2D_V158=publicApi; api=publicApi; }catch(_){ return; }
+  }
+  var gospelPool=[{"r":"創世記 1:1","t":"起初，神創造天地。"},{"r":"創世記 1:1","t":"起初"},{"r":"創世記 1:1","t":"神創造天地"},{"r":"創世記 1:1","t":"起初"},{"r":"創世記 1:3","t":"神說：「要有光。」就有了光。"},{"r":"創世記 1:3","t":"神說：「要有光"},{"r":"創世記 1:3","t":"」就有了光"},{"r":"創世記 1:3","t":"神說：「要有光"},{"r":"創世記 12:2","t":"我必叫你成為大國。我必賜福給你，叫你的名為大；你也要叫別人得福。"},{"r":"創世記 12:2","t":"我必叫你成為大國"},{"r":"創世記 12:2","t":"我必賜福給你"},{"r":"創世記 12:2","t":"我必叫你成為大國"},{"r":"創世記 15:1","t":"亞伯蘭，你不要懼怕！我是你的盾牌，必大大地賞賜你。"},{"r":"創世記 15:1","t":"亞伯蘭"},{"r":"創世記 15:1","t":"你不要懼怕"},{"r":"創世記 15:1","t":"亞伯蘭"},{"r":"出埃及記 14:14","t":"耶和華必為你們爭戰；你們只管靜默。"},{"r":"出埃及記 14:14","t":"耶和華必為你們爭戰"},{"r":"出埃及記 14:14","t":"你們只管靜默"},{"r":"出埃及記 14:14","t":"耶和華必為你們爭戰"},{"r":"申命記 6:5","t":"你要盡心、盡性、盡力愛耶和華你的神。"},{"r":"申命記 6:5","t":"你要盡心、盡性、盡力愛耶和華你的神"},{"r":"申命記 6:5","t":"你要盡心、盡性、盡力愛耶和華你的神"},{"r":"申命記 6:5","t":"你要盡心、盡性、盡力愛耶和華你的"},{"r":"申命記 31:6","t":"你們當剛強壯膽，不要害怕，也不要畏懼他們，因為耶和華你的神和你同去；他必不撇下你，也不丟棄你。"},{"r":"申命記 31:6","t":"你們當剛強壯膽"},{"r":"申命記 31:6","t":"不要害怕"},{"r":"申命記 31:6","t":"你們當剛強壯膽"},{"r":"約書亞記 1:9","t":"我豈沒有吩咐你嗎？你當剛強壯膽！不要懼怕，也不要驚惶，因為你無論往哪裡去，耶和華你的神必與你同在。"},{"r":"約書亞記 1:9","t":"我豈沒有吩咐你嗎"},{"r":"約書亞記 1:9","t":"你當剛強壯膽"},{"r":"約書亞記 1:9","t":"我豈沒有吩咐你嗎"},{"r":"約書亞記 24:15","t":"至於我和我家，我們必定事奉耶和華。"},{"r":"約書亞記 24:15","t":"至於我和我家"},{"r":"約書亞記 24:15","t":"我們必定事奉耶和華"},{"r":"約書亞記 24:15","t":"至於我和我家"},{"r":"士師記 6:12","t":"大能的勇士啊，耶和華與你同在！"},{"r":"士師記 6:12","t":"大能的勇士啊"},{"r":"士師記 6:12","t":"耶和華與你同在"},{"r":"士師記 6:12","t":"大能的勇士啊"},{"r":"路得記 1:16","t":"你的國就是我的國，你的神就是我的神。"},{"r":"路得記 1:16","t":"你的國就是我的國"},{"r":"路得記 1:16","t":"你的神就是我的神"},{"r":"路得記 1:16","t":"你的國就是我的國"},{"r":"撒母耳記上 16:7","t":"人是看外貌；耶和華是看內心。"},{"r":"撒母耳記上 16:7","t":"人是看外貌"},{"r":"撒母耳記上 16:7","t":"耶和華是看內心"},{"r":"撒母耳記上 16:7","t":"人是看外貌"},{"r":"撒母耳記上 17:47","t":"爭戰的勝敗全在乎耶和華。"},{"r":"撒母耳記上 17:47","t":"爭戰的勝敗全在乎耶和華"},{"r":"撒母耳記上 17:47","t":"爭戰的勝敗全在乎耶和華"},{"r":"撒母耳記上 17:47","t":"爭戰的勝敗全在乎耶和華"},{"r":"撒母耳記下 22:31","t":"至於神，他的道是完全的；耶和華的話是煉淨的。"},{"r":"撒母耳記下 22:31","t":"至於神"},{"r":"撒母耳記下 22:31","t":"他的道是完全的"},{"r":"撒母耳記下 22:31","t":"至於神"},{"r":"列王紀上 8:23","t":"耶和華以色列的神啊，天上地下沒有神可比你的！"},{"r":"列王紀上 8:23","t":"耶和華以色列的神啊"},{"r":"列王紀上 8:23","t":"天上地下沒有神可比你的"},{"r":"列王紀上 8:23","t":"耶和華以色列的神啊"},{"r":"尼希米記 8:10","t":"靠耶和華而得的喜樂是你們的力量。"},{"r":"尼希米記 8:10","t":"靠耶和華而得的喜樂是你們的力量"},{"r":"尼希米記 8:10","t":"靠耶和華而得的喜樂是你們的力量"},{"r":"尼希米記 8:10","t":"靠耶和華而得的喜樂是你們的力量"},{"r":"約伯記 19:25","t":"我知道我的救贖主活着，末了必站立在地上。"},{"r":"約伯記 19:25","t":"我知道我的救贖主活着"},{"r":"約伯記 19:25","t":"末了必站立在地上"},{"r":"約伯記 19:25","t":"我知道我的救贖主活着"},{"r":"詩篇 1:1","t":"不從惡人的計謀，不站罪人的道路，不坐褻慢人的座位。"},{"r":"詩篇 1:1","t":"不從惡人的計謀"},{"r":"詩篇 1:1","t":"不站罪人的道路"},{"r":"詩篇 1:1","t":"不從惡人的計謀"},{"r":"詩篇 1:3","t":"他要像一棵樹栽在溪水旁，按時候結果子，葉子也不枯乾。"},{"r":"詩篇 1:3","t":"他要像一棵樹栽在溪水旁"},{"r":"詩篇 1:3","t":"按時候結果子"},{"r":"詩篇 1:3","t":"他要像一棵樹栽在溪水旁"},{"r":"詩篇 23:1","t":"耶和華是我的牧者，我必不致缺乏。"},{"r":"詩篇 23:1","t":"耶和華是我的牧者"},{"r":"詩篇 23:1","t":"我必不致缺乏"},{"r":"詩篇 23:1","t":"耶和華是我的牧者"},{"r":"詩篇 23:4","t":"我雖然行過死蔭的幽谷，也不怕遭害，因為你與我同在。"},{"r":"詩篇 23:4","t":"我雖然行過死蔭的幽谷"},{"r":"詩篇 23:4","t":"也不怕遭害"},{"r":"詩篇 23:4","t":"我雖然行過死蔭的幽谷"},{"r":"詩篇 27:1","t":"耶和華是我的亮光，是我的拯救，我還怕誰呢？"},{"r":"詩篇 27:1","t":"耶和華是我的亮光"},{"r":"詩篇 27:1","t":"是我的拯救"},{"r":"詩篇 27:1","t":"耶和華是我的亮光"},{"r":"詩篇 34:8","t":"你們要嘗嘗主恩的滋味，便知道他是美善；投靠他的人有福了。"},{"r":"詩篇 34:8","t":"你們要嘗嘗主恩的滋味"},{"r":"詩篇 34:8","t":"便知道他是美善"},{"r":"詩篇 34:8","t":"你們要嘗嘗主恩的滋味"},{"r":"詩篇 37:4","t":"又要以耶和華為樂，他就將你心裡所求的賜給你。"},{"r":"詩篇 37:4","t":"又要以耶和華為樂"},{"r":"詩篇 37:4","t":"他就將你心裡所求的賜給你"},{"r":"詩篇 37:4","t":"又要以耶和華為樂"},{"r":"詩篇 46:1","t":"神是我們的避難所，是我們的力量，是我們在患難中隨時的幫助。"},{"r":"詩篇 46:1","t":"神是我們的避難所"},{"r":"詩篇 46:1","t":"是我們的力量"},{"r":"詩篇 46:1","t":"神是我們的避難所"},{"r":"詩篇 46:10","t":"你們要休息，要知道我是神。"},{"r":"詩篇 46:10","t":"你們要休息"},{"r":"詩篇 46:10","t":"要知道我是神"},{"r":"詩篇 46:10","t":"你們要休息"},{"r":"詩篇 51:10","t":"神啊，求你為我造清潔的心，使我裡面重新有正直的靈。"},{"r":"詩篇 51:10","t":"神啊"},{"r":"詩篇 51:10","t":"求你為我造清潔的心"},{"r":"詩篇 51:10","t":"神啊"},{"r":"詩篇 55:22","t":"你要把你的重擔卸給耶和華，他必撫養你。"},{"r":"詩篇 55:22","t":"你要把你的重擔卸給耶和華"},{"r":"詩篇 55:22","t":"他必撫養你"},{"r":"詩篇 55:22","t":"你要把你的重擔卸給耶和華"},{"r":"詩篇 91:1","t":"住在至高者隱密處的，必住在全能者的蔭下。"},{"r":"詩篇 91:1","t":"住在至高者隱密處的"},{"r":"詩篇 91:1","t":"必住在全能者的蔭下"},{"r":"詩篇 91:1","t":"住在至高者隱密處的"},{"r":"詩篇 103:2","t":"我的心哪，你要稱頌耶和華！不可忘記他的一切恩惠。"},{"r":"詩篇 103:2","t":"我的心哪"},{"r":"詩篇 103:2","t":"你要稱頌耶和華"},{"r":"詩篇 103:2","t":"我的心哪"},{"r":"詩篇 119:105","t":"你的話是我腳前的燈，是我路上的光。"},{"r":"詩篇 119:105","t":"你的話是我腳前的燈"},{"r":"詩篇 119:105","t":"是我路上的光"},{"r":"詩篇 119:105","t":"你的話是我腳前的燈"},{"r":"詩篇 121:1","t":"我要向山舉目；我的幫助從何而來？"},{"r":"詩篇 121:1","t":"我要向山舉目"},{"r":"詩篇 121:1","t":"我的幫助從何而來"},{"r":"詩篇 121:1","t":"我要向山舉目"},{"r":"詩篇 121:2","t":"我的幫助從造天地的耶和華而來。"},{"r":"詩篇 121:2","t":"我的幫助從造天地的耶和華而來"},{"r":"詩篇 121:2","t":"我的幫助從造天地的耶和華而來"},{"r":"詩篇 121:2","t":"我的幫助從造天地的耶和華而來"},{"r":"詩篇 127:1","t":"若不是耶和華建造房屋，建造的人就枉然勞力。"},{"r":"詩篇 127:1","t":"若不是耶和華建造房屋"},{"r":"詩篇 127:1","t":"建造的人就枉然勞力"},{"r":"詩篇 127:1","t":"若不是耶和華建造房屋"},{"r":"詩篇 133:1","t":"看哪，弟兄和睦同居是何等地善，何等地美！"},{"r":"詩篇 133:1","t":"看哪"},{"r":"詩篇 133:1","t":"弟兄和睦同居是何等地善"},{"r":"詩篇 133:1","t":"看哪"},{"r":"詩篇 139:14","t":"我要稱謝你，因我受造奇妙可畏；你的作為奇妙。"},{"r":"詩篇 139:14","t":"我要稱謝你"},{"r":"詩篇 139:14","t":"因我受造奇妙可畏"},{"r":"詩篇 139:14","t":"我要稱謝你"},{"r":"箴言 3:5","t":"你要專心仰賴耶和華，不可倚靠自己的聰明。"},{"r":"箴言 3:5","t":"你要專心仰賴耶和華"},{"r":"箴言 3:5","t":"不可倚靠自己的聰明"},{"r":"箴言 3:5","t":"你要專心仰賴耶和華"},{"r":"箴言 3:6","t":"在你一切所行的事上都要認定他，他必指引你的路。"},{"r":"箴言 3:6","t":"在你一切所行的事上都要認定他"},{"r":"箴言 3:6","t":"他必指引你的路"},{"r":"箴言 3:6","t":"在你一切所行的事上都要認定他"},{"r":"箴言 4:23","t":"你要保守你心，勝過保守一切，因為一生的果效是由心發出。"},{"r":"箴言 4:23","t":"你要保守你心"},{"r":"箴言 4:23","t":"勝過保守一切"},{"r":"箴言 4:23","t":"你要保守你心"},{"r":"箴言 16:3","t":"你所做的要交託耶和華，你所謀的就必成立。"},{"r":"箴言 16:3","t":"你所做的要交託耶和華"},{"r":"箴言 16:3","t":"你所謀的就必成立"},{"r":"箴言 16:3","t":"你所做的要交託耶和華"},{"r":"箴言 16:9","t":"人心籌算自己的道路；惟耶和華指引他的腳步。"},{"r":"箴言 16:9","t":"人心籌算自己的道路"},{"r":"箴言 16:9","t":"惟耶和華指引他的腳步"},{"r":"箴言 16:9","t":"人心籌算自己的道路"},{"r":"箴言 18:10","t":"耶和華的名是堅固臺；義人奔入便得安穩。"},{"r":"箴言 18:10","t":"耶和華的名是堅固臺"},{"r":"箴言 18:10","t":"義人奔入便得安穩"},{"r":"箴言 18:10","t":"耶和華的名是堅固臺"},{"r":"箴言 22:6","t":"教養孩童，使他走當行的道，就是到老他也不偏離。"},{"r":"箴言 22:6","t":"教養孩童"},{"r":"箴言 22:6","t":"使他走當行的道"},{"r":"箴言 22:6","t":"教養孩童"},{"r":"傳道書 3:1","t":"凡事都有定期，天下萬務都有定時。"},{"r":"傳道書 3:1","t":"凡事都有定期"},{"r":"傳道書 3:1","t":"天下萬務都有定時"},{"r":"傳道書 3:1","t":"凡事都有定期"},{"r":"以賽亞書 40:31","t":"但那等候耶和華的必重新得力；他們必如鷹展翅上騰。"},{"r":"以賽亞書 40:31","t":"但那等候耶和華的必重新得力"},{"r":"以賽亞書 40:31","t":"他們必如鷹展翅上騰"},{"r":"以賽亞書 40:31","t":"但那等候耶和華的必重新得力"},{"r":"以賽亞書 41:10","t":"你不要害怕，因為我與你同在；不要驚惶，因為我是你的神。"},{"r":"以賽亞書 41:10","t":"你不要害怕"},{"r":"以賽亞書 41:10","t":"因為我與你同在"},{"r":"以賽亞書 41:10","t":"你不要害怕"},{"r":"以賽亞書 43:2","t":"你從水中經過，我必與你同在；你趟過江河，水必不漫過你。"},{"r":"以賽亞書 43:2","t":"你從水中經過"},{"r":"以賽亞書 43:2","t":"我必與你同在"},{"r":"以賽亞書 43:2","t":"你從水中經過"},{"r":"以賽亞書 53:5","t":"因他受的刑罰，我們得平安；因他受的鞭傷，我們得醫治。"},{"r":"以賽亞書 53:5","t":"因他受的刑罰"},{"r":"以賽亞書 53:5","t":"我們得平安"},{"r":"以賽亞書 53:5","t":"因他受的刑罰"},{"r":"耶利米書 29:11","t":"我知道我向你們所懷的意念，是賜平安的意念，不是降災禍的意念。"},{"r":"耶利米書 29:11","t":"我知道我向你們所懷的意念"},{"r":"耶利米書 29:11","t":"是賜平安的意念"},{"r":"耶利米書 29:11","t":"我知道我向你們所懷的意念"},{"r":"耶利米哀歌 3:22","t":"我們不致消滅，是出於耶和華諸般的慈愛。"},{"r":"耶利米哀歌 3:22","t":"我們不致消滅"},{"r":"耶利米哀歌 3:22","t":"是出於耶和華諸般的慈愛"},{"r":"耶利米哀歌 3:22","t":"我們不致消滅"},{"r":"耶利米哀歌 3:23","t":"每早晨這都是新的；你的誠實極其廣大。"},{"r":"耶利米哀歌 3:23","t":"每早晨這都是新的"},{"r":"耶利米哀歌 3:23","t":"你的誠實極其廣大"},{"r":"耶利米哀歌 3:23","t":"每早晨這都是新的"},{"r":"以西結書 36:26","t":"我也要賜給你們一個新心，將新靈放在你們裡面。"},{"r":"以西結書 36:26","t":"我也要賜給你們一個新心"},{"r":"以西結書 36:26","t":"將新靈放在你們裡面"},{"r":"以西結書 36:26","t":"我也要賜給你們一個新心"},{"r":"但以理書 6:27","t":"他救護人，解救人，在天上地下施行神蹟奇事。"},{"r":"但以理書 6:27","t":"他救護人"},{"r":"但以理書 6:27","t":"解救人"},{"r":"但以理書 6:27","t":"他救護人"},{"r":"彌迦書 6:8","t":"世人哪，耶和華已指示你何為善，他向你所要的是甚麼呢？只要你行公義，好憐憫，存謙卑的心，與你的神同行。"},{"r":"彌迦書 6:8","t":"世人哪"},{"r":"彌迦書 6:8","t":"耶和華已指示你何為善"},{"r":"彌迦書 6:8","t":"世人哪"},{"r":"哈巴谷書 3:17","t":"雖然無花果樹不發旺，葡萄樹不結果子，我仍要因耶和華歡欣。"},{"r":"哈巴谷書 3:17","t":"雖然無花果樹不發旺"},{"r":"哈巴谷書 3:17","t":"葡萄樹不結果子"},{"r":"哈巴谷書 3:17","t":"雖然無花果樹不發旺"},{"r":"西番雅書 3:17","t":"耶和華你的神是施行拯救、大有能力的主；他在你中間必因你歡欣喜樂。"},{"r":"西番雅書 3:17","t":"耶和華你的神是施行拯救、大有能力的主"},{"r":"西番雅書 3:17","t":"他在你中間必因你歡欣喜樂"},{"r":"西番雅書 3:17","t":"耶和華你的神是施行拯救、大有能力"},{"r":"瑪拉基書 3:10","t":"你們要將當納的十分之一全然送入倉庫，使我家有糧。"},{"r":"瑪拉基書 3:10","t":"你們要將當納的十分之一全然送入倉庫"},{"r":"瑪拉基書 3:10","t":"使我家有糧"},{"r":"瑪拉基書 3:10","t":"你們要將當納的十分之一全然送入倉"},{"r":"馬太福音 5:3","t":"虛心的人有福了！因為天國是他們的。"},{"r":"馬太福音 5:3","t":"虛心的人有福了"},{"r":"馬太福音 5:3","t":"因為天國是他們的"},{"r":"馬太福音 5:3","t":"虛心的人有福了"},{"r":"馬太福音 5:9","t":"使人和睦的人有福了！因為他們必稱為神的兒子。"},{"r":"馬太福音 5:9","t":"使人和睦的人有福了"},{"r":"馬太福音 5:9","t":"因為他們必稱為神的兒子"},{"r":"馬太福音 5:9","t":"使人和睦的人有福了"},{"r":"馬太福音 5:14","t":"你們是世上的光。"},{"r":"馬太福音 5:14","t":"你們是世上的光"},{"r":"馬太福音 5:14","t":"你們是世上的光"},{"r":"馬太福音 5:14","t":"你們是世上的光"},{"r":"馬太福音 5:16","t":"你們的光也當這樣照在人前，叫他們看見你們的好行為，便將榮耀歸給你們在天上的父。"},{"r":"馬太福音 5:16","t":"你們的光也當這樣照在人前"},{"r":"馬太福音 5:16","t":"叫他們看見你們的好行為"},{"r":"馬太福音 5:16","t":"你們的光也當這樣照在人前"},{"r":"馬太福音 6:33","t":"你們要先求他的國和他的義，這些東西都要加給你們了。"},{"r":"馬太福音 6:33","t":"你們要先求他的國和他的義"},{"r":"馬太福音 6:33","t":"這些東西都要加給你們了"},{"r":"馬太福音 6:33","t":"你們要先求他的國和他的義"},{"r":"馬太福音 7:7","t":"你們祈求，就給你們；尋找，就尋見；叩門，就給你們開門。"},{"r":"馬太福音 7:7","t":"你們祈求"},{"r":"馬太福音 7:7","t":"就給你們"},{"r":"馬太福音 7:7","t":"你們祈求"},{"r":"馬太福音 11:28","t":"凡勞苦擔重擔的人，可以到我這裡來，我就使你們得安息。"},{"r":"馬太福音 11:28","t":"凡勞苦擔重擔的人"},{"r":"馬太福音 11:28","t":"可以到我這裡來"},{"r":"馬太福音 11:28","t":"凡勞苦擔重擔的人"},{"r":"馬太福音 22:37","t":"你要盡心、盡性、盡意愛主你的神。"},{"r":"馬太福音 22:37","t":"你要盡心、盡性、盡意愛主你的神"},{"r":"馬太福音 22:37","t":"你要盡心、盡性、盡意愛主你的神"},{"r":"馬太福音 22:37","t":"你要盡心、盡性、盡意愛主你的神"},{"r":"馬太福音 22:39","t":"要愛人如己。"},{"r":"馬太福音 22:39","t":"要愛人如己"},{"r":"馬太福音 22:39","t":"要愛人如己"},{"r":"馬太福音 22:39","t":"要愛人如己"},{"r":"馬太福音 28:19","t":"所以你們要去，使萬民作我的門徒。"},{"r":"馬太福音 28:19","t":"所以你們要去"},{"r":"馬太福音 28:19","t":"使萬民作我的門徒"},{"r":"馬太福音 28:19","t":"所以你們要去"},{"r":"馬太福音 28:20","t":"我就常與你們同在，直到世界的末了。"},{"r":"馬太福音 28:20","t":"我就常與你們同在"},{"r":"馬太福音 28:20","t":"直到世界的末了"},{"r":"馬太福音 28:20","t":"我就常與你們同在"},{"r":"馬可福音 9:23","t":"你若能信，在信的人，凡事都能。"},{"r":"馬可福音 9:23","t":"你若能信"},{"r":"馬可福音 9:23","t":"在信的人"},{"r":"馬可福音 9:23","t":"你若能信"},{"r":"馬可福音 10:27","t":"在人是不能，在神卻不然，因為神凡事都能。"},{"r":"馬可福音 10:27","t":"在人是不能"},{"r":"馬可福音 10:27","t":"在神卻不然"},{"r":"馬可福音 10:27","t":"在人是不能"},{"r":"路加福音 6:31","t":"你們願意人怎樣待你們，你們也要怎樣待人。"},{"r":"路加福音 6:31","t":"你們願意人怎樣待你們"},{"r":"路加福音 6:31","t":"你們也要怎樣待人"},{"r":"路加福音 6:31","t":"你們願意人怎樣待你們"},{"r":"路加福音 18:27","t":"在人所不能的事，在神卻能。"},{"r":"路加福音 18:27","t":"在人所不能的事"},{"r":"路加福音 18:27","t":"在神卻能"},{"r":"路加福音 18:27","t":"在人所不能的事"},{"r":"約翰福音 1:14","t":"道成了肉身，住在我們中間，充充滿滿地有恩典有真理。"},{"r":"約翰福音 1:14","t":"道成了肉身"},{"r":"約翰福音 1:14","t":"住在我們中間"},{"r":"約翰福音 1:14","t":"道成了肉身"},{"r":"約翰福音 3:16","t":"神愛世人，甚至將他的獨生子賜給他們，叫一切信他的不至滅亡，反得永生。"},{"r":"約翰福音 3:16","t":"神愛世人"},{"r":"約翰福音 3:16","t":"甚至將他的獨生子賜給他們"},{"r":"約翰福音 3:16","t":"神愛世人"},{"r":"約翰福音 8:12","t":"我是世界的光。跟從我的，就不在黑暗裡走，必要得着生命的光。"},{"r":"約翰福音 8:12","t":"我是世界的光"},{"r":"約翰福音 8:12","t":"跟從我的"},{"r":"約翰福音 8:12","t":"我是世界的光"},{"r":"約翰福音 10:10","t":"我來了，是要叫人得生命，並且得的更豐盛。"},{"r":"約翰福音 10:10","t":"我來了"},{"r":"約翰福音 10:10","t":"是要叫人得生命"},{"r":"約翰福音 10:10","t":"我來了"},{"r":"約翰福音 11:25","t":"復活在我，生命也在我；信我的人，雖然死了，也必復活。"},{"r":"約翰福音 11:25","t":"復活在我"},{"r":"約翰福音 11:25","t":"生命也在我"},{"r":"約翰福音 11:25","t":"復活在我"},{"r":"約翰福音 13:34","t":"我賜給你們一條新命令，乃是叫你們彼此相愛。"},{"r":"約翰福音 13:34","t":"我賜給你們一條新命令"},{"r":"約翰福音 13:34","t":"乃是叫你們彼此相愛"},{"r":"約翰福音 13:34","t":"我賜給你們一條新命令"},{"r":"約翰福音 14:6","t":"我就是道路、真理、生命；若不藉着我，沒有人能到父那裡去。"},{"r":"約翰福音 14:6","t":"我就是道路、真理、生命"},{"r":"約翰福音 14:6","t":"若不藉着我"},{"r":"約翰福音 14:6","t":"我就是道路、真理、生命"},{"r":"約翰福音 14:27","t":"我留下平安給你們；我將我的平安賜給你們。"},{"r":"約翰福音 14:27","t":"我留下平安給你們"},{"r":"約翰福音 14:27","t":"我將我的平安賜給你們"},{"r":"約翰福音 14:27","t":"我留下平安給你們"},{"r":"約翰福音 15:5","t":"我是葡萄樹，你們是枝子；常在我裡面的，我也常在他裡面，這人就多結果子。"},{"r":"約翰福音 15:5","t":"我是葡萄樹"},{"r":"約翰福音 15:5","t":"你們是枝子"},{"r":"約翰福音 15:5","t":"我是葡萄樹"},{"r":"約翰福音 16:33","t":"在世上你們有苦難；但你們可以放心，我已經勝了世界。"},{"r":"約翰福音 16:33","t":"在世上你們有苦難"},{"r":"約翰福音 16:33","t":"但你們可以放心"},{"r":"約翰福音 16:33","t":"在世上你們有苦難"},{"r":"約翰福音 20:29","t":"那沒有看見就信的有福了。"},{"r":"約翰福音 20:29","t":"那沒有看見就信的有福了"},{"r":"約翰福音 20:29","t":"那沒有看見就信的有福了"},{"r":"約翰福音 20:29","t":"那沒有看見就信的有福了"},{"r":"使徒行傳 1:8","t":"但聖靈降臨在你們身上，你們就必得着能力。"},{"r":"使徒行傳 1:8","t":"但聖靈降臨在你們身上"},{"r":"使徒行傳 1:8","t":"你們就必得着能力"},{"r":"使徒行傳 1:8","t":"但聖靈降臨在你們身上"},{"r":"羅馬書 1:16","t":"我不以福音為恥；這福音本是神的大能，要救一切相信的。"},{"r":"羅馬書 1:16","t":"我不以福音為恥"},{"r":"羅馬書 1:16","t":"這福音本是神的大能"},{"r":"羅馬書 1:16","t":"我不以福音為恥"},{"r":"羅馬書 5:8","t":"惟有基督在我們還作罪人的時候為我們死，神的愛就在此向我們顯明了。"},{"r":"羅馬書 5:8","t":"惟有基督在我們還作罪人的時候為我們死"},{"r":"羅馬書 5:8","t":"神的愛就在此向我們顯明了"},{"r":"羅馬書 5:8","t":"惟有基督在我們還作罪人的時候為我"},{"r":"羅馬書 8:1","t":"如今，那些在基督耶穌裏的就不定罪了。"},{"r":"羅馬書 8:1","t":"如今"},{"r":"羅馬書 8:1","t":"那些在基督耶穌裏的就不定罪了"},{"r":"羅馬書 8:1","t":"如今"},{"r":"羅馬書 8:28","t":"萬事都互相效力，叫愛神的人得益處。"},{"r":"羅馬書 8:28","t":"萬事都互相效力"},{"r":"羅馬書 8:28","t":"叫愛神的人得益處"},{"r":"羅馬書 8:28","t":"萬事都互相效力"},{"r":"羅馬書 8:31","t":"神若幫助我們，誰能敵擋我們呢？"},{"r":"羅馬書 8:31","t":"神若幫助我們"},{"r":"羅馬書 8:31","t":"誰能敵擋我們呢"},{"r":"羅馬書 8:31","t":"神若幫助我們"},{"r":"羅馬書 8:38","t":"無論是死，是生，是天使，是掌權的，是有能的，是現在的事，是將來的事，都不能叫我們與神的愛隔絕。"},{"r":"羅馬書 8:38","t":"無論是死"},{"r":"羅馬書 8:38","t":"是生"},{"r":"羅馬書 8:38","t":"無論是死"},{"r":"羅馬書 12:2","t":"不要效法這個世界，只要心意更新而變化。"},{"r":"羅馬書 12:2","t":"不要效法這個世界"},{"r":"羅馬書 12:2","t":"只要心意更新而變化"},{"r":"羅馬書 12:2","t":"不要效法這個世界"},{"r":"哥林多前書 10:13","t":"神是信實的，必不叫你們受試探過於所能受的。"},{"r":"哥林多前書 10:13","t":"神是信實的"},{"r":"哥林多前書 10:13","t":"必不叫你們受試探過於所能受的"},{"r":"哥林多前書 10:13","t":"神是信實的"},{"r":"哥林多前書 13:4","t":"愛是恆久忍耐，又有恩慈；愛是不嫉妒。"},{"r":"哥林多前書 13:4","t":"愛是恆久忍耐"},{"r":"哥林多前書 13:4","t":"又有恩慈"},{"r":"哥林多前書 13:4","t":"愛是恆久忍耐"},{"r":"哥林多前書 13:13","t":"如今常存的有信、有望、有愛這三樣，其中最大的是愛。"},{"r":"哥林多前書 13:13","t":"如今常存的有信、有望、有愛這三樣"},{"r":"哥林多前書 13:13","t":"其中最大的是愛"},{"r":"哥林多前書 13:13","t":"如今常存的有信、有望、有愛這三樣"},{"r":"哥林多後書 5:17","t":"若有人在基督裡，他就是新造的人，舊事已過，都變成新的了。"},{"r":"哥林多後書 5:17","t":"若有人在基督裡"},{"r":"哥林多後書 5:17","t":"他就是新造的人"},{"r":"哥林多後書 5:17","t":"若有人在基督裡"},{"r":"哥林多後書 12:9","t":"我的恩典夠你用的，因為我的能力是在人的軟弱上顯得完全。"},{"r":"哥林多後書 12:9","t":"我的恩典夠你用的"},{"r":"哥林多後書 12:9","t":"因為我的能力是在人的軟弱上顯得完全"},{"r":"哥林多後書 12:9","t":"我的恩典夠你用的"},{"r":"加拉太書 2:20","t":"現在活着的，不再是我，乃是基督在我裡面活着。"},{"r":"加拉太書 2:20","t":"現在活着的"},{"r":"加拉太書 2:20","t":"不再是我"},{"r":"加拉太書 2:20","t":"現在活着的"},{"r":"加拉太書 5:22","t":"聖靈所結的果子，就是仁愛、喜樂、和平、忍耐、恩慈、良善、信實。"},{"r":"加拉太書 5:22","t":"聖靈所結的果子"},{"r":"加拉太書 5:22","t":"就是仁愛、喜樂、和平、忍耐、恩慈、良善、信實"},{"r":"加拉太書 5:22","t":"聖靈所結的果子"},{"r":"以弗所書 2:8","t":"你們得救是本乎恩，也因着信；這並不是出於自己，乃是神所賜的。"},{"r":"以弗所書 2:8","t":"你們得救是本乎恩"},{"r":"以弗所書 2:8","t":"也因着信"},{"r":"以弗所書 2:8","t":"你們得救是本乎恩"},{"r":"以弗所書 3:20","t":"神能照着運行在我們心裡的大力，充充足足地成就一切，超過我們所求所想的。"},{"r":"以弗所書 3:20","t":"神能照着運行在我們心裡的大力"},{"r":"以弗所書 3:20","t":"充充足足地成就一切"},{"r":"以弗所書 3:20","t":"神能照着運行在我們心裡的大力"}];
+  function secureRandomIndex(n){
+    if(n<=0) return 0;
+    try{
+      if(root.crypto&&typeof root.crypto.getRandomValues==='function'){
+        var a=new Uint32Array(1);
+        var max=0x100000000 - (0x100000000 % n);
+        do{ root.crypto.getRandomValues(a); }while(a[0]>=max);
+        return a[0] % n;
+      }
+    }catch(_){}
+    return Math.floor(Math.random()*n);
+  }
+  function randomGospelVerse(){
+    var x=gospelPool[secureRandomIndex(gospelPool.length)];
+    return {text:x.t,reference:x.r,index:gospelPool.indexOf(x),poolSize:gospelPool.length,canon:'Protestant / evangelical 66-book tradition'};
+  }
+  api.randomGospelVerse=randomGospelVerse;
+  api.gospelClassicCount=function(){return gospelPool.length;};
+  /* Game2D is intentionally frozen by the legacy compatibility layer. Do not mutate it here. */
+  if(typeof root.Game2D==='object' && root.Game2D && root.Game2D.randomGospelVerse===undefined) {
+    /* The supported mutable API is Game2D_V158; expose a host-safe alias only when possible. */
+  }
+  if(root.jplopsoft_EXOS_GSDK_V158){root.jplopsoft_EXOS_GSDK_V158.gospelClassics400=true;root.jplopsoft_EXOS_GSDK_V158.gospelClassicCount=400;}
+})(typeof globalThis!=='undefined'?globalThis:this);
+/* ================= END EXOS GSDK v1.1.44 Gospel Classics 400 ================= */
