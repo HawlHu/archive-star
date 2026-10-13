@@ -59,8 +59,8 @@ var 								j_db_menu=[
 												[
 													"2021-05-18",
 													[
-														["cryp_mizuki","教學","林襄暗網流出私密"],
 														["shar_like_youtube","分享","Youtube連"],
+														["cryp_mizuki","教學","林襄暗網流出私密"],
 														["shar_number_555","資訊","詭異的電話號碼"],
 														["shar_win11_excel_tw_year","分享","OFFICE 2"],
 														["teac_win11_no_login_microsoft_access","教學","跳過 Windo"],
@@ -96,12 +96,12 @@ var 								j_db_menu=[
 													[
 														["teac_html5_login_demo","分享","HTML5登入頁"],
 														["info_joyful_melody_devotion_group","資訊","專情團"],
+														["shar_m3u8_download","教學","副檔名M3U8影"],
 														["shar_pics_20210914","分享","網友分享作品"],
 														["shar_python","分享","Python常用"],
 														["shar_store_65","分享","工研院的老闆許友"],
 														["teac_fat32_in_win10","教學","Windows "],
-														["teac_program_auto_install","技術","自動安裝常用應用"],
-														["shar_m3u8_download","教學","副檔名M3U8影"]														
+														["teac_program_auto_install","技術","自動安裝常用應用"]														
 													]
 												],												
 												[
@@ -112,8 +112,8 @@ var 								j_db_menu=[
 														["shar_chrome_and_bank","資訊","解決CHROME"],
 														["shar_peple2021","教學","人類統計2021"],
 														["shar_taiwan_boy","教學","台男悲歌2022"],
-														["cryp_member","機密","會員名單"],
 														["teac_after_inserting_many_photos_excel_becomes_very_laggy","技術","Excel插入很"],
+														["cryp_member","機密","會員名單"],
 														["teac_online_anime","技術","N網的「神的語言"],
 														["teac_win11_desktop_crashes_right_clicked","技術","Windows "]														
 													]
@@ -125,8 +125,8 @@ var 								j_db_menu=[
 														["shar_php","分享","PHP常用函式大"],
 														["cryp_left_tree_2021","教學","長生草"],
 														["teac_game_pubg","教學","PUBG 閃退("],
-														["cryp_eternal_life","機密","人類壽命長度的真"],
 														["teac_office201x_jump_365","教學","OFFICE 2"],
+														["cryp_eternal_life","機密","人類壽命長度的真"],
 														["teac_troubleshooting_windows_security_center_not_opening","教學","解決 Windo"]														
 													]
 												],												
@@ -138,8 +138,8 @@ var 								j_db_menu=[
 														["shar_rec_cam_or_screen_for_potplayer","分享","錄製網路攝影機畫"],
 														["teac_easy_net_disable","教學","簡易禁止電腦上網"],
 														["cryp_japan_20220708","分享","安倍晉三槍擊真相"],
-														["cryp_dream_20220808","機密","機密檔案88(紅"],
-														["teac_w11_right_menu_to_w10","技術","將 Win11 "]														
+														["teac_w11_right_menu_to_w10","技術","將 Win11 "],
+														["cryp_dream_20220808","機密","機密檔案88(紅"]														
 													]
 												],												
 												[
@@ -272,9 +272,9 @@ var 								j_db_menu=[
 												[
 													"2003-01-08",
 													[
+														["shar_nier_2b_images","分享","尼爾：自動人形桌"],
 														["info_love_20top","資訊","情侶必做清單的文"],
 														["shar_en_1k","教學","基礎1000單字"],
-														["shar_nier_2b_images","分享","尼爾：自動人形桌"],
 														["teac_excel_run_resources_formulas","教學","Excel 在嘗"],
 														["teac_intel_avx_emuator","技術","Intel AV"],
 														["teac_iso_download","教學","Windows "],
