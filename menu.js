@@ -2,8 +2,8 @@ var 								j_db_menu=[
 												[
 													"2026-02-06",
 													[
-														["teac_exes","教學","加密標準(EXE"],
 														["teac_exos","教學","ExOS R13"],
+														["teac_exes","教學","加密標準(EXE"],
 														["teac_ex_md3","教學","EXpansio"],
 														["teac_synth_id","分享","Google S"],
 														["teac_pqc_crypt","教學","PQC 技術研究"],
