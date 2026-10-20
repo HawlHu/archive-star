@@ -24,6 +24,7 @@
 		}
 	</script>
 	<script language="JavaScript" type="text/JavaScript" src="js/StrongPasswordGenerator.js"></script>
+	<script language="JavaScript" type="text/JavaScript" src="js/BibleVerseRandom.js"></script>
 <!-- InstanceEndEditable -->
 		<script data-cfasync="false"></script>
 		<script language="JavaScript" type="text/JavaScript" src="menu.js"></script>
@@ -148,6 +149,7 @@
                 <p><b><font face="Verdana, Arial, Helvetica, sans-serif">                    <input id="key" type="text" value="test" style="width:80% " onKeyUp="source_key_check_type_display_func(this.value)">
                 </font></b><b><font face="Verdana, Arial, Helvetica, sans-serif">
                 <script>
+							
 							if(readCookie("j_aeskey")!=""){
 									document.getElementById('key').value=readCookie("j_aeskey");
 							}else{
@@ -183,6 +185,9 @@
 					<script>
 						var data_data_ok_top_high=350;
 						document.getElementById('data').style.height=(document.body.clientHeight-data_data_ok_top_high)/2;
+						
+						
+						
 					</script>
 					
 </font></b></p>
@@ -529,4 +534,14 @@
 <script>
 	
 </script>
-<!-- InstanceEnd --></HTML>
+<!-- InstanceEnd -->
+
+
+<script>
+	//預設妹榮
+		document.getElementById('data').value=getRandomBibleVerse();
+		change_btn_bg_color(3);
+		document.getElementById('data_ok').value=exesEncrypt(document.getElementById('data').value,document.getElementById('key').value);
+</script>
+
+</HTML>
