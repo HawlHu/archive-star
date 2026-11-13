@@ -60,8 +60,8 @@ var 								j_db_menu=[
 													"2021-05-18",
 													[
 														["shar_like_youtube","分享","Youtube連"],
-														["cryp_mizuki","教學","林襄暗網流出私密"],
 														["shar_number_555","資訊","詭異的電話號碼"],
+														["cryp_mizuki","教學","林襄暗網流出私密"],
 														["shar_win11_excel_tw_year","分享","OFFICE 2"],
 														["teac_win11_no_login_microsoft_access","教學","跳過 Windo"],
 														["teac_windows10_debloater","技術","Windows1"],
@@ -156,8 +156,8 @@ var 								j_db_menu=[
 												[
 													"2013-04-29",
 													[
-														["cryp_mm_2023","機密","紀念資料(202"],
 														["cryp_HEU_KMS_Activator","機密","HEU KMS "],
+														["cryp_mm_2023","機密","紀念資料(202"],
 														["teac_linux_commands","教學","Linux常用指"],
 														["teac_uac_disable","技術","真正關閉Wind"],
 														["teac_win10_word2007_fix","技術","Word 200"],
