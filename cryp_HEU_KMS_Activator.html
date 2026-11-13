@@ -163,8 +163,9 @@
 					<script>
 						function down_start(){
 								if(confirm('您確認自己有合理的需求並且了解風險，並且確定您使用方式是合法的？')){
-										var v3 = prompt('請確定您有 Windows 或者 Office 等軟體的合法授權，且不是機器人，請輸入 " ' + easy_man_check_gen_a_num(4,600,1000) + ' " ');
-										if(easy_man_check_gen_a_num_check(v3,4,600,1000,v3.length)){
+										var v4 = Math.round((Math.random()*8000)+1000,0);
+										var v3 = prompt('請確定您有 Windows 或者 Office 等軟體的合法授權，且不是機器人，請輸入 " ' + v4 + ' " ');
+										if(v4==v3){
 												document.getElementById('down_heu').style.display='';
 												document.getElementById('down_heu2').style.display='none';
 										}else{
